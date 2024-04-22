@@ -10,5 +10,5 @@ git push -u origin main
 git remote add origin https://github.com/Adile06/Django-React-LMS.git
 git branch -M main
 git push -u origin main
-Yeni bir satır daha ekledim
+
 
