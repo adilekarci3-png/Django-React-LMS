@@ -117,7 +117,7 @@ function Login() {
                           type="submit"
                           className="btn btn-primary"
                         >
-                          İşlem Yapılıyor <i className="fas fa-spinner fa-spin"></i>
+                          Giriş Yapılıyor <i className="fas fa-spinner fa-spin"></i>
                         </button>
                       )}
 

@@ -3,6 +3,7 @@ import BaseHeader from "../partials/BaseHeader";
 import BaseFooter from "../partials/BaseFooter";
 import { Link } from "react-router-dom";
 import apiInstance from "../../utils/axios";
+
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +15,7 @@ function ForgotPassword() {
       await apiInstance.get(`user/password-reset/${email}/`).then((res) => {
         console.log(res.data);
         setIsLoading(false);
-        alert("Password Reset Email Sent");
+        alert("Şifre Değiştirme Emaili Gönderildi");
       });
     } catch (error) {
       console.log("error: ", error);
@@ -35,8 +36,8 @@ function ForgotPassword() {
             <div className="card shadow">
               <div className="card-body p-6">
                 <div className="mb-4">
-                  <h1 className="mb-1 fw-bold">Forgot Password</h1>
-                  <span>Let's help you get back into your account</span>
+                  <h1 className="mb-1 fw-bold">Şifremi Unuttum</h1>
+                  <span>Hesabınıza Erişmenize Yardımcı Olalım</span>
                 </div>
                 <form
                   className="needs-validation"
@@ -45,14 +46,14 @@ function ForgotPassword() {
                 >
                   <div className="mb-3">
                     <label htmlFor="email" className="form-label">
-                      Email Address
+                      Email Addresiniz
                     </label>
                     <input
                       type="email"
                       id="email"
                       className="form-control"
                       name="email"
-                      placeholder="johndoe@gmail.com"
+                      placeholder="ornek@xyz.com"
                       required
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -62,13 +63,13 @@ function ForgotPassword() {
                     <div className="d-grid">
                       {isLoading === true && (
                         <button disabled type="submit" className="btn btn-primary">
-                          Processing <i className="fas fa-spinner fa-spin"></i>
+                          İşlem Yapılıyor <i className="fas fa-spinner fa-spin"></i>
                         </button>
                       )}
 
                       {isLoading === false && (
                         <button type="submit" className="btn btn-primary">
-                          Reset Password <i className="fas fa-arrow-right"></i>
+                          Şifre Oluştur <i className="fas fa-arrow-right"></i>
                         </button>
                       )}
                     </div>

@@ -74,6 +74,7 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
             print("link ======", link)
         return user
     
+    
 class PasswordChangeAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = api_serializer.UserSerializer

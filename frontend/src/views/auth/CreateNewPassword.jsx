@@ -4,6 +4,7 @@ import BaseFooter from "../partials/BaseFooter";
 import apiInstance from "../../utils/axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Toast from "../plugin/Toast";
+
 function CreateNewPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -11,7 +12,7 @@ function CreateNewPassword() {
 
   const navigate = useNavigate();
   const [searchParam] = useSearchParams();
-
+  debugger;
   const otp = searchParam.get("otp");
   const uuidb64 = searchParam.get("uuidb64");
   const refresh_token = searchParam.get("refresh_token");
@@ -22,10 +23,11 @@ function CreateNewPassword() {
     if (confirmPassword !== password) {
       Toast().fire({
         icon: "warning",
-        title: "Passwords does not match",
+        title: "Şifre Eşleşmedi",
       });
       return;
     } else {
+      debugger;
       const formdata = new FormData();
       formdata.append("password", password);
       formdata.append("otp", otp);
@@ -65,8 +67,8 @@ function CreateNewPassword() {
             <div className="card shadow">
               <div className="card-body p-6">
                 <div className="mb-4">
-                  <h1 className="mb-1 fw-bold">Create New Password</h1>
-                  <span>Choose a new password for your account</span>
+                  <h1 className="mb-1 fw-bold">Yeni Şifre Oluştur</h1>
+                  <span>Hesabınız için yeni bir şifre belirleyin</span>
                 </div>
                 <form
                   className="needs-validation"
@@ -87,25 +89,25 @@ function CreateNewPassword() {
                       onChange={(e) => setPassword(e.target.value)}
                     />
                     <div className="invalid-feedback">
-                      Please enter valid password.
+                      Lütfen geçerli bir şifre girin.
                     </div>
                   </div>
 
                   <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
-                      Confirm New Password
+                    <label htmlFor="confirmPassword" className="form-label">
+                      Şifreyi Onayla
                     </label>
                     <input
                       type="password"
-                      id="password"
+                      id="confirmPassword"
                       className="form-control"
-                      name="password"
+                      name="confirmPassword"
                       placeholder="**************"
                       required=""
                       onChange={(e) => setConfirmPassword(e.target.value)}
                     />
                     <div className="invalid-feedback">
-                      Please enter valid password.
+                      Lütfen geçerli bir şifre girin.
                     </div>
                   </div>
 
@@ -117,13 +119,13 @@ function CreateNewPassword() {
                           type="submit"
                           className="btn btn-primary"
                         >
-                          Processing <i className="fas fa-spinner fa-spin"></i>
+                          İşlem Yapılıyor <i className="fas fa-spinner fa-spin"></i>
                         </button>
                       )}
 
                       {isLoading === false && (
                         <button type="submit" className="btn btn-primary">
-                          Save New Password{" "}
+                          Yeni Şifreyi Kaydet{" "}
                           <i className="fas fa-check-circle"></i>
                         </button>
                       )}
