@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import BaseHeader from "../partials/BaseHeader";
 import BaseFooter from "../partials/BaseFooter";
 import { Link } from "react-router-dom";
@@ -16,7 +16,7 @@ import apiInstance from "../../utils/axios";
 function Index() {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [cartCount, setCartCount] = useContext(CartContext);
+  
 
   const country = GetCurrentAddress().country;
   const userId = UserData()?.user_id;
@@ -41,6 +41,7 @@ function Index() {
   }, []);
 
   const addToCart = async (courseId, userId, price, country, cartId) => {
+    
     const formdata = new FormData();
 
     formdata.append("course_id", courseId);
@@ -58,7 +59,7 @@ function Index() {
             title: "Added To Cart",
             icon: "success",
           });
-
+          const [cartCount, setCartCount] = useContext(CartContext);
           // Set cart count after adding to cart
           apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
             setCartCount(res.data?.length);

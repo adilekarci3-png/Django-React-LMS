@@ -11,8 +11,7 @@ function CreateNewPassword() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const [searchParam] = useSearchParams();
-  debugger;
+  const [searchParam] = useSearchParams(); 
   const otp = searchParam.get("otp");
   const uuidb64 = searchParam.get("uuidb64");
   const refresh_token = searchParam.get("refresh_token");
@@ -26,8 +25,7 @@ function CreateNewPassword() {
         title: "Şifre Eşleşmedi",
       });
       return;
-    } else {
-      debugger;
+    } else {      
       const formdata = new FormData();
       formdata.append("password", password);
       formdata.append("otp", otp);

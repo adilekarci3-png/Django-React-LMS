@@ -14,14 +14,15 @@ import Toast from "../plugin/Toast";
 import { CartContext } from "../plugin/Context";
 import apiInstance from "../../utils/axios";
 
+
+
 function CourseDetail() {
+  const [cartCount, setCartCount] = useContext(CartContext);
   const [course, setCourse] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [addToCartBtn, setAddToCartBtn] = useState("Add To Cart");
-  const [cartCount, setCartCount] = useContext(CartContext);
-
-  const param = useParams();
-
+  
+  const param = useParams();  
   const country = GetCurrentAddress().country;
   const userId = UserData().user_id;
 
@@ -39,6 +40,7 @@ function CourseDetail() {
   }, []);
 
   const addToCart = async (courseId, userId, price, country, cartId) => {
+   
     setAddToCartBtn("Adding To Cart");
     const formdata = new FormData();
 
@@ -52,19 +54,22 @@ function CourseDetail() {
       await useAxios()
         .post(`course/cart/`, formdata)
         .then((res) => {
+          
           console.log(res.data);
           setAddToCartBtn("Added To Cart");
           Toast().fire({
             title: "Added To Cart",
             icon: "success",
           });
-
-          // Set cart count after adding to cart
+          
+          //Set cart count after adding to cart
           apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
+          
             setCartCount(res.data?.length);
           });
         });
     } catch (error) {
+      
       console.log(error);
       setAddToCartBtn("Add To Cart");
     }
@@ -77,7 +82,7 @@ function CourseDetail() {
       <>
         {isLoading === true ? (
           <p>
-            Loading <i className="fas fa-spinner fa-spin"></i>
+            Yükleniyor <i className="fas fa-spinner fa-spin"></i>
           </p>
         ) : (
           <>
@@ -105,7 +110,7 @@ function CourseDetail() {
                       </li>
                       <li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
                         <i className="fas fa-user-graduate text-orange me-2" />
-                        {course.students?.length} Enrolled
+                        {course.students?.length} İzleyen Öğrenci Sayısı
                       </li>
                       <li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
                         <i className="fas fa-signal text-success me-2" />
@@ -152,7 +157,7 @@ function CourseDetail() {
                               aria-controls="course-pills-1"
                               aria-selected="true"
                             >
-                              Overview
+                              Kurs Hakkında Bilgi
                             </button>
                           </li>
                           {/* Tab item */}
@@ -170,7 +175,7 @@ function CourseDetail() {
                               aria-controls="course-pills-2"
                               aria-selected="false"
                             >
-                              Curriculum
+                              Müfredat
                             </button>
                           </li>
                           {/* Tab item */}
@@ -188,7 +193,7 @@ function CourseDetail() {
                               aria-controls="course-pills-3"
                               aria-selected="false"
                             >
-                              Instructor
+                              Eğitmen
                             </button>
                           </li>
                           {/* Tab item */}
@@ -206,7 +211,7 @@ function CourseDetail() {
                               aria-controls="course-pills-4"
                               aria-selected="false"
                             >
-                              Reviews
+                              Yorumlar
                             </button>
                           </li>
                           {/* Tab item */}
@@ -224,7 +229,7 @@ function CourseDetail() {
                               aria-controls="course-pills-5"
                               aria-selected="false"
                             >
-                              FAQs
+                              Sıkça Sorulan Sorular
                             </button>
                           </li>
                           {/* Tab item */}
@@ -242,7 +247,7 @@ function CourseDetail() {
                               aria-controls="course-pills-6"
                               aria-selected="false"
                             >
-                              Comment
+                              Yorum
                             </button>
                           </li>
                         </ul>
@@ -402,7 +407,7 @@ function CourseDetail() {
                             </div>
                             {/* Card END */}
                             {/* Instructor info */}
-                            <h5 className="mb-3">About Instructor</h5>
+                            <h5 className="mb-3">Eğitmen Hakkında</h5>
                             <p className="mb-3">{course.teacher.about}</p>
                           </div>
                           <div
@@ -413,7 +418,7 @@ function CourseDetail() {
                           >
                             {/* Review START */}
                             <div className="row mb-1">
-                              <h5 className="mb-4">Our Student Reviews</h5>
+                              <h5 className="mb-4">Öğrenci Yorumları</h5>
                             </div>
 
                             <div className="row">
@@ -445,7 +450,7 @@ function CourseDetail() {
                                     </ul>
                                   </div>
                                   {/* Info */}
-                                  <p className="small mb-2">5 days ago</p>
+                                  <p className="small mb-2">5 gün önce</p>
                                   <p className="mb-2">
                                     Perceived end knowledge certainly day
                                     sweetness why cordially. Ask a quick six
@@ -517,7 +522,7 @@ function CourseDetail() {
                             {/* Student review END */}
                             {/* Leave Review START */}
                             <div className="mt-2">
-                              <h5 className="mb-4">Leave a Review</h5>
+                              <h5 className="mb-4">Yorum Bırak</h5>
                               <form className="row g-3">
                                 {/* Rating */}
                                 <div className="col-12 bg-light-input">
@@ -548,7 +553,7 @@ function CourseDetail() {
                                     type="submit"
                                     className="btn btn-primary mb-0"
                                   >
-                                    Post Review
+                                    Yorumu Gönder
                                   </button>
                                 </div>
                               </form>
@@ -564,7 +569,7 @@ function CourseDetail() {
                             aria-labelledby="course-pills-tab-5"
                           >
                             {/* Title */}
-                            <h5 className="mb-3">Frequently Asked Questions</h5>
+                            <h5 className="mb-3">Sıkça Sorulan Sorular</h5>
                             {/* Accordion START */}
                             <div
                               className="accordion accordion-flush"
