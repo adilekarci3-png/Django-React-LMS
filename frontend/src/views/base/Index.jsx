@@ -16,7 +16,7 @@ import apiInstance from "../../utils/axios";
 function Index() {
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [cartCount, setCartCount] = useContext(CartContext);
 
   const country = GetCurrentAddress().country;
   const userId = UserData()?.user_id;
@@ -30,6 +30,7 @@ function Index() {
         .then((res) => {
           setCourses(res.data);
           setIsLoading(false);
+          console.log(res.data);
         });
     } catch (error) {
       console.log(error);
@@ -59,7 +60,7 @@ function Index() {
             title: "Added To Cart",
             icon: "success",
           });
-          const [cartCount, setCartCount] = useContext(CartContext);
+          
           // Set cart count after adding to cart
           apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
             setCartCount(res.data?.length);
@@ -71,7 +72,8 @@ function Index() {
   };
 
   // Pagination
-  const itemsPerPage = 1;
+  debugger;
+  const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -330,7 +332,7 @@ function Index() {
                       onClick={() => setCurrentPage(currentPage - 1)}
                     >
                       <i className="ci-arrow-left me-2" />
-                      Previous
+                      Önceki
                     </button>
                   </li>
                 </ul>
@@ -358,7 +360,7 @@ function Index() {
                       className="page-link ms-1"
                       onClick={() => setCurrentPage(currentPage + 1)}
                     >
-                      Next
+                      Sonraki
                       <i className="ci-arrow-right ms-3" />
                     </button>
                   </li>

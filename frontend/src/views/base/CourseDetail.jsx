@@ -21,8 +21,8 @@ function CourseDetail() {
   const [course, setCourse] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [addToCartBtn, setAddToCartBtn] = useState("Add To Cart");
-  
-  const param = useParams();  
+
+  const param = useParams();
   const country = GetCurrentAddress().country;
   const userId = UserData().user_id;
 
@@ -40,7 +40,7 @@ function CourseDetail() {
   }, []);
 
   const addToCart = async (courseId, userId, price, country, cartId) => {
-   
+
     setAddToCartBtn("Adding To Cart");
     const formdata = new FormData();
 
@@ -54,22 +54,22 @@ function CourseDetail() {
       await useAxios()
         .post(`course/cart/`, formdata)
         .then((res) => {
-          
+
           console.log(res.data);
           setAddToCartBtn("Added To Cart");
           Toast().fire({
             title: "Added To Cart",
             icon: "success",
           });
-          
+
           //Set cart count after adding to cart
           apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
-          
+
             setCartCount(res.data?.length);
           });
         });
     } catch (error) {
-      
+
       console.log(error);
       setAddToCartBtn("Add To Cart");
     }

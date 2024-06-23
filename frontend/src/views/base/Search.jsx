@@ -98,7 +98,7 @@ function Search() {
             <div className="col-12">
               <div className="mb-6">
                 <h2 className="mb-1 h1">
-                  Showing Results for "{searchQuery || "No Search Query"}"
+                  Arama Sonucu "{searchQuery || "Herhangi Bir Eğitim Bulunamadı"}"
                 </h2>
               </div>
             </div>
@@ -107,7 +107,7 @@ function Search() {
                 <input
                   type="text"
                   className="form-control lg mt-3"
-                  placeholder="Search Courses..."
+                  placeholder="Eğitim Ara..."
                   name=""
                   id=""
                   onChange={handleSeach}

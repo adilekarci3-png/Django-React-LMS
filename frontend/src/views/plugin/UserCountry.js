@@ -5,6 +5,7 @@ function GetCurrentAddress() {
   
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((pos) => {
+      debugger;
       const { latitude, longitude } = pos.coords;
 
       const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;

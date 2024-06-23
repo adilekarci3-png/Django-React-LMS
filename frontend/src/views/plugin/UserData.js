@@ -8,12 +8,10 @@ function UserData() {
   if (access_token && refresh_token) {
     const token = refresh_token;
     const decoded = jwtDecode(token);
-
+    
     return decoded;
   } else {
     // pass
   }
 }
-
-
 export default UserData
