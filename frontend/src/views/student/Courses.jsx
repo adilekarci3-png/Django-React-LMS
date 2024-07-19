@@ -20,7 +20,7 @@ function Courses() {
     useAxios()
       .get(`student/course-list/${UserData()?.user_id}/`)
       .then((res) => {
-        console.log(res.data);
+        console.log(res);
         setCourses(res.data);
         setFetching(false);
       });
@@ -56,17 +56,17 @@ function Courses() {
             <div className="col-lg-9 col-md-8 col-12">
               <h4 className="mb-0 mb-4">
                 {" "}
-                <i className="fas fa-shopping-cart"></i> My Courses
+                <i className="fas fa-chalkboard-user"></i> Kurslarım
               </h4>
 
-              {fetching === true && <p className="mt-3 p-3">Loading...</p>}
+              {fetching === true && <p className="mt-3 p-3">Yükleniyor...</p>}
 
               {fetching === false && (
                 <div className="card mb-4">
                   <div className="card-header">
-                    <h3 className="mb-0">Courses</h3>
+                    <h3 className="mb-0">Kurslar</h3>
                     <span>
-                      Start watching courses now from your dashboard page.
+                    Panel sayfanızdan kursları izlemeye hemen başlayın.
                     </span>
                   </div>
                   <div className="card-body">
@@ -75,7 +75,7 @@ function Courses() {
                         <input
                           type="search"
                           className="form-control"
-                          placeholder="Search Your Courses"
+                          placeholder="Kurslarında Ara"
                           onChange={handleSearch}
                         />
                       </div>
@@ -85,11 +85,11 @@ function Courses() {
                     <table className="table mb-0 text-nowrap table-hover table-centered text-nowrap">
                       <thead className="table-light">
                         <tr>
-                          <th>Courses</th>
-                          <th>Date Enrolled</th>
-                          <th>Lectures</th>
-                          <th>Completed</th>
-                          <th>Action</th>
+                          <th>Kurslar</th>
+                          <th>Kayıt Tarihi</th>
+                          <th>Dersler</th>
+                          <th>Tamamlanmışmı</th>
+                          <th>İşlem</th>
                           <th />
                         </tr>
                       </thead>
@@ -155,24 +155,30 @@ function Courses() {
                             </td>
                             <td>
                               {c.completed_lesson?.length < 1 && (
-                                <button className="btn btn-success btn-sm mt-3">
-                                  start Course
-                                  <i className="fas fa-arrow-right ms-2"></i>
-                                </button>
+                                <Link
+                                to={`/student/courses/${c.enrollment_id}/`}
+                                className="btn btn-success btn-sm mt-3"
+                              >
+                                Kursa Başla
+                                <i className="fas fa-arrow-right ms-2"></i>
+                              </Link>
                               )}
 
                               {c.completed_lesson?.length > 0 && (
-                                <button className="btn btn-primary btn-sm mt-3">
-                                  Continue Course
-                                  <i className="fas fa-arrow-right ms-2"></i>
-                                </button>
+                                 <Link
+                                 to={`/student/courses/${c.enrollment_id}/`}
+                                 className="btn btn-primary btn-sm mt-3"
+                               >
+                                 Kursa Devam Et
+                                 <i className="fas fa-arrow-right ms-2"></i>
+                               </Link>
                               )}
                             </td>
                           </tr>
                         ))}
 
                         {courses?.length < 1 && (
-                          <p className="mt-4 p-4">No courses found</p>
+                          <p className="mt-4 p-4">Kurs Bulunamadı</p>
                         )}
                       </tbody>
                     </table>

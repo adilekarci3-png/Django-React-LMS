@@ -84,24 +84,24 @@ function Checkout() {
                     <ol className="breadcrumb breadcrumb-dots mb-0">
                       <li className="breadcrumb-item">
                         <a href="#" className="text-decoration-none text-dark">
-                          Home
+                          Ana Sayfa
                         </a>
                       </li>
                       <li className="breadcrumb-item">
                         <a href="#" className="text-decoration-none text-dark">
-                          Courses
+                          Kurslar
                         </a>
                       </li>
                       <li className="breadcrumb-item">
                         <a href="#" className="text-decoration-none text-dark">
-                          Cart
+                          Sepet
                         </a>
                       </li>
                       <li
                         className="breadcrumb-item active"
                         aria-current="page"
                       >
-                        Checkout
+                        Çıkış
                       </li>
                     </ol>
                   </nav>
@@ -121,7 +121,7 @@ function Checkout() {
               >
                 <div>
                   <i className="bi bi-exclamation-octagon-fill me-2" />
-                  Review your courses before payment
+                  Ödeme yapmadan önce kurslarınızı inceleyin
                 </div>
 
                 <button
@@ -135,7 +135,7 @@ function Checkout() {
               </div>
 
               <div className="p-4 shadow rounded-3 mt-4">
-                <h5 className="mb-0 mb-3">Courses</h5>
+                <h5 className="mb-0 mb-3">Kurslar</h5>
 
                 <div className="table-responsive border-0 rounded-3">
                   <table className="table align-middle p-4 mb-0">
@@ -175,16 +175,16 @@ function Checkout() {
                   </table>
                 </div>
                 <Link to={`/cart/`} className="btn btn-outline-secondary mt-3">
-                  Edit Cart <i className="fas fa-edit"></i>
+                  Kart Düzenle <i className="fas fa-edit"></i>
                 </Link>
               </div>
 
               <div className="shadow p-4 rounded-3 mt-5">
-                <h5 className="mb-0">Personal Details</h5>
+                <h5 className="mb-0">Kişisel detaylar</h5>
                 <form className="row g-3 mt-0">
                   <div className="col-md-12 bg-light-input">
                     <label htmlFor="yourName" className="form-label">
-                      Your name *
+                      İsminiz *
                     </label>
                     <input
                       type="text"
@@ -197,7 +197,7 @@ function Checkout() {
                   </div>
                   <div className="col-md-12 bg-light-input">
                     <label htmlFor="emailInput" className="form-label">
-                      Email address *
+                      Eposta Adresiniz *
                     </label>
                     <input
                       type="email"
@@ -212,7 +212,7 @@ function Checkout() {
                   {/* Country option */}
                   <div className="col-md-12 bg-light-input">
                     <label htmlFor="mobileNumber" className="form-label">
-                      Select country *
+                      Ülke Seçiniz *
                     </label>
                     <input
                       type="text"
@@ -231,10 +231,10 @@ function Checkout() {
               <div className="row mb-0">
                 <div className="col-md-6 col-xl-12">
                   <div className="shadow p-4 mb-4 rounded-3">
-                    <h4 className="mb-4">Order Summary</h4>
+                    <h4 className="mb-4">Sipariş Özeti</h4>
                     <div className="mb-4">
                       <div className="d-flex justify-content-between align-items-center">
-                        <span>Transaction ID</span>
+                        <span>İşlem Kimliği</span>
                         <p className="mb-0 h6 fw-light">DES23853</p>
                       </div>
                     </div>
@@ -250,7 +250,7 @@ function Checkout() {
                         type="button"
                         className="btn btn-primary"
                       >
-                        Apply
+                        Ekle
                       </button>
                     </div>
 
@@ -258,19 +258,19 @@ function Checkout() {
                       <h4 className="mb-3">Cart Total</h4>
                       <ul class="list-group mb-3">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                          Sub Total
+                        Ara Toplam
                           <span>${order.sub_total}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                          Discount
+                          İndirim
                           <span>${order.saved}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                          Tax
+                          Vergi
                           <span>${order.tax_fee}</span>
                         </li>
                         <li class="list-group-item d-flex fw-bold justify-content-between align-items-center">
-                          Total
+                          Toplam
                           <span className="fw-bold">${order.total}</span>
                         </li>
                       </ul>
@@ -287,7 +287,7 @@ function Checkout() {
                               className="btn btn-lg btn-success mt-2 w-100"
                             >
                               {" "}
-                              Processing{" "}
+                              İşleme{" "}
                               <i className="fas fa-spinner f a-spin"></i>
                             </button>
                           ) : (
@@ -297,7 +297,7 @@ function Checkout() {
                               className="btn btn-lg btn-success mt-2 w-100"
                             >
                               {" "}
-                              Pay With Stripe
+                              Stripe İle Ödeme
                             </button>
                           )}
                         </form>
@@ -335,10 +335,10 @@ function Checkout() {
                         </PayPalScriptProvider>
                       </div>
                       <p className="small mb-0 mt-2 text-center">
-                        By proceeding to payment, you agree to these{" "}
+                       Ödemeye devam ederek bunları kabul etmiş olursunuz{" "}
                         <a href="#">
                           {" "}
-                          <strong>Terms of Service</strong>
+                          <strong>Hizmet Şartları</strong>
                         </a>
                       </p>
                     </div>

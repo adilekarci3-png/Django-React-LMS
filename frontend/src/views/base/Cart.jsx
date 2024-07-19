@@ -92,26 +92,26 @@ function Cart() {
           <div className="row">
             <div className="col-12">
               <div className="bg-light p-4 text-center rounded-3">
-                <h1 className="m-0">My cart</h1>
+                <h1 className="m-0">Sepetim</h1>
                 {/* Breadcrumb */}
                 <div className="d-flex justify-content-center">
                   <nav aria-label="breadcrumb">
                     <ol className="breadcrumb breadcrumb-dots mb-0">
                       <li className="breadcrumb-item">
                         <a href="#" className="text-decoration-none text-dark">
-                          Home
+                          Ana Sayfa
                         </a>
                       </li>
                       <li className="breadcrumb-item">
                         <a href="#" className="text-decoration-none text-dark">
-                          Courses
+                          Kurslar
                         </a>
                       </li>
                       <li
                         className="breadcrumb-item active"
                         aria-current="page"
                       >
-                        Cart
+                        Sepet
                       </li>
                     </ol>
                   </nav>
@@ -129,7 +129,7 @@ function Cart() {
               {/* Main content START */}
               <div className="col-lg-8 mb-4 mb-sm-0">
                 <div className="p-4 shadow rounded-3">
-                  <h5 className="mb-0 mb-3">Cart Items ({cart?.length})</h5>
+                  <h5 className="mb-0 mb-3"> Sepet Öğesi ({cart?.length})</h5>
 
                   <div className="table-responsive border-0 rounded-3">
                     <table className="table align-middle p-4 mb-0">
@@ -176,7 +176,7 @@ function Cart() {
                         ))}
 
                         {cart?.length < 1 && (
-                          <p className="mt-1 p-1">No Item In Cart</p>
+                          <p className="mt-1 p-1">Sepetinizde öğe yok</p>
                         )}
                       </tbody>
                     </table>
@@ -186,13 +186,13 @@ function Cart() {
                 {/* Personal info START */}
                 <div className="shadow p-4 rounded-3 mt-5">
                   {/* Title */}
-                  <h5 className="mb-0">Personal Details</h5>
+                  <h5 className="mb-0">Kişisel Detaylar</h5>
                   {/* Form START */}
                   <div className="row g-3 mt-0">
                     {/* Name */}
                     <div className="col-md-12 bg-light-input">
                       <label htmlFor="yourName" className="form-label">
-                        Your name *
+                        İsminiz *
                       </label>
                       <input
                         type="text"
@@ -207,7 +207,7 @@ function Cart() {
                     {/* Email */}
                     <div className="col-md-12 bg-light-input">
                       <label htmlFor="emailInput" className="form-label">
-                        Email address *
+                        E-posta Adresiniz *
                       </label>
                       <input
                         type="email"
@@ -223,7 +223,7 @@ function Cart() {
                     {/* Country option */}
                     <div className="col-md-12 bg-light-input">
                       <label htmlFor="mobileNumber" className="form-label">
-                        Enter country *
+                        Ülke Girin *
                       </label>
                       <input
                         type="text"
@@ -245,15 +245,15 @@ function Cart() {
                   <h4 className="mb-3">Cart Total</h4>
                   <ul class="list-group mb-3">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Sub Total
+                      Toplam
                       <span>${cartStats.price?.toFixed(2)}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Tax
+                      Vergi
                       <span>${cartStats.tax?.toFixed(2)}</span>
                     </li>
                     <li class="list-group-item d-flex fw-bold justify-content-between align-items-center">
-                      Total
+                      Toplam
                       <span className="fw-bold">
                         ${cartStats.total?.toFixed(2)}
                       </span>
@@ -264,11 +264,11 @@ function Cart() {
                       Proceed to Checkout
                     </button>
                   </div>
-                  <p className="small mb-0 mt-2 text-center">
-                    By proceeding to checkout, you agree to these{" "}
+                  <p className="small mb-0 mt-2 text-center">                    
+Ödeme işlemine devam ederek bunları kabul etmiş olursunuz{" "}
                     <a href="#">
                       {" "}
-                      <strong>Terms of Service</strong>
+                      <strong>Hizmet Şartları</strong>
                     </a>
                   </p>
                 </div>

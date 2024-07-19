@@ -39,11 +39,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(
             full_name=validated_data['full_name'],
-            email=validated_data['email'],
+            email=validated_data['email']            
         )
 
         email_username, _ = user.email.split("@")
-        user.username = email_username
+        user.username = email_username        
         user.set_password(validated_data['password'])
         user.save()
 
@@ -199,7 +199,6 @@ class CompletedLessonSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 class NoteSerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = '__all__'
         model = api_models.Note
@@ -285,7 +284,7 @@ class CourseSerializer(serializers.ModelSerializer):
     lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
     reviews = ReviewSerializer(many=True, read_only=True, required=False)
     class Meta:
-        fields = ["id", "category", "teacher", "file", "image", "title", "description", "price", "language", "level", "platform_status", "teacher_course_status", "featured", "course_id", "slug", "date", "students", "curriculum", "lectures", "average_rating", "rating_count", "reviews",]
+        fields = ["id", "category", "teacher", "file", "image", "title", "description", "language", "level", "platform_status", "teacher_course_status", "featured", "course_id", "slug", "date", "students", "curriculum", "lectures", "average_rating", "rating_count", "reviews",]
         model = api_models.Course
 
     def __init__(self, *args, **kwargs):

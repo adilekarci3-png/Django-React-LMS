@@ -51,18 +51,16 @@ function Success() {
             {orderMessage === "Payment Successfull" && (
               <>
                 <div className="col-lg-5">
-                  <h1 className="text-success">Enrollment Successful!</h1>
+                  <h1 className="text-success">Kayıt Başarılı</h1>
                   <p>
                     {" "}
-                    Hey there, you enrollment in the 2 courses where successful,
-                    visit your <a href="">My Courses</a> page, to view the
-                    courses now.
+                    Merhaba, başarılı bir şekilde kurslara kayıt oldun, <a href="">Kurslarım</a> sayfasından kursları görüntüleyebilirsin                   
                   </p>
                   <button
                     type="button"
                     className="btn btn-primary mb-0 rounded-2"
                   >
-                    View Enrolled Courses <i className="fas fa-arrow-right"></i>
+                    Kayıtlı olduğun kursları görüntüle<i className="fas fa-arrow-right"></i>
                   </button>
                 </div>
                 <div className="col-lg-7 text-center">
@@ -82,15 +80,13 @@ function Success() {
                   <h1 className="text-success">Already Paid</h1>
                   <p>
                     {" "}
-                    Hey there, you enrollment in the 2 courses where successful,
-                    visit your <a href="">My Courses</a> page, to view the
-                    courses now.
+                    Merhaba, başarılı bir şekilde kurslara kayıt oldun, <a href="">Kurslarım</a> sayfasından kursları görüntüleyebilirsin                   
                   </p>
                   <button
                     type="button"
                     className="btn btn-primary mb-0 rounded-2"
                   >
-                    View Enrolled Courses <i className="fas fa-arrow-right"></i>
+                    Kayıtlı olduğun kursları görüntüle <i className="fas fa-arrow-right"></i>
                   </button>
                 </div>
                 <div className="col-lg-7 text-center">

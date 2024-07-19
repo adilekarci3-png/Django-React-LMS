@@ -5,6 +5,7 @@ import Cookie from "js-cookie";
 import Swal from "sweetalert2";
 
 export const login = async (email, password) => {
+  
   try {
     const { data, status } = await axios.post(`user/token/`, {
       email,
@@ -25,12 +26,13 @@ export const login = async (email, password) => {
 };
 
 export const register = async (full_name, email, password, password2) => {
+  
   try {
     const { data } = await axios.post(`user/register/`, {
       full_name,
       email,
       password,
-      password2,
+      password2     
     });
 
     await login(email, password);
@@ -52,11 +54,12 @@ export const logout = () => {
 };
 
 export const setUser = async () => {
+  
   const access_token = Cookie.get("access_token");
   const refresh_token = Cookie.get("refresh_token");
 
-  if (!access_token || !refresh_token) {
-    // alert("Tokens does not exists");
+  if (!access_token || !refresh_token) {    
+    alert("Tokens does not exists");
     return;
   }
 
@@ -68,7 +71,7 @@ export const setUser = async () => {
   }
 };
 
-export const setAuthUser = (access_token, refresh_token) => {
+export const setAuthUser = (access_token, refresh_token) => { 
   Cookie.set("access_token", access_token, {
     expires: 1,
     secure: true,
@@ -88,10 +91,13 @@ export const setAuthUser = (access_token, refresh_token) => {
 };
 
 export const getRefreshedToken = async () => {
+  
   const refresh_token = Cookie.get("refresh_token");
+  
   const response = await axios.post(`user/token/refresh/`, {
     refresh: refresh_token,
   });
+  
   return response.data;
 };
 

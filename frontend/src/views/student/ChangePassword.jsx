@@ -17,6 +17,7 @@ function ChangePassword() {
   });
 
   const handlePasswordChange = (event) => {
+    
     setPassword({
       ...password,
       [event.target.name]: event.target.value,
@@ -30,18 +31,19 @@ function ChangePassword() {
     if (password.confirm_new_password !== password.new_password) {
       Toast().fire({
         icon: "error",
-        title: "Password does not match",
+        title: "Parola Eşleşmiyor",
       });
     }
 
     const formdata = new FormData();
     formdata.append("user_id", UserData()?.user_id);
     formdata.append("old_password", password.old_password);
-    formdata.append("new_password", password.new_passowrd);
+    formdata.append("new_password", password.new_password);
 
     await useAxios()
       .post(`user/change-password/`, formdata)
       .then((res) => {
+        
         console.log(res.data);
         Toast().fire({
           icon: res.data.icon,
@@ -66,7 +68,7 @@ function ChangePassword() {
               <div className="card">
                 {/* Card header */}
                 <div className="card-header">
-                  <h3 className="mb-0">Change Password</h3>
+                  <h3 className="mb-0">Şifre Değiştir</h3>
                 </div>
                 {/* Card body */}
                 <div className="card-body">
@@ -83,7 +85,7 @@ function ChangePassword() {
                         </label>
                         <input
                           type="password"
-                          id="password"
+                          id="password1"
                           className="form-control"
                           placeholder="**************"
                           required=""
@@ -95,11 +97,11 @@ function ChangePassword() {
                       {/* Last name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="lname">
-                          New Password
+                          Yeni Şifre
                         </label>
                         <input
                           type="password"
-                          id="password"
+                          id="password2"
                           className="form-control"
                           placeholder="**************"
                           required=""
@@ -112,11 +114,11 @@ function ChangePassword() {
                       {/* Country */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="editCountry">
-                          Confirm New Password
+                          Yeni Şifreyi Doğrula
                         </label>
                         <input
                           type="password"
-                          id="password"
+                          id="password3"
                           className="form-control"
                           placeholder="**************"
                           required=""
@@ -128,7 +130,7 @@ function ChangePassword() {
                       <div className="col-12">
                         {/* Button */}
                         <button className="btn btn-primary" type="submit">
-                          Save New Password{" "}
+                          Yeni Şifreyi Kaydet{" "}
                           <i className="fas fa-check-circle"></i>
                         </button>
                       </div>

@@ -29,11 +29,9 @@ from datetime import datetime, timedelta
 # import distutils
 # from distutils.util import strtobool
 
-
 stripe.api_key = settings.STRIPE_SECRET_KEY
 PAYPAL_CLIENT_ID = settings.PAYPAL_CLIENT_ID
 PAYPAL_SECRET_ID = settings.PAYPAL_SECRET_ID
-
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -53,7 +51,7 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.UserSerializer
 
     def get_object(self):
-        email = self.kwargs['email'] # api/v1/password-email-verify/desphixs@gmail.com/
+        email = self.kwargs['email'] # api/v1/password-email-verify/adilekarci3@gmail.com/
 
         user = User.objects.filter(email=email).first()
 
@@ -102,7 +100,7 @@ class PasswordChangeAPIView(generics.CreateAPIView):
         user = User.objects.get(id=uuidb64, otp=otp)
         if user:
             user.set_password(password)
-            # user.otp = ""
+            user.otp = otp
             user.save()
 
             return Response({"message": "Password Changed Successfully"}, status=status.HTTP_201_CREATED)
@@ -120,7 +118,7 @@ class ChangePasswordAPIView(generics.CreateAPIView):
 
         user = User.objects.get(id=user_id)
         if user is not None:
-            if check_password(old_password, user.password):
+            if check_password(old_password,user.password):
                 user.set_password(new_password)
                 user.save()
                 return Response({"message": "Password changed successfully", "icon": "success"})
@@ -254,9 +252,9 @@ class CartStatsAPIView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
 
-        total_price = 0.00
-        total_tax = 0.00
-        total_total = 0.00
+        # total_price = 0.00
+        # total_tax = 0.00
+        # total_total = 0.00
 
         for cart_item in queryset:
             total_price += float(self.calculate_price(cart_item))
@@ -302,10 +300,10 @@ class CreateOrderAPIView(generics.CreateAPIView):
 
         cart_items = api_models.Cart.objects.filter(cart_id=cart_id)
 
-        total_price = Decimal(0.00)
-        total_tax = Decimal(0.00)
-        total_initial_total = Decimal(0.00)
-        total_total = Decimal(0.00)
+        # total_price = Decimal(0.00)
+        # total_tax = Decimal(0.00)
+        # total_initial_total = Decimal(0.00)
+        # total_total = Decimal(0.00)
 
         order = api_models.CartOrder.objects.create(
             full_name=full_name,
@@ -617,8 +615,8 @@ class StudentNoteCreateAPIView(generics.ListCreateAPIView):
         return api_models.Note.objects.filter(user=user, course=enrolled.course)
 
     def create(self, request, *args, **kwargs):
-        user_id = request.data['user_id']
-        enrollment_id = request.data['enrollment_id']
+        user_id = self.kwargs['user_id']
+        enrollment_id = self.kwargs['enrollment_id']
         title = request.data['title']
         note = request.data['note']
 
@@ -1157,7 +1155,7 @@ class CourseUpdateAPIView(generics.RetrieveUpdateAPIView):
         serializer.save(course=course_instance) 
 
 
-class CourseDetailAPIView(generics.RetrieveDestroyAPIView):
+class TeacherCourseDetailAPIView(generics.RetrieveDestroyAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import Cookie from "js-cookie";
 import apiInstance from "../../utils/axios";
 import { register } from "../../utils/auth";
 
@@ -8,18 +8,20 @@ import BaseHeader from "../partials/BaseHeader";
 import BaseFooter from "../partials/BaseFooter";
 
 function Register() {
+  
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
+  const [password2, setPassword2] = useState("");  
   const [isLoading, setIsLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     setIsLoading(true);
-
+   
+    
     const { error } = await register(fullName, email, password, password2);
     if (error) {
       alert(error);

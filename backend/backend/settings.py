@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'vendor', 
     
      # Third Party Apps
-    'rest_framework',
+    'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'anymail',
@@ -180,7 +180,7 @@ JAZZMIN_SETTINGS  = {
     "site_brand": "Hafızlık Uygulaması",
     "site_logo": "path-to-logo",
     "welcome_sign": "Admin Paneline Hoşgeldiniz",
-    "copyright": "Desphixs LMS Ltd",
+    "copyright": "EHAD",
     "show_ui_builder": True,
 }
 

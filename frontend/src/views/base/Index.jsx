@@ -72,7 +72,7 @@ function Index() {
   };
 
   // Pagination
-  debugger;
+  
   const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -116,27 +116,25 @@ function Index() {
                 {/* heading */}
                 <h5 className="text-dark mb-4">
                   <i className="fe fe-check icon-xxs icon-shape bg-light-success text-success rounded-circle me-2" />
-                  Most trusted education platform
+                  KUR'AN-I KERİM-E HİZMET ŞEREFTİR
                 </h5>
                 {/* heading */}
                 <h1 className="display-3 fw-bold mb-3">
-                  Grow your skills and advance career
+                EHAD'a Hoş Geldiniz..
                 </h1>
                 {/* para */}
                 <p className="pe-lg-10 mb-5">
-                  Start, switch, or advance your career with more than 5,000
-                  courses, Professional Certificates, and degrees from
-                  world-class universities and companies.
+                Evrensel Hafızlar Derneği 2007 yılında Genel Merkezi Ankara’da olmak üzere Kur’ân-ı Kerimi öğrenen, öğreten, muhtevasına vakıf olmaya çalışan ve bu uğurda hizmet verenlere her türlü katkıda bulunmak, bu amaçla faaliyet gösteren kişi, kurum ve kuruluşların sorunlarına çözümler üretmek ve stratejiler geliştirmek için ve Milli, manevi, ahlaki ve evrensel değerlere sahip, ruhsal ve bedensel yönden sağlıklı, üstün vasıflı örnek nesiller  yetiştirilmesine katkı sağlamak için Türkiye’nin çeşitli şehirlerinden biraraya gelen Kur’an aşıkları tarafından kurulmuştur.
                 </p>
                 {/* btn */}
                 <a href="#" className="btn btn-primary fs-4 text-inherit ms-3">
-                  Join Free Now <i className="fas fa-plus"></i>
+                  Şimdi Kayıt Olabilirsiniz <i className="fas fa-plus"></i>
                 </a>
                 <a
                   href="https://www.youtube.com/watch?v=Nfzi7034Kbg"
                   className="btn btn-outline-success fs-4 text-inherit ms-3"
                 >
-                  Watch Demo <i className="fas fa-video"></i>
+                  Tanıtıma Geç <i className="fas fa-video"></i>
                 </a>
               </div>
             </div>
@@ -145,7 +143,7 @@ function Index() {
               {/* images */}
               <div className="position-relative">
                 <img
-                  src="https://geeksui.codescandy.com/geeks/assets/images/background/acedamy-img/girl-image.png"
+                  src="https://www.ehad.org.tr/wp-content/uploads/2021/03/EHAD-Akademi-Genel-Afisi-2021-01-350x350.jpg"
                   alt="girl"
                   className="end-0 bottom-0"
                 />
@@ -167,7 +165,7 @@ function Index() {
                 </div>
                 <div className="lh-1">
                   <h2 className="mb-1">316,000+</h2>
-                  <span>Qualified Instructor</span>
+                  <span>Kaliteli Eğitmenlerimiz</span>
                 </div>
               </div>
             </div>
@@ -220,10 +218,9 @@ function Index() {
             {/* col */}
             <div className="col-12">
               <div className="mb-6">
-                <h2 className="mb-1 h1">🔥Most Popular Courses</h2>
+                <h2 className="mb-1 h1">🔥En çok izlenen kurslar</h2>
                 <p>
-                  These are the most popular courses among Geeks Courses
-                  learners worldwide in year 2022
+                  EHAD dersleri içerisinde en çok izlenen kurslar
                 </p>
               </div>
             </div>
@@ -270,7 +267,7 @@ function Index() {
                         </h4>
                         <small>By: {c.teacher.full_name}</small> <br />
                         <small>
-                          {c.students?.length} Student
+                          {c.students?.length} Öğrenci
                           {c.students?.length > 1 && "s"}
                         </small>{" "}
                         <br />
@@ -282,7 +279,7 @@ function Index() {
                           </span>
                           <span className="text-warning">4.5</span>
                           <span className="fs-6 ms-2">
-                            ({c.reviews?.length} Reviews)
+                            ({c.reviews?.length} Yorumlar)
                           </span>
                         </div>
                       </div>
@@ -290,7 +287,7 @@ function Index() {
                       <div className="card-footer">
                         <div className="row align-items-center g-0">
                           <div className="col">
-                            <h5 className="mb-0">${c.price}</h5>
+                            {/* <h5 className="mb-0">${c.price}</h5> */}
                           </div>
                           <div className="col-auto">
                             <button
@@ -306,13 +303,13 @@ function Index() {
                               }
                               className="text-inherit text-decoration-none btn btn-primary me-2"
                             >
-                              <i className="fas fa-shopping-cart text-primary text-white" />
+                              <i className="fas fa-commenting-o  text-primary text-white" />
                             </button>
                             <Link
                               to={""}
                               className="text-inherit text-decoration-none btn btn-primary"
                             >
-                              Enroll Now{" "}
+                              Kayıt Ol{" "}
                               <i className="fas fa-arrow-right text-primary align-middle me-2 text-white" />
                             </Link>
                           </div>
@@ -405,14 +402,13 @@ function Index() {
             <div className="col-lg-5 col-12">
               <div className="text-white p-5 p-lg-0">
                 {/* text */}
-                <h2 className="h1 text-white">Become an instructor today</h2>
+                <h2 className="h1 text-white">Eğitmen Ol</h2>
                 <p className="mb-0">
-                  Instructors from around the world teach millions of students
-                  on Geeks. We provide the tools and skills to teach what you
-                  love.
+                EHAD'de Dünyanın dört bir yanından eğitmenler yüzlerce öğrenciye eğitim veriyor. 
+                Size öğretmek için gerekli araçları ve becerileri sağlıyoruz?
                 </p>
                 <a href="#" className="btn bg-white text-dark fw-bold mt-4">
-                  Start Teaching Today <i className="fas fa-arrow-right"></i>
+                  Bugün Öğretmeye Başla <i className="fas fa-arrow-right"></i>
                 </a>
               </div>
             </div>
@@ -444,7 +440,7 @@ function Index() {
                       <span className="ms-2">(Based on 3265 ratings)</span>
                     </div>
                     {/* heading */}
-                    <h2 className="h1">What our students say</h2>
+                    <h2 className="h1">Öğrencilerimiz Ne Dedi?</h2>
                     <p className="mb-0">
                       Hear from
                       <span className="text-dark">teachers</span>,

@@ -231,7 +231,7 @@ function CourseEdit() {
     console.log(response.data);
     Swal.fire({
       icon: "success",
-      title: "Course Updated Successfully",
+      title: "Kurs Başarılı Bir Şekilde Güncellendi",
     });
   };
   return (
@@ -266,14 +266,13 @@ function CourseEdit() {
                               style={{ backgroundColor: "white" }}
                             >
                               {" "}
-                              <i className="fas fa-arrow-left"></i> Back to
-                              Course
+                              <i className="fas fa-arrow-left"></i> Kursa Dön
                             </Link>
                             <a
                               href="instructor-courses.html"
                               className="btn btn-dark ms-2"
                             >
-                              Save <i className="fas fa-check-circle"></i>
+                              Kaydet <i className="fas fa-check-circle"></i>
                             </a>
                           </div>
                         </div>
@@ -285,11 +284,11 @@ function CourseEdit() {
                   <div className="card mb-3">
                     {/* Basic Info Section */}
                     <div className="card-header border-bottom px-4 py-3">
-                      <h4 className="mb-0">Basic Information</h4>
+                      <h4 className="mb-0">Temel Bilgiler</h4>
                     </div>
                     <div className="card-body">
                       <label htmlFor="courseTHumbnail" className="form-label">
-                        Thumbnail Preview
+                        Küçük Resim Önizleme
                       </label>
                       <img
                         style={{
@@ -308,7 +307,7 @@ function CourseEdit() {
                       />
                       <div className="mb-3">
                         <label htmlFor="courseTHumbnail" className="form-label">
-                          Course Thumbnail
+                          Kurs Küçük Resim
                         </label>
                         <input
                           id="courseTHumbnail"
@@ -320,7 +319,7 @@ function CourseEdit() {
                       </div>
                       <div className="mb-3">
                         <label htmlFor="courseTitle" className="form-label">
-                          Intro Video
+                          Tanıtım Videosu
                         </label>
                         <input
                           id="introvideo"
@@ -332,7 +331,7 @@ function CourseEdit() {
                       </div>
                       <div className="mb-3">
                         <label htmlFor="courseTitle" className="form-label">
-                          Title
+                          Başlık
                         </label>
                         <input
                           id="courseTitle"
@@ -343,7 +342,7 @@ function CourseEdit() {
                           defaultValue={course.title}
                           onChange={handleCourseInputChange}
                         />
-                        <small>Write a 60 character course title.</small>
+                        <small>En fazla 60 karakter olacak şekilde kurs başlığınızı yazın</small>
                       </div>
                       <div className="mb-3">
                         <label className="form-label">Courses category</label>
@@ -361,8 +360,7 @@ function CourseEdit() {
                           ))}
                         </select>
                         <small>
-                          Help people find your courses by choosing categories
-                          that represent your course.
+                        Kategorileri seçerek insanların kurslarınızı bulmasına yardımcı olun
                         </small>
                       </div>
                       <div className="mb-3">
@@ -372,10 +370,10 @@ function CourseEdit() {
                           name="level"
                           value={course.level}
                         >
-                          <option value="">Select level</option>
-                          <option value="Beginner">Beginner</option>
-                          <option value="Intemediate">Intemediate</option>
-                          <option value="Advanced">Advanced</option>
+                         <option value="">Seviye Seçin</option>
+                          <option value="Beginner">Başlangıç</option>
+                          <option value="Intemediate">Orta</option>
+                          <option value="Advanced">İleri Seviye</option>
                         </select>
                       </div>
 
@@ -386,14 +384,14 @@ function CourseEdit() {
                           name="language"
                           value={course.language}
                         >
-                          <option value="">Select Language</option>
-                          <option value="English">English</option>
-                          <option value="Spanish">Spanish</option>
-                          <option value="French">French</option>
+                        <option value="">Dil Seçin</option>
+                          <option value="English">Türkçe</option>
+                          <option value="Spanish">İngilizce</option>
+                          <option value="French">Arapça</option>
                         </select>
                       </div>
                       <div className="mb-3">
-                        <label className="form-label">Course Description</label>
+                        <label className="form-label">Kurs Açıklaması</label>
                         <CKEditor
                           editor={ClassicEditor}
                           data={ckEdtitorData}
@@ -402,9 +400,9 @@ function CourseEdit() {
                           name="description"
                           value={course.description || ""}
                         />
-                        <small>A brief summary of your courses.</small>
+                        <small>Kurslarınızın kısa bir özeti.</small>
                       </div>
-                      <label htmlFor="courseTitle" className="form-label">
+                      {/* <label htmlFor="courseTitle" className="form-label">
                         Price
                       </label>
                       <input
@@ -414,12 +412,12 @@ function CourseEdit() {
                         onChange={handleCourseInputChange}
                         name="price"
                         placeholder="$20.99"
-                      />
+                      /> */}
                     </div>
 
                     {/* Curriculum Section */}
                     <div className="card-header border-bottom px-4 py-3">
-                      <h4 className="mb-0">Curriculum</h4>
+                      <h4 className="mb-0">Dersler</h4>
                     </div>
                     <div className="card-body ">
                       {variants?.map((variant, variantIndex) => (
@@ -511,7 +509,7 @@ function CourseEdit() {
                                 </div>
                                 <div className="col-lg-4">
                                   <label htmlFor={`checkbox${1}`}>
-                                    Preview
+                                    Önizleme
                                   </label>
                                   <input
                                     type="checkbox"
@@ -543,7 +541,7 @@ function CourseEdit() {
                                   )
                                 }
                               >
-                                Delete Lesson <i className="fas fa-trash"></i>
+                                Dersi Sil <i className="fas fa-trash"></i>
                               </button>
                             </div>
                           ))}
@@ -553,7 +551,7 @@ function CourseEdit() {
                             type="button"
                             onClick={() => addItem(variantIndex)}
                           >
-                            + Add Lesson
+                            + Ders Ekle
                           </button>
                         </div>
                       ))}
@@ -563,7 +561,7 @@ function CourseEdit() {
                         type="button"
                         onClick={addVariant}
                       >
-                        + New Section
+                        + Yeni Bölüm
                       </button>
                     </div>
                   </div>
@@ -571,7 +569,7 @@ function CourseEdit() {
                     className="btn btn-lg btn-success w-100 mt-2"
                     type="submit"
                   >
-                    Create Course <i className="fas fa-check-circle"></i>
+                    Kurs Oluştur <i className="fas fa-check-circle"></i>
                   </button>
                 </section>
               </>

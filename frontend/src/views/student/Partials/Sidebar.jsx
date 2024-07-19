@@ -13,27 +13,27 @@ function Sidebar() {
                     <div className="navbar-nav flex-column">
                         <ul className="list-unstyled ms-n2 mb-4">
                             <li className="nav-item">
-                                <Link className="nav-link" to={`/student/dashboard/`}> <i className='bi bi-grid-fill'></i>Dashboard</Link>
+                                <Link className="nav-link" to={`/student/dashboard/`}> <i className='bi bi-grid-fill'></i>Panel</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to={`/student/courses/`}> <i className='fas fa-shopping-cart'></i>My Courses</Link>
+                                <Link className="nav-link" to={`/student/courses/`}> <i className='fas fa-chalkboard-user'></i>Kurslarım</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to={`/student/wishlist/`}>  <i className='fas fa-heart'></i> Wishlist </Link>
+                                <Link className="nav-link" to={`/student/wishlist/`}>  <i className='fas fa-heart'></i> İstekler </Link>
                             </li>
                         </ul>
 
                         {/* Navbar header */}
-                        <span className="navbar-header mb-3">Account Settings</span>
+                        <span className="navbar-header mb-3">Hesap Ayarları</span>
                         <ul className="list-unstyled ms-n2 mb-0">
                             <li className="nav-item">
-                                <Link className="nav-link" to={`/student/profile/`}> <i className='fas fa-edit'></i> Edit Profile</Link>
+                                <Link className="nav-link" to={`/student/profile/`}> <i className='fas fa-edit'></i> Profil Düzenle</Link>
                             </li>
                             <li className="nav-item ">
-                                <Link className="nav-link" to={`/student/change-password/`}> <i className='fas fa-lock'></i> Change Password</Link>
+                                <Link className="nav-link" to={`/student/change-password/`}> <i className='fas fa-lock'></i> Şifre Değiştir</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to={`/login/`}> <i className='fas fa-sign-out-alt'></i> Sign Out</Link>
+                                <Link className="nav-link" to={`/login/`}> <i className='fas fa-sign-out-alt'></i> Çıkış Yap</Link>
                             </li>
                         </ul>
                     </div>

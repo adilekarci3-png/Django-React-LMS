@@ -185,7 +185,7 @@ function Wishlist() {
                                   }
                                   className="text-inherit text-decoration-none btn btn-primary me-2"
                                 >
-                                  <i className="fas fa-shopping-cart text-primary text-white" />
+                                  <i className="fas fa-chalkboard-user text-primary text-white" />
                                 </button>
                                 <Link
                                   to={""}

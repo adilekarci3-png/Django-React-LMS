@@ -108,8 +108,8 @@ function QA() {
                         <input
                           className="form-control pe-5 bg-transparent"
                           type="search"
-                          placeholder="Search Questions"
-                          aria-label="Search"
+                          placeholder="Sorularda Aar"
+                          aria-label="Ara"
                           onChange={handleSearchQuestion}
                         />
                       </div>

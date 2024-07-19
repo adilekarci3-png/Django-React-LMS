@@ -9,28 +9,28 @@ from moviepy.editor import VideoFileClip
 import math
 
 LANGUAGE = (
-    ("English", "English"),
-    ("Spanish", "Spanish"),
-    ("French", "French"),
+    ("Türkçe", "Türkçe"),
+    ("İngilizce", "İngilizce"),
+    ("Arapça", "Arapça"),
 )
 
 LEVEL = (
-    ("Beginner", "Beginner"),
-    ("Intemediate", "Intemediate"),
-    ("Advanced", "Advanced"),
+    ("Başlangıç", "Başlangıç"),
+    ("Orta", "Orta"),
+    ("İleri Seviye", "İleri Seviye"),
 )
 
 
 TEACHER_STATUS = (
-    ("Draft", "Draft"),
-    ("Disabled", "Disabled"),
-    ("Published", "Published"),
+    ("Taslak", "Taslak"),
+    ("Pasif", "Pasif"),
+    ("Yayınlanmış", "Yayınlanmış"),
 )
 
 PAYMENT_STATUS = (
-    ("Paid", "Paid"),
-    ("Processing", "Processing"),
-    ("Failed", "Failed"),
+    ("Ödendi", "Paid"),
+    ("İşleniyor", "İşleniyor"),
+    ("Arızalı", "Arızalı"),
 )
 
 
@@ -43,11 +43,11 @@ PLATFORM_STATUS = (
 )
 
 RATING = (
-    (1, "1 Star"),
-    (2, "2 Star"),
-    (3, "3 Star"),
-    (4, "4 Star"),
-    (5, "5 Star"),
+    (1, "1 Yıldız"),
+    (2, "2 Yıldız"),
+    (3, "3 Yıldız"),
+    (4, "4 Yıldız"),
+    (5, "5 Yıldız"),
 )
 
 NOTI_TYPE = (
@@ -82,6 +82,10 @@ class Teacher(models.Model):
     def review(self):
         return Course.objects.filter(teacher=self).count()
     
+    class Meta:
+        verbose_name = "Eğitmen"
+        verbose_name_plural = "Eğitmenler"
+    
 class Category(models.Model):
     title = models.CharField(max_length=100)
     image = models.FileField(upload_to="course-file", default="category.jpg", null=True, blank=True)
@@ -102,6 +106,10 @@ class Category(models.Model):
         if self.slug == "" or self.slug == None:
             self.slug = slugify(self.title) 
         super(Category, self).save(*args, **kwargs)
+        
+    class Meta:
+        verbose_name = "Kategori"
+        verbose_name_plural = "Kategoriler"
             
 class Course(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
@@ -110,7 +118,7 @@ class Course(models.Model):
     image = models.FileField(upload_to="course-file", blank=True, null=True)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
-    price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    # price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     language = models.CharField(choices=LANGUAGE, default="English", max_length=100)
     level = models.CharField(choices=LEVEL, default="Beginner", max_length=100)
     platform_status = models.CharField(choices=PLATFORM_STATUS, default="Published", max_length=100)
@@ -147,6 +155,10 @@ class Course(models.Model):
     
     def reviews(self):
         return Review.objects.filter(course=self, active=True)
+    
+    class Meta:
+        verbose_name = "Kurs"
+        verbose_name_plural = "Kurslar"
     
 class Variant(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -234,7 +246,7 @@ class Question_Answer_Message(models.Model):
 class Cart(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    price = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    # price = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     tax_fee = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     country = models.CharField(max_length=100, null=True, blank=True)
@@ -247,12 +259,12 @@ class Cart(models.Model):
 class CartOrder(models.Model):
     student = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     teachers = models.ManyToManyField(Teacher, blank=True)
-    sub_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    tax_fee = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    initial_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    saved = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    payment_status = models.CharField(choices=PAYMENT_STATUS, default="Processing", max_length=100)
+    #sub_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    #tax_fee = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    #total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    #initial_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    #saved = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    #payment_status = models.CharField(choices=PAYMENT_STATUS, default="Processing", max_length=100)
     full_name = models.CharField(max_length=100, null=True, blank=True)
     email = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
@@ -275,11 +287,11 @@ class CartOrderItem(models.Model):
     order = models.ForeignKey(CartOrder, on_delete=models.CASCADE, related_name="orderitem")
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="order_item")
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    tax_fee = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    initial_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    saved = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    # price = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    # tax_fee = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    # total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    # initial_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    # saved = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     coupons = models.ManyToManyField("api.Coupon", blank=True)
     applied_coupon = models.BooleanField(default=False)
     oid = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")

@@ -8,11 +8,10 @@ function BaseFooter() {
           <div className="col-lg-4 col-md-6 col-12 text-white">
             {/* about company */}
             <div className="mb-4">
-              <h1>Desphixs</h1>
+              <h1>EHAD</h1>
               <div className="mt-4">
                 <p>
-                  Desphixs is feature-rich components and beautifully Bootstrap UIKit
-                  for developers, built with bootstrap responsive framework.
+                EHAD olarak 81 ildeki şube ve temsilciliklerimiz ile Kuran-ı Kerim’i sahih okuma dersleri, Hatimle Teravih Namazı kıldıranları ödüllendirme programları, Kur`an-ı Kerim Sahih ve Güzel Okuma yarışmaları, hafızlık öğrencilerine yaz ve kış dönemlerinde kamp programları hafızlık yolu motivasyon seminerleri, hafızlık öğrencilerine çeşitli hediyeler takdim edilmesi ve ihtiyaç sahibi hafız ve hafız adaylarına imkanlarımız ölçüsünde burs verilmesi, gibi birçok hayırlı hizmetlere imza atıyoruz.
                 </p>
                 {/* social media */}
                 <div className="fs-4 mt-4">
@@ -62,31 +61,31 @@ function BaseFooter() {
           <div className="offset-lg-1 col-lg-2 col-md-3 col-6">
             <div className="mb-4">
               {/* list */}
-              <h3 className="fw-bold mb-3">Company</h3>
+              <h3 className="fw-bold mb-3">Kuruluş</h3>
               <ul className="list-unstyled nav nav-footer flex-column nav-x-0">
                 <li>
                   <a href="#" className="nav-link text-white">
-                    About
+                    Hakkında
                   </a>
                 </li>
                 <li>
                   <a href="#" className="nav-link text-white">
-                    Pricing
+                    Bağış
                   </a>
                 </li>
                 <li>
                   <a href="#" className="nav-link text-white">
-                    Blog
+                    EHAD Akademi
                   </a>
                 </li>
                 <li>
                   <a href="#" className="nav-link text-white">
-                    Careers
+                    EHAD Akademisi Bünyesinde Faaliyet
                   </a>
                 </li>
                 <li>
                   <a href="#" className="nav-link text-white">
-                    Contact
+                    İletişim
                   </a>
                 </li>
               </ul>
@@ -95,16 +94,16 @@ function BaseFooter() {
           <div className="col-lg-2 col-md-3 col-6">
             <div className="mb-4">
               {/* list */}
-              <h3 className="fw-bold mb-3">Support</h3>
+              <h3 className="fw-bold mb-3">Destek</h3>
               <ul className="list-unstyled nav nav-footer flex-column nav-x-0">
                 <li>
                   <a href="#" className="nav-link text-white">
-                    Help and Support
+                    Yardım ve Destek
                   </a>
                 </li>
                 <li>
                   <a href="#" className="nav-link text-white">
-                    Become Instructor
+                    Eğitmen Ol
                   </a>
                 </li>
                 <li>
@@ -119,7 +118,7 @@ function BaseFooter() {
                 </li>
                 <li>
                   <a href="#" className="nav-link text-white">
-                    Tutorial
+                    Ders
                   </a>
                 </li>
               </ul>
@@ -128,15 +127,15 @@ function BaseFooter() {
           <div className="col-lg-3 col-md-12">
             {/* contact info */}
             <div className="mb-4">
-              <h3 className="fw-bold mb-3">Get in touch</h3>
-              <p>123 Main Street, U.S.A</p>
+              <h3 className="fw-bold mb-3">İletişimde Kalın</h3>
+              <p>Anafartalar Cad. Gülhane İşhanı No: 62/33 Altındağ/Ankara</p>
               <p className="mb-1">
-                Email:
-                <a href="#" className='text-white'> support@desphixs.com</a>
+                Eposta:
+                <a href="#" className='text-white'> bilgi@ehad.org.tr</a>
               </p>
               <p>
-                Phone:
-                <span className="text-dark fw-semibold">(000) 123 456 789</span>
+                Telefon:
+                <span className="text-dark fw-semibold">+90 312 324 00 34</span>
               </p>
               <div className="d-flex">
                 <a href="#">
@@ -164,22 +163,22 @@ function BaseFooter() {
               <div className="me-4">
                 <span>
                   ©<span id="copyright5"></span>
-                  Desphixs
+                  EHAD
                 </span>
               </div>
               <div>
                 <nav className="nav nav-footer">
                   <a className="nav-link text-white ps-0" href="#">
-                    Privacy Policy
+                    Gizlilik Politikası
                   </a>
                   <a className="nav-link text-white px-2 px-md-3" href="#">
-                    Cookie Notice
+                    Çerez Bildirimi
                   </a>
                   <a className="nav-link text-white d-none d-lg-block" href="#">
-                    Do Not Sell My Personal Information
+                    KKVK
                   </a>
                   <a className="nav-link text-white" href="#">
-                    Terms of Use
+                    Kullanım Şartları
                   </a>
                 </nav>
               </div>
@@ -196,7 +195,7 @@ function BaseFooter() {
                 aria-expanded="false"
               >
                 <i className="fe fe-globe me-2 align-middle" />
-                Language
+                Dil
               </a>
               <ul className="dropdown-menu" aria-labelledby="dropdownMenuLink">
                 <li>
@@ -240,7 +239,7 @@ function BaseFooter() {
                         </defs>
                       </svg>
                     </span>
-                    English
+                    Türkçe
                   </a>
                 </li>
                 <li>
@@ -285,7 +284,7 @@ function BaseFooter() {
                         </defs>
                       </svg>
                     </span>
-                    Français
+                    İngilizce
                   </a>
                 </li>
                 <li>
@@ -315,7 +314,7 @@ function BaseFooter() {
                         </defs>
                       </svg>
                     </span>
-                    Deutsch
+                    Almanca
                   </a>
                 </li>
               </ul>

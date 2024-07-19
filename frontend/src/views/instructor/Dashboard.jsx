@@ -16,14 +16,13 @@ function Dashboard() {
   const fetchCourseData = () => {
     useAxios()
       .get(`teacher/summary/${UserData()?.teacher_id}/`)
-      .then((res) => {
-        console.log(res.data[0]);
+      .then((res) => {        
         setStats(res.data[0]);
       });
 
     useAxios()
       .get(`teacher/course-lists/${UserData()?.teacher_id}/`)
-      .then((res) => {
+      .then((res) => {        
         console.log(res.data);
         setCourses(res.data);
       });
@@ -61,7 +60,7 @@ function Dashboard() {
               <div className="row mb-4">
                 <h4 className="mb-0 mb-4">
                   {" "}
-                  <i className="bi bi-grid-fill"></i> Dashboard
+                  <i className="bi bi-grid-fill"></i> Eğitmen Panel
                 </h4>
                 {/* Counter item */}
 
@@ -76,7 +75,7 @@ function Dashboard() {
                           {stats.total_courses}
                         </h5>
                       </div>
-                      <p className="mb-0 h6 fw-light">Total Courses</p>
+                      <p className="mb-0 h6 fw-light">Tüm Kurslar</p>
                     </div>
                   </div>
                 </div>
@@ -92,7 +91,7 @@ function Dashboard() {
                           {stats.total_students}
                         </h5>
                       </div>
-                      <p className="mb-0 h6 fw-light">Total Students</p>
+                      <p className="mb-0 h6 fw-light">Tüm Öğrenciler</p>
                     </div>
                   </div>
                 </div>
@@ -100,7 +99,7 @@ function Dashboard() {
                 <div className="col-sm-6 col-lg-4 mb-3 mb-lg-0">
                   <div className="d-flex justify-content-center align-items-center p-4 bg-success bg-opacity-10 rounded-3">
                     <span className="display-6 lh-1 text-success mb-0">
-                      <i className="fas fa-dollar-sign fa-fw" />
+                      <i className="fas fa-turkish-lira fa-fw" />
                     </span>
                     <div className="ms-4">
                       <div className="d-flex">
@@ -108,7 +107,7 @@ function Dashboard() {
                           ${stats.total_revenue?.toFixed(2)}
                         </h5>
                       </div>
-                      <p className="mb-0 h6 fw-light">Total Revenue</p>
+                      {/* <p className="mb-0 h6 fw-light">Total Revenue</p> */}
                     </div>
                   </div>
                 </div>
@@ -116,10 +115,9 @@ function Dashboard() {
 
               <div className="card mb-4">
                 <div className="card-header">
-                  <h3 className="mb-0">Courses</h3>
+                  <h3 className="mb-0">Kurslar</h3>
                   <span>
-                    Manage your courses from here, earch, view, edit or delete
-                    courses.
+                  Kurslarınızı buradan yönetin, derslerinizi arayın, görüntüleyin, düzenleyin veya silin
                   </span>
                 </div>
                 <div className="card-body">
@@ -128,7 +126,7 @@ function Dashboard() {
                       <input
                         type="search"
                         className="form-control"
-                        placeholder="Search Your Courses"
+                        placeholder="Kurslarında Ara"
                         onChange={handleSearch}
                       />
                     </div>
@@ -138,12 +136,12 @@ function Dashboard() {
                   <table className="table mb-0 text-nowrap table-hover table-centered text-nowrap">
                     <thead className="table-light">
                       <tr>
-                        <th>Courses</th>
-                        <th>Enrolled</th>
-                        <th>Level</th>
-                        <th>Status</th>
-                        <th>Date Created</th>
-                        <th>Action</th>
+                        <th>Kurslar</th>
+                        <th>Kaydedilenler</th>
+                        <th>Seviye</th>
+                        <th>Durum</th>
+                        <th>Oluşturulma Tarihi</th>
+                        <th>İşlem</th>
                         <th />
                       </tr>
                     </thead>
@@ -191,7 +189,7 @@ function Dashboard() {
                                   </li>
                                   <li className="list-inline-item">
                                     <small>
-                                      <i className="fas fa-dollar-sign"></i>
+                                      <i className="fas fa-turkish-lira"></i>
                                       <span>{c.price}</span>
                                     </small>
                                   </li>
@@ -207,7 +205,7 @@ function Dashboard() {
                           </td>
                           <td>
                             <p className="mt-3 badge bg-warning text-dark">
-                              Intermediate
+                              Orta Seviye
                             </p>
                           </td>
                           <td>

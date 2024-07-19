@@ -26,6 +26,7 @@ function Dashboard() {
     useAxios()
       .get(`student/course-list/${UserData()?.user_id}/`)
       .then((res) => {
+        debugger;
         console.log(res.data);
         setCourses(res.data);
         setFetching(false);
@@ -33,6 +34,7 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    debugger;
     fetchData();
   }, []);
 
@@ -64,7 +66,7 @@ function Dashboard() {
               <div className="row mb-4">
                 <h4 className="mb-0 mb-4">
                   {" "}
-                  <i className="bi bi-grid-fill"></i> Dashboard
+                  <i className="bi bi-grid-fill"></i> Öğrenci Paneli
                 </h4>
                 {/* Counter item */}
 
@@ -79,7 +81,7 @@ function Dashboard() {
                           {stats.total_courses}
                         </h5>
                       </div>
-                      <p className="mb-0 h6 fw-light">Total Courses</p>
+                      <p className="mb-0 h6 fw-light">Tüm Kurslar</p>
                     </div>
                   </div>
                 </div>
@@ -96,7 +98,7 @@ function Dashboard() {
                           {stats.completed_lessons}
                         </h5>
                       </div>
-                      <p className="mb-0 h6 fw-light">Complete lessons</p>
+                      <p className="mb-0 h6 fw-light">Tamamlanmış Dersler</p>
                     </div>
                   </div>
                 </div>
@@ -113,20 +115,20 @@ function Dashboard() {
                           {stats.achieved_certificates}
                         </h5>
                       </div>
-                      <p className="mb-0 h6 fw-light">Achieved Certificates</p>
+                      <p className="mb-0 h6 fw-light">Kazanılmış Sertifikalar</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {fetching === true && <p className="mt-3 p-3">Loading...</p>}
+              {fetching === true && <p className="mt-3 p-3">Yükleniyor...</p>}
 
               {fetching === false && (
                 <div className="card mb-4">
                   <div className="card-header">
-                    <h3 className="mb-0">Courses</h3>
+                    <h3 className="mb-0">Kurslar</h3>
                     <span>
-                      Start watching courses now from your dashboard page.
+                      Panel sayfanızdan videoları şimdi izlemeye başlayın
                     </span>
                   </div>
                   <div className="card-body">
@@ -135,7 +137,7 @@ function Dashboard() {
                         <input
                           type="search"
                           className="form-control"
-                          placeholder="Search Your Courses"
+                          placeholder="Kurslarında Ara"
                           onChange={handleSearch}
                         />
                       </div>
@@ -145,11 +147,11 @@ function Dashboard() {
                     <table className="table mb-0 text-nowrap table-hover table-centered text-nowrap">
                       <thead className="table-light">
                         <tr>
-                          <th>Courses</th>
-                          <th>Date Enrolled</th>
-                          <th>Lectures</th>
-                          <th>Completed</th>
-                          <th>Action</th>
+                          <th>Kurslar</th>
+                          <th>Kayıt Tarihi</th>
+                          <th>Dersler</th>
+                          <th>Tamamlanmış</th>
+                          <th>Eylem</th>
                           <th />
                         </tr>
                       </thead>
@@ -219,7 +221,7 @@ function Dashboard() {
                                   to={`/student/courses/${c.enrollment_id}/`}
                                   className="btn btn-success btn-sm mt-3"
                                 >
-                                  start Course
+                                  Kursa Başla
                                   <i className="fas fa-arrow-right ms-2"></i>
                                 </Link>
                               )}
@@ -229,7 +231,7 @@ function Dashboard() {
                                   to={`/student/courses/${c.enrollment_id}/`}
                                   className="btn btn-primary btn-sm mt-3"
                                 >
-                                  Continue Course
+                                  Kursa Devam Et
                                   <i className="fas fa-arrow-right ms-2"></i>
                                 </Link>
                               )}
@@ -238,7 +240,7 @@ function Dashboard() {
                         ))}
 
                         {courses?.length < 1 && (
-                          <p className="mt-4 p-4">No courses found</p>
+                          <p className="mt-4 p-4">Kurs Bulunamadı</p>
                         )}
                       </tbody>
                     </table>

@@ -28,84 +28,84 @@ function Sidebar() {
               <li className="nav-item">
                 <Link className="nav-link " to={`/instructor/dashboard/`}>
                   {" "}
-                  <i className="bi bi-grid-fill me-2"></i> Dashboard
+                  <i className="bi bi-grid-fill me-2"></i> Panel
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link " to={`/instructor/courses/`}>
                   {" "}
-                  <i className="fas fa-shopping-cart me-2"></i>My Courses
+                  <i className="fas fa-chalkboard-user me-2"></i>Kurslarım
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link " to={`/instructor/create-course/`}>
                   {" "}
-                  <i className="fas fa-plus me-2"></i>Create Course
+                  <i className="fas fa-plus me-2"></i>Kurs Oluştur
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link " to={`/instructor/reviews/`}>
                   {" "}
-                  <i className="fas fa-star me-2"></i>Review
+                  <i className="fas fa-star me-2"></i>Yorum
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link " to={`/instructor/students/`}>
                   {" "}
-                  <i className="fas fa-graduation-cap me-2"></i>Students
+                  <i className="fas fa-graduation-cap me-2"></i>Öğrenciler
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link " to={`/instructor/earning/`}>
                   {" "}
-                  <i className="fas fa-dollar-sign me-2"></i>Earning
+                  <i className="fas fa-turkish-lira me-2"></i>Bağış
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link " to={`/instructor/coupon/`}>
                   {" "}
-                  <i className="fas fa-tag me-2"></i>Coupons
+                  <i className="fas fa-tag me-2"></i>Ödüller
                 </Link>
                 <li className="nav-item">
                   <Link className="nav-link " to={`/instructor/notifications/`}>
                     {" "}
-                    <i className="fas fa-bell me-2"></i>Notifications
+                    <i className="fas fa-bell me-2"></i>Bildirimler
                   </Link>
                 </li>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to={`/instructor/orders/`}>
                   {" "}
-                  <i className="fas fa-shopping-cart me-2"></i> Orders{" "}
+                  <i className="fas fa-chalkboard-userme-2"></i> Kurs Talepleri{" "}
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to={`/instructor/question-answer/`}>
                   {" "}
-                  <i className="fas fa-envelope me-2"></i> Q/A{" "}
+                  <i className="fas fa-envelope me-2"></i> Soru/Cevap{" "}
                 </Link>
               </li>
             </ul>
 
             {/* Navbar header */}
-            <span className="navbar-header mb-3">Account Settings</span>
+            <span className="navbar-header mb-3">Hesap Ayarları</span>
             <ul className="list-unstyled ms-n2 mb-0">
               <li className="nav-item">
                 <Link className="nav-link" to={`/instructor/profile/`}>
                   {" "}
-                  <i className="fas fa-edit"></i> Edit Profile
+                  <i className="fas fa-edit"></i> Profili Düzenle
                 </Link>
               </li>
               <li className="nav-item ">
                 <Link className="nav-link" to={`/instructor/change-password/`}>
                   {" "}
-                  <i className="fas fa-lock"></i> Change Password
+                  <i className="fas fa-lock"></i> Şifre Değiştir
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to={`/login/`}>
                   {" "}
-                  <i className="fas fa-sign-out-alt"></i> Sign Out
+                  <i className="fas fa-sign-out-alt"></i> Çıkış Yap
                 </Link>
               </li>
             </ul>

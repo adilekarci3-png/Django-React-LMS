@@ -19,12 +19,12 @@ function QADetail() {
                         {/* Sidebar Here */}
                         <Sidebar />
                         <div className="col-lg-9 col-md-8 col-12">
-                            <h4 className="mb-0 mb-4"> <i className='fas fa-envelope'></i> Q/A - Angular Masterclass Course</h4>
+                            <h4 className="mb-0 mb-4"> <i className='fas fa-envelope'></i> Soru/Cevap - Yasin Süresi Tefsiri</h4>
 
                             <div className="card mb-4">
                                 <div className="card-header">
-                                    <span>Course: <b>Angular Masterclass Course</b></span> <br />
-                                    <span>Questions: <b>16</b></span>
+                                    <span>Kurs: <b>Yasin Süresi Tefsiri</b></span> <br />
+                                    <span>Sorular: <b>16</b></span>
                                 </div>
                                 <div className="p-2 p-sm-4">
                                     <ul className="list-unstyled mb-0" style={{ overflowY: "scroll", height: "500px" }}>
@@ -41,8 +41,8 @@ function QADetail() {
                                                         <div className="d-flex w-100 justify-content-center">
                                                             <div className="me-2 ">
                                                                 <h6 className="mb-1 lead fw-bold">
-                                                                    <a href="#!" className='text-decoration-none text-dark'> Jenny Adga </a><br />
-                                                                    <span style={{ fontSize: "12px", color: "gray" }}>5hrs Ago</span>
+                                                                    <a href="#!" className='text-decoration-none text-dark'> Adile Karci </a><br />
+                                                                    <span style={{ fontSize: "12px", color: "gray" }}>Zeynep Karatepe</span>
                                                                 </h6>
                                                                 <p className="mb-0 mt-3  ">Removed demands expense account
                                                                 </p>

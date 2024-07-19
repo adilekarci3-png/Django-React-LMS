@@ -58,15 +58,16 @@ function Courses() {
               <div className="row mb-4">
                 <h4 className="mb-0 mb-2 mt-4">
                   {" "}
-                  <i className="bi bi-grid-fill"></i> Courses
+                  <i className="bi bi-grid-fill"></i> Kurslar
                 </h4>
               </div>
               <div className="card mb-4">
                 <div className="card-header">
-                  <h3 className="mb-0">Courses</h3>
+                  <h3 className="mb-0">Kurslar</h3>
                   <span>
-                    Manage your courses from here, earch, view, edit or delete
-                    courses.
+                   
+Kurslarınızı buradan yönetin, derslerinizi arayın, görüntüleyin, düzenleyin veya silin
+                    
                   </span>
                 </div>
                 <div className="card-body">
@@ -75,7 +76,7 @@ function Courses() {
                       <input
                         type="search"
                         className="form-control"
-                        placeholder="Search Your Courses"
+                        placeholder="Kurslarında Ara"
                         onChange={handleSearch}
                       />
                     </div>
@@ -85,12 +86,12 @@ function Courses() {
                   <table className="table mb-0 text-nowrap table-hover table-centered text-nowrap">
                     <thead className="table-light">
                       <tr>
-                        <th>Courses</th>
-                        <th>Enrolled</th>
-                        <th>Level</th>
-                        <th>Status</th>
-                        <th>Date Created</th>
-                        <th>Action</th>
+                        <th>Kurslar</th>
+                        <th>Kaydedenler</th>
+                        <th>Seviye</th>
+                        <th>Durum</th>
+                        <th>Oluşturulma Tarihi</th>
+                        <th>İşlem</th>
                         <th />
                       </tr>
                     </thead>
@@ -138,7 +139,7 @@ function Courses() {
                                   </li>
                                   <li className="list-inline-item">
                                     <small>
-                                      <i className="fas fa-dollar-sign"></i>
+                                      <i className="fas fa-turkish-lira"></i>
                                       <span>{c.price}</span>
                                     </small>
                                   </li>
@@ -154,7 +155,7 @@ function Courses() {
                           </td>
                           <td>
                             <p className="mt-3 badge bg-warning text-dark">
-                              Intermediate
+                              Orta Seviye
                             </p>
                           </td>
                           <td>

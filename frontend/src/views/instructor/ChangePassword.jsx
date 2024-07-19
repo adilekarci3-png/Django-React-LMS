@@ -41,6 +41,7 @@ function ChangePassword() {
     await useAxios()
       .post(`user/change-password/`, formdata)
       .then((res) => {
+        
         console.log(res.data);
         Toast().fire({
           icon: res.data.icon,
@@ -65,7 +66,7 @@ function ChangePassword() {
               <div className="card">
                 {/* Card header */}
                 <div className="card-header">
-                  <h3 className="mb-0">Change Password</h3>
+                  <h3 className="mb-0">Şifre Değiştir</h3>
                 </div>
                 {/* Card body */}
                 <div className="card-body">
@@ -78,7 +79,7 @@ function ChangePassword() {
                       {/* First name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="fname">
-                          Old Password
+                          Eski Şifre
                         </label>
                         <input
                           type="password"
@@ -94,7 +95,7 @@ function ChangePassword() {
                       {/* Last name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="lname">
-                          New Password
+                          Yeni Şifre
                         </label>
                         <input
                           type="password"
@@ -111,7 +112,7 @@ function ChangePassword() {
                       {/* Country */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="editCountry">
-                          Confirm New Password
+                          Yeni Şifre Doğrula
                         </label>
                         <input
                           type="password"
@@ -127,7 +128,7 @@ function ChangePassword() {
                       <div className="col-12">
                         {/* Button */}
                         <button className="btn btn-primary" type="submit">
-                          Save New Password{" "}
+                          Yeni Şifreyi Kaydet{" "}
                           <i className="fas fa-check-circle"></i>
                         </button>
                       </div>

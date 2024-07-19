@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import apiInstance from "../../utils/axios";
 import { login } from "../../utils/auth";
 import BaseHeader from "../partials/BaseHeader";
@@ -74,7 +73,7 @@ function Login() {
                   {/* Password */}
                   <div className="mb-3">
                     <label htmlFor="password" className="form-label">
-                      Password
+                      Parola
                     </label>
                     <input
                       type="password"

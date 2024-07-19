@@ -75,7 +75,7 @@ function CourseDetail() {
     fetchCourseDetail();
   }, []);
 
-  console.log(createReview?.rating);
+  //console.log(createReview?.rating);
   // console.log(studentReview);
   const handleMarkLessonAsCompleted = (variantItemId) => {
     const key = `lecture_${variantItemId}`;
@@ -127,7 +127,7 @@ function CourseDetail() {
           handleNoteClose();
           Toast().fire({
             icon: "success",
-            title: "Note created",
+            title: "Not Oluştur",
           });
         });
     } catch (error) {
@@ -153,7 +153,7 @@ function CourseDetail() {
         fetchCourseDetail();
         Toast().fire({
           icon: "success",
-          title: "Note updated",
+          title: "Notu Güncelle",
         });
       });
   };
@@ -167,7 +167,7 @@ function CourseDetail() {
         fetchCourseDetail();
         Toast().fire({
           icon: "success",
-          title: "Note deleted",
+          title: "Notu Sil",
         });
       });
   };
@@ -198,7 +198,7 @@ function CourseDetail() {
         handleQuestionClose();
         Toast().fire({
           icon: "success",
-          title: "Question sent",
+          title: "Soru Gönder",
         });
       });
   };
@@ -259,7 +259,7 @@ function CourseDetail() {
         fetchCourseDetail();
         Toast().fire({
           icon: "success",
-          title: "Review created",
+          title: "Yorum Oluştur",
         });
       });
   };
@@ -283,7 +283,7 @@ function CourseDetail() {
         fetchCourseDetail();
         Toast().fire({
           icon: "success",
-          title: "Review updated",
+          title: "Yorum Güncelle",
         });
       });
   };
@@ -333,7 +333,7 @@ function CourseDetail() {
                                 aria-controls="course-pills-1"
                                 aria-selected="true"
                               >
-                                Course Lectures
+                                Kurs Dersleri
                               </button>
                             </li>
                             {/* Tab item */}
@@ -351,7 +351,7 @@ function CourseDetail() {
                                 aria-controls="course-pills-2"
                                 aria-selected="false"
                               >
-                                Notes
+                                Notlar
                               </button>
                             </li>
                             {/* Tab item */}
@@ -369,7 +369,7 @@ function CourseDetail() {
                                 aria-controls="course-pills-3"
                                 aria-selected="false"
                               >
-                                Discussion
+                                Tartışma
                               </button>
                             </li>
 
@@ -387,7 +387,7 @@ function CourseDetail() {
                                 aria-controls="course-pills-4"
                                 aria-selected="false"
                               >
-                                Leave a Review
+                                Yorum Bırak
                               </button>
                             </li>
                           </ul>
@@ -443,7 +443,7 @@ function CourseDetail() {
                                       >
                                         {c.title}
                                         <span className="small ms-0 ms-sm-2">
-                                          ({c.variant_items?.length} Lecture
+                                          ({c.variant_items?.length} Ders
                                           {c.variant_items?.length > 1 && "s"})
                                         </span>
                                       </button>
@@ -514,7 +514,7 @@ function CourseDetail() {
                               <div className="card">
                                 <div className="card-header border-bottom p-0 pb-3">
                                   <div className="d-sm-flex justify-content-between align-items-center">
-                                    <h4 className="mb-0 p-3">All Notes</h4>
+                                    <h4 className="mb-0 p-3">Tüm Notlar</h4>
                                     {/* Add Note Modal */}
                                     <button
                                       type="button"
@@ -522,7 +522,7 @@ function CourseDetail() {
                                       data-bs-toggle="modal"
                                       data-bs-target="#exampleModal"
                                     >
-                                      Add Note <i className="fas fa-pen"></i>
+                                      Not Ekle <i className="fas fa-pen"></i>
                                     </button>
                                     <div
                                       className="modal fade"
@@ -538,7 +538,7 @@ function CourseDetail() {
                                               className="modal-title"
                                               id="exampleModalLabel"
                                             >
-                                              Add New Note{" "}
+                                              Yeni Not Ekle{" "}
                                               <i className="fas fa-pen"></i>
                                             </h5>
                                             <button
@@ -557,7 +557,7 @@ function CourseDetail() {
                                                   htmlFor="exampleInputEmail1"
                                                   className="form-label"
                                                 >
-                                                  Note Title
+                                                  Not Başlığı
                                                 </label>
                                                 <input
                                                   type="text"
@@ -571,7 +571,7 @@ function CourseDetail() {
                                                   htmlFor="exampleInputPassword1"
                                                   className="form-label"
                                                 >
-                                                  Note Content
+                                                  İçerik
                                                 </label>
                                                 <textarea
                                                   className="form-control"
@@ -588,13 +588,13 @@ function CourseDetail() {
                                                 data-bs-dismiss="modal"
                                               >
                                                 <i className="fas fa-arrow-left"></i>{" "}
-                                                Close
+                                                Kapat
                                               </button>
                                               <button
                                                 type="submit"
                                                 className="btn btn-primary"
                                               >
-                                                Save Note{" "}
+                                                Notu Kaydet{" "}
                                                 <i className="fas fa-check-circle"></i>
                                               </button>
                                             </form>
@@ -618,7 +618,7 @@ function CourseDetail() {
                                             className="btn btn-success mb-0"
                                           >
                                             <i className="bi bi-pencil-square me-2" />{" "}
-                                            Edit
+                                            Düzenle
                                           </a>
                                           <a
                                             onClick={() =>
@@ -627,7 +627,7 @@ function CourseDetail() {
                                             className="btn btn-danger mb-0"
                                           >
                                             <i className="bi bi-trash me-2" />{" "}
-                                            Delete
+                                            Sil
                                           </a>
                                         </div>
                                       </div>
@@ -635,7 +635,7 @@ function CourseDetail() {
                                   ))}
 
                                   {course?.note?.length < 1 && (
-                                    <p className="mt-3 p-3">No notes</p>
+                                    <p className="mt-3 p-3">Not Bulunamadı</p>
                                   )}
                                   <hr />
                                 </div>
@@ -651,7 +651,7 @@ function CourseDetail() {
                                 {/* Card header */}
                                 <div className="card-header border-bottom p-0 pb-3">
                                   {/* Title */}
-                                  <h4 className="mb-3 p-3">Discussion</h4>
+                                  <h4 className="mb-3 p-3">Tartışma</h4>
                                   <form className="row g-4 p-3">
                                     {/* Search */}
                                     <div className="col-sm-6 col-lg-9">
@@ -659,8 +659,8 @@ function CourseDetail() {
                                         <input
                                           className="form-control pe-5 bg-transparent"
                                           type="search"
-                                          placeholder="Search"
-                                          aria-label="Search"
+                                          placeholder="Ara"
+                                          aria-label="Ara"
                                           onChange={handleSearchQuestion}
                                         />
                                         <button
@@ -678,7 +678,7 @@ function CourseDetail() {
                                         data-bs-toggle="modal"
                                         data-bs-target="#modalCreatePost"
                                       >
-                                        Ask Question
+                                        Soru Sor
                                       </a>
                                     </div>
                                   </form>
@@ -731,7 +731,7 @@ function CourseDetail() {
                                             handleConversationShow(q)
                                           }
                                         >
-                                          Join Conversation{" "}
+                                          Konuşmaya Katıl{" "}
                                           <i className="fas fa-arrow-right"></i>
                                         </button>
                                       </div>
@@ -751,7 +751,7 @@ function CourseDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   {/* Title */}
                                   <h4 className="mb-3 p-3">
-                                    Leave a Review {studentReview.rating}
+                                    Yorum Bırak {studentReview.rating}
                                   </h4>
                                   <div className="mt-2">
                                     {!studentReview && (
@@ -826,7 +826,7 @@ function CourseDetail() {
                                             className="form-select js-choice"
                                             onChange={handleReviewChange}
                                             name="rating"
-                                            value={course.review.rating}
+                                            //value={course.review.rating}
                                           >
                                             <option value={1}>
                                               ★☆☆☆☆ (1/5)
@@ -850,7 +850,7 @@ function CourseDetail() {
                                           <textarea
                                             className="form-control"
                                             id="exampleFormControlTextarea1"
-                                            placeholder="Your review"
+                                            placeholder="Yorumun"
                                             rows={3}
                                             onChange={handleReviewChange}
                                             name="review"
@@ -863,7 +863,7 @@ function CourseDetail() {
                                             type="submit"
                                             className="btn btn-primary mb-0"
                                           >
-                                            Update Review
+                                            Yorumu Güncelle
                                           </button>
                                         </div>
                                       </form>
@@ -907,13 +907,13 @@ function CourseDetail() {
       {/* Note Edit Modal */}
       <Modal show={noteShow} size="lg" onHide={handleNoteClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Note: {selectedNote?.title}</Modal.Title>
+          <Modal.Title>Not: {selectedNote?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={(e) => handleSubmitEditNote(e, selectedNote?.id)}>
             <div className="mb-3">
               <label htmlFor="exampleInputEmail1" className="form-label">
-                Note Title
+                Not Başlığı
               </label>
               <input
                 defaultValue={selectedNote?.title}
@@ -925,7 +925,7 @@ function CourseDetail() {
             </div>
             <div className="mb-3">
               <label htmlFor="exampleInputPassword1" className="form-label">
-                Note Content
+                İçerik
               </label>
               <textarea
                 defaultValue={selectedNote?.note}
@@ -944,7 +944,7 @@ function CourseDetail() {
               <i className="fas fa-arrow-left"></i> Close
             </button>
             <button type="submit" className="btn btn-primary">
-              Save Note <i className="fas fa-check-circle"></i>
+              Kaydet <i className="fas fa-check-circle"></i>
             </button>
           </form>
         </Modal.Body>
@@ -953,7 +953,7 @@ function CourseDetail() {
       {/* Conversation Modal */}
       <Modal show={ConversationShow} size="lg" onHide={handleConversationClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Lesson: {selectedConversation?.title}</Modal.Title>
+          <Modal.Title>Ders: {selectedConversation?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="border p-2 p-sm-4 rounded-3">
@@ -1020,10 +1020,10 @@ function CourseDetail() {
                 id="autoheighttextarea"
                 rows="2"
                 onChange={handleMessageChange}
-                placeholder="What's your question?"
+                placeholder="Sorunuz Nedir?"
               ></textarea>
               <button class="btn btn-primary ms-2 mb-0 w-25" type="submit">
-                Post <i className="fas fa-paper-plane"></i>
+                Gönder <i className="fas fa-paper-plane"></i>
               </button>
             </form>
 
@@ -1053,13 +1053,13 @@ function CourseDetail() {
       {/* Note Edit Modal */}
       <Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Ask Question</Modal.Title>
+          <Modal.Title>Soru Sor</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleSaveQuestion}>
             <div className="mb-3">
               <label htmlFor="exampleInputEmail1" className="form-label">
-                Question Title
+                Soru Başlığı
               </label>
               <input
                 value={createMessage.title}
@@ -1071,7 +1071,7 @@ function CourseDetail() {
             </div>
             <div className="mb-3">
               <label htmlFor="exampleInputPassword1" className="form-label">
-                Question Message
+                Mesaj
               </label>
               <textarea
                 value={createMessage.message}
@@ -1087,10 +1087,10 @@ function CourseDetail() {
               className="btn btn-secondary me-2"
               onClick={handleQuestionClose}
             >
-              <i className="fas fa-arrow-left"></i> Close
+              <i className="fas fa-arrow-left"></i> Kapat
             </button>
             <button type="submit" className="btn btn-primary">
-              Send Message <i className="fas fa-check-circle"></i>
+              Mesaj Gönder <i className="fas fa-check-circle"></i>
             </button>
           </form>
         </Modal.Body>

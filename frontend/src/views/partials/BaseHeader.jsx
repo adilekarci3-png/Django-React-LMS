@@ -11,15 +11,15 @@ function BaseHeader() {
     const handleSearchSubmit = () => {
         navigate(`/search/?search=${searchQuery}`);
     };
-
+debugger;
     const [isLoggedIn, user] = useAuthStore((state) => [state.isLoggedIn, state.user]);
-
+    
     return (
         <div>
             <nav className="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
                 <div className="container">
                     <Link className="navbar-brand" to="/">
-                        Desphixs
+                        EHAD
                     </Link>
                     <button
                         className="navbar-toggler"
@@ -37,12 +37,12 @@ function BaseHeader() {
                             <li className="nav-item">
                                 <Link className="nav-link" to="/pages/contact-us/">
                                     {" "}
-                                    <i className="fas fa-phone"></i> Contact Us
+                                    <i className="fas fa-phone"></i> İletişim
                                 </Link>
                             </li>
                             <li className="nav-item">
                                 <Link className="nav-link" to="/pages/about-us/">
-                                    <i className="fas fa-address-card"></i> About Us
+                                    <i className="fas fa-address-card"></i> Hakkımızda
                                 </Link>
                             </li>
                             <li className="nav-item dropdown">
@@ -53,7 +53,7 @@ function BaseHeader() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <i className="fas fa-chalkboard-user"></i> Instructor
+                                    <i className="fas fa-chalkboard-user"></i> Eğitmen
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li>
@@ -61,12 +61,12 @@ function BaseHeader() {
                                             className="dropdown-item"
                                             to={`/instructor/dashboard/`}
                                         >
-                                            <i className="bi bi-grid-fill"></i> Dashboard
+                                            <i className="bi bi-grid-fill"></i> Panel
                                         </Link>
                                     </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/instructor/courses/`}>
-                                            <i className="fas fa-shopping-cart"></i> My Courses
+                                            <i className="fas fa-chalkboard-user"></i> Kurslarım
                                         </Link>
                                     </li>
                                     <li>
@@ -74,7 +74,7 @@ function BaseHeader() {
                                             className="dropdown-item"
                                             to={`/instructor/create-course/`}
                                         >
-                                            <i className="fas fa-plus"></i> Create Course
+                                            <i className="fas fa-plus"></i> Kurs Oluştur
                                         </Link>
                                     </li>
                                     <li>
@@ -87,7 +87,7 @@ function BaseHeader() {
                                             className="dropdown-item"
                                             to={`/instructor/question-answer/`}
                                         >
-                                            <i className="fas fa-envelope"></i> Q/A{" "}
+                                            <i className="fas fa-envelope"></i> Soru/Cevap{" "}
                                         </Link>
                                     </li>
                                     <li>
@@ -95,18 +95,18 @@ function BaseHeader() {
                                             className="dropdown-item"
                                             to={`/instructor/students/`}
                                         >
-                                            <i className="fas fa-users"></i> Students{" "}
+                                            <i className="fas fa-users"></i> Öğrenciler{" "}
                                         </Link>
                                     </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/instructor/earning/`}>
-                                            <i className="fas fa-dollar-sign"></i> Earning{" "}
+                                            <i className="fas fa-turkish-lira"></i> Earning{" "}
                                         </Link>
                                     </li>
 
                                     <li>
                                         <Link className="dropdown-item" to={`/instructor/profile/`}>
-                                            <i className="fas fa-gear"></i> Settings & Profile{" "}
+                                            <i className="fas fa-gear"></i> Ayarlar & Profil{" "}
                                         </Link>
                                     </li>
                                 </ul>
@@ -119,26 +119,26 @@ function BaseHeader() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <i className="fas fa-graduation-cap"></i> Student
+                                    <i className="fas fa-graduation-cap"></i> Öğrenci
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li>
                                         <Link className="dropdown-item" to={`/student/dashboard/`}>
                                             {" "}
-                                            <i className="bi bi-grid-fill"></i> Dashboard
+                                            <i className="bi bi-grid-fill"></i> Panel
                                         </Link>
                                     </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/student/courses/`}>
                                             {" "}
-                                            <i className="fas fa-shopping-cart"></i>My Courses
+                                            <i className="fas fa-chalkboard-user"></i>Kurslarım
                                         </Link>
                                     </li>
 
                                     <li>
                                         <Link className="dropdown-item" to={`/student/wishlist/`}>
                                             {" "}
-                                            <i className="fas fa-heart"></i> Wishlist{" "}
+                                            <i className="fas fa-heart"></i> İstek Listesi{" "}
                                         </Link>
                                     </li>
                                     <li>
@@ -147,13 +147,13 @@ function BaseHeader() {
                                             to={`/student/question-answer/`}
                                         >
                                             {" "}
-                                            <i className="fas fa-envelope"></i> Q/A{" "}
+                                            <i className="fas fa-envelope"></i> Soru/Cevap{" "}
                                         </Link>
                                     </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/student/profile/`}>
                                             {" "}
-                                            <i className="fas fa-gear"></i> Profile & Settings
+                                            <i className="fas fa-gear"></i> Profil & Ayarlar
                                         </Link>
                                     </li>
                                 </ul>
@@ -163,8 +163,8 @@ function BaseHeader() {
                             <input
                                 className="form-control me-2 w-100"
                                 type="search"
-                                placeholder="Search Courses"
-                                aria-label="Search Courses"
+                                placeholder="Kurslarda Ara"
+                                aria-label="Kurslarda Ara"
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                             <button
@@ -172,33 +172,33 @@ function BaseHeader() {
                                 className="btn btn-outline-success w-50"
                                 type="submit"
                             >
-                                Search <i className="fas fa-search"></i>
+                                Ara <i className="fas fa-search"></i>
                             </button>
                         </div>
-                        {isLoggedIn() === true ? (
+                        {isLoggedIn() === true ? (                            
                             <>
                                 <Link to="/logout/" className="btn btn-primary ms-2" type="submit">
-                                    Logout <i className="fas fa-usign-out-alt"></i>
+                                    Çıkış Yap <i className="fas fa-usign-out-alt"></i>
                                 </Link>
                             </>
                         ) : (
                             <>
                                 {/* Login and register button */}
                                 <Link to="/login/" className="btn btn-primary ms-2" type="submit">
-                                    Login <i className="fas fa-sign-in-alt"></i>
+                                    Giriş Yap <i className="fas fa-sign-in-alt"></i>
                                 </Link>
                                 <Link
                                     to="/register/"
                                     className="btn btn-primary ms-2"
                                     type="submit"
                                 >
-                                    Register <i className="fas fa-user-plus"> </i>
+                                    Kayıt Ol <i className="fas fa-user-plus"> </i>
                                 </Link>
                             </>
                         )}
-                        <Link className="btn btn-success ms-2" to="/cart/">
-                            Cart ({cartCount}) <i className="fas fa-shopping-cart"> </i>
-                        </Link>
+                        {/* <Link className="btn btn-success ms-2" to="/cart/">
+                            Hafızlık Bilgi Sistemi ({cartCount}) <i className="fas fa-shopping-cart"> </i>
+                        </Link> */}
                     </div>
                 </div>
             </nav>

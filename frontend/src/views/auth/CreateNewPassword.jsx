@@ -17,6 +17,7 @@ function CreateNewPassword() {
   const refresh_token = searchParam.get("refresh_token");
 
   const handleCreatePassword = async (e) => {
+    
     e.preventDefault();
     setIsLoading(true);
     if (confirmPassword !== password) {
@@ -36,6 +37,7 @@ function CreateNewPassword() {
         await apiInstance
           .post(`user/password-change/`, formdata)
           .then((res) => {
+            
             console.log(res.data);
             setIsLoading(false);
             navigate("/login/");
@@ -50,7 +52,7 @@ function CreateNewPassword() {
       }
     }
 
-    console.log("Password Created");
+    console.log("Şifre Oluşturuldu");
   };
   return (
     <>
@@ -75,7 +77,7 @@ function CreateNewPassword() {
                 >
                   <div className="mb-3">
                     <label htmlFor="password" className="form-label">
-                      Enter New Password
+                      Yeni bir şifre girin
                     </label>
                     <input
                       type="password"

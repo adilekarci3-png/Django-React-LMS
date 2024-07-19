@@ -439,7 +439,7 @@ function CourseDetail() {
                                 {/* Text */}
                                 <div>
                                   <div className="d-sm-flex mt-1 mt-md-0 align-items-center">
-                                    <h5 className="me-3 mb-0">Sam Jay</h5>
+                                    <h5 className="me-3 mb-0">Adile Karci</h5>
                                     {/* Review star */}
                                     <ul className="list-inline mb-0">
                                       <i className="fas fa-star text-warning" />
@@ -452,13 +452,8 @@ function CourseDetail() {
                                   {/* Info */}
                                   <p className="small mb-2">5 gün önce</p>
                                   <p className="mb-2">
-                                    Perceived end knowledge certainly day
-                                    sweetness why cordially. Ask a quick six
-                                    seven offer see among. Handsome met debating
-                                    sir dwelling age material. As style lived he
-                                    worse dried. Offered related so visitors we
-                                    private removed. Moderate do subjects to
-                                    distance.
+                                  Düşünce açılımı bağlamında yorum, olayın bireysel açıdan ifade edilmesine verilen addır. Yorumlar genellikle özneldir.
+                                  Kişinin duygu, düşünce ve yaşadığı ruh halini yalnızca sözlü anlatımla değil; resim, müzik, heykel gibi çok farklı sanatsal yapıtlarla ortaya çıkarması ve dışa vurmasıdır.
                                   </p>
                                   {/* Like and dislike button */}
                                 </div>
@@ -485,7 +480,7 @@ function CourseDetail() {
                                 {/* Text */}
                                 <div>
                                   <div className="d-sm-flex mt-1 mt-md-0 align-items-center">
-                                    <h5 className="me-3 mb-0">Benny Doggo</h5>
+                                    <h5 className="me-3 mb-0">Zeynep Karatepe</h5>
                                     {/* Review star */}
                                     <ul className="list-inline mb-0">
                                       <li className="list-inline-item me-0">
@@ -506,12 +501,10 @@ function CourseDetail() {
                                     </ul>
                                   </div>
                                   {/* Info */}
-                                  <p className="small mb-2">2 days ago</p>
+                                  <p className="small mb-2">2 gün önce</p>
                                   <p className="mb-2">
-                                    Handsome met debating sir dwelling age
-                                    material. As style lived he worse dried.
-                                    Offered related so visitors we private
-                                    removed. Moderate do subjects to distance.
+                                  Kişinin duygu, düşünce ve yaşadığı ruh halini yalnızca sözlü anlatımla değil; resim, müzik, heykel gibi çok farklı sanatsal yapıtlarla ortaya çıkarması ve dışa vurmasıdır.
+                                  
                                   </p>
                                 </div>
                               </div>
@@ -593,7 +586,7 @@ function CourseDetail() {
                                       01
                                     </span>
                                     <span className="h6 mb-0">
-                                      How Digital Marketing Work?
+                                      EHAD'ın faaliyet Alanları?
                                     </span>
                                   </button>
                                 </h2>
@@ -604,15 +597,7 @@ function CourseDetail() {
                                   data-bs-parent="#accordionExample"
                                 >
                                   <div className="accordion-body pt-0">
-                                    Comfort reached gay perhaps chamber his six
-                                    detract besides add. Moonlight newspaper up
-                                    its enjoyment agreeable depending. Timed
-                                    voice share led him to widen noisy young. At
-                                    weddings believed laughing although the
-                                    material does the exercise of. Up attempt
-                                    offered ye civilly so sitting to. She new
-                                    course gets living within Elinor joy. She
-                                    rapturous suffering concealed.
+                                  Kişinin duygu, düşünce ve yaşadığı ruh halini yalnızca sözlü anlatımla değil; resim, müzik, heykel gibi çok farklı sanatsal yapıtlarla ortaya çıkarması ve dışa vurmasıdır.
                                   </div>
                                 </div>
                               </div>
@@ -634,7 +619,7 @@ function CourseDetail() {
                                       02
                                     </span>
                                     <span className="h6 mb-0">
-                                      What is SEO?
+                                      Hafız Kimdir?
                                     </span>
                                   </button>
                                 </h2>
@@ -645,43 +630,11 @@ function CourseDetail() {
                                   data-bs-parent="#accordionExample"
                                 >
                                   <div className="accordion-body pt-0">
-                                    Pleasure and so read the was hope entire
-                                    first decided the so must have as on was
-                                    want up of I will rival in came this touched
-                                    got a physics to travelling so all
-                                    especially refinement monstrous desk they
-                                    was arrange the overall helplessly out of
-                                    particularly ill are purer.
+                                  Arapça’da “korumak, ezberlemek” mânasındaki hıfz kökünden türemiş bir sıfat olan hâfız (çoğulu huffâz) sözlükte “koruyan, ezberleyen” anlamına gelip Kur’an’ın tamamını ezberleyene hâfız denilmiştir. Hâfız kelimesi, Kur’ân-ı Kerîm’de sözlük anlamında birçok âyette yer almakta (bk. M. F. Abdülbâkī, el-Muʿcem, “ḥfẓ” md.), üç âyette Allah’ın sıfatı olarak geçmektedir (Yûsuf 12/64; el-Hicr 15/9; el-Enbiyâ 21/82). Hz. Peygamber, hâfızları Abese sûresinde sözü edilen (80/15-16) “sefere-i kirâm”a benzetmiş ve hâfızların cennette onlarla beraber olacağını müjdelemiştir
                                     <p className="mt-2">
-                                      Person she control of to beginnings view
-                                      looked eyes Than continues its and because
-                                      and given and shown creating curiously to
-                                      more in are man were smaller by we instead
-                                      the these sighed Avoid in the sufficient
-                                      me real man longer of his how her for
-                                      countries to brains warned notch important
-                                      Finds be to the of on the increased
-                                      explain noise of power deep asking
-                                      contribution this live of suppliers goals
-                                      bit separated poured sort several the was
-                                      organization the if relations go work
-                                      after mechanic But we've area wasn't
-                                      everything needs of and doctor where
-                                      would.
+                                    Buhârî’nin ashabın kurrâsıyla ilgili babda kaydettiği rivayetlerden (“Feżâʾilü’l-Ḳurʾân”, 8), Kur’an’ı kısmen veya tamamen ezberleme anlamında “kıraat” kelimesinin kullanıldığı anlaşılmakta (EI2 [İng.], V, 129), bazı rivayetlerde ise Kur’ân-ı Kerîm’in tamamını ezberlememiş olsa bile ahkâmı konusunda geniş bilgi sahibi olanlara da kurrâ denildiği görülmektedir. Resûl-i Ekrem’in çeşitli kabilelere gönderdiği ashâb-ı suffeden olan hocalara “kurrâ” adı veriliyordu. Bu anlamda Bi’rimaûne’de şehid edilenlere de kurrâ denilmiştir (Buhârî, “Vitir”, 7; Müslim, “Mesâcid”, 301). 
                                     </p>
-                                    Go he prisoners And mountains in just
-                                    switching city steps Might rung line what Mr
-                                    Bulk; Was or between towards the have phase
-                                    were its world my samples are the was royal
-                                    he luxury the about trying And on he to my
-                                    enough is was the remember a although lead
-                                    in were through serving their assistant fame
-                                    day have for its after would cheek dull have
-                                    what in go feedback assignment Her of a any
-                                    help if the a of semantics is rational
-                                    overhauls following in from our hazardous
-                                    and used more he themselves the parents up
-                                    just regulatory.
+                                    Buhârî’de yer alan bir rivayete göre (“İʿtiṣâm”, 2) yaşlı ve genç kāriler Hz. Ömer’in meclisinde bulunur, halife onlarla istişare ederdi. Hakem Vak‘ası’nın ardından Hz. Ali’ye karşı mücadeleye girişen Hâricîler arasında 8000 kurrâ bulunduğundan söz edilirse de Ahmed b. Hanbel’in bir rivayetinden anlaşılacağı gibi bunlar genellikle okuma yazması olan, içlerinde hâfızların da yer aldığı kimselerdi. Hz. Ali bu hâfızları bir eve davet etmiş ve daha önce Kûfe’ye gönderilen örnek mushaftan âyetler göstererek onları iknaya çalışmıştır (Müsned, I, 86). Daha sonra, mânasını anlamasa bile Kur’an’ı ezberleyen ve kıraat vecihlerinden bir veya birkaçı hakkında bilgi sahibi olanlara kurrâ denilmiştir. 
                                   </div>
                                 </div>
                               </div>
@@ -703,7 +656,7 @@ function CourseDetail() {
                                       03
                                     </span>
                                     <span className="h6 mb-0">
-                                      Who should join this course?
+                                      EHAD'de kimler katılır?
                                     </span>
                                   </button>
                                 </h2>
@@ -714,23 +667,11 @@ function CourseDetail() {
                                   data-bs-parent="#accordionExample"
                                 >
                                   <div className="accordion-body pt-0">
-                                    Post no so what deal evil rent by real in.
-                                    But her ready least set lived spite solid.
-                                    September how men saw tolerably two behavior
-                                    arranging. She offices for highest and
-                                    replied one venture pasture. Applauded no
-                                    discovery in newspaper allowance am
-                                    northward. Frequently partiality possession
-                                    resolution at or appearance unaffected me.
-                                    Engaged its was the evident pleased husband.
-                                    Ye goodness felicity do disposal dwelling
-                                    no. First am plate jokes to began to cause a
-                                    scale.
+                                  EHAD olarak 81 ildeki şube ve temsilciliklerimiz ile Kuran-ı Kerim’i sahih okuma dersleri, Hatimle Teravih Namazı kıldıranları ödüllendirme programları, Kur`an-ı Kerim Sahih ve Güzel Okuma yarışmaları, hafızlık öğrencilerine yaz ve kış dönemlerinde kamp programları hafızlık yolu motivasyon seminerleri, hafızlık öğrencilerine çeşitli hediyeler takdim edilmesi ve ihtiyaç sahibi hafız ve hafız adaylarına imkanlarımız ölçüsünde burs verilmesi, gibi birçok hayırlı hizmetlere imza atıyoruz.
                                     <strong>
-                                      Subjects he prospect elegance followed no
-                                      overcame
+                                    Sadece Kur’an-ı Kerim’i ve O’nun ahlakını ve ahkamını yaymayı hedef edinmiş. EHAD ile doğru bir şekilde öğrenin!
                                     </strong>
-                                    possible it on.
+                                    EHAD, Evrensel Hafızlar Derneği, ülke çapında bir araya gelen gönüllülerle ve komisyonlarla ülke çapında ulaşılabilir.
                                   </div>
                                 </div>
                               </div>
@@ -752,7 +693,7 @@ function CourseDetail() {
                                       04
                                     </span>
                                     <span className="h6 mb-0">
-                                      What are the T&amp;C for this program?
+                                      EHAD Neye hizmet için vardır?
                                     </span>
                                   </button>
                                 </h2>
@@ -763,28 +704,7 @@ function CourseDetail() {
                                   data-bs-parent="#accordionExample"
                                 >
                                   <div className="accordion-body pt-0">
-                                    Night signs creeping yielding green Seasons
-                                    together man green fruitful make fish behold
-                                    earth unto you'll lights living moving sea
-                                    open for fish day multiply tree good female
-                                    god had fruitful of creature fill shall
-                                    don't day fourth lesser he the isn't let
-                                    multiply may Creeping earth under was You're
-                                    without which image stars in Own creeping
-                                    night of wherein Heaven years their he over
-                                    doesn't whose won't kind seasons light Won't
-                                    that fish him whose won't also it dominion
-                                    heaven fruitful Whales created And likeness
-                                    doesn't that Years without divided saying
-                                    morning creeping hath you'll seas cattle in
-                                    multiply under together in us said above dry
-                                    tree herb saw living darkness without have
-                                    won't for i behold meat brought winged
-                                    Moving living second beast Over fish place
-                                    beast image very him evening Thing they're
-                                    fruit together forth day Seed lights Land
-                                    creature together Multiply waters form
-                                    brought.
+                                  Ülkemizin geleceğine kast eden FETÖ’cü hainlerin darbe girişimine sahne olan 15 Temmuz karanlık gecesinin üzerinden sekiz yıl geçti. Sekiz yıl önce bugün ülkemiz, milletimizin feraseti ve Allah'ın lütuf ve inayetiyle uçurumun kenarından dönmüş, milletimiz, istiklaline ve istikbaline sahip çıkmıştır. Bu meş’um gecede 249 şehidimiz, memleketi, canı pahasına korumuş, hiçbir hainin bir daha cesaret bile edemeyeceği bir kahramanlık destanı ile tarihe geçecek direniş sergilemiştir
                                   </div>
                                 </div>
                               </div>
@@ -806,8 +726,7 @@ function CourseDetail() {
                                       05
                                     </span>
                                     <span className="h6 mb-0">
-                                      What certificates will I be received for
-                                      this program?
+                                    HAD ve şubelerinin düzenlemiş olduğu etkinlikler, eğitimler, seminerler, toplantılara dair bilgiler ve haberleri bulabilirsiniz. Devamı için menüden “Şubelimiz”e tıklayın
                                     </span>
                                   </button>
                                 </h2>
@@ -818,17 +737,7 @@ function CourseDetail() {
                                   data-bs-parent="#accordionExample"
                                 >
                                   <div className="accordion-body pt-0">
-                                    Smile spoke total few great had never their
-                                    too Amongst moments do in arrived at my
-                                    replied Fat weddings servants but man
-                                    believed prospect Companions understood is
-                                    as especially pianoforte connection
-                                    introduced Nay newspaper can sportsman are
-                                    admitting gentleman belonging his Is oppose
-                                    no he summer lovers twenty in Not his
-                                    difficulty boisterous surrounded bed Seems
-                                    folly if in given scale Sex contented
-                                    dependent conveying advantage.
+                                  Bugün Filistin’de tüm dünyanın gözleri önünde telafisi olmayan acılar ve eşi benzeri görülmemiş insanlık dramları yaşanmaktadır. Filistin’de 75 yılı aşkındır devam eden sistematik zulüm ve katliam, 7 Ekim 2023’ten itibaren artık soykırıma dönüşmüştür. Kana, talana, işgale doymayan Siyonistler, her geçen gün Filistin’de işgali genişletmeye devam etmektedirler.
                                   </div>
                                 </div>
                               </div>
@@ -846,7 +755,7 @@ function CourseDetail() {
                             {/* Review START */}
                             <div className="row">
                               <div className="col-12">
-                                <h5 className="mb-4">Group Chat & Q/A Forum</h5>
+                                <h5 className="mb-4">Soru/Cevap Forum</h5>
 
                                 {/* Comment item START */}
                                 <div className="border p-2 p-sm-4 rounded-3 mb-4">
@@ -1327,7 +1236,7 @@ function CourseDetail() {
                             </div>
                             {/* Buttons */}
                             <div className="mt-3 d-sm-flex justify-content-sm-between ">
-                              {addToCartBtn === "Add To Cart" && (
+                              {/* {addToCartBtn === "Add To Cart" && (
                                 <button
                                   type="button"
                                   className="btn btn-primary mb-0 w-100 me-2"
@@ -1344,9 +1253,9 @@ function CourseDetail() {
                                   <i className="fas fa-shopping-cart"></i> Add
                                   To Cart
                                 </button>
-                              )}
+                              )} */}
 
-                              {addToCartBtn === "Added To Cart" && (
+                              {/* {addToCartBtn === "Added To Cart" && (
                                 <button
                                   type="button"
                                   className="btn btn-primary mb-0 w-100 me-2"
@@ -1363,9 +1272,9 @@ function CourseDetail() {
                                   <i className="fas fa-check-circle"></i> Added
                                   To Cart
                                 </button>
-                              )}
+                              )} */}
 
-                              {addToCartBtn === "Adding To Cart" && (
+                              {/* {addToCartBtn === "Adding To Cart" && (
                                 <button
                                   type="button"
                                   className="btn btn-primary mb-0 w-100 me-2"
@@ -1382,7 +1291,7 @@ function CourseDetail() {
                                   <i className="fas fa-spinner fa-spin"></i>{" "}
                                   Adding To Cart
                                 </button>
-                              )}
+                              )} */}
                               <Link
                                 to="/cart/"
                                 className="btn btn-success mb-0 w-100"
@@ -1525,7 +1434,7 @@ function CourseDetail() {
                                   href="#"
                                   className="text-inherit text-decoration-none btn btn-primary"
                                 >
-                                  <i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
+                                  <i className="fas fa-commenting-o text-primary align-middle me-2 text-white" />
                                   Enroll Now
                                 </a>
                               </div>
@@ -1589,8 +1498,8 @@ function CourseDetail() {
                                   href="#"
                                   className="text-inherit text-decoration-none btn btn-primary"
                                 >
-                                  <i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
-                                  Enroll Now
+                                  <i className="fas fa-chalkboard-user text-primary align-middle me-2 text-white" />
+                                  Şimdi Kayıt Ol
                                 </a>
                               </div>
                             </div>
@@ -1654,8 +1563,8 @@ function CourseDetail() {
                                   href="#"
                                   className="text-inherit text-decoration-none btn btn-primary"
                                 >
-                                  <i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
-                                  Enroll Now
+                                  <i className="fas fa-chalkboard-user text-primary align-middle me-2 text-white" />
+                                  Şimdi Kayıt Ol
                                 </a>
                               </div>
                             </div>
@@ -1718,8 +1627,8 @@ function CourseDetail() {
                                   href="#"
                                   className="text-inherit text-decoration-none btn btn-primary"
                                 >
-                                  <i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
-                                  Enroll Now
+                                  <i className="fas fa-chalkboard-user text-primary align-middle me-2 text-white" />
+                                  Şimdi Kayıt Ol
                                 </a>
                               </div>
                             </div>

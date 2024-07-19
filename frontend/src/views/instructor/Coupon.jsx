@@ -69,7 +69,7 @@ function Coupon() {
         handleAddCouponClose();
         Toast().fire({
           icon: "success",
-          title: "Coupon created successfully",
+          title: "Kupon Başarılı Bir Şekilde Oluşturuldu",
         });
       });
   };
@@ -82,7 +82,7 @@ function Coupon() {
         fetchCoupons();
         Toast().fire({
           icon: "success",
-          title: "Coupon deleted successfully",
+          title: "Kupon Başarılı Bir Şekilde Silindi",
         });
       });
   };
@@ -107,7 +107,7 @@ function Coupon() {
         handleClose();
         Toast().fire({
           icon: "success",
-          title: "Coupon updated successfully",
+          title: "Kupon Başarılı Bir Şekilde Güncellendi",
         });
       });
   };
@@ -129,14 +129,14 @@ function Coupon() {
                 {/* Card header */}
                 <div className="card-header d-lg-flex align-items-center justify-content-between">
                   <div className="mb-3 mb-lg-0">
-                    <h3 className="mb-0">Coupons</h3>
-                    <span>Manage all your coupons from here</span>
+                    <h3 className="mb-0">Kuponlar</h3>
+                    <span>Tüm kuponlarınızı buradan yönetin</span>
                   </div>
                   <button
                     className="btn btn-primary"
                     onClick={handleAddCouponShow}
                   >
-                    Add Coupon
+                    Kupon Ekle
                   </button>
                 </div>
                 {/* Card body */}
@@ -151,13 +151,13 @@ function Coupon() {
                             <div className="d-flex align-items-center justify-content-between">
                               <div>
                                 <h4 className="mb-0">{c.code}</h4>
-                                <span>{c.used_by} Student</span>
+                                <span>{c.used_by} Öğrenci</span>
                               </div>
                             </div>
                             <div className="mt-2">
                               <p className="mt-2">
                                 <span className="me-2 fw-bold">
-                                  Discount:{" "}
+                                  İndirim:{" "}
                                   <span className="fw-light">
                                     {c.discount}% Discount
                                   </span>
@@ -165,7 +165,7 @@ function Coupon() {
                               </p>
                               <p className="mt-1">
                                 <span className="me-2 fw-bold">
-                                  Date Created:{" "}
+                                  Tarih Oluştur:{" "}
                                   <span className="fw-light">
                                     {moment(c.date).format("DD MMM, YYYY")}
                                   </span>
@@ -177,7 +177,7 @@ function Coupon() {
                                   type="button"
                                   onClick={() => handleShow(c)}
                                 >
-                                  Update Coupon
+                                  Kupon Güncelle
                                 </button>
 
                                 <button
@@ -204,7 +204,7 @@ function Coupon() {
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Update Coupon -{" "}
+            Kupon Güncelle -{" "}
             <span className="fw-bold">{selectedCoupon.code}</span>
           </Modal.Title>
         </Modal.Header>
@@ -212,7 +212,7 @@ function Coupon() {
           <form onSubmit={handleCouponUpdateSubmit}>
             <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">
-                Code
+                Kod
               </label>
               <input
                 type="text"
@@ -223,7 +223,7 @@ function Coupon() {
                 onChange={handleCreateCouponChange}
               />
               <label for="exampleInputEmail1" class="form-label mt-3">
-                Discount
+                İndirim
               </label>
               <input
                 type="text"
@@ -237,11 +237,11 @@ function Coupon() {
             </div>
 
             <button type="submit" class="btn btn-primary">
-              Update Coupon <i className="fas fa-check-circle"> </i>
+              Kupon Güncelle <i className="fas fa-check-circle"> </i>
             </button>
 
             <Button className="ms-2" variant="secondary" onClick={handleClose}>
-              Close
+              Kapat
             </Button>
           </form>
         </Modal.Body>
@@ -249,13 +249,13 @@ function Coupon() {
 
       <Modal show={showAddCoupon} onHide={handleAddCouponClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Create New Coupon</Modal.Title>
+          <Modal.Title>Yeni Kupon Oluştur</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleCouponSubmit}>
             <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">
-                Code
+                Kod
               </label>
               <input
                 type="text"
@@ -266,7 +266,7 @@ function Coupon() {
                 onChange={handleCreateCouponChange}
               />
               <label for="exampleInputEmail1" class="form-label mt-3">
-                Discount
+                İndirim
               </label>
               <input
                 type="text"
@@ -280,7 +280,7 @@ function Coupon() {
             </div>
 
             <button type="submit" class="btn btn-primary">
-              Create Coupon <i className="fas fa-plus"> </i>
+              Kupon Oluştur <i className="fas fa-plus"> </i>
             </button>
 
             <Button
@@ -288,7 +288,7 @@ function Coupon() {
               variant="secondary"
               onClick={handleAddCouponClose}
             >
-              Close
+              Kapat
             </Button>
           </form>
         </Modal.Body>
