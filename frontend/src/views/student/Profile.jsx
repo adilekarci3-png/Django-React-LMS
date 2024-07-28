@@ -154,7 +154,7 @@ function Profile() {
                           type="text"
                           id="fname"
                           className="form-control"
-                          placeholder="First Name"
+                          placeholder="Adınız"
                           required=""
                           value={profileData.full_name}
                           onChange={handleProfileChange}
@@ -192,7 +192,7 @@ function Profile() {
                           type="text"
                           id="country"
                           className="form-control"
-                          placeholder="Country"
+                          placeholder="Ülke"
                           required=""
                           value={profileData.country}
                           onChange={handleProfileChange}

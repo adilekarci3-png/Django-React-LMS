@@ -40,7 +40,7 @@ function StudentCourseLectureDetail() {
                                                         {/* Tab item */}
                                                         <li className="nav-item me-2 me-sm-4" role="presentation">
                                                             <button className="nav-link mb-2 mb-md-0 active" id="course-pills-tab-1" data-bs-toggle="pill" data-bs-target="#course-pills-1" type="button" role="tab" aria-controls="course-pills-1" aria-selected="true">
-                                                                Course Lectures
+                                                                Kurs Dersleri
                                                             </button>
                                                         </li>
                                                         {/* Tab item */}
@@ -119,7 +119,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             Introduction of Digital Marketing
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (3 Lectures)
+                                                                                (3 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -195,7 +195,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             Customer Life cycle
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (4 Lectures)
+                                                                                (4 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -303,7 +303,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             What is Search Engine Optimization(SEO)
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (10 Lectures)
+                                                                                (10 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -507,7 +507,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             Facebook ADS
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (3 Lectures)
+                                                                                (3 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -583,7 +583,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             YouTube Marketing
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (5 Lectures)
+                                                                                (5 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -723,7 +723,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             Why SEO
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (8 Lectures)
+                                                                                (8 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -879,7 +879,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             Google tag manager
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (4 Lectures)
+                                                                                (4 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -975,7 +975,7 @@ function StudentCourseLectureDetail() {
                                                                         >
                                                                             Integration with Website
                                                                             <span className="small ms-0 ms-sm-2">
-                                                                                (3 Lectures)
+                                                                                (3 Dersler)
                                                                             </span>
                                                                         </button>
                                                                     </h6>
@@ -1101,7 +1101,7 @@ function StudentCourseLectureDetail() {
                                                                         {/* Search */}
                                                                         <div className="col-sm-6 col-lg-9">
                                                                             <div className="position-relative">
-                                                                                <input className="form-control pe-5 bg-transparent" type="search" placeholder="Search" aria-label="Search" />
+                                                                                <input className="form-control pe-5 bg-transparent" type="search" placeholder="Ara" aria-label="Search" />
                                                                                 <button className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
                                                                                     <i className="fas fa-search fs-6 " />
                                                                                 </button>
@@ -1293,7 +1293,7 @@ function StudentCourseLectureDetail() {
                                                                             </ul>
 
                                                                             <form class="w-100 d-flex">
-                                                                                <textarea class="one form-control pe-4 bg-light w-75" id="autoheighttextarea" rows="1" placeholder="Write a message..."></textarea>
+                                                                                <textarea class="one form-control pe-4 bg-light w-75" id="autoheighttextarea" rows="1" placeholder="Bir mesaj yazınız..."></textarea>
                                                                                 <button class="btn btn-primary ms-2 mb-0 w-25" type="button">Post <i className='fas fa-paper-plane'></i></button>
                                                                             </form>
                                                                         </div>
@@ -1311,7 +1311,7 @@ function StudentCourseLectureDetail() {
                                                                 {/* Card header */}
                                                                 <div className="card-header border-bottom p-0 pb-3">
                                                                     {/* Title */}
-                                                                    <h4 className="mb-3 p-3">Leave a Review</h4>
+                                                                    <h4 className="mb-3 p-3">Yorum Bırak</h4>
                                                                     <div className="mt-2">
                                                                         <form className="row g-3 p-3">
 
@@ -1333,7 +1333,7 @@ function StudentCourseLectureDetail() {
                                                                                 <textarea
                                                                                     className="form-control"
                                                                                     id="exampleFormControlTextarea1"
-                                                                                    placeholder="Your review"
+                                                                                    placeholder="Yorumunuz"
                                                                                     rows={3}
                                                                                     defaultValue={""}
                                                                                 />
@@ -1341,7 +1341,7 @@ function StudentCourseLectureDetail() {
                                                                             {/* Button */}
                                                                             <div className="col-12">
                                                                                 <button type="submit" className="btn btn-primary mb-0">
-                                                                                    Post Review
+                                                                                    Yorum Gönder
                                                                                 </button>
                                                                             </div>
                                                                         </form>

@@ -69,7 +69,7 @@ function Coupon() {
         handleAddCouponClose();
         Toast().fire({
           icon: "success",
-          title: "Kupon Başarılı Bir Şekilde Oluşturuldu",
+          title: "Ödül Başarılı Bir Şekilde Oluşturuldu",
         });
       });
   };
@@ -82,7 +82,7 @@ function Coupon() {
         fetchCoupons();
         Toast().fire({
           icon: "success",
-          title: "Kupon Başarılı Bir Şekilde Silindi",
+          title: "Ödül Başarılı Bir Şekilde Silindi",
         });
       });
   };
@@ -107,7 +107,7 @@ function Coupon() {
         handleClose();
         Toast().fire({
           icon: "success",
-          title: "Kupon Başarılı Bir Şekilde Güncellendi",
+          title: "Ödül Başarılı Bir Şekilde Güncellendi",
         });
       });
   };
@@ -129,14 +129,14 @@ function Coupon() {
                 {/* Card header */}
                 <div className="card-header d-lg-flex align-items-center justify-content-between">
                   <div className="mb-3 mb-lg-0">
-                    <h3 className="mb-0">Kuponlar</h3>
-                    <span>Tüm kuponlarınızı buradan yönetin</span>
+                    <h3 className="mb-0">Ödüller</h3>
+                    <span>Tüm ödüllerinizi buradan yönetin</span>
                   </div>
                   <button
                     className="btn btn-primary"
                     onClick={handleAddCouponShow}
                   >
-                    Kupon Ekle
+                    Ödül Ekle
                   </button>
                 </div>
                 {/* Card body */}
@@ -157,7 +157,7 @@ function Coupon() {
                             <div className="mt-2">
                               <p className="mt-2">
                                 <span className="me-2 fw-bold">
-                                  İndirim:{" "}
+                                Ödül İçeriği:{" "}
                                   <span className="fw-light">
                                     {c.discount}% Discount
                                   </span>
@@ -177,7 +177,7 @@ function Coupon() {
                                   type="button"
                                   onClick={() => handleShow(c)}
                                 >
-                                  Kupon Güncelle
+                                  Ödül Güncelle
                                 </button>
 
                                 <button
@@ -204,7 +204,7 @@ function Coupon() {
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Kupon Güncelle -{" "}
+          Ödül Güncelle -{" "}
             <span className="fw-bold">{selectedCoupon.code}</span>
           </Modal.Title>
         </Modal.Header>
@@ -216,18 +216,18 @@ function Coupon() {
               </label>
               <input
                 type="text"
-                placeholder="Code"
+                placeholder="Ödül Kodu"
                 defaultValue={selectedCoupon.code}
                 className="form-control"
                 name="code"
                 onChange={handleCreateCouponChange}
               />
               <label for="exampleInputEmail1" class="form-label mt-3">
-                İndirim
+              Ödül İçeriği
               </label>
               <input
                 type="text"
-                placeholder="Discount"
+                placeholder="Ödül İçeriği"
                 defaultValue={selectedCoupon.discount}
                 className="form-control"
                 name="discount"
@@ -237,7 +237,7 @@ function Coupon() {
             </div>
 
             <button type="submit" class="btn btn-primary">
-              Kupon Güncelle <i className="fas fa-check-circle"> </i>
+            Ödül Güncelle <i className="fas fa-check-circle"> </i>
             </button>
 
             <Button className="ms-2" variant="secondary" onClick={handleClose}>
@@ -249,7 +249,7 @@ function Coupon() {
 
       <Modal show={showAddCoupon} onHide={handleAddCouponClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Yeni Kupon Oluştur</Modal.Title>
+          <Modal.Title>Yeni Ödül Oluştur</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleCouponSubmit}>
@@ -259,18 +259,18 @@ function Coupon() {
               </label>
               <input
                 type="text"
-                placeholder="Code"
+                placeholder="Ödül Kodu"
                 value={createCoupon.code}
                 className="form-control"
                 name="code"
                 onChange={handleCreateCouponChange}
               />
               <label for="exampleInputEmail1" class="form-label mt-3">
-                İndirim
+                Ödül İçeriği
               </label>
               <input
                 type="text"
-                placeholder="Discount"
+                placeholder="Ödül İçeriği"
                 value={createCoupon.discount}
                 className="form-control"
                 name="discount"
@@ -280,7 +280,7 @@ function Coupon() {
             </div>
 
             <button type="submit" class="btn btn-primary">
-              Kupon Oluştur <i className="fas fa-plus"> </i>
+            Ödül Oluştur <i className="fas fa-plus"> </i>
             </button>
 
             <Button

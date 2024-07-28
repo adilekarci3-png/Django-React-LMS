@@ -104,9 +104,9 @@ function Review() {
                 {/* Card header */}
                 <div className="card-header d-lg-flex align-items-center justify-content-between">
                   <div className="mb-3 mb-lg-0">
-                    <h3 className="mb-0">Reviews</h3>
+                    <h3 className="mb-0">Yorumlar</h3>
                     <span>
-                      You have full control to manage your own account setting.
+                    Kendi hesap ayarlarınızı yönetmek için tam kontrole sahipsiniz.
                     </span>
                   </div>
                 </div>
@@ -118,7 +118,7 @@ function Review() {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Search By Couse"
+                        placeholder="Kurslarda Ara"
                         onChange={handleFilterByCourse}
                       />
                     </div>
@@ -128,7 +128,7 @@ function Review() {
                         className="form-select"
                         onChange={handleSortByRatingChange}
                       >
-                        <option value={0}>Rating</option>
+                        <option value={0}>Beğeni</option>
                         <option value={1}>1</option>
                         <option value={2}>2</option>
                         <option value={3}>3</option>
@@ -142,9 +142,9 @@ function Review() {
                         className="form-select"
                         onChange={handleSortByDate}
                       >
-                        <option value="">Sort by</option>
-                        <option value="Newest">Newest</option>
-                        <option value="Oldest">Oldest</option>
+                        <option value="">Sırala</option>
+                        <option value="Newest">En Yeni</option>
+                        <option value="Oldest">En Eski</option>
                       </select>
                     </div>
                   </form>
@@ -186,19 +186,19 @@ function Review() {
                             </div>
                             <div className="mt-2">
                               <span className="fs-6 me-1 align-top">
-                                <Rater total={5} rating={r.rating || 0} />
+                                {/* <Rater total={5} rating={r.rating || 0} /> */}
                               </span>
-                              <span className="me-1">for</span>
+                              {/* <span className="me-1">for</span> */}
                               <span className="h5">{r.course?.title}</span>
                               <p className="mt-2">
                                 <span className="fw-bold me-2">
-                                  Review <i className="fas fa-arrow-right"></i>
+                                  Yorum <i className="fas fa-arrow-right"></i>
                                 </span>
                                 {r.review}
                               </p>
                               <p className="mt-2">
                                 <span className="fw-bold me-2">
-                                  Response{" "}
+                                  Cevap{" "}
                                   <i className="fas fa-arrow-right"></i>
                                 </span>
                                 {r.reply || "No Reply"}
@@ -212,7 +212,7 @@ function Review() {
                                   aria-expanded="false"
                                   aria-controls={`collapse${r.id}`}
                                 >
-                                  Send Response
+                                  Yanıt Gönder
                                 </button>
                               </p>
                               <div class="collapse" id={`collapse${r.id}`}>
@@ -223,7 +223,7 @@ function Review() {
                                         for="exampleInputEmail1"
                                         class="form-label"
                                       >
-                                        Write Response
+                                        Yanıt Yaz
                                       </label>
                                       <textarea
                                         name=""
@@ -243,7 +243,7 @@ function Review() {
                                       class="btn btn-primary"
                                       onClick={() => handleSubmitReply(r.id)}
                                     >
-                                      Send Response{" "}
+                                      Yanıt Gönder{" "}
                                       <i className="fas fa-paper-plane"> </i>
                                     </button>
                                   </div>
@@ -256,7 +256,7 @@ function Review() {
                     ))}
 
                     {filteredReviews?.length < 1 && (
-                      <p className="mt-4 p-3">No reviews</p>
+                      <p className="mt-4 p-3">Kayıt Bulunamadı</p>
                     )}
                   </ul>
                 </div>

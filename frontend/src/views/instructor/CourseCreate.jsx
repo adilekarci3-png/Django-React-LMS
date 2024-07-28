@@ -323,9 +323,9 @@ function CourseCreate() {
                           name="level"
                         >
                           <option value="">Seviye Seçin</option>
-                          <option value="Beginner">Başlangıç</option>
-                          <option value="Intemediate">Orta</option>
-                          <option value="Advanced">İleri Seviye</option>
+                          <option value="Başlangıç">Başlangıç</option>
+                          <option value="Orta">Orta</option>
+                          <option value="İleri Seviye">İleri Seviye</option>
                         </select>
                       </div>
 
@@ -336,9 +336,9 @@ function CourseCreate() {
                           name="language"
                         >
                           <option value="">Dil Seçin</option>
-                          <option value="English">Türkçe</option>
-                          <option value="Spanish">İngilizce</option>
-                          <option value="French">Arapça</option>
+                          <option value="Türkçe">Türkçe</option>
+                          <option value="İngilizce">İngilizce</option>
+                          <option value="Arapça">Arapça</option>
                         </select>
                       </div>
                       <div className="mb-3">
@@ -380,7 +380,7 @@ function CourseCreate() {
                           <div className="d-flex mb-4">
                             <input
                               type="text"
-                              placeholder="Section Name"
+                              placeholder="Böüm Adı"
                               required
                               className="form-control"
                               onChange={(e) =>
@@ -406,7 +406,7 @@ function CourseCreate() {
                             >
                               <input
                                 type="text"
-                                placeholder="Lesson Title"
+                                placeholder="Ders Başlığı"
                                 className="form-control me-1 mt-2"
                                 name="title"
                                 onChange={(e) =>
@@ -424,7 +424,7 @@ function CourseCreate() {
                                 id=""
                                 cols="30"
                                 className="form-control mt-2"
-                                placeholder="Lesson Description"
+                                placeholder="Ders Tanımı"
                                 rows="4"
                                 onChange={(e) =>
                                   handleItemChange(

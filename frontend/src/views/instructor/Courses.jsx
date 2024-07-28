@@ -139,7 +139,7 @@ Kurslarınızı buradan yönetin, derslerinizi arayın, görüntüleyin, düzenl
                                   </li>
                                   <li className="list-inline-item">
                                     <small>
-                                      <i className="fas fa-turkish-lira"></i>
+                                      {/* <i className="fas fa-turkish-lira"></i> */}
                                       <span>{c.price}</span>
                                     </small>
                                   </li>

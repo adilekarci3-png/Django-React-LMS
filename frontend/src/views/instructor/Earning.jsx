@@ -52,15 +52,15 @@ function Earning() {
             <div className="col-lg-9 col-md-8 col-12">
               <div className="card mb-4">
                 <div className="card-body">
-                  <h3 className="mb-0">Earnings</h3>
+                  <h3 className="mb-0">Bağış</h3>
                   <p className="mb-0">
-                    You have full control to manage your own account setting.
+                    Hesap Ayarlarınız ile ilgili tam kontrole sahipsiniz.
                   </p>
                 </div>
               </div>
               <div className="card mb-4">
                 <div className="card-header d-flex justify-content-between align-items-center">
-                  <h4 className="mb-0">Earnings</h4>
+                  <h4 className="mb-0">Bağış</h4>
                   <div className="dropdown dropstart">
                     <a
                       className="btn-icon btn btn-ghost btn-sm rounded-circle"
@@ -76,12 +76,12 @@ function Earning() {
                       className="dropdown-menu dropdown-menu-end"
                       aria-labelledby="paymentDropdown"
                     >
-                      <span className="dropdown-header">Setting</span>
+                      <span className="dropdown-header">Ayarlar</span>
                       <a className="dropdown-item" href="#">
-                        30 Days
+                        {/* 30 Gün */}
                       </a>
                       <a className="dropdown-item" href="#">
-                        2 Months
+                        {/* 2 Months */}
                       </a>
                     </div>
                   </div>
@@ -92,18 +92,18 @@ function Earning() {
                       <div className="border p-3 rounded shadow-sm">
                         <i className="fe fe-shopping-cart icon-shape icon-sm rounded-3 bg-light-success text-dark-success mt-2" />
                         <h3 className="display-4 fw-bold mt-3 mb-0">
-                          ${stats.total_revenue?.toFixed(2)}
+                          {stats.total_revenue?.toFixed(2)}
                         </h3>
-                        <span>Monthly Earnings (Jan)</span>
+                        {/* <span>Monthly Earnings (Jan)</span> */}
                       </div>
                     </div>
                     <div className="col-xl-6 col-lg-6 col-md-12 col-12 mb-3 mb-lg-0">
                       <div className="border p-3 rounded shadow-sm">
                         <i className="fe fe-shopping-cart icon-shape icon-sm rounded-3 bg-light-success text-dark-success mt-2" />
                         <h3 className="display-4 fw-bold mt-3 mb-0">
-                          ${stats.monthly_revenue?.toFixed(2)}
+                          {stats.monthly_revenue?.toFixed(2)}
                         </h3>
-                        <span>Your Revenue</span>
+                        {/* <span>Your Revenue</span> */}
                       </div>
                     </div>
                   </div>
@@ -112,16 +112,16 @@ function Earning() {
               {/* Card */}
               <div className="card mb-4">
                 <div className="card-header border-bottom-0">
-                  <h3 className="mb-0 h4">Best Selling Courses</h3>
+                  {/* <h3 className="mb-0 h4">Best Selling Courses</h3> */}
                 </div>
                 {/* Table */}
                 <div className="table-responsive">
                   <table className="table mb-0 text-nowrap table-hover table-centered text-nowrap">
                     <thead className="table-light">
                       <tr>
-                        <th>Courses</th>
+                        {/* <th>Courses</th>
                         <th>Sales</th>
-                        <th>Amount</th>
+                        <th>Amount</th> */}
                         <th />
                       </tr>
                     </thead>
@@ -168,14 +168,14 @@ function Earning() {
                                 className="dropdown-menu"
                                 aria-labelledby="courseDropdown1"
                               >
-                                <span className="dropdown-header">Setting</span>
+                                <span className="dropdown-header">Ayarlar</span>
                                 <a className="dropdown-item" href="#">
                                   <i className="fe fe-edit dropdown-item-icon" />
-                                  Edit
+                                  Düzenle
                                 </a>
                                 <a className="dropdown-item" href="#">
                                   <i className="fe fe-trash dropdown-item-icon" />
-                                  Remove
+                                  Sil
                                 </a>
                               </span>
                             </span>
@@ -190,15 +190,15 @@ function Earning() {
               <div className="card mb-4">
                 {/* Card header */}
                 <div className="card-header border-bottom-0">
-                  <h3 className="h4 mb-3">Earning History</h3>
+                  {/* <h3 className="h4 mb-3">Earning History</h3> */}
                 </div>
                 {/* Table */}
                 <div className="table-responsive">
                   <table className="table mb-0">
                     <thead className="table-light">
                       <tr>
-                        <th>Month</th>
-                        <th>Amount</th>
+                        {/* <th>Month</th>
+                        <th>Amount</th> */}
                       </tr>
                     </thead>
                     <tbody>

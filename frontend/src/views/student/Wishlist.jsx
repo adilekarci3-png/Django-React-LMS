@@ -95,7 +95,7 @@ function Wishlist() {
             <div className="col-lg-9 col-md-8 col-12">
               <h4 className="mb-0 mb-4">
                 {" "}
-                <i className="fas fa-heart"></i> Wishlist{" "}
+                <i className="fas fa-heart"></i> İstek Listesi{" "}
               </h4>
 
               <div className="row">
@@ -143,10 +143,10 @@ function Wishlist() {
                                 {w.course.title}
                               </Link>
                             </h4>
-                            <small>By: {w.course?.teacher?.full_name}</small>{" "}
+                            <small> {w.course?.teacher?.full_name}</small>{" "}
                             <br />
                             <small>
-                              {w.course.students?.length} Student
+                              {w.course.students?.length} Öğrenci
                               {w.course.students?.length > 1 && "s"}
                             </small>{" "}
                             <br />
@@ -161,7 +161,7 @@ function Wishlist() {
                               </span>
                               <span className="text-warning">4.5</span>
                               <span className="fs-6 ms-2">
-                                ({w.course.reviews?.length} Reviews)
+                                ({w.course.reviews?.length} Yorumlar)
                               </span>
                             </div>
                           </div>
@@ -191,7 +191,7 @@ function Wishlist() {
                                   to={""}
                                   className="text-inherit text-decoration-none btn btn-primary"
                                 >
-                                  Enroll Now{" "}
+                                  Kayıt Ol{" "}
                                   <i className="fas fa-arrow-right text-primary align-middle me-2 text-white" />
                                 </Link>
                               </div>
@@ -202,7 +202,7 @@ function Wishlist() {
                     ))}
 
                     {wishlist.length < 1 && (
-                      <p className="mt-4 p-3">No item in wishlist</p>
+                      <p className="mt-4 p-3">Kayıt bulunamadı</p>
                     )}
                   </div>
                 </div>

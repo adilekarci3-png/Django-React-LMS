@@ -101,9 +101,9 @@ function Profile() {
               <div className="card">
                 {/* Card header */}
                 <div className="card-header">
-                  <h3 className="mb-0">Profile Details</h3>
+                  <h3 className="mb-0">Profil Detayları</h3>
                   <p className="mb-0">
-                    You have full control to manage your own account setting.
+                  Kendi hesap ayarlarınızı yönetmek için tam kontrole sahipsiniz.
                   </p>
                 </div>
                 {/* Card body */}
@@ -123,9 +123,9 @@ function Profile() {
                         }}
                       />
                       <div className="ms-3">
-                        <h4 className="mb-0">Your avatar</h4>
+                        <h4 className="mb-0">Profil Resminiz</h4>
                         <p className="mb-0">
-                          PNG or JPG no bigger than 800px wide and tall.
+                        PNG veya JPG, genişliği ve yüksekliği 800 pikselden büyük olmamalıdır.
                         </p>
                         <input
                           type="file"
@@ -139,35 +139,35 @@ function Profile() {
                   </div>
                   <hr className="my-5" />
                   <div>
-                    <h4 className="mb-0">Personal Details</h4>
+                    <h4 className="mb-0">Profil Detayları</h4>
                     <p className="mb-4">
-                      Edit your personal information and address.
+                    Kişisel bilgilerinizi ve adresinizi düzenleyin.
                     </p>
                     {/* Form */}
                     <div className="row gx-3">
                       {/* First name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="fname">
-                          Full Name
+                          Adınız Soyadınız
                         </label>
                         <input
                           type="text"
                           id="fname"
                           className="form-control"
-                          placeholder="First Name"
+                          placeholder="Adınız"
                           required=""
                           value={profileData.full_name}
                           onChange={handleProfileChange}
                           name="full_name"
                         />
                         <div className="invalid-feedback">
-                          Please enter first name.
+                          Lütfen Adınızı Giriniz
                         </div>
                       </div>
                       {/* Last name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="lname">
-                          About Me
+                          Hakkımda
                         </label>
                         <textarea
                           onChange={handleProfileChange}
@@ -179,33 +179,33 @@ function Profile() {
                           value={profileData.about}
                         ></textarea>
                         <div className="invalid-feedback">
-                          Please enter last name.
+                          Soyadınızı Giriniz
                         </div>
                       </div>
 
                       {/* Country */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="editCountry">
-                          Country
+                          Ülke
                         </label>
                         <input
                           type="text"
                           id="country"
                           className="form-control"
-                          placeholder="Country"
+                          placeholder="Ülke"
                           required=""
                           value={profileData.country}
                           onChange={handleProfileChange}
                           name="country"
                         />
                         <div className="invalid-feedback">
-                          Please choose country.
+                          Ülke Seçiniz
                         </div>
                       </div>
                       <div className="col-12">
                         {/* Button */}
                         <button className="btn btn-primary" type="submit">
-                          Update Profile <i className="fas fa-check-circle"></i>
+                          Profili Güncelle <i className="fas fa-check-circle"></i>
                         </button>
                       </div>
                     </div>

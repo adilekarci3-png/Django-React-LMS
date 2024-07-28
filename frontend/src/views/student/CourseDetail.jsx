@@ -188,6 +188,7 @@ function CourseDetail() {
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
 
+    debugger;
     await useAxios()
       .post(
         `student/question-answer-list-create/${course.course?.id}/`,
@@ -369,7 +370,7 @@ function CourseDetail() {
                                 aria-controls="course-pills-3"
                                 aria-selected="false"
                               >
-                                Tartışma
+                                Konuşma
                               </button>
                             </li>
 
@@ -651,7 +652,7 @@ function CourseDetail() {
                                 {/* Card header */}
                                 <div className="card-header border-bottom p-0 pb-3">
                                   {/* Title */}
-                                  <h4 className="mb-3 p-3">Tartışma</h4>
+                                  <h4 className="mb-3 p-3">Konuşma</h4>
                                   <form className="row g-4 p-3">
                                     {/* Search */}
                                     <div className="col-sm-6 col-lg-9">
@@ -752,6 +753,7 @@ function CourseDetail() {
                                   {/* Title */}
                                   <h4 className="mb-3 p-3">
                                     Yorum Bırak {studentReview.rating}
+                                    
                                   </h4>
                                   <div className="mt-2">
                                     {!studentReview && (
@@ -792,7 +794,7 @@ function CourseDetail() {
                                           <textarea
                                             className="form-control"
                                             id="exampleFormControlTextarea1"
-                                            placeholder="Your review"
+                                            placeholder="Yorumun"
                                             rows={3}
                                             onChange={handleReviewChange}
                                             name="review"
@@ -887,7 +889,7 @@ function CourseDetail() {
       {/* Lecture Modal */}
       <Modal show={show} size="lg" onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Lesson: {variantItem?.title}</Modal.Title>
+          <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <ReactPlayer

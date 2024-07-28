@@ -38,9 +38,9 @@ function Orders() {
               <div className="card mb-4">
                 {/* Card header */}
                 <div className="card-header border-bottom-0">
-                  <h3 className="mb-0">Orders</h3>
+                  <h3 className="mb-0">Talep Edilen Kurslar</h3>
                   <span>
-                    Order Dashboard is a quick overview of all current orders.
+                    Talep ettiğiniz kurs listesi.
                   </span>
                 </div>
                 {/* Table */}
@@ -48,10 +48,10 @@ function Orders() {
                   <table className="table mb-0 text-nowrap table-hover table-centered">
                     <thead className="table-light">
                       <tr>
-                        <th>Courses</th>
-                        <th>Amount</th>
-                        <th>Invoice</th>
-                        <th>Date</th>
+                        <th>Kurslar</th>
+                        <th>Kurs Linki</th>
+                        <th>Kursu Talep Eden</th>
+                        <th>Tarih</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -67,7 +67,7 @@ function Orders() {
                               </a>
                             </h5>
                           </td>
-                          <td>${o.price}</td>
+                          <td>{o.price}</td>
                           <td>#{o.order.oid}</td>
                           <td>{moment(o.date).format("DD MMM, YYYY")}</td>
                         </tr>

@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+    'django_admin_logs',
     #Custom Apps 
     'core',
     'api',
@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'vendor', 
     
      # Third Party Apps
+    "rest_framework",
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',

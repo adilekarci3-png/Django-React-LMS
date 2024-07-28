@@ -314,7 +314,7 @@ function BaseFooter() {
                         </defs>
                       </svg>
                     </span>
-                    Almanca
+                    Arapça
                   </a>
                 </li>
               </ul>

@@ -138,13 +138,13 @@ function Search() {
                       <div className="card-body">
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <div>
-                            <span className="badge bg-info">{c.level}</span>
+                            {/* <span className="badge bg-info">{c.level}</span> */}
                             <span className="badge bg-success ms-2">
-                              {c.language}
+                              {/* {c.language} */}
                             </span>
                           </div>
                           <a href="#" className="fs-5">
-                            <i className="fas fa-heart text-danger align-middle" />
+                            {/* <i className="fas fa-heart text-danger align-middle" /> */}
                           </a>
                         </div>
                         <h4 className="mb-2 text-truncate-line-2 ">
@@ -155,7 +155,7 @@ function Search() {
                             {c.title}
                           </Link>
                         </h4>
-                        <small>By: {c.teacher.full_name}</small> <br />
+                        <small>{c.teacher.full_name}</small> <br />
                         <small>
                           {c.students?.length} Student
                           {c.students?.length > 1 && "s"}
@@ -167,7 +167,7 @@ function Search() {
                               <Rater total={5} rating={c.average_rating || 0} />
                             </span>
                           </span>
-                          <span className="text-warning">4.5</span>
+                          {/* <span className="text-warning">4.5</span> */}
                           <span className="fs-6 ms-2">
                             ({c.reviews?.length} Reviews)
                           </span>
@@ -199,7 +199,7 @@ function Search() {
                               to={""}
                               className="text-inherit text-decoration-none btn btn-primary"
                             >
-                              Enroll Now{" "}
+                              Şimdi Kayıt Ol{" "}
                               <i className="fas fa-arrow-right text-primary align-middle me-2 text-white" />
                             </Link>
                           </div>

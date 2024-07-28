@@ -79,7 +79,7 @@ debugger;
                                     </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/instructor/reviews/`}>
-                                            <i className="fas fa-star"></i> Reviews{" "}
+                                            <i className="fas fa-star"></i> Yorumlar{" "}
                                         </Link>
                                     </li>
                                     <li>
@@ -100,7 +100,7 @@ debugger;
                                     </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/instructor/earning/`}>
-                                            <i className="fas fa-turkish-lira"></i> Earning{" "}
+                                            <i className="fas fa-turkish-lira"></i> Bağış{" "}
                                         </Link>
                                     </li>
 

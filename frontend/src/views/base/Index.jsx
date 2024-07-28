@@ -143,7 +143,7 @@ function Index() {
               {/* images */}
               <div className="position-relative">
                 <img
-                  src="https://www.ehad.org.tr/wp-content/uploads/2021/03/EHAD-Akademi-Genel-Afisi-2021-01-350x350.jpg"
+                  src="https://www.ehad.org.tr/wp-content/uploads/2021/03/EHAD-Akademi-003-Small.jpg"
                   alt="girl"
                   className="end-0 bottom-0"
                 />
@@ -164,7 +164,7 @@ function Index() {
                   <i className="fe fe-award fs-2 text-info" />
                 </div>
                 <div className="lh-1">
-                  <h2 className="mb-1">316,000+</h2>
+                  <h2 className="mb-1">3,000+</h2>
                   <span>Kaliteli Eğitmenlerimiz</span>
                 </div>
               </div>
@@ -177,8 +177,8 @@ function Index() {
                 </div>
                 {/* text */}
                 <div className="lh-1">
-                  <h2 className="mb-1">1.8 Billion+</h2>
-                  <span>Course enrolments</span>
+                  <h2 className="mb-1">1000+</h2>
+                  <span>Kayıtlı Dersler</span>
                 </div>
               </div>
             </div>
@@ -190,8 +190,8 @@ function Index() {
                 </div>
                 {/* text */}
                 <div className="lh-1">
-                  <h2 className="mb-1">41,000+</h2>
-                  <span>Courses in 42 languages</span>
+                  {/* <h2 className="mb-1">41,000+</h2>
+                  <span>Courses in 42 languages</span> */}
                 </div>
               </div>
             </div>
@@ -203,8 +203,8 @@ function Index() {
                 </div>
                 {/* text */}
                 <div className="lh-1">
-                  <h2 className="mb-1">179,000+</h2>
-                  <span>Online Videos</span>
+                  <h2 className="mb-1">1,000+</h2>
+                  <span>Online Videolar</span>
                 </div>
               </div>
             </div>
@@ -218,7 +218,7 @@ function Index() {
             {/* col */}
             <div className="col-12">
               <div className="mb-6">
-                <h2 className="mb-1 h1">🔥En çok izlenen kurslar</h2>
+                <h2 className="mb-1 h1">En çok izlenen kurslar</h2>
                 <p>
                   EHAD dersleri içerisinde en çok izlenen kurslar
                 </p>
@@ -248,13 +248,13 @@ function Index() {
                       <div className="card-body">
                         <div className="d-flex justify-content-between align-items-center mb-3">
                           <div>
-                            <span className="badge bg-info">{c.level}</span>
+                            {/* <span className="badge bg-info">{c.level}</span> */}
                             <span className="badge bg-success ms-2">
-                              {c.language}
+                              {/* {c.language} */}
                             </span>
                           </div>
                           <a onClick={() => addToWishlist(c.id)} className="fs-5">
-                            <i className="fas fa-heart text-danger align-middle" />
+                            {/* <i className="fas fa-heart text-danger align-middle" /> */}
                           </a>
                         </div>
                         <h4 className="mb-2 text-truncate-line-2 ">
@@ -265,7 +265,7 @@ function Index() {
                             {c.title}
                           </Link>
                         </h4>
-                        <small>By: {c.teacher.full_name}</small> <br />
+                        <small>{c.teacher.full_name}</small> <br />
                         <small>
                           {c.students?.length} Öğrenci
                           {c.students?.length > 1 && "s"}
@@ -274,12 +274,12 @@ function Index() {
                         <div className="lh-1 mt-3 d-flex">
                           <span className="align-text-top">
                             <span className="fs-6">
-                              <Rater total={5} rating={c.average_rating || 0} />
+                              {/* <Rater total={5} rating={c.average_rating || 0} /> */}
                             </span>
                           </span>
-                          <span className="text-warning">4.5</span>
+                          {/* <span className="text-warning">4.5</span> */}
                           <span className="fs-6 ms-2">
-                            ({c.reviews?.length} Yorumlar)
+                            {/* ({c.reviews?.length} Yorumlar) */}
                           </span>
                         </div>
                       </div>
@@ -375,26 +375,26 @@ function Index() {
           <div className="row align-items-center bg-primary gx-0 rounded-3 mt-5">
             {/* col */}
             <div className="col-lg-6 col-12 d-none d-lg-block">
-              <div className="d-flex justify-content-center pt-4">
+              <div className="d-flex justify-content-center pt-10">
                 {/* img */}
                 <div className="position-relative">
                   <img
-                    src="https://geeksui.codescandy.com/geeks/assets/images/png/cta-instructor-1.png"
+                    src="https://www.ehad.org.tr/wp-content/uploads/2021/03/EHAD-Akademi-006-Small.jpg"
                     alt="image"
                     className="img-fluid mt-n8"
                   />
                   <div className="ms-n8 position-absolute bottom-0 start-0 mb-6">
-                    <img
+                    {/* <img
                       src="https://geeksui.codescandy.com/geeks/assets/images/svg/dollor.svg"
                       alt="dollor"
-                    />
+                    /> */}
                   </div>
                   {/* img */}
                   <div className="me-n4 position-absolute top-0 end-0">
-                    <img
+                    {/* <img
                       src="https://geeksui.codescandy.com/geeks/assets/images/svg/graph.svg"
                       alt="graph"
-                    />
+                    /> */}
                   </div>
                 </div>
               </div>
@@ -429,32 +429,32 @@ function Index() {
                     <div className="mb-3">
                       <span className="lh-1">
                         <span className="align-text-top ms-2">
+                          {/* <i className="fas fa-star text-warning"></i>
                           <i className="fas fa-star text-warning"></i>
                           <i className="fas fa-star text-warning"></i>
                           <i className="fas fa-star text-warning"></i>
-                          <i className="fas fa-star text-warning"></i>
-                          <i className="fas fa-star text-warning"></i>
+                          <i className="fas fa-star text-warning"></i> */}
                         </span>
-                        <span className="text-dark fw-semibold">4.5/5.0</span>
+                        {/* <span className="text-dark fw-semibold">4.5/5.0</span> */}
                       </span>
-                      <span className="ms-2">(Based on 3265 ratings)</span>
+                      {/* <span className="ms-2">(Based on 3265 ratings)</span> */}
                     </div>
                     {/* heading */}
                     <h2 className="h1">Öğrencilerimiz Ne Dedi?</h2>
-                    <p className="mb-0">
+                    {/* <p className="mb-0">
                       Hear from
                       <span className="text-dark">teachers</span>,
                       <span className="text-dark">trainers</span>, and
                       <span className="text-dark">leaders</span>
                       in the learning space about how Geeks empowers them to
                       provide quality online learning experiences.
-                    </p>
+                    </p> */}
                   </div>
                 </div>
                 <div className="col-lg-6 col-md-4 text-md-end mt-4 mt-md-0">
                   {/* btn */}
                   <a href="#" className="btn btn-primary">
-                    View Reviews
+                    Yorumları Görüntüle
                   </a>
                 </div>
               </div>
@@ -476,15 +476,12 @@ function Index() {
                           <div className="card-body text-center p-6">
                             {/* img */}
                             <img
-                              src="../../assets/images/avatar/avatar-1.jpg"
+                              src="../../assets/images/avatar/avatar-1.jpg"                              
                               alt="avatar"
                               className="avatar avatar-lg rounded-circle"
                             />
                             <p className="mb-0 mt-3">
-                              “The generated lorem Ipsum is therefore always
-                              free from repetition, injected humour, or words
-                              etc generate lorem Ipsum which looks racteristic
-                              reasonable.”
+                              “Arapça’da “korumak, ezberlemek” mânasındaki hıfz kökünden türemiş bir sıfat olan hafız (çoğulu huffâz) sözlükte “koruyan, ezberleyen” anlamına gelip Kur’an’ın tamamını ezberleyene hafız denilmiştir. Hafız kelimesi, Kur’ân-ı Kerîm’de sözlük anlamında birçok âyette yer almakta (bk. M. F. Abdülbâkī, el-Muʿcem, “ḥfẓ” md.), üç âyette Allah’ın sıfatı olarak geçmektedir (Yûsuf 12/64; el-Hicr 15/9; el-Enbiyâ 21/82). Hz. Peygamber, hafızları Abese sûresinde sözü edilen (80/15-16) “sefere-i kirâm”a benzetmiş ve hafızların cennette onlarla beraber olacağını müjdelemiştir”
                             </p>
                             {/* rating */}
                             <div className="lh-1 mb-3 mt-4">
@@ -543,8 +540,8 @@ function Index() {
                               <span className="text-warning">5</span>
                               {/* text */}
                             </div>
-                            <h3 className="mb-0 h4">Gladys Colbert</h3>
-                            <span>Software Engineer at Palantir</span>
+                            <h3 className="mb-0 h4">Zeynep Karatepe</h3>
+                            <span>Hafızlık Öğrencisi</span>
                           </div>
                         </div>
                       </div>
@@ -560,10 +557,7 @@ function Index() {
                               className="avatar avatar-lg rounded-circle"
                             />
                             <p className="mb-0 mt-3">
-                              “The generated lorem Ipsum is therefore always
-                              free from repetition, injected humour, or words
-                              etc generate lorem Ipsum which looks racteristic
-                              reasonable.”
+                              “Arapça’da “korumak, ezberlemek” mânasındaki hıfz kökünden türemiş bir sıfat olan hafız (çoğulu huffâz) sözlükte “koruyan, ezberleyen” anlamına gelip Kur’an’ın tamamını ezberleyene hafız denilmiştir. Hafız kelimesi, Kur’ân-ı Kerîm’de sözlük anlamında birçok âyette yer almakta (bk. M. F. Abdülbâkī, el-Muʿcem, “ḥfẓ” md.), üç âyette Allah’ın sıfatı olarak geçmektedir (Yûsuf 12/64; el-Hicr 15/9; el-Enbiyâ 21/82). Hz. Peygamber, hafızları Abese sûresinde sözü edilen (80/15-16) “sefere-i kirâm”a benzetmiş ve hafızların cennette onlarla beraber olacağını müjdelemiştir ”
                             </p>
                             {/* rating */}
                             <div className="lh-1 mb-3 mt-4">
@@ -622,8 +616,8 @@ function Index() {
                               <span className="text-warning">5</span>
                               {/* text */}
                             </div>
-                            <h3 className="mb-0 h4">Gladys Colbert</h3>
-                            <span>Software Engineer at Palantir</span>
+                            <h3 className="mb-0 h4">Irem Zehra Kurt</h3>
+                            <span>Hafızlık Öğrencisi</span>
                           </div>
                         </div>
                       </div>
@@ -639,10 +633,7 @@ function Index() {
                               className="avatar avatar-lg rounded-circle"
                             />
                             <p className="mb-0 mt-3">
-                              “The generated lorem Ipsum is therefore always
-                              free from repetition, injected humour, or words
-                              etc generate lorem Ipsum which looks racteristic
-                              reasonable.”
+                              “Arapça’da “korumak, ezberlemek” mânasındaki hıfz kökünden türemiş bir sıfat olan hafız (çoğulu huffâz) sözlükte “koruyan, ezberleyen” anlamına gelip Kur’an’ın tamamını ezberleyene hafız denilmiştir. Hafız kelimesi, Kur’ân-ı Kerîm’de sözlük anlamında birçok âyette yer almakta (bk. M. F. Abdülbâkī, el-Muʿcem, “ḥfẓ” md.), üç âyette Allah’ın sıfatı olarak geçmektedir (Yûsuf 12/64; el-Hicr 15/9; el-Enbiyâ 21/82). Hz. Peygamber, hafızları Abese sûresinde sözü edilen (80/15-16) “sefere-i kirâm”a benzetmiş ve hafızların cennette onlarla beraber olacağını müjdelemiştir”
                             </p>
                             {/* rating */}
                             <div className="lh-1 mb-3 mt-4">
@@ -701,8 +692,8 @@ function Index() {
                               <span className="text-warning">5</span>
                               {/* text */}
                             </div>
-                            <h3 className="mb-0 h4">Gladys Colbert</h3>
-                            <span>Software Engineer at Palantir</span>
+                            <h3 className="mb-0 h4">Saliha Nur Gül</h3>
+                            <span>Hafızlık Öğrencisi</span>
                           </div>
                         </div>
                       </div>

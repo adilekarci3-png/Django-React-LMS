@@ -190,7 +190,7 @@ function Checkout() {
                       type="text"
                       className="form-control bg-light"
                       id="yourName"
-                      placeholder="Name"
+                      placeholder="İsminiz"
                       readOnly
                       value={order.full_name}
                     />
@@ -203,7 +203,7 @@ function Checkout() {
                       type="email"
                       className="form-control bg-light"
                       id="emailInput"
-                      placeholder="Email"
+                      placeholder="E-posta"
                       readOnly
                       value={order.email}
                     />
@@ -218,7 +218,7 @@ function Checkout() {
                       type="text"
                       className="form-control bg-light"
                       id="mobileNumber"
-                      placeholder="Country"
+                      placeholder="Ülke"
                       readOnly
                       value={order.country}
                     />
@@ -242,7 +242,7 @@ function Checkout() {
                     <div className="input-group mt-1">
                       <input
                         className="form-control form-control"
-                        placeholder="COUPON CODE"
+                        placeholder="Ödül Kodu"
                         onChange={(e) => setCoupon(e.target.value)}
                       />
                       <button
@@ -259,15 +259,15 @@ function Checkout() {
                       <ul class="list-group mb-3">
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                         Ara Toplam
-                          <span>${order.sub_total}</span>
+                          <span>{order.sub_total}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                           İndirim
-                          <span>${order.saved}</span>
+                          <span>{order.saved}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                           Vergi
-                          <span>${order.tax_fee}</span>
+                          <span>{order.tax_fee}</span>
                         </li>
                         <li class="list-group-item d-flex fw-bold justify-content-between align-items-center">
                           Toplam

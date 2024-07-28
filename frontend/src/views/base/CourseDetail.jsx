@@ -104,10 +104,10 @@ function CourseDetail() {
                     ></p>
                     {/* Content */}
                     <ul className="list-inline mb-0">
-                      <li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
+                      {/* <li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
                         <i className="fas fa-star text-warning me-2" />
                         {course.average_rating}/5
-                      </li>
+                      </li> */}
                       <li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
                         <i className="fas fa-user-graduate text-orange me-2" />
                         {course.students?.length} İzleyen Öğrenci Sayısı
@@ -175,7 +175,7 @@ function CourseDetail() {
                               aria-controls="course-pills-2"
                               aria-selected="false"
                             >
-                              Müfredat
+                              Kurs Dersleri
                             </button>
                           </li>
                           {/* Tab item */}
@@ -426,7 +426,7 @@ function CourseDetail() {
                                 <div className="avatar avatar-xl me-4 flex-shrink-0">
                                   <img
                                     className="avatar-img rounded-circle"
-                                    src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-1.jpg"
+                                    src="https://i.pinimg.com/280x280_RS/7d/f4/54/7df454ceb5df39a1cb94dfcd8533fd7c.jpg"
                                     style={{
                                       width: "50px",
                                       height: "50px",
@@ -467,7 +467,7 @@ function CourseDetail() {
                                 <div className="avatar avatar-xl me-4 flex-shrink-0">
                                   <img
                                     className="avatar-img rounded-circle"
-                                    src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-1.jpg"
+                                    src="https://i.pinimg.com/280x280_RS/7d/f4/54/7df454ceb5df39a1cb94dfcd8533fd7c.jpg"
                                     style={{
                                       width: "50px",
                                       height: "50px",
@@ -535,7 +535,7 @@ function CourseDetail() {
                                   <textarea
                                     className="form-control"
                                     id="exampleFormControlTextarea1"
-                                    placeholder="Your review"
+                                    placeholder="Yorumunuz"
                                     rows={3}
                                     defaultValue={""}
                                   />
@@ -773,7 +773,7 @@ function CourseDetail() {
                                                     className="text-decoration-none text-dark"
                                                   >
                                                     <span className="text-secondary">
-                                                      By:
+                                                      
                                                     </span>{" "}
                                                     Frances Guerrero{" "}
                                                   </a>
@@ -822,7 +822,7 @@ function CourseDetail() {
                                                     className="text-decoration-none text-dark"
                                                   >
                                                     <span className="text-secondary">
-                                                      By:
+                                                     
                                                     </span>{" "}
                                                     Frances Guerrero{" "}
                                                   </a>
@@ -874,7 +874,7 @@ function CourseDetail() {
                                           <a href="#">
                                             <img
                                               className="avatar-img rounded-circle"
-                                              src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
+                                              src="https://i.pinimg.com/280x280_RS/7d/f4/54/7df454ceb5df39a1cb94dfcd8533fd7c.jpg"
                                               style={{
                                                 width: "40px",
                                                 height: "40px",
@@ -925,7 +925,7 @@ function CourseDetail() {
                                           <a href="#">
                                             <img
                                               className="avatar-img rounded-circle"
-                                              src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
+                                              src="https://i.pinimg.com/280x280_RS/7d/f4/54/7df454ceb5df39a1cb94dfcd8533fd7c.jpg"
                                               style={{
                                                 width: "40px",
                                                 height: "40px",
@@ -978,7 +978,7 @@ function CourseDetail() {
                                           <a href="#">
                                             <img
                                               className="avatar-img rounded-circle"
-                                              src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
+                                              src="https://i.pinimg.com/280x280_RS/7d/f4/54/7df454ceb5df39a1cb94dfcd8533fd7c.jpg"
                                               style={{
                                                 width: "40px",
                                                 height: "40px",
@@ -1029,7 +1029,7 @@ function CourseDetail() {
                                           <a href="#">
                                             <img
                                               className="avatar-img rounded-circle"
-                                              src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
+                                              src="https://i.pinimg.com/280x280_RS/7d/f4/54/7df454ceb5df39a1cb94dfcd8533fd7c.jpg"
                                               style={{
                                                 width: "40px",
                                                 height: "40px",
@@ -1080,7 +1080,7 @@ function CourseDetail() {
                                       class="one form-control pe-4 bg-light w-75"
                                       id="autoheighttextarea"
                                       rows="1"
-                                      placeholder="Write a message..."
+                                      placeholder="Bir mesaj yazın..."
                                     ></textarea>
                                     <button
                                       class="btn btn-primary ms-2 mb-0 w-25"
@@ -1130,7 +1130,7 @@ function CourseDetail() {
                                 data-bs-target="#exampleModal"
                                 className="fw-bold"
                               >
-                                Course Introduction Video
+                                Kurs Önizleme Videosu
                               </span>
 
                               <div
@@ -1147,7 +1147,7 @@ function CourseDetail() {
                                         className="modal-title fs-5"
                                         id="exampleModalLabel"
                                       >
-                                        Introduction Videos
+                                        Kurs Önizleme Videoları
                                       </h1>
                                       <button
                                         type="button"
@@ -1163,13 +1163,13 @@ function CourseDetail() {
                                         className="btn btn-secondary"
                                         data-bs-dismiss="modal"
                                       >
-                                        Close
+                                        Kapat
                                       </button>
                                       <button
                                         type="button"
                                         className="btn btn-primary"
                                       >
-                                        Save changes
+                                        Değişiklikleri Kaydet
                                       </button>
                                     </div>
                                   </div>
@@ -1185,7 +1185,7 @@ function CourseDetail() {
                               <div>
                                 <div className="d-flex align-items-center">
                                   <h3 className="fw-bold mb-0 me-2">
-                                    ${course.price}
+                                    {course.price}
                                   </h3>
                                 </div>
                               </div>
@@ -1228,7 +1228,7 @@ function CourseDetail() {
                                   <li>
                                     <a className="dropdown-item" href="#">
                                       <i className="fas fa-copy me-2" />
-                                      Copy link
+                                      Linki Kopyala
                                     </a>
                                   </li>
                                 </ul>
@@ -1296,7 +1296,7 @@ function CourseDetail() {
                                 to="/cart/"
                                 className="btn btn-success mb-0 w-100"
                               >
-                                Enroll Now{" "}
+                                Şimdi Kayıt Ol{" "}
                                 <i className="fas fa-arrow-right"></i>
                               </Link>
                             </div>
@@ -1306,49 +1306,49 @@ function CourseDetail() {
                         {/* Course info START */}
                         <div className="card card-body shadow p-4 mb-4">
                           {/* Title */}
-                          <h4 className="mb-3">This course includes</h4>
+                          <h4 className="mb-3">Kurs İçerikleri</h4>
                           <ul className="list-group list-group-borderless">
                             <li className="list-group-item d-flex justify-content-between align-items-center">
                               <span className="h6 fw-light mb-0">
                                 <i className="fas fa-fw fa-book-open text-primary me-2" />
-                                Lectures
+                                Dersler
                               </span>
                               <span>30</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center d-none">
                               <span className="h6 fw-light mb-0">
                                 <i className="fas fa-fw fa-clock text-primary me-2" />
-                                Duration
+                                Kurs Uzunluğu
                               </span>
                               <span>4h 50m</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
                               <span className="h6 fw-light mb-0">
                                 <i className="fas fa-fw fa-signal text-primary me-2" />
-                                Skills
+                                Seviye
                               </span>
-                              <span>Beginner</span>
+                              <span>Başlangıç</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
                               <span className="h6 fw-light mb-0">
                                 <i className="fas fa-fw fa-globe text-primary me-2" />
-                                Language
+                                Dil
                               </span>
-                              <span>English</span>
+                              <span>Türkçe</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
                               <span className="h6 fw-light mb-0">
                                 <i className="fas fa-fw fa-user-clock text-primary me-2" />
-                                Published
+                                Yayınlanma Tarihi
                               </span>
-                              <span>7th August, 2025</span>
+                              <span>7 Ağustos, 2025</span>
                             </li>
                             <li className="list-group-item d-flex justify-content-between align-items-center">
                               <span className="h6 fw-light mb-0">
                                 <i className="fas fa-fw fa-medal text-primary me-2" />
-                                Certificate
+                                Sertifika
                               </span>
-                              <span>Yes</span>
+                              <span>Evet</span>
                             </li>
                           </ul>
                         </div>
@@ -1368,10 +1368,9 @@ function CourseDetail() {
                   {/* col */}
                   <div className="col-12">
                     <div className="mb-6">
-                      <h2 className="mb-1 h1">Related Courses</h2>
+                      <h2 className="mb-1 h1">Alakalı Kurslar</h2>
                       <p>
-                        These are the most popular courses among Geeks Courses
-                        learners worldwide in year 2022
+                      Etimoloji ve Kapsam. “Eski” anlamındaki kadîmin zıddı olan hadîs kelimesi (çoğulu ehâdîs) tahdîs masdarından isim olup “haber” mânasına gelir. İnsana uyanıkken veya uykuda duyurulmak yahut vahyedilmek suretiyle iletilen her söze, ayrıca anlatılan kıssaya (“hadîsü Mûsâ” [Tâhâ 20/9; en-Nâziât 79/15])
                       </p>
                     </div>
                   </div>
@@ -1384,7 +1383,7 @@ function CourseDetail() {
                         <div className="card card-hover">
                           <Link to={`/course-detail/slug/`}>
                             <img
-                              src="https://geeksui.codescandy.com/geeks/assets/images/course/course-css.jpg"
+                              // src="https://geeksui.codescandy.com/geeks/assets/images/course/course-css.jpg"
                               alt="course"
                               className="card-img-top"
                             />
@@ -1392,11 +1391,11 @@ function CourseDetail() {
                           {/* Card Body */}
                           <div className="card-body">
                             <div className="d-flex justify-content-between align-items-center mb-3">
-                              <span className="badge bg-info">
-                                Intermediate
-                              </span>
+                              {/* <span className="badge bg-info">
+                                Orta Seviye
+                              </span> */}
                               <a href="#" className="fs-5">
-                                <i className="fas fa-heart text-danger align-middle" />
+                                {/* <i className="fas fa-heart text-danger align-middle" /> */}
                               </a>
                             </div>
                             <h4 className="mb-2 text-truncate-line-2 ">
@@ -1404,10 +1403,10 @@ function CourseDetail() {
                                 to={`/course-detail/slug/`}
                                 className="text-inherit text-decoration-none text-dark fs-5"
                               >
-                                How to easily create a website with JavaScript
+                                {/* How to easily create a website with JavaScript */}
                               </Link>
                             </h4>
-                            <small>By: Claire Evans</small> <br />
+                            {/* <small>By: Claire Evans</small> <br />
                             <small>16k Students</small> <br />
                             <div className="lh-1 mt-3 d-flex">
                               <span className="align-text-top">
@@ -1421,10 +1420,10 @@ function CourseDetail() {
                               </span>
                               <span className="text-warning">4.5</span>
                               <span className="fs-6 ms-2">(9,300)</span>
-                            </div>
+                            </div> */}
                           </div>
                           {/* Card Footer */}
-                          <div className="card-footer">
+                          {/* <div className="card-footer">
                             <div className="row align-items-center g-0">
                               <div className="col">
                                 <h5 className="mb-0">$39.00</h5>
@@ -1435,26 +1434,26 @@ function CourseDetail() {
                                   className="text-inherit text-decoration-none btn btn-primary"
                                 >
                                   <i className="fas fa-commenting-o text-primary align-middle me-2 text-white" />
-                                  Enroll Now
+                                  Şimdi Kayıt Ol
                                 </a>
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 
                       <div className="col">
                         {/* Card */}
                         <div className="card card-hover">
-                          <Link to={`/course-detail/slug/`}>
+                          {/* <Link to={`/course-detail/slug/`}>
                             <img
                               src="https://geeksui.codescandy.com/geeks/assets/images/course/course-angular.jpg"
                               alt="course"
                               className="card-img-top"
                             />
-                          </Link>
+                          </Link> */}
                           {/* Card Body */}
-                          <div className="card-body">
+                          {/* <div className="card-body">
                             <div className="d-flex justify-content-between align-items-center mb-3">
                               <span className="badge bg-info">
                                 Intermediate
@@ -1486,9 +1485,9 @@ function CourseDetail() {
                               <span className="text-warning">4.5</span>
                               <span className="fs-6 ms-2">(9,300)</span>
                             </div>
-                          </div>
+                          </div> */}
                           {/* Card Footer */}
-                          <div className="card-footer">
+                          {/* <div className="card-footer">
                             <div className="row align-items-center g-0">
                               <div className="col">
                                 <h5 className="mb-0">$39.00</h5>
@@ -1503,22 +1502,22 @@ function CourseDetail() {
                                 </a>
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 
                       <div className="col">
                         {/* Card */}
                         <div className="card card-hover">
-                          <Link to={`/course-detail/slug/`}>
+                          {/* <Link to={`/course-detail/slug/`}>
                             <img
                               src="https://geeksui.codescandy.com/geeks/assets/images/course/course-react.jpg"
                               alt="course"
                               className="card-img-top"
                             />
-                          </Link>
+                          </Link> */}
                           {/* Card Body */}
-                          <div className="card-body">
+                          {/* <div className="card-body">
                             <div className="d-flex justify-content-between align-items-center mb-3">
                               <span className="badge bg-info">
                                 Intermediate
@@ -1551,9 +1550,9 @@ function CourseDetail() {
                               <span className="text-warning">4.5</span>
                               <span className="fs-6 ms-2">(9,300)</span>
                             </div>
-                          </div>
+                          </div> */}
                           {/* Card Footer */}
-                          <div className="card-footer">
+                          {/* <div className="card-footer">
                             <div className="row align-items-center g-0">
                               <div className="col">
                                 <h5 className="mb-0">$39.00</h5>
@@ -1568,22 +1567,22 @@ function CourseDetail() {
                                 </a>
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 
                       <div className="col">
                         {/* Card */}
                         <div className="card card-hover">
-                          <Link to={`/course-detail/slug/`}>
+                          {/* <Link to={`/course-detail/slug/`}>
                             <img
                               src="https://geeksui.codescandy.com/geeks/assets/images/course/course-python.jpg"
                               alt="course"
                               className="card-img-top"
                             />
-                          </Link>
+                          </Link> */}
                           {/* Card Body */}
-                          <div className="card-body">
+                          {/* <div className="card-body">
                             <div className="d-flex justify-content-between align-items-center mb-3">
                               <span className="badge bg-info">
                                 Intermediate
@@ -1615,9 +1614,9 @@ function CourseDetail() {
                               <span className="text-warning">4.5</span>
                               <span className="fs-6 ms-2">(9,300)</span>
                             </div>
-                          </div>
+                          </div> */}
                           {/* Card Footer */}
-                          <div className="card-footer">
+                          {/* <div className="card-footer">
                             <div className="row align-items-center g-0">
                               <div className="col">
                                 <h5 className="mb-0">$39.00</h5>
@@ -1632,7 +1631,7 @@ function CourseDetail() {
                                 </a>
                               </div>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>

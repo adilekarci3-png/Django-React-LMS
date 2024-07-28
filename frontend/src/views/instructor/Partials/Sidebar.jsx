@@ -76,7 +76,7 @@ function Sidebar() {
               <li className="nav-item">
                 <Link className="nav-link" to={`/instructor/orders/`}>
                   {" "}
-                  <i className="fas fa-chalkboard-userme-2"></i> Kurs Talepleri{" "}
+                  <i className="fas fa-commenting"></i> Kurs Talepleri{" "}
                 </Link>
               </li>
               <li className="nav-item">

@@ -115,7 +115,7 @@ function Dashboard() {
                           {stats.achieved_certificates}
                         </h5>
                       </div>
-                      <p className="mb-0 h6 fw-light">Kazanılmış Sertifikalar</p>
+                      <p className="mb-0 h6 fw-light">Kazanılmış Sertifika Sayısı</p>
                     </div>
                   </div>
                 </div>

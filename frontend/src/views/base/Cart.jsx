@@ -92,7 +92,7 @@ function Cart() {
           <div className="row">
             <div className="col-12">
               <div className="bg-light p-4 text-center rounded-3">
-                <h1 className="m-0">Sepetim</h1>
+                <h1 className="m-0">Talep Ettiğim Kurslar</h1>
                 {/* Breadcrumb */}
                 <div className="d-flex justify-content-center">
                   <nav aria-label="breadcrumb">
@@ -111,7 +111,7 @@ function Cart() {
                         className="breadcrumb-item active"
                         aria-current="page"
                       >
-                        Sepet
+                        Talep Ettiğim Kurs
                       </li>
                     </ol>
                   </nav>
@@ -129,7 +129,7 @@ function Cart() {
               {/* Main content START */}
               <div className="col-lg-8 mb-4 mb-sm-0">
                 <div className="p-4 shadow rounded-3">
-                  <h5 className="mb-0 mb-3"> Sepet Öğesi ({cart?.length})</h5>
+                  <h5 className="mb-0 mb-3"> Talep Ettiğim Kurs Öğesi ({cart?.length})</h5>
 
                   <div className="table-responsive border-0 rounded-3">
                     <table className="table align-middle p-4 mb-0">
@@ -176,7 +176,7 @@ function Cart() {
                         ))}
 
                         {cart?.length < 1 && (
-                          <p className="mt-1 p-1">Sepetinizde öğe yok</p>
+                          <p className="mt-1 p-1">Talep Ettiğim Kurs Yok</p>
                         )}
                       </tbody>
                     </table>
@@ -198,7 +198,7 @@ function Cart() {
                         type="text"
                         className="form-control"
                         id="yourName"
-                        placeholder="Name"
+                        placeholder="Adınız Soyadınız"
                         name="full_name"
                         value={bioData.full_name}
                         onChange={handleBioDataChange}
@@ -213,7 +213,7 @@ function Cart() {
                         type="email"
                         className="form-control"
                         id="emailInput"
-                        placeholder="Email"
+                        placeholder="E-posta"
                         name="email"
                         value={bioData.email}
                         onChange={handleBioDataChange}
@@ -229,7 +229,7 @@ function Cart() {
                         type="text"
                         className="form-control"
                         id="mobileNumber"
-                        placeholder="Country"
+                        placeholder="Ülke"
                         name="country"
                         value={bioData.country}
                         onChange={handleBioDataChange}
@@ -242,33 +242,33 @@ function Cart() {
 
               <div className="col-lg-4">
                 <div className="p-4 shadow rounded-3">
-                  <h4 className="mb-3">Cart Total</h4>
+                  <h4 className="mb-3">Kursa Kayıt Ol</h4>
                   <ul class="list-group mb-3">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Toplam
-                      <span>${cartStats.price?.toFixed(2)}</span>
+                      {/* Toplam */}
+                      <span>{cartStats.price?.toFixed(2)}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Vergi
-                      <span>${cartStats.tax?.toFixed(2)}</span>
+                      {/* Vergi */}
+                      <span>{cartStats.tax?.toFixed(2)}</span>
                     </li>
                     <li class="list-group-item d-flex fw-bold justify-content-between align-items-center">
-                      Toplam
+                      {/* Toplam */}
                       <span className="fw-bold">
-                        ${cartStats.total?.toFixed(2)}
+                        {cartStats.total?.toFixed(2)}
                       </span>
                     </li>
                   </ul>
                   <div className="d-grid">
                     <button type="submit" className="btn btn-lg btn-success">
-                      Proceed to Checkout
+                     Kayıt Ol
                     </button>
                   </div>
                   <p className="small mb-0 mt-2 text-center">                    
-Ödeme işlemine devam ederek bunları kabul etmiş olursunuz{" "}
+Kayıt İşleminden önce dersi almak istediğiniz tarihi belirleyin, eğitmeniniz tarafından onaylandıktan sonra talep edilen kurs listenizde görüntülenecektir{" "}
                     <a href="#">
                       {" "}
-                      <strong>Hizmet Şartları</strong>
+                      <strong>Eğitmeniniz tarafından onaylandıktan sonra talep edilen kurs listenizde görüntülenecektir</strong>
                     </a>
                   </p>
                 </div>

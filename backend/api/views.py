@@ -144,18 +144,18 @@ class CategoryListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 class CourseListAPIView(generics.ListAPIView):
-    queryset = api_models.Course.objects.filter(platform_status="Published", teacher_course_status="Published")
+    queryset = api_models.Course.objects.filter(platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
 
 class CourseDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
-    queryset = api_models.Course.objects.filter(platform_status="Published", teacher_course_status="Published")
+    queryset = api_models.Course.objects.filter(platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
 
     def get_object(self):
         slug = self.kwargs['slug']
-        course = api_models.Course.objects.get(slug=slug, platform_status="Published", teacher_course_status="Published")
+        course = api_models.Course.objects.get(slug=slug, platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
         return course
     
 class CartAPIView(generics.CreateAPIView):
@@ -525,11 +525,7 @@ class SearchCourseAPIView(generics.ListAPIView):
     def get_queryset(self):
         query = self.request.GET.get('query')
         # learn lms
-        return api_models.Course.objects.filter(title__icontains=query, platform_status="Published", teacher_course_status="Published")
-    
-
-
-
+        return api_models.Course.objects.filter(title__icontains=query, platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis") 
 
 class StudentSummaryAPIView(generics.ListAPIView):
     serializer_class = api_serializer.StudentSummarySerializer
