@@ -2,7 +2,6 @@ from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
 
-
 from userauths.models import User, Profile
 from shortuuid.django_fields import ShortUUIDField
 from moviepy.editor import VideoFileClip
@@ -13,6 +12,12 @@ LANGUAGE = (
     ("Ingilizce", "İngilizce"),
     ("Arapca", "Arapça"),
 )
+
+OS_CHOICES =[
+    ('android','android'),
+    ('ios','IOS'),
+    ('windows','windows')
+]
 
 LEVEL = (
     ("Başlangic", "Başlangıç"),
@@ -575,3 +580,13 @@ class Country(models.Model):
     class Meta:
         verbose_name = "Ülke"
         verbose_name_plural = "Ülkeler"
+        
+
+class HafizBilgi(models.Model):
+    name = models.CharField(max_length=150)
+    decription = models.TextField(blank=True)
+    os = models.CharField(max_length=8, choices=OS_CHOICES)
+    yas = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def __str__(self):
+        return self.name

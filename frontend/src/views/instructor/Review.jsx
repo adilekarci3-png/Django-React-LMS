@@ -201,7 +201,7 @@ function Review() {
                                   Cevap{" "}
                                   <i className="fas fa-arrow-right"></i>
                                 </span>
-                                {r.reply || "No Reply"}
+                                {r.reply || "Yanıt Yok"}
                               </p>
                               <p>
                                 <button
