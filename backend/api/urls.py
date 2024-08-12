@@ -4,8 +4,14 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
+    # Hafız Bilgi
+    path("hafizbilgi/", api_views.HafizBilgiCreateAPIView.as_view()),
+    path("hafizbilgi/list/", api_views.HafizBilgiListAPIView.as_view({'get': 'list'})),
+    
+    # Meslek    
+    path("job/list/", api_views.JobListAPIView.as_view({'get': 'list'})),
+    
     # Authentication Endpoints
-
     path("user/token/", api_views.MyTokenObtainPairView.as_view()),
     path("user/token/refresh/", TokenRefreshView.as_view()),
     path("user/register/", api_views.RegisterView.as_view()),

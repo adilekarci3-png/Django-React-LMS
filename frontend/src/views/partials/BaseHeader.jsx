@@ -11,7 +11,7 @@ function BaseHeader() {
     const handleSearchSubmit = () => {
         navigate(`/search/?search=${searchQuery}`);
     };
-debugger;
+
     const [isLoggedIn, user] = useAuthStore((state) => [state.isLoggedIn, state.user]);
     
     return (

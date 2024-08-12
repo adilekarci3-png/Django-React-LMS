@@ -1192,3 +1192,128 @@ class CourseVariantItemDeleteAPIVIew(generics.DestroyAPIView):
         course = api_models.Course.objects.get(teacher=teacher, course_id=course_id)
         variant = api_models.Variant.objects.get(variant_id=variant_id, course=course)
         return api_models.VariantItem.objects.get(variant=variant, variant_item_id=variant_item_id)
+    
+class HafizBilgiCreateAPIView(generics.CreateAPIView):
+    querysect = api_models.Hafizbilgileri.objects.all()
+    serializer_class = api_serializer.HafizBilgiSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):       
+        name=request.data['name']
+        surname=request.data['surname']
+        babaadi=request.data['babaadi']
+        tcno=request.data['tcno']
+        adres=request.data['adres']
+        adresIl=request.data['adresIl']
+        adresIlce=request.data['adresIlce']
+        hafizlikbitirmeyili=request.data['hafizlikbitirmeyili']
+        evtel=request.data['evtel']
+        istel=request.data['istel']
+        ceptel=request.data['ceptel']
+        isMarried=request.data['isMarried']
+        ePosta=request.data['ePosta']
+        hafizlikyaptigikursadi=request.data['hafizlikyaptigikursadi']
+        hafizlikyaptigikursili=request.data['hafizlikyaptigikursili']
+        gorev=request.data['gorev']
+        hafizlikhocaadi=request.data['hafizlikhocaadi']
+        hafizlikhocasoyadi=request.data['hafizlikhocasoyadi']
+        hafizlikhocaceptel=request.data['hafizlikhocaceptel']
+        hafizlikarkadasadi=request.data['hafizlikarkadasadi']
+        hafizlikarkadasoyad=request.data['hafizlikarkadasoyad']
+        hafizlikarkadasceptel=request.data['hafizlikarkadasceptel']
+        referanstcno=request.data['referanstcno']
+        onaydurumu=request.data['onaydurumu']
+        decription=request.data['decription']
+        gender=request.data['gender']
+        job=request.data['job']
+        yas=request.data['yas']
+        active=request.data['active']
+        
+        api_models.Hafizbilgileri.objects.create(         
+            name=name,
+            surname=surname,
+            babaadi=babaadi,
+            tcno=tcno,
+            adres=adres,
+            adresIl=adresIl,
+            adresIlce=adresIlce,
+            hafizlikbitirmeyili=hafizlikbitirmeyili,
+            evtel=evtel,
+            istel=istel,
+            ceptel=ceptel,
+            isMarried=isMarried,
+            ePosta=ePosta,
+            hafizlikyaptigikursadi=hafizlikyaptigikursadi,
+            hafizlikyaptigikursili=hafizlikyaptigikursili,
+            gorev=gorev,
+            hafizlikhocaadi=hafizlikhocaadi,
+            hafizlikhocasoyadi=hafizlikhocasoyadi,
+            hafizlikhocaceptel=hafizlikhocaceptel,
+            hafizlikarkadasadi=hafizlikarkadasadi,
+            hafizlikarkadasoyad=hafizlikarkadasoyad,
+            hafizlikarkadasceptel=hafizlikarkadasceptel,
+            referanstcno=referanstcno,
+            onaydurumu=onaydurumu,
+            decription=decription,
+            gender=gender,
+            job=job,
+            yas=yas,
+            active=active
+        )
+        return Response({"message": "Hafız bilgisi başarılı bir şekilde eklendi"}, status=status.HTTP_201_CREATED)
+
+    
+class HafizBilgiListAPIView(viewsets.ViewSet):
+
+    def list(self, request, teacher_id=None):
+        HafizBilgis = api_models.Hafizbilgileri.objects.all()        
+        hafizs = []
+
+        for hafizBilgi in HafizBilgis:  
+            hafizs.append({
+                    "name": hafizBilgi.name,
+                    "surname":hafizBilgi.surname,
+                    "babaadi":hafizBilgi.babaadi,
+                    "tcno":hafizBilgi.tcno,
+                    "adres":hafizBilgi.adres,
+                    "adresIl":hafizBilgi.adresIl,
+                    "adresIlce":hafizBilgi.adresIlce,
+                    "hafizlikbitirmeyili":hafizBilgi.hafizlikbitirmeyili,
+                    "evtel":hafizBilgi.evtel,
+                    "istel":hafizBilgi.istel,
+                    "ceptel":hafizBilgi.ceptel,
+                    "isMarried":hafizBilgi.isMarried,
+                    "ePosta":hafizBilgi.ePosta,
+                    "hafizlikyaptigikursadi":hafizBilgi.hafizlikyaptigikursadi,
+                    "hafizlikyaptigikursili":hafizBilgi.hafizlikyaptigikursili,
+                    "gorev":hafizBilgi.gorev,
+                    "hafizlikhocaadi":hafizBilgi.hafizlikhocaadi,
+                    "hafizlikhocasoyadi":hafizBilgi.hafizlikhocasoyadi,
+                    "hafizlikhocaceptel":hafizBilgi.hafizlikhocaceptel,
+                    "hafizlikarkadasadi":hafizBilgi.hafizlikarkadasadi,
+                    "hafizlikarkadasoyad":hafizBilgi.hafizlikarkadasoyad,
+                    "hafizlikarkadasceptel":hafizBilgi.hafizlikarkadasceptel,
+                    "referanstcno":hafizBilgi.referanstcno,
+                    "onaydurumu":hafizBilgi.onaydurumu,
+                    "decription":hafizBilgi.decription,
+                    "gender":hafizBilgi.gender,
+                    "job":hafizBilgi.job,
+                    "yas":hafizBilgi.yas,
+                    "active":hafizBilgi.active
+            })
+
+        return Response(hafizs)    
+  
+class JobListAPIView(viewsets.ViewSet):
+
+    def list(self, request, teacher_id=None):
+        Jobs = api_models.Job.objects.all()        
+        jobs = []
+
+        for hafizBilgi in Jobs:  
+            jobs.append({
+              "name": hafizBilgi.name,                
+              "active":hafizBilgi.active
+            })
+
+        return Response(jobs)     

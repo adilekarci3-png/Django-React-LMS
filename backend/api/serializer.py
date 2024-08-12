@@ -265,7 +265,6 @@ class EnrolledCourseSerializer(serializers.ModelSerializer):
     question_answer = Question_AnswerSerializer(many=True, read_only=True)
     review = ReviewSerializer(many=False, read_only=True)
 
-
     class Meta:
         fields = '__all__'
         model = api_models.EnrolledCourse
@@ -307,3 +306,13 @@ class TeacherSummarySerializer(serializers.Serializer):
     total_students = serializers.IntegerField(default=0)
     total_revenue = serializers.IntegerField(default=0)
     monthly_revenue = serializers.IntegerField(default=0)
+    
+class HafizBilgiSerializer(serializers.Serializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.Hafizbilgileri
+
+class JobSerializer(serializers.Serializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.Job

@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
@@ -7,18 +8,36 @@ from shortuuid.django_fields import ShortUUIDField
 from moviepy.editor import VideoFileClip
 import math
 
+YEAR =set()
+yearNow =int(datetime.strftime(datetime.now(),"%Y"))
+for x in range(1930, yearNow):
+  YEAR.add((str(x),str(x)))
+  
 LANGUAGE = (
     ("Turkce", "Türkçe"),
     ("Ingilizce", "İngilizce"),
     ("Arapca", "Arapça"),
 )
 
-OS_CHOICES =[
-    ('android','android'),
-    ('ios','IOS'),
-    ('windows','windows')
-]
+GENDER_CHOICES =(
+    ('erkek','Erkek'),
+    ('kadin','Kadın')    
+)
 
+ONAY_CHOICES =(
+    ('onaylandi','Onaylandi'),
+    ('onaylanmadi','Onaylanmadi')    
+)
+
+ISMARRIED_CHOICES =(
+    ('evli','Evli'),
+    ('bekar','Bekar')    
+)
+OS_CHOICES =[
+    ('android','Android'),
+    ('ios','ios'),
+    ('windows','Windows')        
+]
 LEVEL = (
     ("Başlangic", "Başlangıç"),
     ("Orta", "Orta"),
@@ -550,7 +569,8 @@ class Coupon(models.Model):
     discount = models.IntegerField(default=1)
     active = models.BooleanField(default=False)
     date = models.DateTimeField(default=timezone.now)   
-
+    active = models.BooleanField(default=True)
+    
     def __str__(self):
         return self.code
     
@@ -561,6 +581,7 @@ class Coupon(models.Model):
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
     
     def __str__(self):
         return str(self.course.title)
@@ -581,12 +602,84 @@ class Country(models.Model):
         verbose_name = "Ülke"
         verbose_name_plural = "Ülkeler"
         
+class Job(models.Model):
+    name = models.CharField(max_length=100)   
+    active = models.BooleanField(default=True)
 
-class HafizBilgi(models.Model):
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Meslek"
+        verbose_name_plural = "Meslekler"  
+             
+Job._meta.get_field('name').verbose_name = "Meslek" 
+Job._meta.get_field('name').verbose_name = "Aktif/Pasif" 
+
+class Hafizbilgileri(models.Model):
     name = models.CharField(max_length=150)
-    decription = models.TextField(blank=True)
-    os = models.CharField(max_length=8, choices=OS_CHOICES)
+    surname = models.CharField(max_length=150,default="")
+    babaadi = models.CharField(max_length=150,default="")
+    tcno = models.CharField(max_length=150,default="")
+    adres = models.CharField(max_length=150, default="")
+    adresIl = models.CharField(max_length=150, default="")
+    adresIlce = models.CharField(max_length=150, default="")
+    hafizlikbitirmeyili = models.CharField(max_length=8, choices=tuple(sorted(YEAR))  ,default="")
+    evtel = models.CharField(max_length=150, default="")
+    istel = models.CharField(max_length=150, default="")
+    ceptel = models.CharField(max_length=150, default="")
+    isMarried = models.CharField(max_length=150, choices=ISMARRIED_CHOICES,default="")
+    ePosta = models.CharField(max_length=150, default="")
+    hafizlikyaptigikursadi = models.CharField(max_length=150, default="")
+    hafizlikyaptigikursili = models.CharField(max_length=150, default="")
+    gorev = models.CharField(max_length=150, default="")
+    hafizlikhocaadi = models.CharField(max_length=150, default="")
+    hafizlikhocasoyadi = models.CharField(max_length=150, default="")
+    hafizlikhocaceptel = models.CharField(max_length=150, default="")
+    hafizlikarkadasadi = models.CharField(max_length=150, default="")
+    hafizlikarkadasoyad = models.CharField(max_length=150, default="")
+    hafizlikarkadasceptel = models.CharField(max_length=150, default="")
+    referanstcno = models.CharField(max_length=150, default="")
+    onaydurumu = models.CharField(max_length=150,choices=ONAY_CHOICES,default="")    
+    decription = models.TextField(blank=True)    
+    gender = models.CharField(max_length=50, choices=GENDER_CHOICES,default="")    
+    job = models.ForeignKey("Job", related_name="Meslekler", null=True, blank=True, on_delete=models.SET_NULL)
     yas = models.DecimalField(max_digits=10, decimal_places=2)
+    active = models.BooleanField(default=True)
     
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = "Hafız Bilgi"
+        verbose_name_plural = "Hafız Bilgileri"   
+
+Hafizbilgileri._meta.get_field('name').verbose_name = "Hafız Adı"     
+Hafizbilgileri._meta.get_field('surname').verbose_name = "Hafız Soyadı" 
+Hafizbilgileri._meta.get_field('babaadi').verbose_name = "Baba Adı" 
+Hafizbilgileri._meta.get_field('tcno').verbose_name = "TC Kimlik NO"     
+Hafizbilgileri._meta.get_field('adres').verbose_name = "Adres" 
+Hafizbilgileri._meta.get_field('adresIl').verbose_name = "İl" 
+Hafizbilgileri._meta.get_field('adresIlce').verbose_name = "İlçe"     
+Hafizbilgileri._meta.get_field('hafizlikbitirmeyili').verbose_name = "Hafızlık Bitirme Yılı" 
+Hafizbilgileri._meta.get_field('evtel').verbose_name = "Ev Telefonu" 
+Hafizbilgileri._meta.get_field('istel').verbose_name = "İş Telefonu"     
+Hafizbilgileri._meta.get_field('ceptel').verbose_name = "Cep Telefonu" 
+Hafizbilgileri._meta.get_field('isMarried').verbose_name = "Medeni Hali" 
+Hafizbilgileri._meta.get_field('ePosta').verbose_name = "E-Posta Adresi" 
+Hafizbilgileri._meta.get_field('hafizlikyaptigikursadi').verbose_name = "Hafızlık Yaptığı Kurs Adı" 
+Hafizbilgileri._meta.get_field('hafizlikyaptigikursili').verbose_name = "Hafızlık Yaptığı Kurs İli" 
+Hafizbilgileri._meta.get_field('gorev').verbose_name = "Görevi" 
+Hafizbilgileri._meta.get_field('hafizlikhocaadi').verbose_name = "Hoca Adı" 
+Hafizbilgileri._meta.get_field('hafizlikhocasoyadi').verbose_name = "Hoca Soyadı" 
+Hafizbilgileri._meta.get_field('hafizlikhocaceptel').verbose_name = "Hoca Cep Telefonu" 
+Hafizbilgileri._meta.get_field('hafizlikarkadasadi').verbose_name = "Hafız Arkadaş Adı" 
+Hafizbilgileri._meta.get_field('hafizlikarkadasoyad').verbose_name = "Hafız Arkadaş Soyadı" 
+Hafizbilgileri._meta.get_field('hafizlikarkadasceptel').verbose_name = "Hafız Arkadaş Cep Telefonu" 
+Hafizbilgileri._meta.get_field('referanstcno').verbose_name = "Referanst TC Kimlik NO" 
+Hafizbilgileri._meta.get_field('onaydurumu').verbose_name = "Onay Durumu" 
+Hafizbilgileri._meta.get_field('decription').verbose_name = "Hakkında" 
+Hafizbilgileri._meta.get_field('gender').verbose_name = "Cinsiyet" 
+Hafizbilgileri._meta.get_field('job').verbose_name = "Meslek" 
+Hafizbilgileri._meta.get_field('yas').verbose_name = "Yaş" 
+Hafizbilgileri._meta.get_field('active').verbose_name = "Aktif/Pasif" 

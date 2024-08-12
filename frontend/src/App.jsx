@@ -21,6 +21,7 @@ import Checkout from "./views/base/Checkout";
 import Success from "./views/base/Success";
 import Search from "./views/base/Search";
 
+import HafizBilgiList from "./views/hafizbilgi/HafizBilgiList";
 import StudentDashboard from "./views/student/Dashboard";
 import StudentCourses from "./views/student/Courses";
 import StudentCourseDetail from "./views/student/CourseDetail";
@@ -41,6 +42,7 @@ import QA from "./views/instructor/QA";
 import ChangePassword from "./views/instructor/ChangePassword";
 import Profile from "./views/instructor/Profile";
 import CourseCreate from "./views/instructor/CourseCreate";
+import HafizBilgiCreate from "./views/hafizbilgi/HafizBilgiCreate";
 import CourseEdit from "./views/instructor/CourseEdit";
 
 
@@ -86,6 +88,12 @@ function App() {
               />
               <Route path="/search/" element={<Search />} />
 
+              {/* Hafız Bilgi Routes */}
+              <Route path="/hafizbilgi/list/" element={<HafizBilgiList />} />
+              <Route
+                path="/hafizbilgi/create-hafizbilgi/"
+                element={<HafizBilgiCreate />}
+              />
               {/* Student Routes */}
               <Route
                 path="/student/dashboard/"
