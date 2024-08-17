@@ -22,7 +22,7 @@ class User(AbstractUser):
         if self.username == "" or self.username == None:
             self.username = email_username           
         super(User, self).save(*args, **kwargs)
-
+    
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -36,15 +36,14 @@ class Profile(models.Model):
         if self.full_name:
             return str(self.full_name)
         else:
-            return str(self.user.full_name)
-        
+            return str(self.user.full_name)        
     
     def save(self, *args, **kwargs):
         if self.full_name == "" or self.full_name == None:
             self.full_name == self.user.username
         super(Profile, self).save(*args, **kwargs)
-
-
+ 
+    
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)

@@ -10,11 +10,11 @@ function HafizBilgiList() {
     const [hafizBilgi, setHafizBilgis] = useState([]);
     const [meslekler, setMeslekler] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const crud_url = "http://localhost:8000/api/products/";
+    const crud_url = "hafizbilgi/list/";
 
     const [validationErrors, setValidationErrors] = useState({});
     const onaydurumu_choise = ["Onaylandı", "Onaylanmadı"];
-    const meslek_choise = [];
+    var meslek_choise = [];
     
 
     const fetchHafizBilgis = () => {
@@ -22,22 +22,23 @@ function HafizBilgiList() {
         useAxios()
             .get(`hafizbilgi/list/`)
             .then((res) => {                
-                console.log(res.data);
+                
                 setHafizBilgis(res.data);  
                 setIsLoading(false);
             });
     };
     const FetchMesleks = () => {
+        debugger;
         setIsLoading(true);
         useAxios()
             .get(`job/list/`)
-            .then((res) => {              
-                console.log(res.data);
+            .then((res) => {         
+                debugger;
                 setMeslekler(res.data);
-                res.data.forEach(function(meslek){ 
-                    debugger;
+                res.data.forEach(function(meslek){                     
                     meslek_choise.push(meslek.name);
                 });
+                console.log(meslek_choise);
                 setIsLoading(false);
             });
     };
@@ -49,30 +50,30 @@ function HafizBilgiList() {
     const columns = useMemo(
         () => [           
             {
-                accessorKey: "name",
+                accessorKey: "full_name",
                 header: "Adı",                
                 muiEditTextFieldProps: {
                     required: true,
-                    error: !!validationErrors?.name,
-                    helperText: validationErrors?.name,                    
+                    error: !!validationErrors?.full_name,
+                    helperText: validationErrors?.full_name,                    
                     onFocus: () =>
                         setValidationErrors({
                             ...validationErrors,
-                            name: undefined,
+                            full_name: undefined,
                         }),
                 },
             },
             {
-                accessorKey: "surname",
-                header: "Soyadı",
+                accessorKey: "adres",
+                header: "Adres",
                 muiEditTextFieldProps: {
                     required: true,
-                    error: !!validationErrors?.surname,
-                    helperText: validationErrors?.surname,
+                    error: !!validationErrors?.adres,
+                    helperText: validationErrors?.adres,
                     onFocus: () =>
                         setValidationErrors({
                             ...validationErrors,
-                            surname: undefined,
+                            adres: undefined,
                         }),
                 },
             },
@@ -151,7 +152,7 @@ function HafizBilgiList() {
 
     const validateLength = (value, field, lowest) => {
         debugger;
-        if (value.length === 0 && value == null) {
+        if (value == null || value.length === 0) {
             return `${field} Boş Olamaz`;
         } else if (value.length < lowest) {
             return `En az ${lowest} Karakter Gerekli`;
@@ -170,8 +171,8 @@ function HafizBilgiList() {
 
     function validateData(data) {
         return {
-            name: validateLength(data.name, "Name", 3),
-            decription: validateLength(data.decription, "decription", 20),
+            full_name: validateLength(data.full_name, "Adı Soyadı", 3),
+            description: validateLength(data.description, "description", 20),
             onaydurumu: !validateSelect(data.onaydurumu, onaydurumu_choise)
                 ? "Onay Durumu Seçiniz"
                 : "",

@@ -5,11 +5,17 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     # Hafız Bilgi
-    path("hafizbilgi/", api_views.HafizBilgiCreateAPIView.as_view()),
-    path("hafizbilgi/list/", api_views.HafizBilgiListAPIView.as_view({'get': 'list'})),
+    path("hafizbilgi/create/", api_views.HafizBilgiCreateAPIView.as_view()),   
+    path("hafizbilgi/list/", api_views.HafizsListAPIView.as_view()),   
     
     # Meslek    
-    path("job/list/", api_views.JobListAPIView.as_view({'get': 'list'})),
+    path("job/list/", api_views.JobListAPIView.as_view()),
+    
+    # İl    
+    path("city/list/", api_views.CityListAPIView.as_view()),
+    
+    # İlçe    
+    path("district/list/", api_views.DistrictListAPIView.as_view()),
     
     # Authentication Endpoints
     path("user/token/", api_views.MyTokenObtainPairView.as_view()),
@@ -49,8 +55,14 @@ urlpatterns = [
     path("student/question-answer-list-create/<course_id>/", api_views.QuestionAnswerListCreateAPIView.as_view()),
     path("student/question-answer-message-create/", api_views.QuestionAnswerMessageSendAPIView.as_view()),
 
-
-    # Teacher Routes
+    # Agent API Endpoints
+    path("agent/summary/<agent_id>/", api_views.AgentSummaryAPIView.as_view()),
+    path("agent/hafiz-list/<agent_id>/", api_views.AgentHafizListAPIView.as_view()),
+    path("agent/<user_id>/", api_views.IsAgent),
+    path("agent/hafizbilgi-update/<agent_id>/<hafizbilgi_id>/", api_views.HafizBilgiUpdateAPIView.as_view()),
+    path("agent/hafizbilgi-create/", api_views.HafizBilgiCreateAPIView.as_view()),
+    
+    # Teacher API Endpoints
     path("teacher/summary/<teacher_id>/", api_views.TeacherSummaryAPIView.as_view()),
     path("teacher/course-lists/<teacher_id>/", api_views.TeacherCourseListAPIView.as_view()),
     path("teacher/review-lists/<teacher_id>/", api_views.TeacherReviewListAPIView.as_view()),

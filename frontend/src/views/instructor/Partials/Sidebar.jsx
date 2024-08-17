@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 function Sidebar() {
   return (
-    <div className="col-lg-3 col-md-4 col-12">
+    <div className="col-lg-2 col-md-4 col-12">
       <nav className="navbar navbar-expand-md shadow-sm mb-4 mb-lg-0 sidenav">
         <a
           className="d-xl-none d-lg-none d-md-none text-inherit fw-bold text-decoration-none text-dark p-3"

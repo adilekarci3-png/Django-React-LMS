@@ -8,18 +8,20 @@ import { MRT_Localization_TR } from 'material-react-table/locales/tr';
 import {
   Box,
   Button,
+  Stack,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
-  IconButton,
+  TextField,
   Tooltip,
+  Fab
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/EditTwoTone";
 import DeleteIcon from "@mui/icons-material/DeleteTwoTone";
-import axios from "axios";
-
+import useAxios from "../../utils/useAxios";
+import UserData from "../plugin/UserData";
 
 const CrudTable = ({
   data,
@@ -32,13 +34,29 @@ const CrudTable = ({
   const [isLoadingDataError, setIsLoadingDataError] = useState(false);
   // CUD Actions
   const createData = async (values) => {
-    const response = await axios.post(crud_url, values);
+    const response = await useAxios().post(crud_url, values);
     fetchData();
   };
 
   const updateData = async (values) => {
-    //const response = await axios.put(${crud_url}${values.id}/, values);
-    fetchData();
+    debugger;
+    console.log(UserData())
+    try {
+      await useAxios()
+        .patch(`agent/hafizbilgi-update/'+${values.agent_id}/${values.id}/`, values)
+        .then((res) => {
+          debugger;
+          console.log(res.data);
+          // fetchReviewsData();
+          Toast().fire({
+            icon: "success",
+            title: "Hafız Bilgileri Güncellendi",
+          });
+          // setReply("");
+        });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const deleteData = async (id) => {
@@ -48,7 +66,7 @@ const CrudTable = ({
 
   //CREATE action
   const handleCreateData = async ({ values, table }) => {
-    // console.log(values);
+    console.log(values);
     const newValidationErrors = validateData(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
@@ -62,14 +80,14 @@ const CrudTable = ({
 
   //UPDATE action
   const handleSaveData = async ({ values, table }) => {
-    // console.log(values);
     const newValidationErrors = validateData(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
+      debugger;
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
-    // await
+    debugger;
     updateData(values);
     console.log(values);
     table.setEditingRow(null); //exit editing mode
@@ -86,9 +104,14 @@ const CrudTable = ({
 
   const table = useMaterialReactTable({
     columns,
-    data: data,  
+    data: data,
     exportButton: true,
     enableExpandAll: false, //disable expand all button
+    createDisplayMode: "modal", //default ('row', and 'custom' are also available)
+    editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)    
+    enableEditing: true,
+    localization: MRT_Localization_TR,
+    getRowId: (row) => row.id,
     muiTableContainerProps: {
       sx: {
         maxHeight: '500px',
@@ -102,40 +125,29 @@ const CrudTable = ({
       },
     }),
     renderDetailPanel: ({ row }) => (
-      <Box
-        sx={{
-          display: 'grid',
-          margin: 'auto',
-          gridTemplateColumns: '2fr 1fr',
-          width: '100%'          
-        }}
+      <Box component="div" whiteSpace="nowrap"
       >
-        <Typography>Adı: {row.original.name}</Typography>
-        <Typography>Soyadı: {row.original.surname}</Typography>
-        <Typography>Baba Adı: {row.original.babaadi}</Typography>
-        <Typography>TC Kimlik No: {row.original.tcno}</Typography>
-        <Typography>Adres: {row.original.adres}</Typography>
-        <Typography>İl: {row.original.adresIl}</Typography>
-        <Typography>İlçe: {row.original.adresIlce}</Typography>
-        <Typography>Hafızlık Bitirme Yılı: {row.original.hafizlikbitirmeyili}</Typography>
-        <Typography>Ev Telefonu: {row.original.evtel}</Typography>
-        <Typography>İş Telefonu: {row.original.istel}</Typography>
-        <Typography>Cep Telefonu: {row.original.ceptel}</Typography>
-        <Typography>Evli/Bekar: {row.original.isMarried}</Typography>
-        <Typography>E-Posta: {row.original.ePosta}</Typography>
-        <Typography>Hafızlık Yaptığı Kurs Adı: {row.original.hafizlikyaptigikursadi}</Typography>
-        <Typography>Hafızlık Yaptığı Kurs Ili: {row.original.hafizlikyaptigikursili}</Typography>
-        <Typography>Görevi: {row.original.gorev}</Typography>
-        <Typography>Hafız Hoca Adı: {row.original.hafizlikhocaadi}</Typography>
-        <Typography>Hafız Hoca Soyadı: {row.original.hafizlikhocasoyadi}</Typography>
-        <Typography>Hafız Hoca Cep Telefonu: {row.original.hafizlikhocaceptel}</Typography>
+        <Typography variant="h6">Adı: {row.original.full_name}</Typography>
+        <Typography variant="h6">Baba Adı: {row.original.babaadi}</Typography>
+        <Typography variant="h6">TC Kimlik No: {row.original.tcno}</Typography>
+        <Typography variant="h6">Adres: {row.original.adres}</Typography>
+        <Typography variant="h6">İl: {row.original.adresIl}</Typography>
+        <Typography variant="h6">İlçe: {row.original.adresIlce}</Typography>
+        <Typography variant="h6">Hafızlık Bitirme Yılı: {row.original.hafizlikbitirmeyili}</Typography>
+        <Typography variant="h6">Ev Telefonu: {row.original.evtel}</Typography>
+        <Typography variant="h6">İş Telefonu: {row.original.istel}</Typography>
+        <Typography variant="h6">Cep Telefonu: {row.original.ceptel}</Typography>
+        <Typography variant="h6">Evli/Bekar: {row.original.isMarried}</Typography>
+        <Typography variant="h6">E-Posta: {row.original.ePosta}</Typography>
+        <Typography variant="h6">Hafızlık Yaptığı Kurs Adı: {row.original.hafizlikyaptigikursadi}</Typography>
+        <Typography variant="h6">Hafızlık Yaptığı Kurs Ili: {row.original.hafizlikyaptigikursili}</Typography>
+        <Typography variant="h6">Görevi: {row.original.gorev}</Typography>
+        <Typography variant="h6">Hafız Hoca Adı: {row.original.hafizlikhocaadi}</Typography>
+        <Typography variant="h6">Hafız Hoca Soyadı: {row.original.hafizlikhocasoyadi}</Typography>
+        <Typography variant="h6">Hafız Hoca Cep Telefonu: {row.original.hafizlikhocaceptel}</Typography>
       </Box>
     ),
-    //createDisplayMode: "modal", //default ('row', and 'custom' are also available)
-    editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)    
-    enableEditing: true,
-    localization: MRT_Localization_TR,
-    getRowId: (row) => row.id,
+
     muiToolbarAlertBannerProps: isLoadingDataError
       ? {
         color: "error",
@@ -151,47 +163,101 @@ const CrudTable = ({
     onCreatingRowSave: handleCreateData,
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveData,
-    renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
-      <Dialog open={true}
-        onClose={false} sx={{ '& .MuiDialog-paper': { width: '100%', maxHeight: 1000 } }}
-        maxWidth="md"
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description">
-        <>
-          <DialogTitle variant="h5">Hafız Bilgi Ekle</DialogTitle>
-          <DialogContent
-            sx={{
-              display: 'grid',
-              columnGap: 10,
-              rowGap: 3,
-              gridTemplateColumns: 'repeat(2, 1fr)'
-            }}
-          >
-            {internalEditComponents} {/* or render custom edit components here */}
-          </DialogContent>
-          <DialogActions>
-            <MRT_EditActionButtons variant="text" table={table} row={row} />
-          </DialogActions>
-        </>
-      </Dialog>
+    renderCreateRowDialogContent: ({ table, row }) => (
+      <>
+        <DialogTitle variant="h6" fontFamily="sans serif" textAlign='center'>Yeni Hafız Bilgisi Ekle</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+        >
+          <form onSubmit={(e) => e.preventDefault()}>
+            <Stack
+              sx={{
+                width: '100%',
+                minWidth: { xs: '300px', sm: '360px', md: '400px' },
+                gap: '1.5rem',
+              }}
+            >
+              {columns.filter(column =>
+                column.accessorKey === 'full_name' ||
+                column.accessorKey === 'babaadi' ||
+                column.accessorKey === 'tcno' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'description' ||
+                column.accessorKey === 'babaadi').map((column) => (
+                  <TextField
+                    key={column.accessorKey}
+                    variant='outlined'
+                    id="standard-basic"
+                    label={column.header}
+                    name={column.accessorKey}
+                    type={column.accessorKey === 'item' ? 'text' : 'number'}
+                    onChange={(e) =>
+                      setValues({ ...values, [e.target.name]: e.target.value })
+                    }
+                  />
+                ))}
+            </Stack>
+          </form>
+        </DialogContent>
+        <DialogActions sx={{ p: '1.25rem' }}>
+          <MRT_EditActionButtons variant="text" table={table} row={row} />
+        </DialogActions>
+
+      </>
 
     ),
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
+        <Dialog
+          // onClose={handleCloseModal}
+          aria-labelledby="customized-dialog-title"
+          open={open}
+          sx={{
+            "& .MuiDialog-container": {
+              "& .MuiPaper-root": {
+                width: "750px",
+                height:"1000px",
+                maxWidth: "5000px",  // Set your width here                
+                
+              },
+            },
+          }}
+        >
         <DialogTitle variant="h5">Düzenle</DialogTitle>
         <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+          // sx={{ display: 'column',mr: 1 , columnCount: 2, columnFill: 'balance', gap: '1.5rem', marginBottom:'2' }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: '1rem', flexWrap:'wrap', columnCount:3}}
         >
           {internalEditComponents} {/* or render custom edit components here */}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
         </DialogActions>
+        </Dialog>
       </>
     ),
     renderRowActions: ({ row, table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
-        <Tooltip title="Düzenle">
+        <Fab size="small" color="secondary" aria-label="add">
+          <DeleteIcon style={{ fontSize: 20 }} onClick={() => openDeleteConfirmModal(row)} />
+        </Fab>
+        <Fab size="small" color="success" aria-label="edit">
+          <EditIcon style={{ fontSize: 20 }} onClick={() => table.setEditingRow(row)} />
+        </Fab>
+        {/* <Fab variant="extended">
+        <NavigationIcon sx={{ mr: 1 }} />
+        Navigate
+      </Fab>
+      <Fab disabled aria-label="like">
+        <FavoriteIcon />
+      </Fab> */}
+        {/* <Tooltip title="Düzenle">
           <IconButton onClick={() => table.setEditingRow(row)}>
             <EditIcon  style={{ color: 'green', fontSize:35 }} />
           </IconButton>
@@ -200,7 +266,7 @@ const CrudTable = ({
           <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
             <DeleteIcon style={{ color: 'red', fontSize:35 }}/>
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
       </Box>
     ),
     renderTopToolbarCustomActions: ({ table }) => (

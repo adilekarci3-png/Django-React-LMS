@@ -602,6 +602,9 @@ class Country(models.Model):
         verbose_name = "Ülke"
         verbose_name_plural = "Ülkeler"
         
+Country._meta.get_field('name').verbose_name = "Ülke" 
+Country._meta.get_field('active').verbose_name = "Aktif/Pasif"
+       
 class Job(models.Model):
     name = models.CharField(max_length=100)   
     active = models.BooleanField(default=True)
@@ -614,48 +617,48 @@ class Job(models.Model):
         verbose_name_plural = "Meslekler"  
              
 Job._meta.get_field('name').verbose_name = "Meslek" 
-Job._meta.get_field('name').verbose_name = "Aktif/Pasif" 
+Job._meta.get_field('active').verbose_name = "Aktif/Pasif" 
 
-class Hafizbilgileri(models.Model):
-    name = models.CharField(max_length=150)
-    surname = models.CharField(max_length=150,default="")
-    babaadi = models.CharField(max_length=150,default="")
-    tcno = models.CharField(max_length=150,default="")
-    adres = models.CharField(max_length=150, default="")
-    adresIl = models.CharField(max_length=150, default="")
-    adresIlce = models.CharField(max_length=150, default="")
+class Hafizbilgileri(models.Model):    
+    full_name = models.CharField(max_length=100,default="")
+    babaadi = models.CharField(max_length=150,default="",null=True, blank=True)
+    tcno = models.CharField(max_length=150,default="",null=True, blank=True)
+    adres = models.CharField(max_length=150, default="",null=True, blank=True)
+    adresIl = models.ForeignKey("City",related_name="AdresIl", null=True, blank=True, on_delete=models.SET_NULL)
+    adresIlce = models.ForeignKey("District", null=True, blank=True, on_delete=models.SET_NULL)
     hafizlikbitirmeyili = models.CharField(max_length=8, choices=tuple(sorted(YEAR))  ,default="")
-    evtel = models.CharField(max_length=150, default="")
-    istel = models.CharField(max_length=150, default="")
-    ceptel = models.CharField(max_length=150, default="")
-    isMarried = models.CharField(max_length=150, choices=ISMARRIED_CHOICES,default="")
-    ePosta = models.CharField(max_length=150, default="")
+    evtel = models.CharField(max_length=150, default="",null=True, blank=True)
+    istel = models.CharField(max_length=150, default="",null=True, blank=True)
+    ceptel = models.CharField(max_length=150, default="", unique=True)
+    isMarried = models.CharField(max_length=150, choices=ISMARRIED_CHOICES,default="",null=True, blank=True)
+    email = models.CharField(max_length=150, default="", unique=True)
     hafizlikyaptigikursadi = models.CharField(max_length=150, default="")
-    hafizlikyaptigikursili = models.CharField(max_length=150, default="")
-    gorev = models.CharField(max_length=150, default="")
-    hafizlikhocaadi = models.CharField(max_length=150, default="")
-    hafizlikhocasoyadi = models.CharField(max_length=150, default="")
-    hafizlikhocaceptel = models.CharField(max_length=150, default="")
-    hafizlikarkadasadi = models.CharField(max_length=150, default="")
-    hafizlikarkadasoyad = models.CharField(max_length=150, default="")
-    hafizlikarkadasceptel = models.CharField(max_length=150, default="")
-    referanstcno = models.CharField(max_length=150, default="")
+    hafizlikyaptigikursili = models.ForeignKey("City",related_name="KursIlı", null=True, blank=True, on_delete=models.SET_NULL)
+    gorev = models.CharField(max_length=150, default="",null=True, blank=True)
+    hafizlikhocaadi = models.CharField(max_length=150, default="",null=True, blank=True,)
+    hafizlikhocasoyadi = models.CharField(max_length=150, default="",null=True, blank=True)
+    hafizlikhocaceptel = models.CharField(max_length=150, default="",null=True, blank=True)
+    hafizlikarkadasadi = models.CharField(max_length=150, default="",null=True, blank=True)
+    hafizlikarkadasoyad = models.CharField(max_length=150, default="",null=True, blank=True)
+    hafizlikarkadasceptel = models.CharField(max_length=150, default="",null=True, blank=True)
+    referanstcno = models.CharField(max_length=150, default="",null=True, blank=True)
     onaydurumu = models.CharField(max_length=150,choices=ONAY_CHOICES,default="")    
-    decription = models.TextField(blank=True)    
+    description = models.TextField(blank=True,null=True)    
     gender = models.CharField(max_length=50, choices=GENDER_CHOICES,default="")    
-    job = models.ForeignKey("Job", related_name="Meslekler", null=True, blank=True, on_delete=models.SET_NULL)
-    yas = models.DecimalField(max_digits=10, decimal_places=2)
+    job = models.ForeignKey("Job", null=True, blank=True, on_delete=models.SET_NULL)
+    yas = models.IntegerField(null=True, blank=True)
     active = models.BooleanField(default=True)
+    agent = models.ForeignKey("Agent", null=True, blank=True, on_delete=models.SET_NULL)    
+    country = models.ForeignKey("Country", null=True, blank=True, on_delete=models.SET_NULL)
     
     def __str__(self):
-        return self.name
+        return self.full_name
     
     class Meta:
         verbose_name = "Hafız Bilgi"
         verbose_name_plural = "Hafız Bilgileri"   
 
-Hafizbilgileri._meta.get_field('name').verbose_name = "Hafız Adı"     
-Hafizbilgileri._meta.get_field('surname').verbose_name = "Hafız Soyadı" 
+Hafizbilgileri._meta.get_field('full_name').verbose_name = "Adı Soyadı" 
 Hafizbilgileri._meta.get_field('babaadi').verbose_name = "Baba Adı" 
 Hafizbilgileri._meta.get_field('tcno').verbose_name = "TC Kimlik NO"     
 Hafizbilgileri._meta.get_field('adres').verbose_name = "Adres" 
@@ -666,7 +669,7 @@ Hafizbilgileri._meta.get_field('evtel').verbose_name = "Ev Telefonu"
 Hafizbilgileri._meta.get_field('istel').verbose_name = "İş Telefonu"     
 Hafizbilgileri._meta.get_field('ceptel').verbose_name = "Cep Telefonu" 
 Hafizbilgileri._meta.get_field('isMarried').verbose_name = "Medeni Hali" 
-Hafizbilgileri._meta.get_field('ePosta').verbose_name = "E-Posta Adresi" 
+Hafizbilgileri._meta.get_field('email').verbose_name = "E-Posta Adresi" 
 Hafizbilgileri._meta.get_field('hafizlikyaptigikursadi').verbose_name = "Hafızlık Yaptığı Kurs Adı" 
 Hafizbilgileri._meta.get_field('hafizlikyaptigikursili').verbose_name = "Hafızlık Yaptığı Kurs İli" 
 Hafizbilgileri._meta.get_field('gorev').verbose_name = "Görevi" 
@@ -678,8 +681,84 @@ Hafizbilgileri._meta.get_field('hafizlikarkadasoyad').verbose_name = "Hafız Ark
 Hafizbilgileri._meta.get_field('hafizlikarkadasceptel').verbose_name = "Hafız Arkadaş Cep Telefonu" 
 Hafizbilgileri._meta.get_field('referanstcno').verbose_name = "Referanst TC Kimlik NO" 
 Hafizbilgileri._meta.get_field('onaydurumu').verbose_name = "Onay Durumu" 
-Hafizbilgileri._meta.get_field('decription').verbose_name = "Hakkında" 
+Hafizbilgileri._meta.get_field('description').verbose_name = "Hakkında" 
 Hafizbilgileri._meta.get_field('gender').verbose_name = "Cinsiyet" 
 Hafizbilgileri._meta.get_field('job').verbose_name = "Meslek" 
 Hafizbilgileri._meta.get_field('yas').verbose_name = "Yaş" 
 Hafizbilgileri._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+Hafizbilgileri._meta.get_field('agent').verbose_name = "İl Temsilcisi" 
+Hafizbilgileri._meta.get_field('country').verbose_name = "Ülke" 
+
+class Agent(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
+    full_name = models.CharField(max_length=100)
+    bio = models.CharField(max_length=100, null=True, blank=True)
+    evtel = models.CharField(max_length=150, default="")
+    istel = models.CharField(max_length=150, default="")
+    ceptel = models.CharField(max_length=150, default="", unique=True)
+    email = models.CharField(max_length=150, default="", unique=True)
+    facebook = models.URLField(null=True, blank=True)
+    twitter = models.URLField(null=True, blank=True)
+    linkedin = models.URLField(null=True, blank=True)
+    about = models.TextField(null=True, blank=True)
+    country = models.ForeignKey("Country", related_name="Ülkeler", null=True, blank=True, on_delete=models.SET_NULL)
+    city = models.ForeignKey("City", related_name="Sehirler", null=True, blank=True, on_delete=models.SET_NULL)
+    active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return self.full_name 
+    
+    def Hafizs(self):
+        return Hafizbilgileri.objects.filter(agent=self)   
+    
+    class Meta:
+        verbose_name = "Temsilci"
+        verbose_name_plural = "Temsilciler"
+
+Agent._meta.get_field('user').verbose_name = "Temsilci"     
+Agent._meta.get_field('image').verbose_name = "Profil Resmi" 
+Agent._meta.get_field('full_name').verbose_name = "Adı Soyadı" 
+Agent._meta.get_field('bio').verbose_name = "Biografi"     
+Agent._meta.get_field('evtel').verbose_name = "Ev Telefonu" 
+Agent._meta.get_field('istel').verbose_name = "İş Telefonu" 
+Agent._meta.get_field('ceptel').verbose_name = "Cep Telefonu"     
+Agent._meta.get_field('email').verbose_name = "E-posta Adresi"     
+Agent._meta.get_field('facebook').verbose_name = "Facebook" 
+Agent._meta.get_field('twitter').verbose_name = "Twitter" 
+Agent._meta.get_field('linkedin').verbose_name = "Linkedin"     
+Agent._meta.get_field('about').verbose_name = "Hakkında" 
+Agent._meta.get_field('country').verbose_name = "Ülke" 
+Agent._meta.get_field('city').verbose_name = "Şehir" 
+Agent._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+
+class City(models.Model):
+    name = models.CharField(max_length=100)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Şehir"
+        verbose_name_plural = "Şehirler"
+        
+City._meta.get_field('name').verbose_name = "Şehir" 
+City._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+
+     
+class District(models.Model):
+    name = models.CharField(max_length=100)
+    city = models.ForeignKey("City", related_name="Cities", null=True, blank=True, on_delete=models.SET_NULL)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "İlçe"
+        verbose_name_plural = "İlçeler"
+        
+District._meta.get_field('name').verbose_name = "İlçe"    
+District._meta.get_field('city').verbose_name = "Şehir" 
+District._meta.get_field('active').verbose_name = "Aktif/Pasif" 

@@ -1,7 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import { CartContext } from "../plugin/Context";
+import UserData from "../plugin/UserData";
+
 import { useAuthStore } from "../../store/auth";
+
+import useAxios from "../../utils/useAxios";
 
 function BaseHeader() {
     const [cartCount, setCartCount] = useContext(CartContext);
@@ -13,7 +18,27 @@ function BaseHeader() {
     };
 
     const [isLoggedIn, user] = useAuthStore((state) => [state.isLoggedIn, state.user]);
-    
+    const [isAgent, setIsAgent] = useState(false);
+    const [isTeacher, setIsTeacher] = useState(true);
+    const [isStudent, setIsStudent] = useState(true);
+
+    const IsUserAgent = () => {        
+        try {
+            useAxios()
+                .get(`agent/${UserData()?.user_id}/`)
+                .then((res) => {                    
+                    setIsAgent(res.data);
+                    // setIsAgent(false);
+                    console.log(res.data);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        IsUserAgent();
+    },[])
     return (
         <div>
             <nav className="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
@@ -43,6 +68,11 @@ function BaseHeader() {
                             <li className="nav-item">
                                 <Link className="nav-link" to="/pages/about-us/">
                                     <i className="fas fa-address-card"></i> Hakkımızda
+                                </Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/hafizbilgi/create-hafizbilgi/">
+                                    <i className="fas fa-address-card"></i> HBS
                                 </Link>
                             </li>
                             <li className="nav-item dropdown">
@@ -158,6 +188,56 @@ function BaseHeader() {
                                     </li>
                                 </ul>
                             </li>
+                            {isAgent && (
+                                <li className="nav-item dropdown">
+                                <a
+                                    className="nav-link dropdown-toggle"
+                                    href="#"
+                                    role="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <i className="fas fa-user-plus"></i> Temsilci
+                                </a>
+                                <ul className="dropdown-menu">
+                                    <li>
+                                        <Link className="dropdown-item" to={`/student/dashboard/`}>
+                                            {" "}
+                                            <i className="bi bi-grid-fill"></i> Panel
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/agent/hafizbilgi/list/`}>
+                                            {" "}
+                                            <i className="fas fa-chalkboard-user"></i>Hafız Bilgileri
+                                        </Link>
+                                    </li>
+
+                                    <li>
+                                        <Link className="dropdown-item" to={`/student/wishlist/`}>
+                                            {" "}
+                                            <i className="fas fa-heart"></i> İstek Listesi{" "}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            className="dropdown-item"
+                                            to={`/student/question-answer/`}
+                                        >
+                                            {" "}
+                                            <i className="fas fa-envelope"></i> Soru/Cevap{" "}
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/student/profile/`}>
+                                            {" "}
+                                            <i className="fas fa-gear"></i> Profil & Ayarlar
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </li>
+                            )}
+                            
                         </ul>
                         <div className="d-flex" role="search">
                             <input
@@ -175,7 +255,7 @@ function BaseHeader() {
                                 Ara <i className="fas fa-search"></i>
                             </button>
                         </div>
-                        {isLoggedIn() === true ? (                            
+                        {isLoggedIn() === true ? (
                             <>
                                 <Link to="/logout/" className="btn btn-primary ms-2" type="submit">
                                     Çıkış Yap <i className="fas fa-usign-out-alt"></i>

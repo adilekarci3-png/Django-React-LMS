@@ -1,3 +1,4 @@
+from urllib import response
 from django.shortcuts import render, redirect
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -16,6 +17,7 @@ from userauths.models import User, Profile
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status, viewsets
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -184,7 +186,7 @@ class CartAPIView(generics.CreateAPIView):
             country = country_object.name
         except:
             country_object = None
-            country = "United States"
+            country = "Türkiye"
 
         if country_object:
             tax_rate = country_object.tax_rate / 100
@@ -276,10 +278,7 @@ class CartStatsAPIView(generics.RetrieveAPIView):
         return cart_item.tax_fee
 
     def calculate_total(self, cart_item):
-        return cart_item.total
-    
-
-
+        return cart_item.total   
 
 class CreateOrderAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.CartOrderSerializer
@@ -550,6 +549,31 @@ class StudentSummaryAPIView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
     
+class AgentSummaryAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.AgentSummarySerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        agent_id = self.kwargs['agent_id']
+        agent = api_models.Agent.objects.get(id=agent_id)
+
+        # total_courses = api_models.EnrolledCourse.objects.filter(user=agent).count()
+        # completed_lessons = api_models.CompletedLesson.objects.filter(user=agent).count()
+        # achieved_certificates = api_models.Certificate.objects.filter(user=agent).count()
+        total_hafizs = api_models.Hafizbilgileri.objects.filter(agent=agent).count()
+
+        return [{
+            # "total_courses": total_courses,
+            # "completed_lessons": completed_lessons,
+            # "achieved_certificates": achieved_certificates,
+            "total_hafizs": total_hafizs,
+        }]
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
 class StudentCourseListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.EnrolledCourseSerializer
     permission_classes = [AllowAny]
@@ -558,7 +582,8 @@ class StudentCourseListAPIView(generics.ListAPIView):
         user_id = self.kwargs['user_id']
         user =  User.objects.get(id=user_id)
         return api_models.EnrolledCourse.objects.filter(user=user)
-    
+
+
 
 class StudentCourseDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.EnrolledCourseSerializer
@@ -762,7 +787,6 @@ class QuestionAnswerMessageSendAPIView(generics.CreateAPIView):
 
 
 
-
 class TeacherSummaryAPIView(generics.ListAPIView):
     serializer_class = api_serializer.TeacherSummarySerializer
     permission_classes = [AllowAny]
@@ -882,6 +906,16 @@ def TeacherAllMonthEarningAPIView(request, teacher_id):
     )
 
     return Response(monthly_earning_tracker)
+
+@api_view(("GET", ))
+def IsAgent(request, user_id):
+    agent = api_models.Agent.objects.get(user_id=user_id)
+    if agent is None:
+        return Response(False)
+    else:
+        return Response(True)
+        
+
 
 class TeacherBestSellingCourseAPIView(viewsets.ViewSet):
 
@@ -1187,33 +1221,39 @@ class CourseVariantItemDeleteAPIVIew(generics.DestroyAPIView):
         teacher_id = self.kwargs['teacher_id']
         course_id = self.kwargs['course_id']
 
-
         teacher = api_models.Teacher.objects.get(id=teacher_id)
         course = api_models.Course.objects.get(teacher=teacher, course_id=course_id)
         variant = api_models.Variant.objects.get(variant_id=variant_id, course=course)
         return api_models.VariantItem.objects.get(variant=variant, variant_item_id=variant_item_id)
-    
+
+
 class HafizBilgiCreateAPIView(generics.CreateAPIView):
     querysect = api_models.Hafizbilgileri.objects.all()
     serializer_class = api_serializer.HafizBilgiSerializer
     permission_classes = [AllowAny]
 
-    def create(self, request, *args, **kwargs):       
-        name=request.data['name']
-        surname=request.data['surname']
+    def create(self, request, *args, **kwargs):
+        yasVar=0
+        if "yas" in request.POST:
+            yas = response.POST["yas"]
+            yasVar = yas
+            
+        city_id = request.data['adresIl']
+        kurscity_id = request.data['hafizlikyaptigikursili']
+        ilce_id = request.data['adresIlce']
+        job_id = request.data["job"]
+        full_name=request.data['full_name']
+               
         babaadi=request.data['babaadi']
         tcno=request.data['tcno']
-        adres=request.data['adres']
-        adresIl=request.data['adresIl']
-        adresIlce=request.data['adresIlce']
+        adres=request.data['adres']       
         hafizlikbitirmeyili=request.data['hafizlikbitirmeyili']
         evtel=request.data['evtel']
         istel=request.data['istel']
         ceptel=request.data['ceptel']
         isMarried=request.data['isMarried']
-        ePosta=request.data['ePosta']
-        hafizlikyaptigikursadi=request.data['hafizlikyaptigikursadi']
-        hafizlikyaptigikursili=request.data['hafizlikyaptigikursili']
+        email=request.data['email']
+        hafizlikyaptigikursadi=request.data['hafizlikyaptigikursadi']        
         gorev=request.data['gorev']
         hafizlikhocaadi=request.data['hafizlikhocaadi']
         hafizlikhocasoyadi=request.data['hafizlikhocasoyadi']
@@ -1223,28 +1263,29 @@ class HafizBilgiCreateAPIView(generics.CreateAPIView):
         hafizlikarkadasceptel=request.data['hafizlikarkadasceptel']
         referanstcno=request.data['referanstcno']
         onaydurumu=request.data['onaydurumu']
-        decription=request.data['decription']
-        gender=request.data['gender']
-        job=request.data['job']
-        yas=request.data['yas']
-        active=request.data['active']
+        description=request.data['description']
+        gender=request.data['gender']        
+
+        adresDistrict = api_models.District.objects.get(id=ilce_id)
+        adrescity = api_models.City.objects.get(id=city_id)
+        kurscity = api_models.City.objects.get(id=kurscity_id)
+        job = api_models.Job.objects.get(id=job_id)
         
         api_models.Hafizbilgileri.objects.create(         
-            name=name,
-            surname=surname,
+            full_name=full_name,            
             babaadi=babaadi,
             tcno=tcno,
             adres=adres,
-            adresIl=adresIl,
-            adresIlce=adresIlce,
+            adresIl=adrescity,
+            adresIlce=adresDistrict,
             hafizlikbitirmeyili=hafizlikbitirmeyili,
             evtel=evtel,
             istel=istel,
             ceptel=ceptel,
             isMarried=isMarried,
-            ePosta=ePosta,
+            email=email,
             hafizlikyaptigikursadi=hafizlikyaptigikursadi,
-            hafizlikyaptigikursili=hafizlikyaptigikursili,
+            hafizlikyaptigikursili=kurscity,
             gorev=gorev,
             hafizlikhocaadi=hafizlikhocaadi,
             hafizlikhocasoyadi=hafizlikhocasoyadi,
@@ -1254,66 +1295,103 @@ class HafizBilgiCreateAPIView(generics.CreateAPIView):
             hafizlikarkadasceptel=hafizlikarkadasceptel,
             referanstcno=referanstcno,
             onaydurumu=onaydurumu,
-            decription=decription,
+            description=description,
             gender=gender,
             job=job,
-            yas=yas,
-            active=active
+            yas=yasVar,
+            active=False
         )
+
         return Response({"message": "Hafız bilgisi başarılı bir şekilde eklendi"}, status=status.HTTP_201_CREATED)
 
+class HafizBilgiUpdateAPIView(generics.RetrieveUpdateAPIView):
+    querysect = api_models.Hafizbilgileri.objects.all()
+    serializer_class = api_serializer.HafizBilgiSerializer
+    permisscion_classes = [AllowAny]
+
+    def get_object(self):
+        agent_id = self.kwargs['agent_id']
+        hafizbilgi_id = self.kwargs['hafizbilgi_id']
+
+        agent = api_models.Agent.objects.get(id=agent_id)
+        hafizBilgi = api_models.Hafizbilgileri.objects.get(id=hafizbilgi_id)
+
+        return hafizBilgi
     
-class HafizBilgiListAPIView(viewsets.ViewSet):
+    def update(self, request, *args, **kwargs):
+        hafizBilgi = self.get_object()
+        serializer = self.get_serializer(hafizBilgi, data=request.data)
+        print(request.data)
+        serializer.is_valid(raise_exception=True)
 
-    def list(self, request, teacher_id=None):
-        HafizBilgis = api_models.Hafizbilgileri.objects.all()        
-        hafizs = []
+        # if "image" in request.data and isinstance(request.data['image'], InMemoryUploadedFile):
+        #     course.image = request.data['image']
+        # elif 'image' in request.data and str(request.data['image']) == "No File":
+        #     course.image = None
+        
+        # if 'file' in request.data and not str(request.data['file']).startswith("http://"):
+        #     course.file = request.data['file']
 
-        for hafizBilgi in HafizBilgis:  
-            hafizs.append({
-                    "name": hafizBilgi.name,
-                    "surname":hafizBilgi.surname,
-                    "babaadi":hafizBilgi.babaadi,
-                    "tcno":hafizBilgi.tcno,
-                    "adres":hafizBilgi.adres,
-                    "adresIl":hafizBilgi.adresIl,
-                    "adresIlce":hafizBilgi.adresIlce,
-                    "hafizlikbitirmeyili":hafizBilgi.hafizlikbitirmeyili,
-                    "evtel":hafizBilgi.evtel,
-                    "istel":hafizBilgi.istel,
-                    "ceptel":hafizBilgi.ceptel,
-                    "isMarried":hafizBilgi.isMarried,
-                    "ePosta":hafizBilgi.ePosta,
-                    "hafizlikyaptigikursadi":hafizBilgi.hafizlikyaptigikursadi,
-                    "hafizlikyaptigikursili":hafizBilgi.hafizlikyaptigikursili,
-                    "gorev":hafizBilgi.gorev,
-                    "hafizlikhocaadi":hafizBilgi.hafizlikhocaadi,
-                    "hafizlikhocasoyadi":hafizBilgi.hafizlikhocasoyadi,
-                    "hafizlikhocaceptel":hafizBilgi.hafizlikhocaceptel,
-                    "hafizlikarkadasadi":hafizBilgi.hafizlikarkadasadi,
-                    "hafizlikarkadasoyad":hafizBilgi.hafizlikarkadasoyad,
-                    "hafizlikarkadasceptel":hafizBilgi.hafizlikarkadasceptel,
-                    "referanstcno":hafizBilgi.referanstcno,
-                    "onaydurumu":hafizBilgi.onaydurumu,
-                    "decription":hafizBilgi.decription,
-                    "gender":hafizBilgi.gender,
-                    "job":hafizBilgi.job,
-                    "yas":hafizBilgi.yas,
-                    "active":hafizBilgi.active
-            })
+        # if 'category' in request.data['category'] and request.data['category'] != 'NaN' and request.data['category'] != "undefined":
+        #     category = api_models.Category.objects.get(id=request.data['category'])
+        #     course.category = category
 
-        return Response(hafizs)    
-  
-class JobListAPIView(viewsets.ViewSet):
+        self.perform_update(serializer)
+        # self.update_variant(hafizBilgi, request.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)   
 
-    def list(self, request, teacher_id=None):
-        Jobs = api_models.Job.objects.all()        
-        jobs = []
+# class AgentHafizListAPIView(generics.ListAPIView):
+#     serializer_class = api_serializer.HafizBilgiSerializer
+#     permission_classes = [AllowAny]
 
-        for hafizBilgi in Jobs:  
-            jobs.append({
-              "name": hafizBilgi.name,                
-              "active":hafizBilgi.active
-            })
+#     def get_queryset(self):
+#         agent_id = self.kwargs['agent_id']
+#         agent =  api_models.Agent.objects.get(id=agent_id)               
+#         return api_models.Hafizbilgileri.objects.filter(agent=agent)  
+    
+class AgentHafizListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.HafizBilgiSerializer
+    permission_classes = [AllowAny]
 
-        return Response(jobs)     
+    def get_queryset(self):
+        agent_id = self.kwargs['agent_id']
+        agent =  api_models.Agent.objects.get(id=agent_id) 
+        queryset = api_models.Hafizbilgileri.objects.filter(agent=agent)         
+        return queryset        
+     
+class HafizsListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.HafizBilgiSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):        
+        queryset = api_models.Hafizbilgileri.objects.all()
+        print(queryset)      
+        return queryset   
+
+
+class JobListAPIView(generics.ListAPIView):   
+    serializer_class = api_serializer.JobSerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):        
+        queryset = api_models.Job.objects.all()
+        print(queryset)      
+        return queryset      
+
+class CityListAPIView(generics.ListAPIView):   
+    serializer_class = api_serializer.CitySerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):        
+        queryset = api_models.City.objects.all()
+        print(queryset)      
+        return queryset   
+    
+class DistrictListAPIView(generics.ListAPIView):   
+    serializer_class = api_serializer.DistrictSerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):        
+        queryset = api_models.District.objects.all()
+        print(queryset)      
+        return queryset  

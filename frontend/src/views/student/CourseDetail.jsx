@@ -300,7 +300,7 @@ function CourseDetail() {
           <div className="row mt-0 mt-md-4">
             {/* Sidebar Here */}
             <Sidebar />
-            <div className="col-lg-9 col-md-8 col-12">
+            <div className="col-lg-10 col-md-8 col-12">
               {/* <section className="bg-blue py-7">
                 <div className="container">
                   <ReactPlayer url='https://www.youtube.com/watch?v=LXb3EKWsInQ' width={"100%"} height={600} />

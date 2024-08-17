@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 export const login = async (email, password) => {
   
   try {
+    
     const { data, status } = await axios.post(`user/token/`, {
       email,
       password,
@@ -34,7 +35,7 @@ export const register = async (full_name, email, password, password2) => {
       password,
       password2     
     });
-
+    
     await login(email, password);
     return { data, error: null };
   } catch (error) {
@@ -48,6 +49,7 @@ export const register = async (full_name, email, password, password2) => {
 };
 
 export const logout = () => {
+  
   Cookie.remove("access_token");
   Cookie.remove("refresh_token");
   useAuthStore.getState().setUser(null);
@@ -63,15 +65,16 @@ export const setUser = async () => {
     return;
   }
 
-  if (isAccessTokenExpired(access_token)) {
+  if (isAccessTokenExpired(access_token)) {    
     const response = getRefreshedToken(refresh_token);
     setAuthUser(response.access, response.refresh);
-  } else {
+  } else {    
     setAuthUser(access_token, refresh_token);
   }
 };
 
 export const setAuthUser = (access_token, refresh_token) => { 
+  
   Cookie.set("access_token", access_token, {
     expires: 1,
     secure: true,
@@ -80,32 +83,29 @@ export const setAuthUser = (access_token, refresh_token) => {
   Cookie.set("refresh_token", refresh_token, {
     expires: 7,
     secure: true,
-  });
-
+  });  
   const user = jwt_decode(access_token) ?? null;
-
   if (user) {
     useAuthStore.getState().setUser(user);
   }
   useAuthStore.getState().setLoading(false);
 };
 
-export const getRefreshedToken = async () => {
-  
-  const refresh_token = Cookie.get("refresh_token");
-  
+export const getRefreshedToken = async () => {  
+  const refresh_token = Cookie.get("refresh_token");  
   const response = await axios.post(`user/token/refresh/`, {
     refresh: refresh_token,
-  });
-  
+  });  
   return response.data;
 };
 
 export const isAccessTokenExpired = (access_token) => {
   try {
+    
     const decodedToken = jwt_decode(access_token);
     return decodedToken.exp < Date.now() / 1000;
   } catch (error) {
+    
     console.log(error);
     return true;
   }

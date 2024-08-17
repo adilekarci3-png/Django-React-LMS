@@ -148,6 +148,7 @@ function CourseCreate() {
   };
 
   const handleSubmit = async (e) => {
+    debugger;
     e.preventDefault();
     const formdata = new FormData();
     formdata.append("title", course.title);

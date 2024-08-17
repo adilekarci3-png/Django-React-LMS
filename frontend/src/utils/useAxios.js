@@ -13,13 +13,11 @@ const useAxios = () => {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
-  axiosInstance.interceptors.request.use(async (req) => {
+  axiosInstance.interceptors.request.use(async (req) => {    
     if (!isAccessTokenExpired) {
       return req;
     }
-
-    const response = await getRefreshedToken(refreshToken);
-    
+    const response = await getRefreshedToken(refreshToken);    
     setAuthUser(response.access, response.refresh);
     req.headers.Authorization = `Bearer ${response.access}`;
     return req;

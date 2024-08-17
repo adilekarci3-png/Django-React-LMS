@@ -62,26 +62,62 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = ['id', 'title', 'image', 'slug', 'course_count']
         model = api_models.Category
 
 class TeacherSerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = [ "user", "image", "full_name", "bio", "facebook", "twitter", "linkedin", "about", "country", "students", "courses", "review",]
         model = api_models.Teacher
 
-
-
-
-class VariantItemSerializer(serializers.ModelSerializer):
+class AgentSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = [ "user", "image", "full_name", "bio", "evtel", "istel", "ceptel", "email", "facebook", "twitter", "linkedin", "about","country","city","active"]
+        model = api_models.Agent
     
+            
+class HafizBilgiSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.Hafizbilgileri 
+   
+            
+class JobSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.Job  
+              
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.City 
+        
+    def __init__(self, *args, **kwargs):
+        super(CitySerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3  
+            
+class DistrictSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.District 
+        
+    def __init__(self, *args, **kwargs):
+        super(DistrictSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3      
+                               
+class VariantItemSerializer(serializers.ModelSerializer):        
     class Meta:
         fields = '__all__'
         model = api_models.VariantItem
-
     
     def __init__(self, *args, **kwargs):
         super(VariantItemSerializer, self).__init__(*args, **kwargs)
@@ -221,7 +257,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 class NotificationSerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = '__all__'
         model = api_models.Notification
@@ -277,6 +312,21 @@ class EnrolledCourseSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3
 
+class AttendHafizSerializer(serializers.ModelSerializer):
+    hafizs = HafizBilgiSerializer(many=True, read_only=True)    
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.Hafizbilgileri
+
+    def __init__(self, *args, **kwargs):
+        super(AttendHafizSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
 class CourseSerializer(serializers.ModelSerializer):
     students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
     curriculum = VariantSerializer(many=True, required=False, read_only=True,)
@@ -301,18 +351,15 @@ class StudentSummarySerializer(serializers.Serializer):
     completed_lessons = serializers.IntegerField(default=0)
     achieved_certificates = serializers.IntegerField(default=0)
 
+class AgentSummarySerializer(serializers.Serializer):
+    total_courses = serializers.IntegerField(default=0)
+    completed_lessons = serializers.IntegerField(default=0)
+    achieved_certificates = serializers.IntegerField(default=0)
+    total_hafizs = serializers.IntegerField(default=0)
+
 class TeacherSummarySerializer(serializers.Serializer):
     total_courses = serializers.IntegerField(default=0)
     total_students = serializers.IntegerField(default=0)
     total_revenue = serializers.IntegerField(default=0)
     monthly_revenue = serializers.IntegerField(default=0)
     
-class HafizBilgiSerializer(serializers.Serializer):
-    class Meta:
-        fields = '__all__'
-        model = api_models.Hafizbilgileri
-
-class JobSerializer(serializers.Serializer):
-    class Meta:
-        fields = '__all__'
-        model = api_models.Job

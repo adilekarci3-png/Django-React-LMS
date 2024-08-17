@@ -19,6 +19,28 @@ admin.site.register(models.Review)
 admin.site.register(models.Notification)
 admin.site.register(models.Coupon)
 admin.site.register(models.Wishlist)
-admin.site.register(models.Country)
-admin.site.register(models.Hafizbilgileri)
-admin.site.register(models.Job)
+
+class CountryAdmin(admin.ModelAdmin):        
+    list_display = ('name','active')
+
+class CityAdmin(admin.ModelAdmin):        
+    list_display = ('name','active')
+    
+class JobAdmin(admin.ModelAdmin):        
+    list_display = ('name','active')
+    
+class AgentAdmin(admin.ModelAdmin):        
+    list_display = ('full_name','email','ceptel','country','city','active')
+    
+class HafizbilgileriAdmin(admin.ModelAdmin):        
+    list_display = ('full_name','tcno','email','ceptel','country','adresIl','active','onaydurumu')   
+     
+class DistrictAdmin(admin.ModelAdmin):        
+    list_display = ('name','city','active')
+    
+admin.site.register(models.City, CityAdmin)
+admin.site.register(models.District, DistrictAdmin)
+admin.site.register(models.Agent,AgentAdmin)
+admin.site.register(models.Hafizbilgileri,HafizbilgileriAdmin)
+admin.site.register(models.Job, JobAdmin)
+admin.site.register(models.Country,CountryAdmin)

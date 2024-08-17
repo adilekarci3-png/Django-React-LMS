@@ -9,7 +9,7 @@ import Spinner from "../Spinner/Spinner";
 
 function HafizBilgiCreate() {
     const [hafizBilgi, setHafizBilgi] = useState({
-      yas: 0,
+      //yas: 0,
       name: "",
       decription: "",
       os: ""     

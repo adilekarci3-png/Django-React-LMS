@@ -96,7 +96,7 @@ function Profile() {
           <div className="row mt-0 mt-md-4">
             {/* Sidebar Here */}
             <Sidebar />
-            <div className="col-lg-9 col-md-8 col-12">
+            <div className="col-lg-10 col-md-8 col-12">
               {/* Card */}
               <div className="card">
                 {/* Card header */}

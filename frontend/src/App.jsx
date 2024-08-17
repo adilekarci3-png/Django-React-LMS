@@ -30,6 +30,7 @@ import StudentProfile from "./views/student/Profile";
 import useAxios from "./utils/useAxios";
 import UserData from "./views/plugin/UserData";
 import StudentChangePassword from "./views/student/ChangePassword";
+import AgentHafizBilgiList from "./views/agent/HafizBilgiList";
 import Dashboard from "./views/instructor/Dashboard";
 import Courses from "./views/instructor/Courses";
 import Review from "./views/instructor/Review";
@@ -94,6 +95,14 @@ function App() {
                 path="/hafizbilgi/create-hafizbilgi/"
                 element={<HafizBilgiCreate />}
               />
+
+              {/* Agent Routes */}
+              <Route path="/agent/hafizbilgi/list/" element={<AgentHafizBilgiList />} />
+              <Route
+                path="/hafizbilgi/create-hafizbilgi/"
+                element={<HafizBilgiCreate />}
+              />
+
               {/* Student Routes */}
               <Route
                 path="/student/dashboard/"
