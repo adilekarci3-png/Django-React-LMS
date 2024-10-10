@@ -21,7 +21,7 @@ function BaseHeader() {
     const [isAgent, setIsAgent] = useState(false);
     const [isTeacher, setIsTeacher] = useState(true);
     const [isStudent, setIsStudent] = useState(true);
-
+    
     const IsUserAgent = () => {        
         try {
             useAxios()
@@ -35,9 +35,9 @@ function BaseHeader() {
             console.log(error);
         }
     };
-
+    
     useEffect(() => {
-        IsUserAgent();
+        IsUserAgent();        
     },[])
     return (
         <div>
@@ -69,10 +69,10 @@ function BaseHeader() {
                                 <Link className="nav-link" to="/pages/about-us/">
                                     <i className="fas fa-address-card"></i> Hakkımızda
                                 </Link>
-                            </li>
+                            </li>                            
                             <li className="nav-item">
-                                <Link className="nav-link" to="/hafizbilgi/create-hafizbilgi/">
-                                    <i className="fas fa-address-card"></i> HBS
+                                <Link className="nav-link" to="/admin/OrganizationChart/">
+                                    <i className="fas fa-address-card"></i> Organizasyon Şemaları
                                 </Link>
                             </li>
                             <li className="nav-item dropdown">

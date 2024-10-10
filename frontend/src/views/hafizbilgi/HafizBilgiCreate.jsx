@@ -109,13 +109,13 @@ function HafizBilgiCreate() {
   },[]);
 
   const handleMeslekChange = (event) => {
-    debugger;
+    
     const data = event.target.value;       
     setMeslek(data);    
   };
   
   const handleCinsiyetChange = (event) => {
-    debugger;
+    
     const data = event.target.value;
     if(data==10)
       {setCinsiyet("Erkek");} 
@@ -127,7 +127,7 @@ function HafizBilgiCreate() {
   console.log(cinsiyet);
 
   const handleAdresIlChange = (event) => {
-    debugger;
+    
     const data = event;       
     setAdresIl(data);
 
@@ -135,7 +135,7 @@ function HafizBilgiCreate() {
     var IlIlce = []; 
     axios.get(`http://127.0.0.1:8000/api/v1/district/list/`)
       .then((res) => {  
-        debugger;
+        
         temp = res.data;      
         for (var i = 0; i < temp.length; i++) {          
           if(temp[i].city != null && temp[i].city.id == event){
@@ -149,13 +149,13 @@ function HafizBilgiCreate() {
   console.log(adresil);   
 
   const handleAdresIlceChange = (event) => {
-    debugger;
+    
     const data = event.target.value;    
     setAdresIlce(data);
   };
   console.log(adresilce); 
   const handleKursIlChange = (event) => {
-    debugger;
+    
     const data = event.target.value;    
     setKursIl(data);
   };
@@ -164,7 +164,7 @@ function HafizBilgiCreate() {
 
  
   const handleYilChange = (event) => {
-    debugger;
+    
     const data = event.target.value;
     setYil(data);
   };
@@ -179,7 +179,7 @@ function HafizBilgiCreate() {
 
 
   const handleSubmit = async (e) => {
-    try{ debugger;
+    try{ 
       e.preventDefault();
       const formdata = new FormData();
       formdata.append("full_name", adiSoyadi);
@@ -241,13 +241,13 @@ function HafizBilgiCreate() {
         <div className="container">
           <form className="col-md-12 col-md-9 col-12" onSubmit={handleSubmit}>
             <>
-              <section className="py-4 py-md-6 bg-primary rounded-3">
+              <section className="py-2 py-md-2 bg-primary rounded-3">
                 <div className="container">
                   <div className="row">
                     <div className="offset-md-1 col-md-10 col-md-10 col-10">
                       <div className="d-md-flex align-items-center justify-content-between">
                         {/* Content */}
-                        <div className="mb-4 mb-md-0">
+                        <div className="mb-2 mb-md-0">
                           <h1 className="text-white mb-1">Bilgilerinizi Girin</h1>
                           <p className="mb-0 text-white lead">
                             Alanları Doldurunuz, Kayıt İşlemi tamamlandıktan sonra bilgileriniz EHAD sistemine kaydedilecektir ve bulunduğunuz ilin şube başkanları sizinle iletişime geçecektir
@@ -257,10 +257,10 @@ function HafizBilgiCreate() {
                           <Link
                             to="/"
                             className="btn"
-                            style={{ backgroundColor: "white" }}
+                            style={{ backgroundColor: "white", width:"150px" }}
                           >
                             {" "}
-                            <i className="fas fa-arrow-left"></i> Ana Sayfa
+                            <i className="fas fa-home"></i> Ana Sayfa
                           </Link>
                         </div>
                       </div>

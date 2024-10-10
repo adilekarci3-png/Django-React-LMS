@@ -1228,9 +1228,10 @@ class CourseVariantItemDeleteAPIVIew(generics.DestroyAPIView):
 
 
 class HafizBilgiCreateAPIView(generics.CreateAPIView):
-    querysect = api_models.Hafizbilgileri.objects.all()
+    querysect = api_models.Hafizbilgileri.objects.all()    
     serializer_class = api_serializer.HafizBilgiSerializer
     permission_classes = [AllowAny]
+
 
     def create(self, request, *args, **kwargs):
         yasVar=0
@@ -1242,8 +1243,8 @@ class HafizBilgiCreateAPIView(generics.CreateAPIView):
         kurscity_id = request.data['hafizlikyaptigikursili']
         ilce_id = request.data['adresIlce']
         job_id = request.data["job"]
-        full_name=request.data['full_name']
-               
+        full_name=request.data['full_name']        
+            
         babaadi=request.data['babaadi']
         tcno=request.data['tcno']
         adres=request.data['adres']       
@@ -1262,7 +1263,7 @@ class HafizBilgiCreateAPIView(generics.CreateAPIView):
         hafizlikarkadasoyad=request.data['hafizlikarkadasoyad']
         hafizlikarkadasceptel=request.data['hafizlikarkadasceptel']
         referanstcno=request.data['referanstcno']
-        onaydurumu=request.data['onaydurumu']
+        onaydurumu='Onaylanmadı'
         description=request.data['description']
         gender=request.data['gender']        
 
@@ -1270,6 +1271,7 @@ class HafizBilgiCreateAPIView(generics.CreateAPIView):
         adrescity = api_models.City.objects.get(id=city_id)
         kurscity = api_models.City.objects.get(id=kurscity_id)
         job = api_models.Job.objects.get(id=job_id)
+        agent = api_models.Agent.objects.get(city=adrescity, gender=gender)
         
         api_models.Hafizbilgileri.objects.create(         
             full_name=full_name,            
@@ -1299,6 +1301,7 @@ class HafizBilgiCreateAPIView(generics.CreateAPIView):
             gender=gender,
             job=job,
             yas=yasVar,
+            agent =agent,
             active=False
         )
 
@@ -1311,31 +1314,58 @@ class HafizBilgiUpdateAPIView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         agent_id = self.kwargs['agent_id']
+        print(agent_id)
         hafizbilgi_id = self.kwargs['hafizbilgi_id']
 
-        agent = api_models.Agent.objects.get(id=agent_id)
+        agent = api_models.Agent.objects.get(full_name=str(agent_id))
+        print(agent.id)
+        print(hafizbilgi_id)
+        self.kwargs['agent_id'] = agent.id
         hafizBilgi = api_models.Hafizbilgileri.objects.get(id=hafizbilgi_id)
 
         return hafizBilgi
     
     def update(self, request, *args, **kwargs):
+        il = api_models.City.objects.all()
+        ilce = api_models.District.objects.all()
+        job = api_models.Job.objects.all()  
+                
+        if "yas" in request.data:
+            request.data['yas'] = int(request.data['yas']) 
+            
+        if "agent" in request.data:
+            agentBilgi = request.data['agent']
+            print(agentBilgi)
+            agent = api_models.Agent.objects.get(full_name=str(agentBilgi))
+            print(agent)
+            request.data['agent'] = int(agent.id) 
+            
+        if "adresIl" in request.data:
+            if type(request.data['adresIl']) != int:
+                for ilitem in il:
+                    if ilitem == request.data['adresIl']:
+                        request.data['adresIl']=ilitem.id
+                        print(ilitem)  
+           
+     
+                
         hafizBilgi = self.get_object()
-        serializer = self.get_serializer(hafizBilgi, data=request.data)
+        serializer = self.get_serializer(hafizBilgi, data=request.data)         
         print(request.data)
         serializer.is_valid(raise_exception=True)
 
-        # if "image" in request.data and isinstance(request.data['image'], InMemoryUploadedFile):
-        #     course.image = request.data['image']
-        # elif 'image' in request.data and str(request.data['image']) == "No File":
-        #     course.image = None
-        
-        # if 'file' in request.data and not str(request.data['file']).startswith("http://"):
-        #     course.file = request.data['file']
-
-        # if 'category' in request.data['category'] and request.data['category'] != 'NaN' and request.data['category'] != "undefined":
-        #     category = api_models.Category.objects.get(id=request.data['category'])
-        #     course.category = category
-
+        # if "gender" in request.data:
+        #     if request.data['image']=='Kadın':
+        #         hafizBilgi.gender = 'kadin'
+        #     elif request.data['image']=='Erkek':
+        #         hafizBilgi.gender = 'erkek'
+                
+        # if "onaydurumu" in request.data:
+        #     if request.data['onaydurumu']=='Onaylanmadı':
+        #         hafizBilgi.gender = 'onaylanmadi'
+        #     elif request.data['onaydurumu']=='Onaylanmdı':
+        #         hafizBilgi.gender = 'onaylandi'
+       
         self.perform_update(serializer)
         # self.update_variant(hafizBilgi, request.data)
         return Response(serializer.data, status=status.HTTP_200_OK)   
@@ -1353,10 +1383,11 @@ class AgentHafizListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.HafizBilgiSerializer
     permission_classes = [AllowAny]
 
-    def get_queryset(self):
+    def get_queryset(self):  
         agent_id = self.kwargs['agent_id']
         agent =  api_models.Agent.objects.get(id=agent_id) 
-        queryset = api_models.Hafizbilgileri.objects.filter(agent=agent)         
+        queryset = api_models.Hafizbilgileri.objects.filter(agent=agent)        
+           
         return queryset        
      
 class HafizsListAPIView(generics.ListAPIView):
@@ -1387,6 +1418,14 @@ class CityListAPIView(generics.ListAPIView):
         print(queryset)      
         return queryset   
     
+class ProjeListAPIView(generics.ListAPIView):   
+    serializer_class = api_serializer.ProjeSerializer   
+    
+    def get_queryset(self):        
+        queryset = api_models.Proje.objects.all()
+        print(queryset)      
+        return queryset 
+    
 class DistrictListAPIView(generics.ListAPIView):   
     serializer_class = api_serializer.DistrictSerializer 
     permission_classes = [AllowAny]
@@ -1395,3 +1434,95 @@ class DistrictListAPIView(generics.ListAPIView):
         queryset = api_models.District.objects.all()
         print(queryset)      
         return queryset  
+    
+class HafizListViewSetAPIVIew(viewsets.ViewSet):
+    
+    def list(self, request, agent_id=None):
+        agent = api_models.Agent.objects.get(id=agent_id)
+
+        HafizBilgis = api_models.Hafizbilgileri.objects.filter(agent=agent)
+        unique_agent_ids = set()
+        hafizs = []
+
+        for hafizBilgi in HafizBilgis:            
+            agent = api_models.Agent.objects.get(id=hafizBilgi.agent_id)
+            adresIL = str(hafizBilgi.adresIl)
+            hafizlikyaptigikursili = str(hafizBilgi.hafizlikyaptigikursili)
+            adresIlce = str(hafizBilgi.adresIlce)
+            job = str(hafizBilgi.job)
+            hafiz = {
+                "id":hafizBilgi.id,
+                "full_name": hafizBilgi.full_name,
+                "babaadi": hafizBilgi.babaadi,
+                "tcno": hafizBilgi.tcno,
+                "adres": hafizBilgi.adres,
+                "adresIl": adresIL,
+                "adresIlce": adresIlce,
+                "hafizlikbitirmeyili": hafizBilgi.hafizlikbitirmeyili,
+                "evtel": hafizBilgi.evtel,
+                "istel": hafizBilgi.istel,
+                "ceptel": hafizBilgi.ceptel,
+                "isMarried": hafizBilgi.isMarried,
+                "email": hafizBilgi.email,
+                "hafizlikyaptigikursadi": hafizBilgi.hafizlikyaptigikursadi,
+                "hafizlikyaptigikursili": hafizlikyaptigikursili,
+                "gorev": hafizBilgi.gorev,
+                "hafizlikhocaadi": hafizBilgi.hafizlikhocaadi,
+                "hafizlikhocasoyadi": hafizBilgi.hafizlikhocasoyadi,
+                "hafizlikhocaceptel": hafizBilgi.hafizlikhocaceptel,
+                "hafizlikarkadasadi": hafizBilgi.hafizlikarkadasadi,
+                "hafizlikarkadasoyad": hafizBilgi.hafizlikarkadasoyad,
+                "hafizlikarkadasceptel": hafizBilgi.hafizlikarkadasceptel,
+                "referanstcno": hafizBilgi.referanstcno,
+                "onaydurumu": hafizBilgi.onaydurumu,
+                "description": hafizBilgi.description,
+                "gender": hafizBilgi.gender,
+                "job": job,
+                "yas": hafizBilgi.yas,
+                "active": hafizBilgi.active,
+                "agent": str(hafizBilgi.agent),
+                "country": str(hafizBilgi.country)                   
+            }
+            
+            hafizs.append(hafiz)
+            unique_agent_ids.add(hafizBilgi.agent_id)
+            
+
+        return Response(hafizs)
+
+
+class OrganizationMemberViewSetAPIVIew(generics.ListAPIView):   
+    serializer_class = api_serializer.OrganizationMemberSerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):        
+        queryset = api_models.OrganizationMember.objects.all()
+        print(queryset)        
+        return queryset 
+    
+    def list(self,request):
+        members =[]
+        try:
+            queryset = self.get_queryset()
+            serialize_value = api_serializer.OrganizationMemberSerializer(queryset,many=True,context={'request': self.request}).data
+            #Here in "serialize_value" you can append your data as much as you wish
+            for organizationMember in serialize_value: 
+                designation_id = organizationMember['Designation']
+                
+                designation = api_models.Designation.objects.get(id=designation_id)                  
+                member = {
+                    'id': organizationMember['id'],
+                    'Name':organizationMember['Name'],
+                    'Designation':organizationMember['Designation'],
+                    'ImageUrl':organizationMember['ImageUrl'],
+                    'IsExpand':organizationMember['IsExpand'],
+                    'RatingColor':'#68C2DE',
+                    'ReportingPerson':designation.ustBirim,
+                    'DesignationText':designation.name
+                    
+                }
+                members.append(member)    
+            return Response(members, status=status.HTTP_200_OK, content_type='application/json')
+        except Exception as E:
+            return Response({'error': str(E)}, status=status.HTTP_408_REQUEST_TIMEOUT, content_type='application/json') 
+     

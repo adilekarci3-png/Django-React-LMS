@@ -91,16 +91,23 @@ class JobSerializer(serializers.ModelSerializer):
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
-        model = api_models.City 
+        model = api_models.City  
+
+class ProjeSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.Proje 
+
+class DesignationSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.Designation 
         
-    def __init__(self, *args, **kwargs):
-        super(CitySerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3  
-            
+class OrganizationMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.OrganizationMember  
+           
 class DistrictSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'

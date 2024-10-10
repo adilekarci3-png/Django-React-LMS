@@ -26,7 +26,7 @@ function Dashboard() {
     useAxios()
       .get(`student/course-list/${UserData()?.user_id}/`)
       .then((res) => {
-        debugger;
+        
         console.log(res.data);
         setCourses(res.data);
         setFetching(false);
@@ -34,7 +34,7 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    debugger;
+    
     fetchData();
   }, []);
 

@@ -15,7 +15,6 @@ import { CartContext } from "../plugin/Context";
 import apiInstance from "../../utils/axios";
 
 
-
 function CourseDetail() {
   const [cartCount, setCartCount] = useContext(CartContext);
   const [course, setCourse] = useState([]);

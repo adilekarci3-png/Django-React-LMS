@@ -19,13 +19,19 @@ admin.site.register(models.Review)
 admin.site.register(models.Notification)
 admin.site.register(models.Coupon)
 admin.site.register(models.Wishlist)
+admin.site.register(models.OrganizationMember)
+admin.site.register(models.Designation)
+
 
 class CountryAdmin(admin.ModelAdmin):        
     list_display = ('name','active')
 
 class CityAdmin(admin.ModelAdmin):        
     list_display = ('name','active')
-    
+
+class ProjeAdmin(admin.ModelAdmin):        
+    list_display = ('name','active')
+   
 class JobAdmin(admin.ModelAdmin):        
     list_display = ('name','active')
     
@@ -33,12 +39,22 @@ class AgentAdmin(admin.ModelAdmin):
     list_display = ('full_name','email','ceptel','country','city','active')
     
 class HafizbilgileriAdmin(admin.ModelAdmin):        
-    list_display = ('full_name','tcno','email','ceptel','country','adresIl','active','onaydurumu')   
+    list_display = ('full_name','tcno','email','ceptel','country','adresIl','active','onaydurumu')
+    list_filter = [
+         "country",
+         "adresIl",
+         "onaydurumu"
+    ]
+    search_fields = (
+        "full_name",
+        "tcno",
+    ) 
      
 class DistrictAdmin(admin.ModelAdmin):        
     list_display = ('name','city','active')
     
 admin.site.register(models.City, CityAdmin)
+admin.site.register(models.Proje, ProjeAdmin)
 admin.site.register(models.District, DistrictAdmin)
 admin.site.register(models.Agent,AgentAdmin)
 admin.site.register(models.Hafizbilgileri,HafizbilgileriAdmin)

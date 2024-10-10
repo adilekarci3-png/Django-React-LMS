@@ -14,9 +14,15 @@ urlpatterns = [
     # İl    
     path("city/list/", api_views.CityListAPIView.as_view()),
     
+    # Proje   
+    path("proje/list/", api_views.ProjeListAPIView.as_view()),
+    
     # İlçe    
     path("district/list/", api_views.DistrictListAPIView.as_view()),
     
+    # OrganizationChart    
+    path("admin/organizationchart/", api_views.OrganizationMemberViewSetAPIVIew.as_view()),
+   
     # Authentication Endpoints
     path("user/token/", api_views.MyTokenObtainPairView.as_view()),
     path("user/token/refresh/", TokenRefreshView.as_view()),
@@ -57,7 +63,8 @@ urlpatterns = [
 
     # Agent API Endpoints
     path("agent/summary/<agent_id>/", api_views.AgentSummaryAPIView.as_view()),
-    path("agent/hafiz-list/<agent_id>/", api_views.AgentHafizListAPIView.as_view()),
+    path("agent/course-list/<user_id>/", api_views.StudentCourseListAPIView.as_view()),
+    path("agent/hafiz-list/<agent_id>/", api_views.HafizListViewSetAPIVIew.as_view({'get': 'list'})),
     path("agent/<user_id>/", api_views.IsAgent),
     path("agent/hafizbilgi-update/<agent_id>/<hafizbilgi_id>/", api_views.HafizBilgiUpdateAPIView.as_view()),
     path("agent/hafizbilgi-create/", api_views.HafizBilgiCreateAPIView.as_view()),

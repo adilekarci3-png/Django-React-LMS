@@ -27,10 +27,18 @@ import StudentCourses from "./views/student/Courses";
 import StudentCourseDetail from "./views/student/CourseDetail";
 import Wishlist from "./views/student/Wishlist";
 import StudentProfile from "./views/student/Profile";
+
 import useAxios from "./utils/useAxios";
 import UserData from "./views/plugin/UserData";
 import StudentChangePassword from "./views/student/ChangePassword";
+
 import AgentHafizBilgiList from "./views/agent/HafizBilgiList";
+import AgentDashboard from "./views/agent/Dashboard";
+
+import OrganizationChart from "./views/admin/OrganizationChart";
+
+import CrudTableDeneme from "./views/CrudTable/CrudTableDeneme";
+
 import Dashboard from "./views/instructor/Dashboard";
 import Courses from "./views/instructor/Courses";
 import Review from "./views/instructor/Review";
@@ -102,6 +110,17 @@ function App() {
                 path="/hafizbilgi/create-hafizbilgi/"
                 element={<HafizBilgiCreate />}
               />
+              <Route
+                path="/hafizbilgi/crudtable/"
+                element={<CrudTableDeneme />}
+              />
+
+              {/*Admin Routes*/}
+              <Route
+                path="/admin/OrganizationChart/"
+                element={<OrganizationChart />}
+              />
+
 
               {/* Student Routes */}
               <Route

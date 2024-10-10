@@ -188,7 +188,7 @@ function CourseDetail() {
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
 
-    debugger;
+    
     await useAxios()
       .post(
         `student/question-answer-list-create/${course.course?.id}/`,

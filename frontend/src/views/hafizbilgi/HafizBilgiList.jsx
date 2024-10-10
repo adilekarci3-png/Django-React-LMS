@@ -28,12 +28,12 @@ function HafizBilgiList() {
             });
     };
     const FetchMesleks = () => {
-        debugger;
+        
         setIsLoading(true);
         useAxios()
             .get(`job/list/`)
             .then((res) => {         
-                debugger;
+                
                 setMeslekler(res.data);
                 res.data.forEach(function(meslek){                     
                     meslek_choise.push(meslek.name);
@@ -151,7 +151,7 @@ function HafizBilgiList() {
     // Field Validators
 
     const validateLength = (value, field, lowest) => {
-        debugger;
+        
         if (value == null || value.length === 0) {
             return `${field} Boş Olamaz`;
         } else if (value.length < lowest) {

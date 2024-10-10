@@ -20,18 +20,18 @@ LANGUAGE = (
 )
 
 GENDER_CHOICES =(
-    ('erkek','Erkek'),
-    ('kadin','Kadın')    
+    ('Erkek','Erkek'),
+    ('Kadın','Kadın')    
 )
 
 ONAY_CHOICES =(
-    ('onaylandi','Onaylandi'),
-    ('onaylanmadi','Onaylanmadi')    
+    ('Onaylandı','Onaylandı'),
+    ('Onaylanmadı','Onaylanmadı')    
 )
 
 ISMARRIED_CHOICES =(
-    ('evli','Evli'),
-    ('bekar','Bekar')    
+    ('Evli','Evli'),
+    ('Bekar','Bekar')    
 )
 OS_CHOICES =[
     ('android','Android'),
@@ -642,7 +642,7 @@ class Hafizbilgileri(models.Model):
     hafizlikarkadasoyad = models.CharField(max_length=150, default="",null=True, blank=True)
     hafizlikarkadasceptel = models.CharField(max_length=150, default="",null=True, blank=True)
     referanstcno = models.CharField(max_length=150, default="",null=True, blank=True)
-    onaydurumu = models.CharField(max_length=150,choices=ONAY_CHOICES,default="")    
+    onaydurumu = models.CharField(max_length=150,choices=ONAY_CHOICES,default="Onaylanmadı")    
     description = models.TextField(blank=True,null=True)    
     gender = models.CharField(max_length=50, choices=GENDER_CHOICES,default="")    
     job = models.ForeignKey("Job", null=True, blank=True, on_delete=models.SET_NULL)
@@ -705,6 +705,7 @@ class Agent(models.Model):
     country = models.ForeignKey("Country", related_name="Ülkeler", null=True, blank=True, on_delete=models.SET_NULL)
     city = models.ForeignKey("City", related_name="Sehirler", null=True, blank=True, on_delete=models.SET_NULL)
     active = models.BooleanField(default=True)
+    gender = models.CharField(max_length=50, choices=GENDER_CHOICES,default="")   
     
     def __str__(self):
         return self.full_name 
@@ -762,3 +763,61 @@ class District(models.Model):
 District._meta.get_field('name').verbose_name = "İlçe"    
 District._meta.get_field('city').verbose_name = "Şehir" 
 District._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+
+class OrganizationMember(models.Model):
+    Name = models.CharField(max_length=100)    
+    Designation = models.ForeignKey("Designation", null=True, blank=True, on_delete=models.SET_NULL)
+    ImageUrl = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
+    IsExpand = models.BooleanField()
+    active = models.BooleanField()
+    email = models.EmailField(default="")
+    phone = models.CharField(max_length=15,default="")
+    
+    def __str__(self):
+        return self.Name
+    
+    class Meta:
+        verbose_name = "Organizasyon Üyesi"
+        verbose_name_plural = "Organizasyon Üyeleri"
+        
+OrganizationMember._meta.get_field('Name').verbose_name = "Üye Adı Soyadı"    
+OrganizationMember._meta.get_field('Designation').verbose_name = "Görevi" 
+OrganizationMember._meta.get_field('ImageUrl').verbose_name = "Üye Resmi" 
+OrganizationMember._meta.get_field('IsExpand').verbose_name = "Expand" 
+OrganizationMember._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+OrganizationMember._meta.get_field('email').verbose_name = "E Posta" 
+OrganizationMember._meta.get_field('phone').verbose_name = "Telefon" 
+
+class Designation(models.Model):
+    name = models.CharField(max_length=100)
+    ustBirim = models.IntegerField(default=0) 
+    birimNumarasi = models.IntegerField(default=0)
+    active = models.BooleanField()
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Üye Görevi"
+        verbose_name_plural = "Üye Görevleri"
+        
+Designation._meta.get_field('name').verbose_name = "Üye Görevi" 
+Designation._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+Designation._meta.get_field('ustBirim').verbose_name = "Üst Birim" 
+Designation._meta.get_field('birimNumarasi').verbose_name = "Birim Numarası" 
+
+class Proje(models.Model):
+    name = models.CharField(max_length=100)
+    active = models.BooleanField(default=True)
+    image = models.FileField(upload_to="proje-file", default="HBS.png", null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Proje Ado"
+        verbose_name_plural = "Projeler"
+        
+Proje._meta.get_field('name').verbose_name = "Proje Ado" 
+Proje._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+Proje._meta.get_field('image').verbose_name = "Proje Resmi" 
