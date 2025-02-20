@@ -15,6 +15,10 @@ import ForgotPassword from "./views/auth/ForgotPassword";
 import CreateNewPassword from "./views/auth/CreateNewPassword";
 
 import Index from "./views/base/Index";
+import ESKEPIndex from "./views/base/ESKEPIndex";
+import ESKEPStudent from "./views/ESKEPstudent/Dashboard";
+import OdevCreate from "./views/ESKEPstudent/OdevCreate";
+import DersSonuAnketi from "./views/ESKEPstudent/DersSonuAnketi";
 import CourseDetail from "./views/base/CourseDetail";
 import Cart from "./views/base/Cart";
 import Checkout from "./views/base/Checkout";
@@ -103,7 +107,21 @@ function App() {
                 path="/hafizbilgi/create-hafizbilgi/"
                 element={<HafizBilgiCreate />}
               />
-
+              {/* ESKEP Routes */}
+              <Route path="/eskep/" element={<ESKEPIndex />} />
+              <Route path="/eskep/list/" element={<ESKEPIndex />} />
+              <Route
+                path="/eskep/ogrenci/"
+                element={<ESKEPStudent />}
+              />
+              <Route
+                path="/eskep/ogrenci/kursolustur"
+                element={<OdevCreate />}
+              />
+              <Route
+                path="/eskep/ogrenci/dersanket"
+                element={<DersSonuAnketi />}
+              />
               {/* Agent Routes */}
               <Route path="/agent/hafizbilgi/list/" element={<AgentHafizBilgiList />} />
               <Route

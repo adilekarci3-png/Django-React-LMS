@@ -163,8 +163,7 @@ function OrganizationChart() {
                 "Designation": item.DesignationText ? item.DesignationText : "-",
                 "ImageUrl": item.ImageUrl ? item.ImageUrl : "-",
                 "IsExpand": item.IsExpand ? item.IsExpand : "-",
-                "RatingColor": "#68C2DE",
-                "RatingColor": "#68C2DE"
+                "RatingColor": "#68C2DE"                
             }
 
         }

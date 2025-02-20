@@ -243,11 +243,11 @@ const CrudTable = ({
       }
     },
     getRowId: (row) => row.id,
-    muiTableContainerProps: {
-      sx: {
-        maxHeight: '500px',
-      },
-    },
+    // muiTableContainerProps: {
+    //   sx: {
+    //     maxHeight: '500px',
+    //   },
+    // },
     muiExpandButtonProps: ({ row, table }) => ({
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }), //only 1 detail panel open at a time
       sx: {
