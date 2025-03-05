@@ -149,9 +149,10 @@ function HafizBilgiList() {
                 size: 80,
                 muiEditTextFieldProps: {
                     variant: 'outlined',
-
+                    style: { display: 'none' },  // id alanını görsel olarak gizler
                 },
-
+                // id alanını tamamen gizlemek için
+                hide: true, 
             },
             {
                 accessorKey: 'agent',

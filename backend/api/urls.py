@@ -89,6 +89,28 @@ urlpatterns = [
     path("teacher/course/variant-delete/<variant_id>/<teacher_id>/<course_id>/", api_views.CourseVariantDeleteAPIView.as_view()),
     path("teacher/course/variant-item-delete/<variant_id>/<variant_item_id>/<teacher_id>/<course_id>/", api_views.CourseVariantItemDeleteAPIVIew.as_view()),
 
+    # Stajer API Endpoints
+    path("stajer/odev-create/", api_views.OdevCreateAPIView.as_view()),
+    path("stajer/odev-list/<stajer_id>/", api_views.StajerOdevListAPIView.as_view()),
+    path("stajer/odev-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
+    # path("stajer/odev-completed/", api_views.StudentCourseCompletedCreateAPIView.as_view()),
+    
+    # Eğitmen API Endpoints
+    path("instructor/odev-detail/<user_id>/<teacher_id>/", api_views.InstructorOdevDetailAPIView.as_view()),
+    # path("instructor/odev-list/<teacher_id>/", api_views.InstructorOdevListAPIView.as_view()),
+    path("instructor/odev-completed/", api_views.InstructorOdevCompletedCreateAPIView.as_view()),
+    
+    path("instructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),
+    path("instructor/odev-list/<user_id>/", api_views.InstructorOdevListAPIView.as_view()),
+    path("instructor/odev-detail/<user_id>/<enrollment_id>/", api_views.InstructorOdevDetailAPIView.as_view()),
+    path("instructor/odev-completed/", api_views.InstructorOdevCompletedCreateAPIView.as_view()),
+    path("instructor/odev-note/<user_id>/<enrollment_id>/", api_views.InstructorNoteCreateAPIView.as_view()),
+    path("instructor/odev-note-detail/<user_id>/<enrollment_id>/<note_id>/", api_views.InstructorNoteDetailAPIView.as_view()),
+    path("instructor/rate-odev/", api_views.InstructorRateCourseCreateAPIView.as_view()),
+    path("instructor/review-detail/<user_id>/<review_id>/", api_views.InstructorRateCourseUpdateAPIView.as_view()),
+    path("instructor/wishlist/<user_id>/", api_views.StudentWishListListCreateAPIView.as_view()),
+    path("instructor/question-answer-list-create/<odev_id>/", api_views.QuestionAnswerListCreateAPIView.as_view()),
+    path("instructor/question-answer-message-create/", api_views.QuestionAnswerMessageSendAPIView.as_view()),
 ]
 
 

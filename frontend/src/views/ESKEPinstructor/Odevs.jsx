@@ -2,26 +2,33 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import BaseHeader from "../partials/ESKEPBaseHeader";
+import BaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
 
-function Courses() {
-  const [courses, setCourses] = useState([]);
+function Odevs() {
+  const [odevs, setOdevs] = useState([]);
   const [stats, setStats] = useState([]);
   const [fetching, setFetching] = useState(true);
 
   const fetchData = () => {
     setFetching(true);
 
-    useAxios()
-      .get(`student/course-list/${UserData()?.user_id}/`)
+    // useAxios()
+    //   .get(`instructor/odev-list/${UserData()?.user_id}/`)
+    //   .then((res) => {
+    //     console.log(res);
+    //     setOdevs(res.data);
+    //     setFetching(false);
+    //   });
+      useAxios()
+      .get(`instructor/odev-list/1/`)
       .then((res) => {
         console.log(res);
-        setCourses(res.data);
+        setOdevs(res.data);
         setFetching(false);
       });
   };
@@ -36,10 +43,10 @@ function Courses() {
     if (query === "") {
       fetchData();
     } else {
-      const filtered = courses.filter((c) => {
-        return c.course.title.toLowerCase().includes(query);
+      const filtered = odevs.filter((c) => {
+        return c.odev.title.toLowerCase().includes(query);
       });
-      setCourses(filtered);
+      setOdevs(filtered);
     }
   };
   return (
@@ -56,7 +63,7 @@ function Courses() {
             <div className="col-lg-10 col-md-8 col-12">
               <h4 className="mb-0 mb-4">
                 {" "}
-                <i className="fas fa-chalkboard-user"></i> Kurslarım
+                <i className="fas fa-chalkboard-user"></i> Ödevlerım
               </h4>
 
               {fetching === true && <p className="mt-3 p-3">Yükleniyor...</p>}
@@ -64,9 +71,9 @@ function Courses() {
               {fetching === false && (
                 <div className="card mb-4">
                   <div className="card-header">
-                    <h3 className="mb-0">Kurslar</h3>
+                    <h3 className="mb-0">Ödevler</h3>
                     <span>
-                    Panel sayfanızdan kursları izlemeye hemen başlayın.
+                    Panel sayfanızdan ödevleri inceleyebilirsiniz.
                     </span>
                   </div>
                   <div className="card-body">
@@ -75,7 +82,7 @@ function Courses() {
                         <input
                           type="search"
                           className="form-control"
-                          placeholder="Kurslarında Ara"
+                          placeholder="Ödevlerde Ara"
                           onChange={handleSearch}
                         />
                       </div>
@@ -85,7 +92,7 @@ function Courses() {
                     <table className="table mb-0 text-nowrap table-hover table-centered text-nowrap">
                       <thead className="table-light">
                         <tr>
-                          <th>Kurslar</th>
+                          <th>Ödevlar</th>
                           <th>Kayıt Tarihi</th>
                           <th>Dersler</th>
                           <th>Tamamlanmışmı</th>
@@ -94,15 +101,15 @@ function Courses() {
                         </tr>
                       </thead>
                       <tbody>
-                        {courses?.map((c, index) => (
+                        {odevs?.map((c, index) => (
                           <tr>
                             <td>
                               <div className="d-flex align-items-center">
                                 <div>
                                   <a href="#">
                                     <img
-                                      src={c.course.image}
-                                      alt="course"
+                                      src={c.odev.image}
+                                      alt="Ödev"
                                       className="rounded img-4by3-lg"
                                       style={{
                                         width: "100px",
@@ -119,21 +126,21 @@ function Courses() {
                                       href="#"
                                       className="text-inherit text-decoration-none text-dark"
                                     >
-                                      {c.course.title}
+                                      {c.odev.title}
                                     </a>
                                   </h4>
                                   <ul className="list-inline fs-6 mb-0">
                                     <li className="list-inline-item">
                                       <i className="fas fa-user"></i>
                                       <span className="ms-1">
-                                        {c.course.language}
+                                        {c.odev.language}
                                       </span>
                                     </li>
                                     <li className="list-inline-item">
                                       <i className="bi bi-reception-4"></i>
                                       <span className="ms-1">
                                         {" "}
-                                        {c.course.level}
+                                        {c.odev.level}
                                       </span>
                                     </li>
                                   </ul>
@@ -150,35 +157,35 @@ function Courses() {
                             </td>
                             <td>
                               <p className="mt-3">
-                                {c.completed_lesson?.length}
+                                
                               </p>
                             </td>
                             <td>
-                              {c.completed_lesson?.length < 1 && (
+                              {(
                                 <Link
-                                to={`/student/courses/${c.enrollment_id}/`}
+                                to={`/instructor/odevs/${c.enrollment_id}/`}
                                 className="btn btn-success btn-sm mt-3"
                               >
-                                Kursa Başla
+                                Ödevi İncele
                                 <i className="fas fa-arrow-right ms-2"></i>
                               </Link>
                               )}
 
-                              {c.completed_lesson?.length > 0 && (
+                              {/* {(
                                  <Link
-                                 to={`/student/courses/${c.enrollment_id}/`}
+                                 to={`/instructor/odevs/${c.enrollment_id}/`}
                                  className="btn btn-primary btn-sm mt-3"
                                >
-                                 Kursa Devam Et
+                                 Ödeva Devam Et
                                  <i className="fas fa-arrow-right ms-2"></i>
                                </Link>
-                              )}
+                              )} */}
                             </td>
                           </tr>
                         ))}
 
-                        {courses?.length < 1 && (
-                          <p className="mt-4 p-4">Kurs Bulunamadı</p>
+                        {odevs?.length < 1 && (
+                          <p className="mt-4 p-4">Ödev Bulunamadı</p>
                         )}
                       </tbody>
                     </table>
@@ -195,4 +202,4 @@ function Courses() {
   );
 }
 
-export default Courses;
+export default Odevs;

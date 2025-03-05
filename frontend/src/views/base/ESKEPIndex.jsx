@@ -24,149 +24,68 @@ function ESKEPIndex() {
   const cartId = CartId();
 
   const fetchProjelist = () => {
-    debugger;
     setIsLoading(true);
     axios.get(`http://127.0.0.1:8000/api/v1/proje/list/`)
       .then((res) => {
-        debugger;
         setProjeList(res.data);
         setIsLoading(false);
-        console.log(res.data);
       });
-
   };
 
   useEffect(() => {
     fetchProjelist();
   }, []);
 
-  // const addToCart = async (courseId, userId, price, country, cartId) => {
-
-  //   const formdata = new FormData();
-
-  //   formdata.append("course_id", courseId);
-  //   formdata.append("user_id", userId);
-  //   formdata.append("price", price);
-  //   formdata.append("country_name", country);
-  //   formdata.append("cart_id", cartId);
-
-  //   try {
-  //     await useAxios()
-  //       .post(`course/cart/`, formdata)
-  //       .then((res) => {
-  //         console.log(res.data);
-  //         Toast().fire({
-  //           title: "Added To Cart",
-  //           icon: "success",
-  //         });
-
-  //         // Set cart count after adding to cart
-  //         apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
-  //           setCartCount(res.data?.length);
-  //         });
-  //       });
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // Pagination
-
   const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  //const currentItems = courses.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(projelist.length / itemsPerPage);
   const pageNumbers = Array.from(
     { length: totalPages },
     (_, index) => index + 1
   );
 
-
-  // const projelist = (courseId) => {
-  //   const formdata = new FormData();
-  //   formdata.append("user_id", UserData()?.user_id);
-  //   formdata.append("course_id", courseId);
-
-  //   useAxios()
-  //     .post(`student/wishlist/${UserData()?.user_id}/`, formdata)
-  //     .then((res) => {
-  //       console.log(res.data);
-  //       Toast().fire({
-  //         icon: "success",
-  //         title: res.data.message,
-  //       });
-  //     });
-  // };
-
   return (
     <>
       <ESKEPBaseHeader />
 
-      <section className="pt-2 pb-2">
+      <section className="pt-2 pb-2 bg-mint-100">
         <div className="container">
-          {/* Header Here */}
-
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
-
             <div className="col-lg-12 col-md-12 col-12">
-              {/* Card */}
-              <div className="card mb-4">
-                {/* Card body */}
+              <div className="card mb-4 bg-mint-50 shadow-lg">
                 <div className="p-4 d-flex justify-content-between align-items-center">
                   <div>
-                    <h3 className="mb-0">Projeler</h3>
-                    <span>Kurslarınıza katılan öğrenciler ile tanışın</span>
+                    <h3 className="mb-0 text-mint-800">Projeler</h3>
+                    <span className="text-mint-600">Kurslarınıza katılan öğrenciler ile tanışın</span>
                   </div>
-                  {/* Nav */}
                 </div>
               </div>
-              {/* Tab content */}
               <div className="row">
                 {projelist?.map((s, index) => (
-                  <div className="col-lg-4 col-md-6 col-12">
-                    <div className="card mb-4">
+                  <div className="col-lg-4 col-md-6 col-12" key={index}>
+                    <div className="card mb-4 bg-white shadow-md rounded-xl">
                       <div className="card-body">
                         <div className="text-center">
-                          {s.name == 'HBS' ? (
+                          {s.name === 'HBS' ? (
                             <Link className="nav-link" to="/hafizbilgi/create-hafizbilgi/">
+                              <img
+                                src={s.image}
+                                className="avatar-xl mb-3 rounded-full object-cover"
+                                style={{ width: "150px", height: "150px" }}
+                                alt="avatar"
+                              />
+                            </Link>
+                          ) : (
                             <img
                               src={s.image}
-                              className="avatar-xl mb-3"
-                              style={{
-                                width: "150px",
-                                height: "150px",
-                                borderRadius: "50%",
-                                objectFit: "cover",
-                              }}
+                              className="avatar-xl mb-3 rounded-full object-cover"
+                              style={{ width: "150px", height: "150px" }}
                               alt="avatar"
                             />
-                          </Link>
-                          ):(<img
-                            src={s.image}
-                            className="avatar-xl mb-3"
-                            style={{
-                              width: "150px",
-                              height: "150px",
-                              borderRadius: "50%",
-                              objectFit: "cover",
-                            }}
-                            alt="avatar"
-                          />)}                          
-
-                          <h4 className="mb-1">{s.name}</h4>
-                          {/* <p className="mb-0">
-                            {" "}
-                            <i className="fas fa-map-pin me-1" /> {s.country}{" "}
-                          </p> */}
-                        </div>
-                        <div className="d-flex justify-content-between py-2 mt-4 fs-6">
-                          {/* <span>Kayıt olanlar</span>
-                          <span className="text-dark">
-                            {moment(s.date).format("DD MMM YYYY")}
-                          </span> */}
+                          )}
+                          <h4 className="mb-1 text-mint-800">{s.name}</h4>
                         </div>
                       </div>
                     </div>

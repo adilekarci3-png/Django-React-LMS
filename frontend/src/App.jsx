@@ -17,7 +17,7 @@ import CreateNewPassword from "./views/auth/CreateNewPassword";
 import Index from "./views/base/Index";
 import ESKEPIndex from "./views/base/ESKEPIndex";
 import ESKEPStudent from "./views/ESKEPstudent/Dashboard";
-import OdevCreate from "./views/ESKEPstudent/OdevCreate";
+import OdevCreate from "./views/ESKEPstajer/OdevCreate";
 import DersSonuAnketi from "./views/ESKEPstudent/DersSonuAnketi";
 import CourseDetail from "./views/base/CourseDetail";
 import Cart from "./views/base/Cart";
@@ -55,9 +55,12 @@ import QA from "./views/instructor/QA";
 import ChangePassword from "./views/instructor/ChangePassword";
 import Profile from "./views/instructor/Profile";
 import CourseCreate from "./views/instructor/CourseCreate";
+
 import HafizBilgiCreate from "./views/hafizbilgi/HafizBilgiCreate";
 import CourseEdit from "./views/instructor/CourseEdit";
-
+import ESKEPstajerOdevs from "./views/ESKEPstajer/Odevs";
+import ESKEPinstructorOdevs from "./views/ESKEPinstructor/Odevs";
+import ESKEPinstructorOdevDetail from "./views/ESKEPinstructor/OdevDetail";
 
 function App() {
   const [cartCount, setCartCount] = useState(0);
@@ -109,7 +112,7 @@ function App() {
               />
               {/* ESKEP Routes */}
               <Route path="/eskep/" element={<ESKEPIndex />} />
-              <Route path="/eskep/list/" element={<ESKEPIndex />} />
+              <Route path="/eskep/list/" element={<OdevCreate />} />
               <Route
                 path="/eskep/ogrenci/"
                 element={<ESKEPStudent />}
@@ -182,6 +185,12 @@ function App() {
               <Route
                 path="/instructor/edit-course/:course_id/"
                 element={<CourseEdit />}
+              />
+              <Route path="/stajer/odevs/" element={<ESKEPstajerOdevs />} />
+              <Route path="/instructor/odevs/" element={<ESKEPinstructorOdevs />} />
+              <Route
+                path="/instructor/odevs/:enrollment_id/"
+                element={<ESKEPinstructorOdevDetail />}
               />
             </Routes>
           </MainWrapper>

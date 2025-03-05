@@ -21,6 +21,10 @@ admin.site.register(models.Coupon)
 admin.site.register(models.Wishlist)
 admin.site.register(models.OrganizationMember)
 admin.site.register(models.Designation)
+admin.site.register(models.Odev)
+admin.site.register(models.VariantOdev)
+admin.site.register(models.VariantOdevItem)
+admin.site.register(models.EnrolledOdev)
 
 
 class CountryAdmin(admin.ModelAdmin):        
@@ -36,6 +40,12 @@ class JobAdmin(admin.ModelAdmin):
     list_display = ('name','active')
     
 class AgentAdmin(admin.ModelAdmin):        
+    list_display = ('full_name','email','ceptel','country','city','active')
+    
+class StajerAdmin(admin.ModelAdmin):        
+    list_display = ('full_name','email','ceptel','country','city','active')
+    
+class OgrenciAdmin(admin.ModelAdmin):        
     list_display = ('full_name','email','ceptel','country','city','active')
     
 class HafizbilgileriAdmin(admin.ModelAdmin):        
@@ -60,3 +70,6 @@ admin.site.register(models.Agent,AgentAdmin)
 admin.site.register(models.Hafizbilgileri,HafizbilgileriAdmin)
 admin.site.register(models.Job, JobAdmin)
 admin.site.register(models.Country,CountryAdmin)
+admin.site.register(models.Stajer,StajerAdmin)
+admin.site.register(models.Ogrenci,OgrenciAdmin)
+

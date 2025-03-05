@@ -133,7 +133,32 @@ class VariantItemSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
-
+            
+class VariantItemOdevSerializer(serializers.ModelSerializer):        
+    class Meta:
+        fields = '__all__'
+        model = api_models.VariantOdevItem
+    
+    def __init__(self, *args, **kwargs):
+        super(VariantItemOdevSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3   
+                    
+class VariantOdevItemSerializer(serializers.ModelSerializer):        
+    class Meta:
+        fields = '__all__'
+        model = api_models.VariantOdevItem
+    
+    def __init__(self, *args, **kwargs):
+        super(VariantOdevItemSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 class VariantSerializer(serializers.ModelSerializer):
     variant_items = VariantItemSerializer(many=True)
@@ -151,7 +176,21 @@ class VariantSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3
 
+class VariantOdevSerializer(serializers.ModelSerializer):
+    variant_items = VariantOdevItemSerializer(many=True)
+    items = VariantOdevItemSerializer(many=True)
+    class Meta:
+        fields = '__all__'
+        model = api_models.VariantOdev
 
+
+    def __init__(self, *args, **kwargs):
+        super(VariantOdevSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 
 class Question_Answer_MessageSerializer(serializers.ModelSerializer):
@@ -161,6 +200,12 @@ class Question_Answer_MessageSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.Question_Answer_Message
 
+class Question_Answer_MessageOdevSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(many=False)
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.Question_Answer_MessageOdev
 
 class Question_AnswerSerializer(serializers.ModelSerializer):
     messages = Question_Answer_MessageSerializer(many=True)
@@ -169,7 +214,16 @@ class Question_AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = api_models.Question_Answer
+        
 
+
+class Question_AnswerOdevSerializer(serializers.ModelSerializer):
+    messages = Question_Answer_MessageOdevSerializer(many=True)
+    profile = ProfileSerializer(many=False)
+    
+    class Meta:
+        fields = '__all__'
+        model = api_models.Question_AnswerOdev
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -240,13 +294,31 @@ class CompletedLessonSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+            
+class CompletedOdevSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.CompletedOdev
+
+
+    def __init__(self, *args, **kwargs):
+        super(CompletedOdevSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = api_models.Note
 
-
+class NoteOdevSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.NoteOdev
 
 class ReviewSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
@@ -257,6 +329,21 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super(ReviewSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+            
+class ReviewOdevSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(many=False)
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.ReviewOdev
+
+    def __init__(self, *args, **kwargs):
+        super(ReviewOdevSerializer, self).__init__(*args, **kwargs)
         request = self.context.get("request")
         if request and request.method == "POST":
             self.Meta.depth = 0
@@ -318,6 +405,46 @@ class EnrolledCourseSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+            
+class EnrolledOdevSerializer(serializers.ModelSerializer):
+    lectures = VariantItemOdevSerializer(many=True, read_only=True)
+    # completed_lesson = CompletedLessonSerializer(many=True, read_only=True)
+    curriculum =  VariantOdevSerializer(many=True, read_only=True)
+    note = NoteOdevSerializer(many=True, read_only=True)
+    question_answer = Question_AnswerOdevSerializer(many=True, read_only=True)
+    review = ReviewOdevSerializer(many=False, read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.EnrolledOdev
+
+    def __init__(self, *args, **kwargs):
+        super(EnrolledOdevSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+            
+class InstructorOdevSerializer(serializers.ModelSerializer):
+    lectures = VariantOdevItemSerializer(many=True, read_only=True)
+    # completed_lesson = CompletedLessonSerializer(many=True, read_only=True)
+    curriculum =  VariantOdevSerializer(many=True, read_only=True)
+    note = NoteOdevSerializer(many=True, read_only=True)
+    question_answer = Question_AnswerOdevSerializer(many=True, read_only=True)
+    review = ReviewSerializer(many=False, read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.EnrolledOdev
+
+    def __init__(self, *args, **kwargs):
+        super(InstructorOdevSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
 
 class AttendHafizSerializer(serializers.ModelSerializer):
     hafizs = HafizBilgiSerializer(many=True, read_only=True)    
@@ -352,9 +479,31 @@ class CourseSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 
+class OdevSerializer(serializers.ModelSerializer):
+    # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
+    curriculum = VariantSerializer(many=True, required=False, read_only=True,)
+    lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
+    # reviews = ReviewSerializer(many=True, read_only=True, required=False)
+    class Meta:
+        fields = ["id", "category", "teacher", "file", "image", "title", "description", "language", "level", "platform_status", "teacher_odev_status", "featured",  "curriculum", "lectures","stajer" ]
+        model = api_models.Odev
+
+    def __init__(self, *args, **kwargs):
+        super(OdevSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+            
 
 class StudentSummarySerializer(serializers.Serializer):
     total_courses = serializers.IntegerField(default=0)
+    completed_lessons = serializers.IntegerField(default=0)
+    achieved_certificates = serializers.IntegerField(default=0)
+    
+class ESKEPStudentSummarySerializer(serializers.Serializer):
+    total_odevs = serializers.IntegerField(default=0)
     completed_lessons = serializers.IntegerField(default=0)
     achieved_certificates = serializers.IntegerField(default=0)
 

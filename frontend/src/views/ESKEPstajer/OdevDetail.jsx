@@ -13,8 +13,8 @@ import UserData from "../plugin/UserData";
 import Toast from "../plugin/Toast";
 import moment from "moment";
 
-function CourseDetail() {
-  const [course, setCourse] = useState([]);
+function OdevDetail() {
+  const [odev, setOdev] = useState([]);
   const [variantItem, setVariantItem] = useState(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
@@ -57,13 +57,13 @@ function CourseDetail() {
   const handleQuestionClose = () => setAddQuestionShow(false);
   const handleQuestionShow = () => setAddQuestionShow(true);
 
-  const fetchCourseDetail = async () => {
+  const fetchOdevDetail = async () => {
     useAxios()
       .get(
-        `student/course-detail/${UserData()?.user_id}/${param.enrollment_id}/`
+        `instructor/odev-detail/${UserData()?.user_id}/${param.enrollment_id}/`
       )
       .then((res) => {
-        setCourse(res.data);
+        setOdev(res.data);
         setQuestions(res.data.question_answer);
         setStudentReview(res.data.review);
         const percentageCompleted =
@@ -72,7 +72,7 @@ function CourseDetail() {
       });
   };
   useEffect(() => {
-    fetchCourseDetail();
+    fetchOdevDetail();
   }, []);
 
   //console.log(createReview?.rating);
@@ -86,13 +86,13 @@ function CourseDetail() {
 
     const formdata = new FormData();
     formdata.append("user_id", UserData()?.user_id || 0);
-    formdata.append("course_id", course.course?.id);
+    formdata.append("odev_id", odev.odev?.id);
     formdata.append("variant_item_id", variantItemId);
 
     useAxios()
-      .post(`student/course-completed/`, formdata)
+      .post(`instructor/odev-completed/`, formdata)
       .then((res) => {
-        fetchCourseDetail();
+        fetchOdevDetail();
         setMarkAsCompletedStatus({
           ...markAsCompletedStatus,
           [key]: "Updated",
@@ -119,11 +119,11 @@ function CourseDetail() {
     try {
       await useAxios()
         .post(
-          `student/course-note/${UserData()?.user_id}/${param.enrollment_id}/`,
+          `instructor/odev-note/${UserData()?.user_id}/${param.enrollment_id}/`,
           formdata
         )
         .then((res) => {
-          fetchCourseDetail();
+          fetchOdevDetail();
           handleNoteClose();
           Toast().fire({
             icon: "success",
@@ -146,11 +146,11 @@ function CourseDetail() {
 
     useAxios()
       .patch(
-        `student/course-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`,
+        `stajer/odev-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`,
         formdata
       )
       .then((res) => {
-        fetchCourseDetail();
+        fetchOdevDetail();
         Toast().fire({
           icon: "success",
           title: "Notu Güncelle",
@@ -161,10 +161,10 @@ function CourseDetail() {
   const handleDeleteNote = (noteId) => {
     useAxios()
       .delete(
-        `student/course-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`
+        `student/odev-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`
       )
       .then((res) => {
-        fetchCourseDetail();
+        fetchOdevDetail();
         Toast().fire({
           icon: "success",
           title: "Notu Sil",
@@ -183,7 +183,7 @@ function CourseDetail() {
     e.preventDefault();
     const formdata = new FormData();
 
-    formdata.append("course_id", course.course?.id);
+    formdata.append("odev_id", odev.odev?.id);
     formdata.append("user_id", UserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
@@ -191,11 +191,11 @@ function CourseDetail() {
     
     await useAxios()
       .post(
-        `student/question-answer-list-create/${course.course?.id}/`,
+        `student/question-answer-list-create/${odev.odev?.id}/`,
         formdata
       )
       .then((res) => {
-        fetchCourseDetail();
+        fetchOdevDetail();
         handleQuestionClose();
         Toast().fire({
           icon: "success",
@@ -207,13 +207,13 @@ function CourseDetail() {
   const sendNewMessage = async (e) => {
     e.preventDefault();
     const formdata = new FormData();
-    formdata.append("course_id", course.course?.id);
+    formdata.append("odev_id", odev.odev?.id);
     formdata.append("user_id", UserData()?.user_id);
     formdata.append("message", createMessage.message);
     formdata.append("qa_id", selectedConversation?.qa_id);
 
     useAxios()
-      .post(`student/question-answer-message-create/`, formdata)
+      .post(`stajer/question-answer-message-create/`, formdata)
       .then((res) => {
         setSelectedConversation(res.data.question);
       });
@@ -228,7 +228,7 @@ function CourseDetail() {
   const handleSearchQuestion = (event) => {
     const query = event.target.value.toLowerCase();
     if (query === "") {
-      fetchCourseDetail();
+      fetchOdevDetail();
     } else {
       const filtered = questions?.filter((question) => {
         return question.title.toLowerCase().includes(query);
@@ -248,16 +248,16 @@ function CourseDetail() {
     e.preventDefault();
 
     const formdata = new FormData();
-    formdata.append("course_id", course.course?.id);
+    formdata.append("odev_id", odev.odev?.id);
     formdata.append("user_id", UserData()?.user_id);
     formdata.append("rating", createReview.rating);
     formdata.append("review", createReview.review);
 
     useAxios()
-      .post(`student/rate-course/`, formdata)
+      .post(`stajer/rate-odev/`, formdata)
       .then((res) => {
         console.log(res.data);
-        fetchCourseDetail();
+        fetchOdevDetail();
         Toast().fire({
           icon: "success",
           title: "Yorum Oluştur",
@@ -269,19 +269,19 @@ function CourseDetail() {
     e.preventDefault();
 
     const formdata = new FormData();
-    formdata.append("course", course.course?.id);
+    formdata.append("odev", odev.odev?.id);
     formdata.append("user", UserData()?.user_id);
     formdata.append("rating", createReview.rating || studentReview?.rating);
     formdata.append("review", createReview.review || studentReview?.review);
 
     useAxios()
       .patch(
-        `student/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
+        `stajer/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
         formdata
       )
       .then((res) => {
         console.log(res.data);
-        fetchCourseDetail();
+        fetchOdevDetail();
         Toast().fire({
           icon: "success",
           title: "Yorum Güncelle",
@@ -334,7 +334,7 @@ function CourseDetail() {
                                 aria-controls="course-pills-1"
                                 aria-selected="true"
                               >
-                                Kurs Dersleri
+                                Ödev Bölümleri
                               </button>
                             </li>
                             {/* Tab item */}
@@ -428,7 +428,7 @@ function CourseDetail() {
                                 </div>
                                 {/* Item */}
 
-                                {course?.curriculum?.map((c, index) => (
+                                {odev?.curriculum?.map((c, index) => (
                                   <div className="accordion-item mb-3 p-3 bg-light">
                                     <h6
                                       className="accordion-header font-base"
@@ -487,7 +487,7 @@ function CourseDetail() {
                                                       l.variant_item_id
                                                     )
                                                   }
-                                                  checked={course.completed_lesson?.some(
+                                                  checked={odev.completed_lesson?.some(
                                                     (cl) =>
                                                       cl.variant_item.id ===
                                                       l.id
@@ -607,7 +607,7 @@ function CourseDetail() {
                                 </div>
                                 <div className="card-body p-0 pt-3">
                                   {/* Note item start */}
-                                  {course?.note?.map((n, index) => (
+                                  {odev?.note?.map((n, index) => (
                                     <div className="row g-4 p-3">
                                       <div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
                                         <h5> {n.title}</h5>
@@ -635,7 +635,7 @@ function CourseDetail() {
                                     </div>
                                   ))}
 
-                                  {course?.note?.length < 1 && (
+                                  {odev?.note?.length < 1 && (
                                     <p className="mt-3 p-3">Not Bulunamadı</p>
                                   )}
                                   <hr />
@@ -1103,4 +1103,4 @@ function CourseDetail() {
   );
 }
 
-export default CourseDetail;
+export default OdevDetail;

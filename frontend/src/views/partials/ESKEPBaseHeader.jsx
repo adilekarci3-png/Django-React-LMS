@@ -38,19 +38,60 @@ function ESKEPBaseHeader() {
     
     const styles = {
         section: {
-          fontSize: "18px",
-          color: "#292b2c",
-          backgroundColor: "#D8F0C6",
-          padding: "5px",
-          margin:"0px"
+            fontSize: "20px", // Yazılar büyük
+            fontWeight: "bold",
+            color: "#ffffff",
+            background: "linear-gradient(135deg, #5bc0de, #ff7f50)", // Açık mavi ve turuncu geçişi
+            padding: "15px",
+            borderBottom: "4px solid #ffb6b9", // Açık pembemsi alt çizgi
         },
-        wrapper: {
-          textAlign: "center",
-          margin: "0 auto",
-          marginTop: "50px"
-        }
-      }
-      
+        navbar: {
+            backgroundColor: "rgba(91, 192, 222, 0.9)", // Hafif saydam mavi
+            color: "#ffffff",
+            padding: "20px",
+            borderRadius: "10px",
+            boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.2)",
+            backdropFilter: "blur(6px)",
+            fontSize: "18px", // Menü yazıları büyüdü
+        },
+        buttonPrimary: {
+            background: "linear-gradient(90deg, #ff7f50, #ffb6b9)", // Turuncu ve pembe tonları
+            color: "#ffffff", 
+            fontSize: "18px",
+            padding: "14px 28px",
+            borderRadius: "50px",
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "bold",
+            transition: "0.3s",
+            boxShadow: "0px 5px 10px rgba(0,0,0,0.2)",
+        },
+        buttonPrimaryHover: {
+            background: "linear-gradient(90deg, #ffb6b9, #ff7f50)", // Turuncu ve pembe geçişi
+        },
+        buttonSecondary: {
+            backgroundColor: "#ff7f50", // Canlı turuncu buton
+            color: "#ffffff", // Beyaz yazı
+            fontSize: "18px",
+            padding: "14px 28px",
+            borderRadius: "50px",
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "bold",
+            transition: "0.3s",
+            boxShadow: "0px 5px 10px rgba(0,0,0,0.2)",
+        },
+        buttonSecondaryHover: {
+            backgroundColor: "#ff4500", // Daha koyu turuncu hover efekti
+        },
+    };
+    
+    
+    
+    
+    
+    
+    
 
     useEffect(() => {
         IsUserAgent();        
@@ -99,7 +140,7 @@ function ESKEPBaseHeader() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <i className="fas fa-chalkboard-user"></i> Koordinatör
+                                    <i className="fas fa-chalkboard-user"></i> Eğitmen
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li>
@@ -165,7 +206,7 @@ function ESKEPBaseHeader() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <i className="fas fa-graduation-cap"></i> Öğrenci
+                                    <i className="fas fa-graduation-cap"></i> Stajer
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li>
@@ -213,7 +254,7 @@ function ESKEPBaseHeader() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <i className="fas fa-user-plus"></i> Temsilci
+                                    <i className="fas fa-user-plus"></i> Eğitmen
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li>
@@ -255,7 +296,7 @@ function ESKEPBaseHeader() {
                             )}
                             
                         </ul>
-                        <div className="d-flex" role="search">
+                        {/* <div className="d-flex" role="search">
                             <input
                                 className="form-control me-2 w-100"
                                 type="search"
@@ -270,7 +311,7 @@ function ESKEPBaseHeader() {
                             >
                                 Ara <i className="fas fa-search"></i>
                             </button>
-                        </div>
+                        </div> */}
                         {isLoggedIn() === true ? (
                             <>
                                 <Link to="/logout/" className="btn btn-primary ms-2" type="submit">
