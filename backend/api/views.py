@@ -615,6 +615,23 @@ class InstructorOdevListAPIView(generics.ListAPIView):
         user =  User.objects.get(id=user_id)
         return api_models.EnrolledOdev.objects.filter(user=user)
 
+class InstructorKitapTahliliListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.EnrolledKitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user =  User.objects.get(id=user_id)
+        return api_models.EnrolledKitapTahlili.objects.filter(user=user)
+    
+class InstructorDersSonuRaporuListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.EnrolledDersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user =  User.objects.get(id=user_id)
+        return api_models.EnrolledDersSonuRaporu.objects.filter(user=user)
 
 class StudentCourseDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.EnrolledCourseSerializer
@@ -652,30 +669,30 @@ class StajerOdevDetailAPIView(generics.RetrieveAPIView):
         user = User.objects.get(id=user_id)
         return api_models.EnrolledOdev.objects.get(user=user, enrollment_id=enrollment_id)
    
-class InstructorOdevDetailAPIView(generics.RetrieveAPIView):
-    serializer_class = api_serializer.InstructorOdevSerializer
-    permission_classes = [AllowAny]
-    lookup_field = 'teacher_id'
+# class InstructorOdevDetailAPIView(generics.RetrieveAPIView):
+#     serializer_class = api_serializer.InstructorOdevSerializer
+#     permission_classes = [AllowAny]
+#     lookup_field = 'teacher_id'
 
-    def get_object(self):
-        print(self)
-        stajer_id = self.kwargs['user_id']
-        teacher_id = self.kwargs['teacher_id']
+#     def get_object(self):
+#         print(self)
+#         stajer_id = self.kwargs['user_id']
+#         teacher_id = self.kwargs['teacher_id']
 
-        try:
-            user = User.objects.get(id=stajer_id)
-        except User.DoesNotExist:
-            raise NotFound({"error": "User not found"})
+#         try:
+#             user = User.objects.get(id=stajer_id)
+#         except User.DoesNotExist:
+#             raise NotFound({"error": "User not found"})
 
-        try:
-            teacher = api_models.Teacher.objects.get(id=teacher_id)
-        except api_models.Teacher.DoesNotExist:
-            raise NotFound({"error": "Teacher not found"})
+#         try:
+#             teacher = api_models.Teacher.objects.get(id=teacher_id)
+#         except api_models.Teacher.DoesNotExist:
+#             raise NotFound({"error": "Teacher not found"})
 
-        try:
-            return api_models.EnrolledOdev.objects.get(user=user, teacher=teacher)
-        except api_models.EnrolledOdev.DoesNotExist:
-            raise NotFound({"error": "EnrolledOdev record not found"})
+#         try:
+#             return api_models.EnrolledOdev.objects.get(user=user, teacher=teacher)
+#         except api_models.EnrolledOdev.DoesNotExist:
+#             raise NotFound({"error": "EnrolledOdev record not found"})
          
         
 class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
@@ -761,7 +778,7 @@ class InstructorNoteCreateAPIView(generics.ListCreateAPIView):
         user = User.objects.get(id=user_id)
         enrolled = api_models.EnrolledOdev.objects.get(enrollment_id=enrollment_id)
         
-        return api_models.NoteOdev.objects.filter(user=user, course=enrolled.course)
+        return api_models.NoteOdev.objects.filter(user=user, odev=enrolled.odev)
 
     def create(self, request, *args, **kwargs):
         user_id = self.kwargs['user_id']
@@ -772,7 +789,7 @@ class InstructorNoteCreateAPIView(generics.ListCreateAPIView):
         user = User.objects.get(id=user_id)
         enrolled = api_models.EnrolledOdev.objects.get(enrollment_id=enrollment_id)
         
-        api_models.NoteOdev.objects.create(user=user, course=enrolled.course, note=note, title=title)
+        api_models.NoteOdev.objects.create(user=user, odev=enrolled.odev, note=note, title=title)
 
         return Response({"message": "Not başarılı bir şekilde oluşturuldu"}, status=status.HTTP_201_CREATED)
     
@@ -800,8 +817,8 @@ class InstructorNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         note_id = self.kwargs['note_id']
 
         user = User.objects.get(id=user_id)
-        enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
-        note = api_models.NoteOdev.objects.get(user=user, course=enrolled.course, id=note_id)
+        enrolled = api_models.EnrolledOdev.objects.get(enrollment_id=enrollment_id)
+        note = api_models.NoteOdev.objects.get(user=user, odev=enrolled.odev, id=note_id)
         return note
 
 class StudentRateCourseCreateAPIView(generics.CreateAPIView):
@@ -898,7 +915,31 @@ class StudentWishListListCreateAPIView(generics.ListCreateAPIView):
             )
             return Response({"message": "Wishlist Created"}, status=status.HTTP_201_CREATED)
 
+class InstructorWishListListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.WishlistSerializer
+    permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user = User.objects.get(id=user_id)
+        return api_models.WishlistOdev.objects.filter(user=user)
+    
+    def create(self, request, *args, **kwargs):
+        user_id = request.data['user_id']
+        odev_id = request.data['odev_id']
+
+        user = User.objects.get(id=user_id)
+        odev = api_models.Odev.objects.get(id=odev_id)
+
+        wishlist = api_models.WishlistOdev.objects.filter(user=user, odev=odev).first()
+        if wishlist:
+            wishlist.delete()
+            return Response({"message": "İstekler Silindi"}, status=status.HTTP_200_OK)
+        else:
+            api_models.WishlistOdev.objects.create(
+                user=user, odev=odev
+            )
+            return Response({"message": "İstekler Oluşturuldu"}, status=status.HTTP_201_CREATED)
 
 class QuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = api_serializer.Question_AnswerSerializer
@@ -957,6 +998,61 @@ class QuestionAnswerMessageSendAPIView(generics.CreateAPIView):
         question_serializer = api_serializer.Question_AnswerSerializer(question)
         return Response({"messgae": "Message Sent", "question": question_serializer.data})
 
+class OdevQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.Question_AnswerOdevSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        odev_id = self.kwargs['odev_id']
+        odev = api_models.Odev.objects.get(id=odev_id)
+        return api_models.Question_AnswerOdev.objects.filter(odev=odev)
+    
+    def create(self, request, *args, **kwargs):
+        odev_id = request.data['odev_id']
+        user_id = request.data['user_id']
+        title = request.data['title']
+        message = request.data['message']
+
+        user = User.objects.get(id=user_id)
+        odev = api_models.Odev.objects.get(id=odev_id)
+        
+        question = api_models.Question_AnswerOdev.objects.create(
+            odev=odev,
+            user=user,
+            title=title
+        )
+
+        api_models.Question_Answer_MessageOdev.objects.create(
+            odev=odev,
+            user=user,
+            message=message,
+            question=question
+        )
+        
+        return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
+
+class OdevQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.Question_Answer_MessageOdevSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        odev_id = request.data['odev_id']
+        qa_id = request.data['qa_id']
+        user_id = request.data['user_id']
+        message = request.data['message']
+
+        user = User.objects.get(id=user_id)
+        odev = api_models.Odev.objects.get(id=odev_id)
+        question = api_models.Question_AnswerOdev.objects.get(qa_id=qa_id)
+        api_models.Question_Answer_MessageOdev.objects.create(
+            odev=odev,
+            user=user,
+            message=message,
+            question=question
+        )
+
+        question_serializer = api_serializer.Question_AnswerOdevSerializer(question)
+        return Response({"messgae": "Mesaj Gönderildi", "question": question_serializer.data})
 
 
 class TeacherSummaryAPIView(generics.ListAPIView):

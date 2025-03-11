@@ -9,7 +9,9 @@ import BaseFooter from "../partials/BaseFooter";
 import Swal from "sweetalert2";
 
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+
 
 function OdevCreate() {
   const [odev, setOdev] = useState({
@@ -139,7 +141,7 @@ function OdevCreate() {
 
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
       <section className="pt-5 pb-5">
         <div className="container">
           <Header />
@@ -208,7 +210,7 @@ function OdevCreate() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

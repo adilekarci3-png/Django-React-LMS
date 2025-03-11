@@ -7,6 +7,7 @@ import UserData from "../plugin/UserData";
 import { useAuthStore } from "../../store/auth";
 
 import useAxios from "../../utils/useAxios";
+// import './css/header.css';
 
 function BaseHeader() {
     const [cartCount, setCartCount] = useContext(CartContext);
@@ -39,11 +40,12 @@ function BaseHeader() {
     useEffect(() => {
         IsUserAgent();        
     },[])
+
     return (
         <div>
-            <nav className="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+            <nav className="navbar navbar-expand-lg" style={{ background: 'linear-gradient(to right, #023e8a, #03045e, #0077b6)' }}>
                 <div className="container">
-                    <Link className="navbar-brand" to="/">
+                    <Link className="navbar-brand" to="/" style={{ color: '#ffffff' }}>
                         EHAD
                     </Link>
                     <button
@@ -60,18 +62,18 @@ function BaseHeader() {
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                             <li className="nav-item">
-                                <Link className="nav-link" to="/pages/contact-us/">
+                                <Link className="nav-link" to="/pages/contact-us/" style={{ color: '#ffffff' }}>
                                     {" "}
                                     <i className="fas fa-phone"></i> İletişim
                                 </Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link" to="/pages/about-us/">
+                                <Link className="nav-link" to="/pages/about-us/" style={{ color: '#ffffff' }}>
                                     <i className="fas fa-address-card"></i> Hakkımızda
                                 </Link>
                             </li>                            
                             <li className="nav-item">
-                                <Link className="nav-link" to="/admin/OrganizationChart/">
+                                <Link className="nav-link" to="/admin/OrganizationChart/" style={{ color: '#ffffff' }}>
                                     <i className="fas fa-address-card"></i> Organizasyon Şemaları
                                 </Link>
                             </li>
@@ -82,6 +84,7 @@ function BaseHeader() {
                                     role="button"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
+                                    style={{ color: '#ffffff' }}
                                 >
                                     <i className="fas fa-chalkboard-user"></i> Eğitmen
                                 </a>
@@ -90,12 +93,13 @@ function BaseHeader() {
                                         <Link
                                             className="dropdown-item"
                                             to={`/instructor/dashboard/`}
+                                            style={{ color: '#000000' }}
                                         >
                                             <i className="bi bi-grid-fill"></i> Panel
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link className="dropdown-item" to={`/instructor/courses/`}>
+                                        <Link className="dropdown-item" to={`/instructor/courses/`} style={{ color: '#000000' }}>
                                             <i className="fas fa-chalkboard-user"></i> Kurslarım
                                         </Link>
                                     </li>
@@ -103,12 +107,13 @@ function BaseHeader() {
                                         <Link
                                             className="dropdown-item"
                                             to={`/instructor/create-course/`}
+                                            style={{ color: '#000000' }}
                                         >
                                             <i className="fas fa-plus"></i> Kurs Oluştur
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link className="dropdown-item" to={`/instructor/reviews/`}>
+                                        <Link className="dropdown-item" to={`/instructor/reviews/`} style={{ color: '#000000' }}>
                                             <i className="fas fa-star"></i> Yorumlar{" "}
                                         </Link>
                                     </li>
@@ -116,6 +121,7 @@ function BaseHeader() {
                                         <Link
                                             className="dropdown-item"
                                             to={`/instructor/question-answer/`}
+                                            style={{ color: '#000000' }}
                                         >
                                             <i className="fas fa-envelope"></i> Soru/Cevap{" "}
                                         </Link>
@@ -124,18 +130,19 @@ function BaseHeader() {
                                         <Link
                                             className="dropdown-item"
                                             to={`/instructor/students/`}
+                                            style={{ color: '#000000' }}
                                         >
                                             <i className="fas fa-users"></i> Öğrenciler{" "}
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link className="dropdown-item" to={`/instructor/earning/`}>
+                                        <Link className="dropdown-item" to={`/instructor/earning/`} style={{ color: '#000000' }}>
                                             <i className="fas fa-turkish-lira"></i> Bağış{" "}
                                         </Link>
                                     </li>
 
                                     <li>
-                                        <Link className="dropdown-item" to={`/instructor/profile/`}>
+                                        <Link className="dropdown-item" to={`/instructor/profile/`} style={{ color: '#000000' }}>
                                             <i className="fas fa-gear"></i> Ayarlar & Profil{" "}
                                         </Link>
                                     </li>
@@ -148,25 +155,26 @@ function BaseHeader() {
                                     role="button"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
+                                    style={{ color: '#ffffff' }}
                                 >
                                     <i className="fas fa-graduation-cap"></i> Öğrenci
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li>
-                                        <Link className="dropdown-item" to={`/student/dashboard/`}>
+                                        <Link className="dropdown-item" to={`/student/dashboard/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="bi bi-grid-fill"></i> Panel
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link className="dropdown-item" to={`/student/courses/`}>
+                                        <Link className="dropdown-item" to={`/student/courses/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="fas fa-chalkboard-user"></i>Kurslarım
                                         </Link>
                                     </li>
 
                                     <li>
-                                        <Link className="dropdown-item" to={`/student/wishlist/`}>
+                                        <Link className="dropdown-item" to={`/student/wishlist/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="fas fa-heart"></i> İstek Listesi{" "}
                                         </Link>
@@ -175,13 +183,14 @@ function BaseHeader() {
                                         <Link
                                             className="dropdown-item"
                                             to={`/student/question-answer/`}
+                                            style={{ color: '#000000' }}
                                         >
                                             {" "}
                                             <i className="fas fa-envelope"></i> Soru/Cevap{" "}
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link className="dropdown-item" to={`/student/profile/`}>
+                                        <Link className="dropdown-item" to={`/student/profile/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="fas fa-gear"></i> Profil & Ayarlar
                                         </Link>
@@ -196,25 +205,26 @@ function BaseHeader() {
                                     role="button"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
+                                    style={{ color: '#ffffff' }}
                                 >
                                     <i className="fas fa-user-plus"></i> Temsilci
                                 </a>
                                 <ul className="dropdown-menu">
                                     <li>
-                                        <Link className="dropdown-item" to={`/student/dashboard/`}>
+                                        <Link className="dropdown-item" to={`/student/dashboard/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="bi bi-grid-fill"></i> Panel
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link className="dropdown-item" to={`/agent/hafizbilgi/list/`}>
+                                        <Link className="dropdown-item" to={`/agent/hafizbilgi/list/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="fas fa-chalkboard-user"></i>Hafız Bilgileri
                                         </Link>
                                     </li>
 
                                     <li>
-                                        <Link className="dropdown-item" to={`/student/wishlist/`}>
+                                        <Link className="dropdown-item" to={`/student/wishlist/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="fas fa-heart"></i> İstek Listesi{" "}
                                         </Link>
@@ -223,13 +233,14 @@ function BaseHeader() {
                                         <Link
                                             className="dropdown-item"
                                             to={`/student/question-answer/`}
+                                            style={{ color: '#000000' }}
                                         >
                                             {" "}
                                             <i className="fas fa-envelope"></i> Soru/Cevap{" "}
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link className="dropdown-item" to={`/student/profile/`}>
+                                        <Link className="dropdown-item" to={`/student/profile/`} style={{ color: '#000000' }}>
                                             {" "}
                                             <i className="fas fa-gear"></i> Profil & Ayarlar
                                         </Link>
@@ -237,14 +248,13 @@ function BaseHeader() {
                                 </ul>
                             </li>
                             )}
-                            
                         </ul>
                         <div className="d-flex" role="search">
                             <input
                                 className="form-control me-2 w-100"
                                 type="search"
-                                placeholder="Kurslarda Ara"
-                                aria-label="Kurslarda Ara"
+                                placeholder="Ara"
+                                aria-label="Ara"
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                             <button
@@ -276,9 +286,6 @@ function BaseHeader() {
                                 </Link>
                             </>
                         )}
-                        {/* <Link className="btn btn-success ms-2" to="/cart/">
-                            Hafızlık Bilgi Sistemi ({cartCount}) <i className="fas fa-shopping-cart"> </i>
-                        </Link> */}
                     </div>
                 </div>
             </nav>

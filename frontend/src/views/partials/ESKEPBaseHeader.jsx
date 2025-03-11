@@ -84,14 +84,7 @@ function ESKEPBaseHeader() {
         buttonSecondaryHover: {
             backgroundColor: "#ff4500", // Daha koyu turuncu hover efekti
         },
-    };
-    
-    
-    
-    
-    
-    
-    
+    }; 
 
     useEffect(() => {
         IsUserAgent();        
@@ -154,6 +147,11 @@ function ESKEPBaseHeader() {
                                     <li>
                                         <Link className="dropdown-item" to={`/instructor/courses/`}>
                                             <i className="fas fa-chalkboard-user"></i> Kurslarım
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/instructor/odevs/`}>
+                                            <i className="fas fa-h"></i> Ödevlerim
                                         </Link>
                                     </li>
                                     <li>
@@ -221,7 +219,42 @@ function ESKEPBaseHeader() {
                                             <i className="fas fa-chalkboard-user"></i>Kurslarım
                                         </Link>
                                     </li>
-
+                                    <li>
+                                        <Link className="dropdown-item" to={`/stajer/odevs/`}>
+                                            {" "}
+                                            <i className="fas fa-pencil-alt"></i>Odevlerim
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/stajer/kitaptahlils/`}>
+                                            {" "}
+                                            <i className="fas fa-book-reader"></i>Kitap Tahlillerim
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/stajer/dersonuraporus/`}>
+                                            {" "}
+                                            <i className="fas fa-file-alt"></i>Ders Sonu Raporlarım
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/eskep/create-odev/`}>
+                                            {" "}
+                                            <i className="fas fa-pencil-alt"></i>Odev Oluştur
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/eskep/create-kitaptahlili/`}>
+                                            {" "}
+                                            <i className="fas fa-book-reader"></i>Kitap Tahlili Oluştur
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/eskep/create-derssonuraporu/`}>
+                                            {" "}
+                                            <i className="fas fa-chart-pie"></i>Ders Sonu Raporu Oluştur
+                                        </Link>
+                                    </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/student/wishlist/`}>
                                             {" "}
@@ -254,9 +287,57 @@ function ESKEPBaseHeader() {
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
-                                    <i className="fas fa-user-plus"></i> Eğitmen
+                                    <i className="fas fa-user-plus"></i> Öğrenci
                                 </a>
                                 <ul className="dropdown-menu">
+                                <li>
+                                        <Link className="dropdown-item" to={`/student/dashboard/`}>
+                                            {" "}
+                                            <i className="bi bi-grid-fill"></i> Panel
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/student/courses/`}>
+                                            {" "}
+                                            <i className="fas fa-chalkboard-user"></i>Kurslarım
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/stajer/odevs/`}>
+                                            {" "}
+                                            <i className="fas fa-pencil-alt"></i>Odevlerim
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/stajer/kitaptahlils/`}>
+                                            {" "}
+                                            <i className="fas fa-book-reader"></i>Kitap Tahlillerim
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/stajer/dersonuraporus/`}>
+                                            {" "}
+                                            <i className="fas fa-file-alt"></i>Ders Sonu Raporlarım
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/eskep/create-odev/`}>
+                                            {" "}
+                                            <i className="fas fa-pencil-alt"></i>Odev Oluştur
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/eskep/create-kitaptahlili/`}>
+                                            {" "}
+                                            <i className="fas fa-book-reader"></i>Kitap Tahlili Oluştur
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to={`/eskep/create-derssonuraporu/`}>
+                                            {" "}
+                                            <i className="fas fa-chart-pie"></i>Ders Sonu Raporu Oluştur
+                                        </Link>
+                                    </li>
                                     <li>
                                         <Link className="dropdown-item" to={`/student/dashboard/`}>
                                             {" "}

@@ -127,7 +127,7 @@ function CourseDetail() {
           handleNoteClose();
           Toast().fire({
             icon: "success",
-            title: "Not Oluştur",
+            title: "Not Eklendi",
           });
         });
     } catch (error) {
@@ -167,7 +167,7 @@ function CourseDetail() {
         fetchCourseDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Sil",
+          title: "Not Silindi",
         });
       });
   };
@@ -199,7 +199,7 @@ function CourseDetail() {
         handleQuestionClose();
         Toast().fire({
           icon: "success",
-          title: "Soru Gönder",
+          title: "Mesaj Gönderildi",
         });
       });
   };
@@ -388,7 +388,7 @@ function CourseDetail() {
                                 aria-controls="course-pills-4"
                                 aria-selected="false"
                               >
-                                Yorum Bırak
+                                Not Ver
                               </button>
                             </li>
                           </ul>
@@ -752,7 +752,7 @@ function CourseDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   {/* Title */}
                                   <h4 className="mb-3 p-3">
-                                    Yorum Bırak {studentReview.rating}
+                                    Not Ver {studentReview.rating}
                                     
                                   </h4>
                                   <div className="mt-2">
@@ -799,7 +799,7 @@ function CourseDetail() {
                                             onChange={handleReviewChange}
                                             name="review"
                                             defaultValue={
-                                              studentReview.review ||
+                                              studentReview?.review ||
                                               createReview.review
                                             }
                                           />
@@ -810,7 +810,7 @@ function CourseDetail() {
                                             type="submit"
                                             className="btn btn-primary mb-0"
                                           >
-                                            Post Review
+                                            Not Ver
                                           </button>
                                         </div>
                                       </form>
@@ -856,7 +856,7 @@ function CourseDetail() {
                                             rows={3}
                                             onChange={handleReviewChange}
                                             name="review"
-                                            defaultValue={studentReview.review}
+                                            defaultValue={studentReview?.review}
                                           />
                                         </div>
                                         {/* Button */}

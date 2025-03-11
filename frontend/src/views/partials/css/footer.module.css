@@ -1,0 +1,42 @@
+/* footer.css dosyasını sadece BaseFooter bileşeni için etkili kılacak şekilde güncelliyoruz. */
+
+.base-footer {
+    background-color: #f8f9fa;
+    color: #495057;
+  }
+  
+  .base-footer .container {
+    padding: 20px;
+  }
+  
+  .base-footer .footer-social-icons a {
+    margin-right: 15px;
+  }
+  
+  .base-footer .text-light {
+    color: #f8f9fa;
+  }
+  
+  .base-footer .fw-bold {
+    font-weight: 700;
+  }
+  
+  /* Diğer footer stilini burada tanımlayabilirsiniz */
+  
+  .base-footer .nav-link {
+    color: #495057;
+  }
+  
+  .base-footer .nav-link:hover {
+    color: #007bff;
+  }
+  
+  .base-footer .text-dark {
+    color: #212529;
+  }
+  
+  .base-footer .img-fluid {
+    max-width: 100%;
+    height: auto;
+  }
+  

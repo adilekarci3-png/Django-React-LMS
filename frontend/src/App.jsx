@@ -18,6 +18,8 @@ import Index from "./views/base/Index";
 import ESKEPIndex from "./views/base/ESKEPIndex";
 import ESKEPStudent from "./views/ESKEPstudent/Dashboard";
 import OdevCreate from "./views/ESKEPstajer/OdevCreate";
+import KitapTahliliCreate from "./views/ESKEPstajer/KitapTahliliCreate";
+import DersSonuRaporuCreate from "./views/ESKEPstajer/DersSonuRaporuCreate";
 import DersSonuAnketi from "./views/ESKEPstudent/DersSonuAnketi";
 import CourseDetail from "./views/base/CourseDetail";
 import Cart from "./views/base/Cart";
@@ -112,7 +114,10 @@ function App() {
               />
               {/* ESKEP Routes */}
               <Route path="/eskep/" element={<ESKEPIndex />} />
-              <Route path="/eskep/list/" element={<OdevCreate />} />
+              <Route path="/eskep/create-odev/" element={<OdevCreate />} />
+              <Route path="/eskep/create-kitaptahlili/" element={<KitapTahliliCreate />} />
+              <Route path="/eskep/create-derssonuraporu/" element={<DersSonuRaporuCreate />} />
+
               <Route
                 path="/eskep/ogrenci/"
                 element={<ESKEPStudent />}
@@ -124,6 +129,14 @@ function App() {
               <Route
                 path="/eskep/ogrenci/dersanket"
                 element={<DersSonuAnketi />}
+              />
+              <Route path="/stajer/odevs/" element={<ESKEPstajerOdevs />} />
+              <Route path="/stajer/kitaptahlils/" element={<ESKEPstajerOdevs />} />
+              <Route path="/stajer/dersonuraporus/" element={<ESKEPstajerOdevs />} />
+              <Route path="/instructor/odevs/" element={<ESKEPinstructorOdevs />} />
+              <Route
+                path="/instructor/odevs/:enrollment_id/"
+                element={<ESKEPinstructorOdevDetail />}
               />
               {/* Agent Routes */}
               <Route path="/agent/hafizbilgi/list/" element={<AgentHafizBilgiList />} />
@@ -186,12 +199,7 @@ function App() {
                 path="/instructor/edit-course/:course_id/"
                 element={<CourseEdit />}
               />
-              <Route path="/stajer/odevs/" element={<ESKEPstajerOdevs />} />
-              <Route path="/instructor/odevs/" element={<ESKEPinstructorOdevs />} />
-              <Route
-                path="/instructor/odevs/:enrollment_id/"
-                element={<ESKEPinstructorOdevDetail />}
-              />
+            
             </Routes>
           </MainWrapper>
         </BrowserRouter>

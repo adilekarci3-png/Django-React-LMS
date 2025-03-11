@@ -73,7 +73,7 @@ function ESKEPIndex() {
                               <img
                                 src={s.image}
                                 className="avatar-xl mb-3 rounded-full object-cover"
-                                style={{ width: "150px", height: "150px" }}
+                                style={{ width: "250px", height: "250px" }}
                                 alt="avatar"
                               />
                             </Link>
@@ -81,7 +81,7 @@ function ESKEPIndex() {
                             <img
                               src={s.image}
                               className="avatar-xl mb-3 rounded-full object-cover"
-                              style={{ width: "150px", height: "150px" }}
+                              style={{ width: "250px", height: "250px" }}
                               alt="avatar"
                             />
                           )}

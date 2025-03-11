@@ -57,7 +57,7 @@ function Index() {
   return (
     <>
       <BaseHeader />
-<section className="pt-2 pb-2 bg-mint-100">
+      <section className="pt-2 pb-2 bg-mint-100">
         <div className="container">
           <div className="row mt-0 mt-md-4">
             <div className="col-lg-12 col-md-12 col-12">
@@ -70,17 +70,27 @@ function Index() {
                 </div>
               </div>
               <div className="row">
-                {projelist?.map((s, index) => (
+                {currentItems?.map((s, index) => (
                   <div className="col-lg-4 col-md-6 col-12" key={index}>
                     <div className="card mb-4 bg-white shadow-md rounded-xl">
                       <div className="card-body">
                         <div className="text-center">
+                          {/* HBS veya ESKEP'e özel link yönlendirmesi */}
                           {s.name === 'HBS' ? (
                             <Link className="nav-link" to="/hafizbilgi/create-hafizbilgi/">
                               <img
                                 src={s.image}
                                 className="avatar-xl mb-3 rounded-full object-cover"
-                                style={{ width: "150px", height: "150px" }}
+                                style={{ width: "250px", height: "250px" }}
+                                alt="avatar"
+                              />
+                            </Link>
+                          ) : s.name === 'ESKEP' ? (
+                            <Link className="nav-link" to="/eskep/">
+                              <img
+                                src={s.image}
+                                className="avatar-xl mb-3 rounded-full object-cover"
+                                style={{ width: "250px", height: "250px" }}
                                 alt="avatar"
                               />
                             </Link>
@@ -88,7 +98,7 @@ function Index() {
                             <img
                               src={s.image}
                               className="avatar-xl mb-3 rounded-full object-cover"
-                              style={{ width: "150px", height: "150px" }}
+                              style={{ width: "250px", height: "250px" }}
                               alt="avatar"
                             />
                           )}

@@ -721,38 +721,38 @@ Question_Answer_MessageOdev._meta.get_field('qam_id').verbose_name = "Soru Cevap
 Question_Answer_MessageOdev._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
 Question_Answer_MessageOdev._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
-class Question_AnswerOdev(models.Model):
-    odev = models.ForeignKey(Odev, on_delete=models.CASCADE)
+class Question_AnswerDersSonuRaporu(models.Model):
+    derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=1000, null=True, blank=True)
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.user.username} - {self.odev.title}"
+        return f"{self.user.username} - {self.derssonuraporu.title}"
     
     class Meta:
         ordering = ['-date']
 
     def messages(self):
-        return Question_Answer_MessageOdev.objects.filter(question=self)
+        return Question_Answer_MessageDersSonuRaporu.objects.filter(question=self)
     
     def profile(self):
         return Profile.objects.get(user=self.user)
     
     class Meta:
-        verbose_name = "Ödev Soru Cevap"
-        verbose_name_plural = "Ödev Soru Cevaplar" 
+        verbose_name = "Ders Sonu Raporu Soru Cevap"
+        verbose_name_plural = "Ders Sonu Raporu Soru Cevaplar" 
         
-Question_AnswerOdev._meta.get_field('odev').verbose_name = "Ödev" 
-Question_AnswerOdev._meta.get_field('title').verbose_name = "Soru Başlığı"
-Question_AnswerOdev._meta.get_field('user').verbose_name = "Kullanıcı"
-Question_AnswerOdev._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
-Question_AnswerOdev._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
+Question_AnswerDersSonuRaporu._meta.get_field('derssonuraporu').verbose_name = "Ders Sonu Raporu" 
+Question_AnswerDersSonuRaporu._meta.get_field('title').verbose_name = "Soru Başlığı"
+Question_AnswerDersSonuRaporu._meta.get_field('user').verbose_name = "Kullanıcı"
+Question_AnswerDersSonuRaporu._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
+Question_AnswerDersSonuRaporu._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
-class Question_Answer_MessageOdev(models.Model):
-    odev = models.ForeignKey(Odev, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question_AnswerOdev, on_delete=models.CASCADE)
+class Question_Answer_MessageDersSonuRaporu(models.Model):
+    derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question_AnswerDersSonuRaporu, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     qam_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -760,7 +760,7 @@ class Question_Answer_MessageOdev(models.Model):
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.user.username} - {self.odev.title}"
+        return f"{self.user.username} - {self.derssonuraporu.title}"
     
     class Meta:
         ordering = ['date']
@@ -769,15 +769,15 @@ class Question_Answer_MessageOdev(models.Model):
         return Profile.objects.get(user=self.user)
     
     class Meta:
-        verbose_name = "Ödev Soru Cevap Mesaj"
-        verbose_name_plural = "Ödev Soru Cevap Mesajlar" 
+        verbose_name = "Ders Sonu Raporu Soru Cevap Mesaj"
+        verbose_name_plural = "Ders Sonu Raporu Soru Cevap Mesajlar" 
         
-Question_Answer_MessageOdev._meta.get_field('odev').verbose_name = "Ödev" 
-Question_Answer_MessageOdev._meta.get_field('question').verbose_name = "Soru Başlığı"
-Question_Answer_MessageOdev._meta.get_field('user').verbose_name = "Kullanıcı"
-Question_Answer_MessageOdev._meta.get_field('qam_id').verbose_name = "Soru Cevap Numarası"  
-Question_Answer_MessageOdev._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
-Question_Answer_MessageOdev._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
+Question_Answer_MessageDersSonuRaporu._meta.get_field('derssonuraporu').verbose_name = "Ders Sonu Raporu" 
+Question_Answer_MessageDersSonuRaporu._meta.get_field('question').verbose_name = "Soru Başlığı"
+Question_Answer_MessageDersSonuRaporu._meta.get_field('user').verbose_name = "Kullanıcı"
+Question_Answer_MessageDersSonuRaporu._meta.get_field('qam_id').verbose_name = "Soru Cevap Numarası"  
+Question_Answer_MessageDersSonuRaporu._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
+Question_Answer_MessageDersSonuRaporu._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
 class Question_AnswerKitapTahlili(models.Model):
     kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
@@ -1156,9 +1156,49 @@ EnrolledKitapTahlili._meta.get_field('kitaptahlili').verbose_name = "Kitap Tahli
 EnrolledKitapTahlili._meta.get_field('user').verbose_name = "Kitap Tahlilini Hazırlayan Öğrenci" 
 EnrolledKitapTahlili._meta.get_field('teacher').verbose_name = "Eğitmeni" 
 # EnrolledKitapTahlili._meta.get_field('order_item').verbose_name = "Kayıt Olunan Ders"     
-EnrolledKitapTahlili._meta.get_field('enrollment_id').verbose_name = "Ödev Numarası" 
-EnrolledKitapTahlili._meta.get_field('date').verbose_name = "Ödev Kayıt Tarihi" 
-      
+EnrolledKitapTahlili._meta.get_field('enrollment_id').verbose_name = "Kitap Tahlili Numarası" 
+EnrolledKitapTahlili._meta.get_field('date').verbose_name = "Kitap Tahlili Kayıt Tarihi" 
+
+class EnrolledDersSonuRaporu(models.Model):
+    derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True)
+    # order_item = models.ForeignKey(CartOrderItem, on_delete=models.CASCADE)
+    enrollment_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
+    date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.derssonuraporu.title
+    
+    def lectures(self):
+        return VariantDersSonuRaporuItem.objects.filter(variant__derssonuraporu=self.derssonuraporu)
+    
+    # def completed_lesson(self):
+    #     return CompletedLesson.objects.filter(course=self.course, user=self.user)
+    
+    def curriculum(self):
+        return VariantDersSonuRaporu.objects.filter(derssonuraporu=self.derssonuraporu)
+    
+    def note(self):
+        return NoteDersSonuRaporu.objects.filter(derssonuraporu=self.derssonuraporu, user=self.user)
+    
+    def question_answer(self):
+        return Question_AnswerDersSonuRaporu.objects.filter(kitaptahlili=self.kitaptahlili)
+    
+    def review(self):
+        return ReviewDersSonuRaporu.objects.filter(kitaptahlili=self.kitaptahlili, user=self.user).first()
+    
+    class Meta:
+        verbose_name = "Eğitmene Gönderilen Ders Sonu Raporu"
+        verbose_name_plural = "Eğitmene Gönderilen Ders Sonu Raporları" 
+        
+EnrolledDersSonuRaporu._meta.get_field('derssonuraporu').verbose_name = "Ders Sonu Raporu"     
+EnrolledDersSonuRaporu._meta.get_field('user').verbose_name = "Ders Sonu Raporunu Hazırlayan Öğrenci" 
+EnrolledDersSonuRaporu._meta.get_field('teacher').verbose_name = "Eğitmeni" 
+# EnrolledKitapTahlili._meta.get_field('order_item').verbose_name = "Kayıt Olunan Ders"     
+EnrolledDersSonuRaporu._meta.get_field('enrollment_id').verbose_name = "Ders Sonu Raporu Numarası" 
+EnrolledDersSonuRaporu._meta.get_field('date').verbose_name = "Ders Sonu Raporu Kayıt Tarihi" 
+     
 class Note(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -1201,8 +1241,23 @@ class NoteKitapTahlili(models.Model):
         return self.title
     
     class Meta:
-        verbose_name = "Kiatp Tahlili Not"
-        verbose_name_plural = "Kiatp Tahlili Notları"
+        verbose_name = "Kitap Tahlili Not"
+        verbose_name_plural = "Kitap Tahlili Notları"
+        
+class NoteDersSonuRaporu(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
+    title = models.CharField(max_length=1000, null=True, blank=True)
+    note = models.TextField()
+    note_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
+    date = models.DateTimeField(default=timezone.now)   
+
+    def __str__(self):
+        return self.title
+    
+    class Meta:
+        verbose_name = "Ders Sonu Raporu Not"
+        verbose_name_plural = "Ders Sonu Raporu Notları"
         
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -1241,6 +1296,7 @@ class ReviewOdev(models.Model):
     class Meta:
         verbose_name = "Ödev Yorum"
         verbose_name_plural = "Ödev Yorumları"
+        
 class ReviewKitapTahlili(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
@@ -1259,6 +1315,25 @@ class ReviewKitapTahlili(models.Model):
     class Meta:
         verbose_name = "Kitap Tahlili Yorum"
         verbose_name_plural = "Kitap Tahlili Yorumları"
+        
+class ReviewDersSonuRaporu(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
+    review = models.TextField()
+    rating = models.IntegerField(choices=RATING, default=None)
+    reply = models.CharField(null=True, blank=True, max_length=1000)
+    active = models.BooleanField(default=False)
+    date = models.DateTimeField(default=timezone.now)   
+
+    def __str__(self):
+        return self.derssonuraporu.title
+    
+    def profile(self):
+        return Profile.objects.get(user=self.user)
+    
+    class Meta:
+        verbose_name = "Ders Sonu Raporu Yorum"
+        verbose_name_plural = "Ders Sonu Raporu Yorumları"
        
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -1304,7 +1379,19 @@ class Wishlist(models.Model):
     class Meta:
         verbose_name = "İstek"
         verbose_name_plural = "İstekler"
+
+class WishlistOdev(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    odev = models.ForeignKey(Odev, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
     
+    def __str__(self):
+        return str(self.odev.title)
+    
+    class Meta:
+        verbose_name = "Ödev İstek"
+        verbose_name_plural = "Ödev İstekler"
+         
 class Country(models.Model):
     name = models.CharField(max_length=100)
     tax_rate = models.IntegerField(default=5)

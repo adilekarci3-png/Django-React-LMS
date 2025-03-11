@@ -96,7 +96,7 @@ urlpatterns = [
     # path("stajer/odev-completed/", api_views.StudentCourseCompletedCreateAPIView.as_view()),
     
     # Eğitmen API Endpoints
-    path("instructor/odev-detail/<user_id>/<teacher_id>/", api_views.InstructorOdevDetailAPIView.as_view()),
+    # path("instructor/odev-detail/<user_id>/<teacher_id>/", api_views.InstructorOdevDetailAPIView.as_view()),
     # path("instructor/odev-list/<teacher_id>/", api_views.InstructorOdevListAPIView.as_view()),
     path("instructor/odev-completed/", api_views.InstructorOdevCompletedCreateAPIView.as_view()),
     
@@ -108,9 +108,9 @@ urlpatterns = [
     path("instructor/odev-note-detail/<user_id>/<enrollment_id>/<note_id>/", api_views.InstructorNoteDetailAPIView.as_view()),
     path("instructor/rate-odev/", api_views.InstructorRateCourseCreateAPIView.as_view()),
     path("instructor/review-detail/<user_id>/<review_id>/", api_views.InstructorRateCourseUpdateAPIView.as_view()),
-    path("instructor/wishlist/<user_id>/", api_views.StudentWishListListCreateAPIView.as_view()),
-    path("instructor/question-answer-list-create/<odev_id>/", api_views.QuestionAnswerListCreateAPIView.as_view()),
-    path("instructor/question-answer-message-create/", api_views.QuestionAnswerMessageSendAPIView.as_view()),
+    path("instructor/wishlist/<user_id>/", api_views.InstructorWishListListCreateAPIView.as_view()),
+    path("instructor/question-answer-list-create/<odev_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
+    path("instructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
 ]
 
 

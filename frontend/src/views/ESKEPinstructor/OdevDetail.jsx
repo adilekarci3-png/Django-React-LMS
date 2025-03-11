@@ -12,6 +12,8 @@ import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
 import Toast from "../plugin/Toast";
 import moment from "moment";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 function OdevDetail() {
   const [odev, setOdev] = useState([]);
@@ -64,7 +66,7 @@ function OdevDetail() {
       )
       .then((res) => {
         setOdev(res.data);
-        setQuestions(res.data.question_answer);
+        setQuestions(res.data.question_answer);setVariantItem
         setStudentReview(res.data.review);
         const percentageCompleted =
           (res.data.completed_lesson?.length / res.data.lectures?.length) * 100;
@@ -127,7 +129,7 @@ function OdevDetail() {
           handleNoteClose();
           Toast().fire({
             icon: "success",
-            title: "Not Oluştur",
+            title: "Not Eklendi",
           });
         });
     } catch (error) {
@@ -167,7 +169,7 @@ function OdevDetail() {
         fetchOdevDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Sil",
+          title: "Not Silindi",
         });
       });
   };
@@ -191,7 +193,7 @@ function OdevDetail() {
     
     await useAxios()
       .post(
-        `student/question-answer-list-create/${odev.odev?.id}/`,
+        `instructor/question-answer-list-create/${odev.odev?.id}/`,
         formdata
       )
       .then((res) => {
@@ -199,7 +201,7 @@ function OdevDetail() {
         handleQuestionClose();
         Toast().fire({
           icon: "success",
-          title: "Soru Gönder",
+          title: "Mesaj Gönderildi",
         });
       });
   };
@@ -213,7 +215,7 @@ function OdevDetail() {
     formdata.append("qa_id", selectedConversation?.qa_id);
 
     useAxios()
-      .post(`stajer/question-answer-message-create/`, formdata)
+      .post(`instructor/question-answer-message-create/`, formdata)
       .then((res) => {
         setSelectedConversation(res.data.question);
       });
@@ -291,7 +293,7 @@ function OdevDetail() {
 
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -388,7 +390,7 @@ function OdevDetail() {
                                 aria-controls="course-pills-4"
                                 aria-selected="false"
                               >
-                                Yorum Bırak
+                                Not Ver
                               </button>
                             </li>
                           </ul>
@@ -427,7 +429,14 @@ function OdevDetail() {
                                   </div>
                                 </div>
                                 {/* Item */}
-
+                                {odev?.lectures?.map((c, index) => (
+        <div key={index}>
+          <h3>{c.name}</h3> {/* Lecture Name */}
+          <a href={c.file} target="_blank" rel="noopener noreferrer">
+            PDF'yi Görüntüle
+          </a>
+        </div>
+      ))}
                                 {odev?.curriculum?.map((c, index) => (
                                   <div className="accordion-item mb-3 p-3 bg-light">
                                     <h6
@@ -458,6 +467,7 @@ function OdevDetail() {
                                     >
                                       <div className="accordion-body mt-3">
                                         {/* Course lecture */}
+                                        
                                         {c.variant_items?.map((l, index) => (
                                           <>
                                             <div className="d-flex justify-content-between align-items-center">
@@ -752,7 +762,7 @@ function OdevDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   {/* Title */}
                                   <h4 className="mb-3 p-3">
-                                  {studentReview.rating && <p>Yorum Bırak {studentReview.rating}</p>}
+                                  {studentReview?.rating && <p>Not Ver {studentReview.rating}</p>}
                                     
                                   </h4>
                                   <div className="mt-2">
@@ -769,7 +779,7 @@ function OdevDetail() {
                                             onChange={handleReviewChange}
                                             name="rating"
                                             defaultValue={
-                                              studentReview.rating || 0
+                                              studentReview?.rating || 0
                                             }
                                           >
                                             <option value={1}>
@@ -799,8 +809,8 @@ function OdevDetail() {
                                             onChange={handleReviewChange}
                                             name="review"
                                             defaultValue={
-                                              studentReview.review ||
-                                              createReview.review
+                                              studentReview?.review ||
+                                              createReview?.review
                                             }
                                           />
                                         </div>
@@ -810,7 +820,7 @@ function OdevDetail() {
                                             type="submit"
                                             className="btn btn-primary mb-0"
                                           >
-                                            Post Review
+                                            Not Ver
                                           </button>
                                         </div>
                                       </form>
@@ -856,7 +866,7 @@ function OdevDetail() {
                                             rows={3}
                                             onChange={handleReviewChange}
                                             name="review"
-                                            defaultValue={studentReview.review}
+                                            defaultValue={studentReview?.review}
                                           />
                                         </div>
                                         {/* Button */}
@@ -1098,7 +1108,7 @@ function OdevDetail() {
         </Modal.Body>
       </Modal>
 
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

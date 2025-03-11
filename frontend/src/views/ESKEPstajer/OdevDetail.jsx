@@ -127,7 +127,7 @@ function OdevDetail() {
           handleNoteClose();
           Toast().fire({
             icon: "success",
-            title: "Not Oluştur",
+            title: "Not Eklendi",
           });
         });
     } catch (error) {
@@ -146,7 +146,7 @@ function OdevDetail() {
 
     useAxios()
       .patch(
-        `stajer/odev-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`,
+        `instructor/odev-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`,
         formdata
       )
       .then((res) => {
@@ -167,7 +167,7 @@ function OdevDetail() {
         fetchOdevDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Sil",
+          title: "Not Silindi",
         });
       });
   };
@@ -199,7 +199,7 @@ function OdevDetail() {
         handleQuestionClose();
         Toast().fire({
           icon: "success",
-          title: "Soru Gönder",
+          title: "Mesaj Gönderildi",
         });
       });
   };
@@ -213,7 +213,7 @@ function OdevDetail() {
     formdata.append("qa_id", selectedConversation?.qa_id);
 
     useAxios()
-      .post(`stajer/question-answer-message-create/`, formdata)
+      .post(`instructor/question-answer-message-create/`, formdata)
       .then((res) => {
         setSelectedConversation(res.data.question);
       });
@@ -254,7 +254,7 @@ function OdevDetail() {
     formdata.append("review", createReview.review);
 
     useAxios()
-      .post(`stajer/rate-odev/`, formdata)
+      .post(`instructor/rate-odev/`, formdata)
       .then((res) => {
         console.log(res.data);
         fetchOdevDetail();
@@ -276,7 +276,7 @@ function OdevDetail() {
 
     useAxios()
       .patch(
-        `stajer/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
+        `instructor/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
         formdata
       )
       .then((res) => {
@@ -388,7 +388,7 @@ function OdevDetail() {
                                 aria-controls="course-pills-4"
                                 aria-selected="false"
                               >
-                                Yorum Bırak
+                                Not Ver
                               </button>
                             </li>
                           </ul>
@@ -752,7 +752,7 @@ function OdevDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   {/* Title */}
                                   <h4 className="mb-3 p-3">
-                                    Yorum Bırak {studentReview.rating}
+                                    Not Ver {studentReview?.rating}
                                     
                                   </h4>
                                   <div className="mt-2">
@@ -769,7 +769,7 @@ function OdevDetail() {
                                             onChange={handleReviewChange}
                                             name="rating"
                                             defaultValue={
-                                              studentReview.rating || 0
+                                              studentReview?.rating || 0
                                             }
                                           >
                                             <option value={1}>
@@ -799,7 +799,7 @@ function OdevDetail() {
                                             onChange={handleReviewChange}
                                             name="review"
                                             defaultValue={
-                                              studentReview.review ||
+                                              studentReview?.review ||
                                               createReview.review
                                             }
                                           />
@@ -810,7 +810,7 @@ function OdevDetail() {
                                             type="submit"
                                             className="btn btn-primary mb-0"
                                           >
-                                            Post Review
+                                            Not Ver
                                           </button>
                                         </div>
                                       </form>
@@ -856,7 +856,7 @@ function OdevDetail() {
                                             rows={3}
                                             onChange={handleReviewChange}
                                             name="review"
-                                            defaultValue={studentReview.review}
+                                            defaultValue={studentReview?.review}
                                           />
                                         </div>
                                         {/* Button */}

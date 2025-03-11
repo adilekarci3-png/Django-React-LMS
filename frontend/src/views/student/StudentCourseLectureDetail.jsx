@@ -1311,7 +1311,7 @@ function StudentCourseLectureDetail() {
                                                                 {/* Card header */}
                                                                 <div className="card-header border-bottom p-0 pb-3">
                                                                     {/* Title */}
-                                                                    <h4 className="mb-3 p-3">Yorum Bırak</h4>
+                                                                    <h4 className="mb-3 p-3">Not Ver</h4>
                                                                     <div className="mt-2">
                                                                         <form className="row g-3 p-3">
 

@@ -514,7 +514,7 @@ function CourseDetail() {
                             {/* Student review END */}
                             {/* Leave Review START */}
                             <div className="mt-2">
-                              <h5 className="mb-4">Yorum Bırak</h5>
+                              <h5 className="mb-4">Not Ver</h5>
                               <form className="row g-3">
                                 {/* Rating */}
                                 <div className="col-12 bg-light-input">

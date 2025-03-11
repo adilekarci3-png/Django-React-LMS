@@ -25,6 +25,7 @@ admin.site.register(models.Odev)
 admin.site.register(models.VariantOdev)
 admin.site.register(models.VariantOdevItem)
 admin.site.register(models.EnrolledOdev)
+admin.site.register(models.NoteOdev)
 
 
 class CountryAdmin(admin.ModelAdmin):        

@@ -6,7 +6,7 @@ import Header from "./Partials/Header";
 
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
-import Toast from "../plugin/Toast";
+import Toast from "../plugin/Toast";  // Toast bileşenini import edin
 import { ProfileContext } from "../plugin/Context";
 
 function Profile() {
@@ -18,12 +18,13 @@ function Profile() {
     country: "",
   });
   const [imagePreview, setImagePreview] = useState("");
-
+  const [toastMessage, setToastMessage] = useState(""); // Toast mesajı için durum
+  
+  
   const fetchProfile = () => {
     useAxios()
       .get(`user/profile/${UserData()?.user_id}/`)
       .then((res) => {
-        console.log(res.data);
         setProfile(res.data);
         setProfileData(res.data);
         setImagePreview(res.data.image);
@@ -41,6 +42,8 @@ function Profile() {
     });
   };
 
+
+  
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     setProfileData({
@@ -78,35 +81,44 @@ function Profile() {
         },
       })
       .then((res) => {
-        console.log(res.data);
         setProfile(res.data);
+        Toast().fire({
+          icon: "success",
+          title: "Profil Güncellendi.",
+        });
+        //setToastMessage("Profil başarıyla güncellendi!"); // Başarı mesajını ayarla
+        setTimeout(() => setToastMessage(""), 3000); // 3 saniye sonra mesajı kaldır
+      })
+      .catch((err) => {
+        Toast().fire({
+          icon: "error",
+          title: "Bir hata oluştu. Lütfen tekrar deneyin.",
+        });
+        //setToastMessage("");
+        setTimeout(() => setToastMessage(""), 3000); // 3 saniye sonra mesajı kaldır
       });
   };
-
-  console.log(imagePreview);
 
   return (
     <>
       <BaseHeader />
 
+      {/* Toast mesajını burada göster */}
+      {toastMessage && <Toast message={toastMessage} />}
+
       <section className="pt-5 pb-5">
         <div className="container">
-          {/* Header Here */}
           <Header />
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
             <Sidebar />
             <div className="col-lg-9 col-md-8 col-12">
-              {/* Card */}
               <div className="card">
-                {/* Card header */}
                 <div className="card-header">
                   <h3 className="mb-0">Profil Detayları</h3>
                   <p className="mb-0">
-                  Kendi hesap ayarlarınızı yönetmek için tam kontrole sahipsiniz.
+                    Kendi hesap ayarlarınızı yönetmek için tam kontrole sahipsiniz.
                   </p>
                 </div>
-                {/* Card body */}
                 <form className="card-body" onSubmit={handleFormSubmit}>
                   <div className="d-lg-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center mb-4 mb-lg-0">
@@ -125,14 +137,13 @@ function Profile() {
                       <div className="ms-3">
                         <h4 className="mb-0">Profil Resminiz</h4>
                         <p className="mb-0">
-                        PNG veya JPG, genişliği ve yüksekliği 800 pikselden büyük olmamalıdır.
+                          PNG veya JPG, genişliği ve yüksekliği 800 pikselden büyük olmamalıdır.
                         </p>
                         <input
                           type="file"
                           className="form-control mt-3"
                           name="image"
                           onChange={handleFileChange}
-                          id=""
                         />
                       </div>
                     </div>
@@ -140,12 +151,8 @@ function Profile() {
                   <hr className="my-5" />
                   <div>
                     <h4 className="mb-0">Profil Detayları</h4>
-                    <p className="mb-4">
-                    Kişisel bilgilerinizi ve adresinizi düzenleyin.
-                    </p>
-                    {/* Form */}
+                    <p className="mb-4">Kişisel bilgilerinizi ve adresinizi düzenleyin.</p>
                     <div className="row gx-3">
-                      {/* First name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="fname">
                           Adınız Soyadınız
@@ -155,16 +162,12 @@ function Profile() {
                           id="fname"
                           className="form-control"
                           placeholder="Adınız"
-                          required=""
+                          required
                           value={profileData.full_name}
                           onChange={handleProfileChange}
                           name="full_name"
                         />
-                        <div className="invalid-feedback">
-                          Lütfen Adınızı Giriniz
-                        </div>
                       </div>
-                      {/* Last name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="lname">
                           Hakkımda
@@ -172,18 +175,12 @@ function Profile() {
                         <textarea
                           onChange={handleProfileChange}
                           name="about"
-                          id=""
                           cols="30"
                           rows="5"
                           className="form-control"
                           value={profileData.about}
                         ></textarea>
-                        <div className="invalid-feedback">
-                          Soyadınızı Giriniz
-                        </div>
                       </div>
-
-                      {/* Country */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="editCountry">
                           Ülke
@@ -193,17 +190,13 @@ function Profile() {
                           id="country"
                           className="form-control"
                           placeholder="Ülke"
-                          required=""
+                          required
                           value={profileData.country}
                           onChange={handleProfileChange}
                           name="country"
                         />
-                        <div className="invalid-feedback">
-                          Ülke Seçiniz
-                        </div>
                       </div>
                       <div className="col-12">
-                        {/* Button */}
                         <button className="btn btn-primary" type="submit">
                           Profili Güncelle <i className="fas fa-check-circle"></i>
                         </button>
