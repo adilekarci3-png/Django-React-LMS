@@ -4,123 +4,89 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
-import { Link } from "react-router-dom";
-
-import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
 import Swal from "sweetalert2";
 
-function CourseCreate() {
-  const [course, setCourse] = useState({
-    category: 0,
-    file: "",
+import useAxios from "../../utils/useAxios";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import UserData from "../plugin/UserData";
+
+function KitapTahliliCreate() {
+  const [kitaptahlili, setKitapTahlili] = useState({
+    category: "",
     image: "",
     title: "",
     description: "",
-    price: "",
     level: "",
     language: "",
-    teacher_course_status: "",
+    hazirlayan:"",
   });
 
   const [category, setCategory] = useState([]);
-  const [progress, setProgress] = useState(0);
   const [ckEdtitorData, setCKEditorData] = useState("");
+  const [variants, setVariants] = useState([{ title: "", pdf: "" }]);
 
-  const [variants, setVariants] = useState([
-    {
-      title: "",
-      items: [{ title: "", description: "", file: "", preview: false }],
-    },
-  ]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    useAxios()
-      .get(`course/category/`)
-      .then((res) => {
-        setCategory(res.data);
-      });
+    useAxios().get(`course/category/`).then((res) => {
+      setCategory(res.data);
+    });
   }, []);
 
-  console.log(category);
-
-  const handleCourseInputChange = (event) => {
-    setCourse({
-      ...course,
-      [event.target.name]:
-        event.target.type === "checkbox"
-          ? event.target.checked
-          : event.target.value,
+  const handleKitapTahliliInputChange = (event) => {
+    setKitapTahlili({
+      ...kitaptahlili,
+      [event.target.name]: event.target.value,
     });
   };
 
   const handleCkEditorChange = (event, editor) => {
     const data = editor.getData();
     setCKEditorData(data);
-    console.log(ckEdtitorData);
   };
 
-  const handleCourseImageChange = (event) => {
+  const handleKitapTahliliImageChange = (event) => {
     const file = event.target.files[0];
-    console.log(file);
-
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCourse({
-          ...course,
-          image: {
-            file: event.target.files[0],
-            preview: reader.result,
-          },
-        });
-      };
-      reader.readAsDataURL(file);
+      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
+        setErrors({ ...errors, image: "Yalnızca jpg, jpeg veya png dosyaları kabul edilir." });
+      } else {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setKitapTahlili({
+            ...kitaptahlili,
+            image: {
+              file: event.target.files[0],
+              preview: reader.result,
+            },
+          });
+          setErrors({ ...errors, image: "" });
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
-  const handleCourseIntroVideoChange = (event) => {
-    setCourse({
-      ...course,
-      [event.target.name]: event.target.files[0],
-    });
+  const handleVariantChange = (index, value) => {
+    const updatedVariants = [...variants];
+    updatedVariants[index].title = value;
+    setVariants(updatedVariants);
   };
 
-  const handleVariantChange = (index, propertyName, value) => {
+  const handlePDFChange = (index, file) => {
     const updatedVariants = [...variants];
-    updatedVariants[index][propertyName] = value;
-    setVariants(updatedVariants);
-
-    console.log(`Name: ${propertyName} - value: ${value} - Index: ${index}`);
-    console.log(variants);
-  };
-
-  const handleItemChange = (
-    variantIndex,
-    itemIndex,
-    propertyName,
-    value,
-    type
-  ) => {
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex].items[itemIndex][propertyName] = value;
-    setVariants(updatedVariants);
-
-    console.log(
-      `Name: ${propertyName} - value: ${value} - Index: ${variantIndex} ItemIndex: ${itemIndex} - type: ${type}`
-    );
+    if (file && file.type !== "application/pdf") {
+      setErrors({ ...errors, [`variant_pdf_${index}`]: "Yalnızca PDF dosyaları kabul edilir." });
+    } else {
+      updatedVariants[index].pdf = file;
+      setVariants(updatedVariants);
+      setErrors({ ...errors, [`variant_pdf_${index}`]: "" });
+    }
   };
 
   const addVariant = () => {
-    setVariants([
-      ...variants,
-      {
-        title: "",
-        items: [{ title: "", description: "", file: "", preview: false }],
-      },
-    ]);
+    setVariants([...variants, { title: "", pdf: "" }]);
   };
 
   const removeVariant = (index) => {
@@ -129,400 +95,141 @@ function CourseCreate() {
     setVariants(updatedVariants);
   };
 
-  const addItem = (variantIndex) => {
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex].items.push({
-      title: "",
-      description: "",
-      file: "",
-      preview: false,
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!kitaptahlili.title) newErrors.title = "Kitap Tahlili başlığı zorunludur.";
+    if (!ckEdtitorData) newErrors.description = "Kitap Tahlili açıklaması zorunludur.";
+    if (!kitaptahlili.image.file) newErrors.image = "Kapak resmi yükleyiniz.";
+    if (!kitaptahlili.category) newErrors.category = "Kategori seçiniz.";
+
+    variants.forEach((variant, index) => {
+      if (!variant.title) newErrors[`variant_title_${index}`] = "Bölüm adı zorunludur.";
+      if (!variant.pdf) newErrors[`variant_pdf_${index}`] = "PDF dosyası ekleyiniz.";
     });
 
-    setVariants(updatedVariants);
-  };
-
-  const removeItem = (variantIndex, itemIndex) => {
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex].items.splice(itemIndex, 1);
-    setVariants(updatedVariants);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
-    
+    debugger;
     e.preventDefault();
+    if (!validateForm()) return;
+
     const formdata = new FormData();
-    formdata.append("title", course.title);
-    formdata.append("image", course.image.file);
+    formdata.append("title", kitaptahlili.title);
+    formdata.append("hazirlayan", parseInt(UserData()?.user_id));
+    formdata.append("kitaptahlili_status", kitaptahlili.kitaptahlili_status);
+    formdata.append("image", kitaptahlili.image.file);
     formdata.append("description", ckEdtitorData);
-    formdata.append("category", course.category);
-    formdata.append("price", course.price);
-    formdata.append("level", course.level);
-    formdata.append("language", course.language);
-    formdata.append("teacher", parseInt(UserData()?.teacher_id));
-    console.log(course.category);
-    if (course.file !== null || course.file !== "") {
-      formdata.append("file", course.file || "");
-    }
+    formdata.append("category", kitaptahlili.category);
+    formdata.append("level", kitaptahlili.level);
+    formdata.append("language", kitaptahlili.language);
+    formdata.append("teacher", 1);
 
-    variants.forEach((variant, variantIndex) => {
-      Object.entries(variant).forEach(([key, value]) => {
-        console.log(`Key: ${key} = value: ${value}`);
-        formdata.append(
-          `variants[${variantIndex}][variant_${key}]`,
-          String(value)
-        );
-      });
-
-      variant.items.forEach((item, itemIndex) => {
-        Object.entries(item).forEach(([itemKey, itemValue]) => {
-          formdata.append(
-            `variants[${variantIndex}][items][${itemIndex}][${itemKey}]`,
-            itemValue
-          );
-        });
-      });
+    variants.forEach((variant, index) => {
+      formdata.append(`variants[${index}][title]`, variant.title);
+      formdata.append(`variants[${index}][pdf]`, variant.pdf);
     });
 
-    const response = await useAxios().post(`teacher/course-create/`, formdata);
-    console.log(response.data);
+    await useAxios().post(`stajer/kitaptahlili-create/`, formdata);
     Swal.fire({
       icon: "success",
-      title: "Kurs Başarılı Bir Şekilde Oluşturuldu"
-    })
+      title: "Kitap Tahlili Başarıyla Oluşturuldu"
+    });
   };
 
   return (
     <>
-      <BaseHeader />
-
+      <ESKEPBaseHeader />
       <section className="pt-5 pb-5">
         <div className="container">
-          {/* Header Here */}
           <Header />
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
             <Sidebar />
             <form className="col-lg-9 col-md-8 col-12" onSubmit={handleSubmit}>
-              <>
-                <section className="py-4 py-lg-6 bg-primary rounded-3">
-                  <div className="container">
-                    <div className="row">
-                      <div className="offset-lg-1 col-lg-10 col-md-12 col-12">
-                        <div className="d-lg-flex align-items-center justify-content-between">
-                          {/* Content */}
-                          <div className="mb-4 mb-lg-0">
-                            <h1 className="text-white mb-1">Yeni Ödev Ekleyin</h1>
-                            <p className="mb-0 text-white lead">
-                              Alanları Doldurun ve Ödevinizi Oluşturun
-                            </p>
-                          </div>
-                          <div>
-                            <Link
-                              to="/instructor/courses/"
-                              className="btn"
-                              style={{ backgroundColor: "white" }}
-                            >
-                              {" "}
-                              <i className="fas fa-arrow-left"></i> Ödev Sayfasına Dön
-                            </Link>
-                            <a
-                              href="instructor-courses.html"
-                              className="btn btn-dark ms-2"
-                            >
-                              Kaydet <i className="fas fa-check-circle"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            {/* <h1>Yeni Kitap Tahlili</h1> */}
+              <div className="mb-3">
+                <label className="form-label">Kitap Tahlili Başlığı</label>
+                <input type="text" className="form-control" name="title" onChange={handleKitapTahliliInputChange} />
+                {errors.title && <span className="text-danger">{errors.title}</span>}
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Ödev Durumu</label>
+                <select
+                  className="form-select"
+                  name="kitaptahlili_status"
+                  onChange={handleKitapTahliliInputChange}
+                >
+                  <option value="">Seçiniz</option>
+                  <option value="İncelemede">İncelemede</option>
+                  <option value="Pasif">Pasif</option>
+                  <option value="Reddedilmiş">Reddedilmiş</option>
+                  <option value="Taslak">Taslak</option>
+                  <option value="Teslim Edildi">Teslim Edildi</option>                 
+                </select>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Kitap Tahlili Açıklaması</label>
+                <CKEditor editor={ClassicEditor} data={ckEdtitorData} onChange={handleCkEditorChange} />
+                {errors.description && <span className="text-danger">{errors.description}</span>}
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Kapak Resmi</label>
+                <input type="file" className="form-control" onChange={handleKitapTahliliImageChange} />
+                {errors.image && <span className="text-danger">{errors.image}</span>}
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Kategori</label>
+                <select className="form-select" name="category" onChange={handleKitapTahliliInputChange}>
+                  <option value="">-------------</option>
+                  {category.map((c, index) => (
+                    <option key={index} value={c.id}>{c.title}</option>
+                  ))}
+                </select>
+                {errors.category && <span className="text-danger">{errors.category}</span>}
+              </div>
+              <div className="mb-3">
+                <h4>Bölümler</h4>
+                {variants.map((variant, index) => (
+                  <div key={index} className="border p-2 rounded-3 mb-3 bg-light">
+                    <input
+                      type="text"
+                      placeholder="Bölüm Adı"
+                      className="form-control mb-2"
+                      value={variant.title}
+                      onChange={(e) => handleVariantChange(index, e.target.value)}
+                    />
+                    {errors[`variant_title_${index}`] && (
+                      <span className="text-danger">{errors[`variant_title_${index}`]}</span>
+                    )}
+
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept="application/pdf"
+                      onChange={(e) => handlePDFChange(index, e.target.files[0])}
+                    />
+                    {errors[`variant_pdf_${index}`] && (
+                      <span className="text-danger">{errors[`variant_pdf_${index}`]}</span>
+                    )}
+
+                    <button className="btn btn-danger mt-2" type="button" onClick={() => removeVariant(index)}>
+                      Bölümü Kaldır
+                    </button>
                   </div>
-                </section>
-                <section className="pb-8 mt-5">
-                  <div className="card mb-3">
-                    {/* Basic Info Section */}
-                    <div className="card-header border-bottom px-4 py-3">
-                      <h4 className="mb-0">Temel Bilgiler</h4>
-                    </div>
-                    <div className="card-body">
-                      <label htmlFor="courseTHumbnail" className="form-label">
-                        Küçük Resim Önizleme
-                      </label>
-                      <img
-                        style={{
-                          width: "100%",
-                          height: "330px",
-                          objectFit: "cover",
-                          borderRadius: "10px",
-                        }}
-                        className="mb-4"
-                        src={
-                          course.image.preview ||
-                          "https://www.eclosio.ong/wp-content/uploads/2018/08/default.png"
-                        }
-                        alt=""
-                      />
-                      <div className="mb-3">
-                        <label htmlFor="courseTHumbnail" className="form-label">
-                          Ödev Küçük Resim
-                        </label>
-                        <input
-                          id="courseTHumbnail"
-                          className="form-control"
-                          type="file"
-                          name="image"
-                          onChange={handleCourseImageChange}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="courseTitle" className="form-label">
-                          Tanıtım Videosu
-                        </label>
-                        <input
-                          id="introvideo"
-                          className="form-control"
-                          type="file"
-                          name="file"
-                          onChange={handleCourseIntroVideoChange}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="courseTitle" className="form-label">
-                          Başlık
-                        </label>
-                        <input
-                          id="courseTitle"
-                          className="form-control"
-                          type="text"
-                          placeholder=""
-                          name="title"
-                          onChange={handleCourseInputChange}
-                        />
-                        <small>En fazla 60 karakter olacak şekilde ödev başlığınızı yazın</small>
-                      </div>
-                      <div className="mb-3">
-                        <label className="form-label">Ödev Kategorisi</label>
-                        <select
-                          className="form-select"
-                          name="category"
-                          onChange={handleCourseInputChange}
-                        >
-                          <option value="">-------------</option>
-                          {category?.map((c, index) => (
-                            <option key={index} value={c.id}>
-                              {c.title}
-                            </option>
-                          ))}
-                        </select>
-                        {/* <small>
-                        Kategorileri seçerek insanların kurslarınızı bulmasına yardımcı olun
-                        </small> */}
-                      </div>
-                      <div className="mb-3">
-                        <select
-                          className="form-select"
-                          onChange={handleCourseInputChange}
-                          name="level"
-                        >
-                          <option value="">Seviye Seçin</option>
-                          <option value="Başlangıç">Başlangıç</option>
-                          <option value="Orta">Orta</option>
-                          <option value="İleri Seviye">İleri Seviye</option>
-                        </select>
-                      </div>
-
-                      <div className="mb-3">
-                        <select
-                          className="form-select"
-                          onChange={handleCourseInputChange}
-                          name="language"
-                        >
-                          <option value="">Dil Seçin</option>
-                          <option value="Türkçe">Türkçe</option>
-                          <option value="İngilizce">İngilizce</option>
-                          <option value="Arapça">Arapça</option>
-                        </select>
-                      </div>
-                      <div className="mb-3">
-                        <label className="form-label">Ödev Açıklaması</label>
-                        <CKEditor
-                          editor={ClassicEditor}
-                          data={ckEdtitorData}
-                          onChange={handleCkEditorChange}
-                          style={{ height: "400px" }}
-                          name="description"
-                          value={course.description || ""}
-                        />
-                        <small>
-                        Ödevlerinizin kısa bir özeti.</small>
-                      </div>
-                      {/* <label htmlFor="courseTitle" className="form-label">
-                        Price
-                      </label>
-                      <input
-                        id="courseTitle"
-                        className="form-control"
-                        type="number"
-                        onChange={handleCourseInputChange}
-                        name="price"
-                        placeholder=""
-                      /> */}
-                    </div>
-
-                    {/* Curriculum Section */}
-                    <div className="card-header border-bottom px-4 py-3">
-                      <h4 className="mb-0">Bölümler</h4>
-                    </div>
-                    <div className="card-body ">
-                      {variants.map((variant, variantIndex) => (
-                        <div
-                          className="border p-2 rounded-3 mb-3"
-                          style={{ backgroundColor: "#ededed" }}
-                        >
-                          <div className="d-flex mb-4">
-                            <input
-                              type="text"
-                              placeholder="Böüm Adı"
-                              required
-                              className="form-control"
-                              onChange={(e) =>
-                                handleVariantChange(
-                                  variantIndex,
-                                  "title",
-                                  e.target.value
-                                )
-                              }
-                            />
-                            <button
-                              className="btn btn-danger ms-2"
-                              type="button"
-                              onClick={() => removeVariant(variantIndex)}
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          </div>
-                          {variant.items.map((item, itemIndex) => (
-                            <div
-                              className=" mb-2 mt-2 shadow p-2 rounded-3 "
-                              style={{ border: "1px #bdbdbd solid" }}
-                            >
-                              <input
-                                type="text"
-                                placeholder="Bölüm Başlığı"
-                                className="form-control me-1 mt-2"
-                                name="title"
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    variantIndex,
-                                    itemIndex,
-                                    "title",
-                                    e.target.value,
-                                    e.target.type
-                                  )
-                                }
-                              />
-                              <textarea
-                                name="description"
-                                id=""
-                                cols="30"
-                                className="form-control mt-2"
-                                placeholder="Ders Tanımı"
-                                rows="4"
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    variantIndex,
-                                    itemIndex,
-                                    "description",
-                                    e.target.value,
-                                    e.target.type
-                                  )
-                                }
-                              ></textarea>
-                              <div className="row d-flex align-items-center">
-                                <div className="col-lg-8">
-                                  <input
-                                    type="file"
-                                    placeholder="Item Price"
-                                    className="form-control me-1 mt-2"
-                                    name="file"
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        variantIndex,
-                                        itemIndex,
-                                        "file",
-                                        e.target.files[0],
-                                        e.target.type
-                                      )
-                                    }
-                                  />
-                                </div>
-                                <div className="col-lg-4">
-                                  <label htmlFor={`checkbox${1}`}>
-                                    Önizleme
-                                  </label>
-                                  <input
-                                    type="checkbox"
-                                    className="form-check-input ms-2"
-                                    name=""
-                                    id={`checkbox${1}`}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        variantIndex,
-                                        itemIndex,
-                                        "preview",
-                                        e.target.checked,
-                                        e.target.type
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </div>
-                              <button
-                                className="btn btn-sm btn-outline-danger me-2 mt-2"
-                                type="button"
-                                onClick={() =>
-                                  removeItem(variantIndex, itemIndex)
-                                }
-                              >
-                                Dersi Sil <i className="fas fa-trash"></i>
-                              </button>
-                            </div>
-                          ))}
-
-                          <button
-                            className="btn btn-sm btn-primary mt-2"
-                            type="button"
-                            onClick={() => addItem(variantIndex)}
-                          >
-                            + Bölüm Ekleyin
-                          </button>
-                        </div>
-                      ))}
-
-                      <button
-                        className="btn btn-sm btn-secondary w-100 mt-2"
-                        type="button"
-                        onClick={addVariant}
-                      >
-                        + Yeni Bölüm
-                      </button>
-                    </div>
-                  </div>
-                  <button
-                    className="btn btn-lg btn-success w-100 mt-2"
-                    type="submit"
-                  >
-                    Ödev Oluştur <i className="fas fa-check-circle"></i>
-                  </button>
-                </section>
-              </>
+                ))}
+                <button className="btn btn-secondary w-100" type="button" onClick={addVariant}>+ Yeni Bölüm</button>
+              </div>
+              <button className="btn btn-success w-100" type="submit">Kitap Tahlili Oluştur</button>
             </form>
           </div>
         </div>
       </section>
-
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }
 
-export default CourseCreate;
+export default KitapTahliliCreate;

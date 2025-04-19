@@ -4,14 +4,12 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
 import Swal from "sweetalert2";
 
 import useAxios from "../../utils/useAxios";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-
+import UserData from "../plugin/UserData";
 
 function DersSonuRaporuCreate() {
   const [derssonuraporu, setDersSonuRaporu] = useState({
@@ -119,20 +117,20 @@ function DersSonuRaporuCreate() {
     if (!validateForm()) return;
 
     const formdata = new FormData();
-    formdata.append("title", dersonuraporu.title);
-    formdata.append("image", dersonuraporu.image.file);
+    formdata.append("title", derssonuraporu.title);
+    formdata.append("hazirlayan", parseInt(UserData()?.user_id));
+    formdata.append("derssonuraporu_status", derssonuraporu.derssonuraporu_status);
+    formdata.append("image", derssonuraporu.image.file);
     formdata.append("description", ckEdtitorData);
-    formdata.append("category", dersonuraporu.category);
-    formdata.append("level", dersonuraporu.level);
-    formdata.append("language", dersonuraporu.language);
-    formdata.append("teacher", 1);
-
+    formdata.append("category", derssonuraporu.category);
+    formdata.append("level", derssonuraporu.level);
+    formdata.append("language", derssonuraporu.language);   
     variants.forEach((variant, index) => {
       formdata.append(`variants[${index}][title]`, variant.title);
       formdata.append(`variants[${index}][pdf]`, variant.pdf);
     });
 
-    await useAxios().post(`stajer/dersonuraporu-create/`, formdata);
+    await useAxios().post(`eskepstajer/dersonuraporu-create/`, formdata);
     Swal.fire({
       icon: "success",
       title: "Ders Sonu Raporu Başarıyla Oluşturuldu"

@@ -53,7 +53,7 @@ function TeacherNotification() {
 
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -122,7 +122,7 @@ function TeacherNotification() {
         </div>
       </section>
 
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

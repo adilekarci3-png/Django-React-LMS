@@ -546,7 +546,7 @@ function CourseDetail() {
                                               type="button"
                                               className="btn-close"
                                               data-bs-dismiss="modal"
-                                              aria-label="Close"
+                                              aria-label="Kapat"
                                             />
                                           </div>
                                           <div className="modal-body">
@@ -901,7 +901,7 @@ function CourseDetail() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Close
+          Kapat
           </Button>
         </Modal.Footer>
       </Modal>

@@ -24,7 +24,7 @@ function Orders() {
   }, []);
   return (
     <>
-      <BaseHeader />
+      <EskepBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -81,7 +81,7 @@ function Orders() {
         </div>
       </section>
 
-      <BaseFooter />
+      <EskepBaseFooter />
     </>
   );
 }

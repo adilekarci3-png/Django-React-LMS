@@ -1,13 +1,16 @@
 from urllib import response
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import render, redirect,get_object_or_404
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 from django.db import models
+from django.db.models import Q
 from django.db.models.functions import ExtractMonth
 from django.core.files.uploadedfile import InMemoryUploadedFile
-
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from api import serializer as api_serializer
 from api import models as api_models
@@ -21,6 +24,8 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+
 
 
 import random
@@ -118,16 +123,16 @@ class ChangePasswordAPIView(generics.CreateAPIView):
         old_password = request.data['old_password']
         new_password = request.data['new_password']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         if user is not None:
             if check_password(old_password,user.password):
                 user.set_password(new_password)
                 user.save()
-                return Response({"message": "Password changed successfully", "icon": "success"})
+                return Response({"message": "Şifre Başarılı Bir Şekilde Değiştirildi", "icon": "success"})
             else:
-                return Response({"message": "Old password is incorrect", "icon": "warning"})
+                return Response({"message": "Eski Şifre Yanlış", "icon": "warning"})
         else:
-            return Response({"message": "User does not exists", "icon": "error"})
+            return Response({"message": "Kullanıcı Mevcut Değil", "icon": "error"})
 
                 
 
@@ -137,12 +142,47 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user_id = self.kwargs['user_id']
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         return Profile.objects.get(user=user)
 
 class CategoryListAPIView(generics.ListAPIView):
     queryset = api_models.Category.objects.filter(active=True)  
     serializer_class = api_serializer.CategorySerializer
+    permission_classes = [AllowAny]
+
+class CoordinatorListAPIView(generics.ListAPIView):
+    queryset = api_models.Koordinator.objects.filter(active=True)  
+    serializer_class = api_serializer.CoordinatorSerializer
+    permission_classes = [AllowAny]
+
+class UserListAPIView(generics.ListAPIView):
+    # queryset = api_models.User.objects.filter(active=True)  
+    serializer_class = api_serializer.UserSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        # Koordinatör atanmış kullanıcıların ID'lerini al
+        koordinator_ids = api_models.Koordinator.objects.values_list("user__id", flat=True)
+
+        # Eğer Koordinator modeliyle bağlantılı user'lar varsa filtrele
+        users = api_models.User.objects.filter(active=True).exclude(id__in=list(koordinator_ids))
+        # users = api_models.User.objects.filter(active=True)
+
+        return users
+        
+class StajerListAPIView(generics.ListAPIView):
+    queryset = api_models.Stajer.objects.filter(active=True)  
+    serializer_class = api_serializer.StajerSerializer
+    permission_classes = [AllowAny]
+
+class EgitmenListAPIView(generics.ListAPIView):
+    queryset = api_models.Teacher.objects.filter(active=True)  
+    serializer_class = api_serializer.TeacherSerializer
+    permission_classes = [AllowAny]
+
+class OgrenciListAPIView(generics.ListAPIView):
+    queryset = api_models.Ogrenci.objects.filter(active=True)  
+    serializer_class = api_serializer.OgrenciSerializer
     permission_classes = [AllowAny]
 
 class CourseListAPIView(generics.ListAPIView):
@@ -239,7 +279,8 @@ class CartItemDeleteAPIView(generics.DestroyAPIView):
         cart_id = self.kwargs['cart_id']
         item_id = self.kwargs['item_id']
 
-        return api_models.Cart.objects.filter(cart_id=cart_id, id=item_id).first()
+        return get_object_or_404(api_models.Cart, cart_id=cart_id, id=item_id)
+
 
 class CartStatsAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.CartSerializer
@@ -293,7 +334,7 @@ class CreateOrderAPIView(generics.CreateAPIView):
         user_id = request.data['user_id']
 
         if user_id != 0:
-            user = User.objects.get(id=user_id)
+            user = get_object_or_404(User, id=user_id)
         else:
             user = None
 
@@ -351,37 +392,54 @@ class CouponApplyAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        order_oid = request.data['order_oid']
-        coupon_code = request.data['coupon_code']
+        order_oid = request.data.get('order_oid')
+        coupon_code = request.data.get('coupon_code')
 
-        order = api_models.CartOrder.objects.get(oid=order_oid)
-        coupon = api_models.Coupon.objects.get(code=coupon_code)
+        # Güvenlik: Parametre kontrolleri
+        if not order_oid or not coupon_code:
+            return Response({"message": "Missing parameters", "icon": "error"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if coupon:
-            order_items = api_models.CartOrderItem.objects.filter(order=order, teacher=coupon.teacher)
-            for i in order_items:
-                if not coupon in i.coupons.all():
-                    discount = i.total * coupon.discount / 100
+        try:
+            order = api_models.CartOrder.objects.get(oid=order_oid)
+        except api_models.CartOrder.DoesNotExist:
+            return Response({"message": "Order not found", "icon": "error"}, status=status.HTTP_404_NOT_FOUND)
 
-                    i.total -= discount
-                    i.price -= discount
-                    i.saved += discount
-                    i.applied_coupon = True
-                    i.coupons.add(coupon)
+        try:
+            coupon = api_models.Coupon.objects.get(code=coupon_code)
+        except api_models.Coupon.DoesNotExist:
+            return Response({"message": "Coupon not found", "icon": "error"}, status=status.HTTP_404_NOT_FOUND)
 
-                    order.coupons.add(coupon)
-                    order.total -= discount
-                    order.sub_total -= discount
-                    order.saved += discount
+        # Öğretmene özel kupon
+        order_items = api_models.CartOrderItem.objects.filter(order=order, teacher=coupon.teacher)
 
-                    i.save()
-                    order.save()
-                    coupon.used_by.add(order.student)
-                    return Response({"message": "Coupon Found and Activated", "icon": "success"}, status=status.HTTP_201_CREATED)
-                else:
-                    return Response({"message": "Coupon Already Applied", "icon": "warning"}, status=status.HTTP_200_OK)
+        if not order_items.exists():
+            return Response({"message": "No eligible items for this coupon", "icon": "warning"}, status=status.HTTP_200_OK)
+
+        coupon_applied = False
+
+        for item in order_items:
+            if coupon not in item.coupons.all():
+                discount = item.total * coupon.discount / 100
+                item.total -= discount
+                item.price -= discount
+                item.saved += discount
+                item.applied_coupon = True
+                item.coupons.add(coupon)
+                item.save()
+
+                order.total -= discount
+                order.sub_total -= discount
+                order.saved += discount
+                coupon_applied = True
+
+        if coupon_applied:
+            order.coupons.add(coupon)
+            order.save()
+            coupon.used_by.add(order.student)
+            return Response({"message": "Coupon applied successfully", "icon": "success"}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"message": "Coupon Not Found", "icon": "error"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "Coupon already applied", "icon": "warning"}, status=status.HTTP_200_OK)
+
 
 class StripeCheckoutAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.CartOrderSerializer
@@ -532,7 +590,7 @@ class StudentSummaryAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
 
         total_courses = api_models.EnrolledCourse.objects.filter(user=user).count()
         completed_lessons = api_models.CompletedLesson.objects.filter(user=user).count()
@@ -549,13 +607,15 @@ class StudentSummaryAPIView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+
+
 class InstructorSummaryAPIView(generics.ListAPIView):
     serializer_class = api_serializer.ESKEPStudentSummarySerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
 
         total_odevs = api_models.EnrolledOdev.objects.filter(user=user).count()
         completed_lessons = api_models.CompletedOdev.objects.filter(user=user).count()
@@ -606,25 +666,38 @@ class StudentCourseListAPIView(generics.ListAPIView):
         user =  User.objects.get(id=user_id)
         return api_models.EnrolledCourse.objects.filter(user=user)
 
-class InstructorOdevListAPIView(generics.ListAPIView):
-    serializer_class = api_serializer.EnrolledOdevSerializer
+class EskepInstructorOdevListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.OdevSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         user =  User.objects.get(id=user_id)
-        return api_models.EnrolledOdev.objects.filter(user=user)
+        return api_models.Odev.objects.filter(koordinator_id=user_id)
 
-class InstructorKitapTahliliListAPIView(generics.ListAPIView):
+class EskepInstructorKitapTahliliListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.EnrolledKitapTahliliSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        # URL parametresinden 'user_id' alınıyor
         user_id = self.kwargs['user_id']
-        user =  User.objects.get(id=user_id)
-        return api_models.EnrolledKitapTahlili.objects.filter(user=user)
+        
+        try:
+            # Koordinator nesnesini bulmaya çalışıyoruz
+            koordinator = api_models.Koordinator.objects.get(user_id=user_id)
+            
+            tahlil = api_models.KitapTahlili.objects.filter(koordinator_id=koordinator.id)
+            print(tahlil)
+            # Koordinator'a bağlı KitapTahlili nesnelerini filtreliyoruz
+            return api_models.KitapTahlili.objects.filter(koordinator_id=koordinator.id)
+        
+        except api_models.Koordinator.DoesNotExist:
+            # Eğer Koordinator bulunamazsa uygun bir hata mesajı döndürüyoruz
+            raise serializers.ValidationError(f"Koordinator with user_id {user_id} not found.")
+
     
-class InstructorDersSonuRaporuListAPIView(generics.ListAPIView):
+class EskepInstructorDersSonuRaporuListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.EnrolledDersSonuRaporuSerializer
     permission_classes = [AllowAny]
 
@@ -632,6 +705,15 @@ class InstructorDersSonuRaporuListAPIView(generics.ListAPIView):
         user_id = self.kwargs['user_id']
         user =  User.objects.get(id=user_id)
         return api_models.EnrolledDersSonuRaporu.objects.filter(user=user)
+
+class EskepInstructorEskepProjeListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.EnrolledEskepProjeSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user =  User.objects.get(id=user_id)
+        return api_models.EnrolledEskepProje.objects.filter(user=user)
 
 class StudentCourseDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.EnrolledCourseSerializer
@@ -642,20 +724,58 @@ class StudentCourseDetailAPIView(generics.RetrieveAPIView):
         user_id = self.kwargs['user_id']
         enrollment_id = self.kwargs['enrollment_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         return api_models.EnrolledCourse.objects.get(user=user, enrollment_id=enrollment_id)
 
-class InstructorOdevDetailAPIView(generics.RetrieveAPIView):
-    serializer_class = api_serializer.EnrolledOdevSerializer
+class EskepInstructorOdevDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.OdevSerializer
     permission_classes = [AllowAny]
-    lookup_field = 'enrollment_id'
+    # lookup_field = 'enrollment_id'
 
     def get_object(self):
-        user_id = self.kwargs['user_id']
-        enrollment_id = self.kwargs['enrollment_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        odev_id = self.kwargs['odev_id']
 
-        user = User.objects.get(id=user_id)
-        return api_models.EnrolledOdev.objects.get(user=user, enrollment_id=enrollment_id)
+        # user = get_object_or_404(User, id=user_id)
+        return api_models.Odev.objects.get(id=odev_id,koordinator_id=koordinator_id)
+
+class EskepInstructorKitapTahliliDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.KitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        kitaptahlili_id = self.kwargs['kitaptahlili_id']
+        user_id = self.kwargs['koordinator_id']
+        koordinator = get_object_or_404(api_models.Koordinator, user_id=user_id)
+        print(koordinator.id)
+        try:
+            return api_models.KitapTahlili.objects.get(id=kitaptahlili_id, koordinator_id=koordinator.id)
+        except api_models.KitapTahlili.DoesNotExist:
+            raise NotFound("Kitap tahlili bulunamadı.")
+        
+class EskepInstructorDersSonuRaporuDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.DersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+    # lookup_field = 'enrollment_id'
+
+    def get_object(self):
+        koordinator_id = self.kwargs['koordinator_id']
+        dersSonuRaporu_id = self.kwargs['dersSonuRaporu_id']
+
+        # user = get_object_or_404(User, id=user_id)
+        return api_models.DersSonuRaporu.objects.get(id=dersSonuRaporu_id,koordinator_id=koordinator_id)
+
+class EskepInstructorProjeDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.ProjeSerializer
+    permission_classes = [AllowAny]
+    # lookup_field = 'enrollment_id'
+
+    def get_object(self):
+        koordinator_id = self.kwargs['koordinator_id']
+        proje_id = self.kwargs['proje_id']
+
+        # user = get_object_or_404(User, id=user_id)
+        return api_models.Proje.objects.get(id=proje_id,koordinator_id=koordinator_id)
 
 class StajerOdevDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.EnrolledOdevSerializer
@@ -666,7 +786,7 @@ class StajerOdevDetailAPIView(generics.RetrieveAPIView):
         user_id = self.kwargs['user_id']
         enrollment_id = self.kwargs['enrollment_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         return api_models.EnrolledOdev.objects.get(user=user, enrollment_id=enrollment_id)
    
 # class InstructorOdevDetailAPIView(generics.RetrieveAPIView):
@@ -704,7 +824,7 @@ class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
         course_id = request.data['course_id']
         variant_item_id = request.data['variant_item_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         course = api_models.Course.objects.get(id=course_id)
         variant_item = api_models.VariantItem.objects.get(variant_item_id=variant_item_id)
 
@@ -727,7 +847,7 @@ class InstructorOdevCompletedCreateAPIView(generics.CreateAPIView):
         odev_id = request.data['odev_id']
         variant_item_id = request.data['variant_item_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         odev = api_models.Odev.objects.get(id=odev_id)
         variant_item = api_models.VariantOdevItem.objects.get(variant_item_id=variant_item_id)
 
@@ -749,7 +869,7 @@ class StudentNoteCreateAPIView(generics.ListCreateAPIView):
         user_id = self.kwargs['user_id']
         enrollment_id = self.kwargs['enrollment_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
         
         return api_models.Note.objects.filter(user=user, course=enrolled.course)
@@ -760,39 +880,117 @@ class StudentNoteCreateAPIView(generics.ListCreateAPIView):
         title = request.data['title']
         note = request.data['note']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
         
         api_models.Note.objects.create(user=user, course=enrolled.course, note=note, title=title)
 
         return Response({"message": "Note created successfullly"}, status=status.HTTP_201_CREATED)
     
-class InstructorNoteCreateAPIView(generics.ListCreateAPIView):
+class EskepInstructorOdevNoteCreateAPIView(generics.ListCreateAPIView):
     serializer_class = api_serializer.NoteOdevSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        user_id = self.kwargs['user_id']
-        enrollment_id = self.kwargs['enrollment_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        odev_id = self.kwargs['odev_id']
 
-        user = User.objects.get(id=user_id)
-        enrolled = api_models.EnrolledOdev.objects.get(enrollment_id=enrollment_id)
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        odev = api_models.Odev.objects.get(id=odev_id)
         
-        return api_models.NoteOdev.objects.filter(user=user, odev=enrolled.odev)
+        return api_models.NoteOdev.objects.filter(koordinator=koordinator, odev=odev)
 
     def create(self, request, *args, **kwargs):
-        user_id = self.kwargs['user_id']
-        enrollment_id = self.kwargs['enrollment_id']
+        odev_id = self.kwargs['odev_id']
+        koordinator_id = self.kwargs['koordinator_id']
         title = request.data['title']
         note = request.data['note']
 
-        user = User.objects.get(id=user_id)
-        enrolled = api_models.EnrolledOdev.objects.get(enrollment_id=enrollment_id)
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        odev = api_models.Odev.objects.get(id=odev_id)
         
-        api_models.NoteOdev.objects.create(user=user, odev=enrolled.odev, note=note, title=title)
+        api_models.NoteOdev.objects.create(odev=odev,koordinator=koordinator, note=note, title=title)
 
         return Response({"message": "Not başarılı bir şekilde oluşturuldu"}, status=status.HTTP_201_CREATED)
-    
+ 
+class EskepInstructorDerSonuRaporuNoteCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.NoteDersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        koordinator_id = self.kwargs['koordinator_id']
+        derSonuRaporu_id = self.kwargs['derSonuRaporu_id']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        derssonuraporu = api_models.DersSonuRaporu.objects.get(id=derSonuRaporu_id)
+        
+        return api_models.NoteDersSonuRaporu.objects.filter(koordinator=koordinator, derssonuraporu=derssonuraporu)
+
+    def create(self, request, *args, **kwargs):
+        derSonuRaporu_id = self.kwargs['derSonuRaporu_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        title = request.data['title']
+        note = request.data['note']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        derssonuraporu = api_models.DersSonuRaporu.objects.get(id=derSonuRaporu_id)
+        
+        api_models.NoteDersSonuRaporu.objects.create(derssonuraporu=derssonuraporu,koordinator=koordinator, note=note, title=title)
+
+        return Response({"message": "Not başarılı bir şekilde oluşturuldu"}, status=status.HTTP_201_CREATED) 
+
+class EskepInstructorKitapTahliliNoteCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.NoteDersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        koordinator_id = self.kwargs['koordinator_id']
+        kitaptahlili_id = self.kwargs['kitaptahlili_id']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        kitaptahlili = api_models.KitapTahlili.objects.get(id=kitaptahlili_id)
+        
+        return api_models.NoteKitapTahlili.objects.filter(koordinator=koordinator, kitaptahlili=kitaptahlili)
+
+    def create(self, request, *args, **kwargs):
+        kitaptahlili_id = self.kwargs['kitaptahlili_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        title = request.data['title']
+        note = request.data['note']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        kitaptahlili = api_models.KitapTahlili.objects.get(id=kitaptahlili_id)
+        
+        api_models.NoteKitapTahlili.objects.create(kitaptahlili=kitaptahlili,koordinator=koordinator, note=note, title=title)
+
+        return Response({"message": "Not başarılı bir şekilde oluşturuldu"}, status=status.HTTP_201_CREATED)  
+
+class EskepInstructorProjeNoteCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.NoteDersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        koordinator_id = self.kwargs['koordinator_id']
+        proje_id = self.kwargs['proje_id']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        proje = api_models.Proje.objects.get(id=proje_id)
+        
+        return api_models.NoteProje.objects.filter(koordinator=koordinator, proje=proje)
+
+    def create(self, request, *args, **kwargs):
+        kitaptahlili_id = self.kwargs['kitaptahlili_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        title = request.data['title']
+        note = request.data['note']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        kitaptahlili = api_models.KitapTahlili.objects.get(id=kitaptahlili_id)
+        
+        api_models.NoteKitapTahlili.objects.create(kitaptahlili=kitaptahlili,koordinator=koordinator, note=note, title=title)
+
+        return Response({"message": "Not başarılı bir şekilde oluşturuldu"}, status=status.HTTP_201_CREATED) 
+   
 class StudentNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = api_serializer.NoteSerializer
     permission_classes = [AllowAny]
@@ -802,23 +1000,65 @@ class StudentNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         enrollment_id = self.kwargs['enrollment_id']
         note_id = self.kwargs['note_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
         note = api_models.Note.objects.get(user=user, course=enrolled.course, id=note_id)
         return note
 
-class InstructorNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+class EskepInstructorOdevNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = api_serializer.NoteOdevSerializer
     permission_classes = [AllowAny]
 
     def get_object(self):
-        user_id = self.kwargs['user_id']
-        enrollment_id = self.kwargs['enrollment_id']
+        odev_id = self.kwargs['odev_id']
+        koordinator_id = self.kwargs['koordinator_id']
         note_id = self.kwargs['note_id']
 
-        user = User.objects.get(id=user_id)
-        enrolled = api_models.EnrolledOdev.objects.get(enrollment_id=enrollment_id)
-        note = api_models.NoteOdev.objects.get(user=user, odev=enrolled.odev, id=note_id)
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        odev = api_models.Odev.objects.get(id=odev_id)
+        note = api_models.NoteOdev.objects.get(koordinator=koordinator, odev=odev, id=note_id)
+        return note
+
+class EskepInstructorDersSonuRaporuNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = api_serializer.NoteDersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        dersSonuRaporu_id = self.kwargs['dersSonuRaporu_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        note_id = self.kwargs['note_id']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        derssonuraporu = api_models.DersSonuRaporu.objects.get(id=dersSonuRaporu_id)
+        note = api_models.NoteDersSonuRaporu.objects.get(koordinator=koordinator, derssonuraporu=derssonuraporu, id=note_id)
+        return note
+
+class EskepInstructorKitapTahliliNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = api_serializer.NoteKitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        kitaptahlili_id = self.kwargs['kitaptahlili_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        note_id = self.kwargs['note_id']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        kitaptahlili = api_models.KitapTahlili.objects.get(id=kitaptahlili_id)
+        note = api_models.NoteKitapTahlili.objects.get(koordinator=koordinator, kitaptahlili=kitaptahlili, id=note_id)
+        return note
+
+class EskepInstructorProjeNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = api_serializer.NoteEskepProjeSerializer
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        proje_id = self.kwargs['proje_id']
+        koordinator_id = self.kwargs['koordinator_id']
+        note_id = self.kwargs['note_id']
+
+        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
+        proje = api_models.EskepProje.objects.get(id=proje_id)
+        note = api_models.NoteProje.objects.get(koordinator=koordinator, proje=proje, id=note_id)
         return note
 
 class StudentRateCourseCreateAPIView(generics.CreateAPIView):
@@ -831,7 +1071,7 @@ class StudentRateCourseCreateAPIView(generics.CreateAPIView):
         rating = request.data['rating']
         review = request.data['review']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         course = api_models.Course.objects.get(id=course_id)
 
         api_models.Review.objects.create(
@@ -854,7 +1094,7 @@ class InstructorRateCourseCreateAPIView(generics.CreateAPIView):
         rating = request.data['rating']
         review = request.data['review']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         odev = api_models.Odev.objects.get(id=odev_id)
 
         api_models.Review.objects.create(
@@ -875,7 +1115,7 @@ class StudentRateCourseUpdateAPIView(generics.RetrieveUpdateAPIView):
         user_id = self.kwargs['user_id']
         review_id = self.kwargs['review_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         return api_models.Review.objects.get(id=review_id, user=user)
     
 class InstructorRateCourseUpdateAPIView(generics.RetrieveUpdateAPIView):
@@ -886,7 +1126,7 @@ class InstructorRateCourseUpdateAPIView(generics.RetrieveUpdateAPIView):
         user_id = self.kwargs['user_id']
         review_id = self.kwargs['review_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         return api_models.ReviewOdev.objects.get(id=review_id, user=user)
 
 class StudentWishListListCreateAPIView(generics.ListCreateAPIView):
@@ -895,14 +1135,14 @@ class StudentWishListListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         return api_models.Wishlist.objects.filter(user=user)
     
     def create(self, request, *args, **kwargs):
         user_id = request.data['user_id']
         course_id = request.data['course_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         course = api_models.Course.objects.get(id=course_id)
 
         wishlist = api_models.Wishlist.objects.filter(user=user, course=course).first()
@@ -921,14 +1161,14 @@ class InstructorWishListListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         return api_models.WishlistOdev.objects.filter(user=user)
     
     def create(self, request, *args, **kwargs):
         user_id = request.data['user_id']
         odev_id = request.data['odev_id']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         odev = api_models.Odev.objects.get(id=odev_id)
 
         wishlist = api_models.WishlistOdev.objects.filter(user=user, odev=odev).first()
@@ -956,7 +1196,7 @@ class QuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
         title = request.data['title']
         message = request.data['message']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         course = api_models.Course.objects.get(id=course_id)
         
         question = api_models.Question_Answer.objects.create(
@@ -985,7 +1225,7 @@ class QuestionAnswerMessageSendAPIView(generics.CreateAPIView):
         user_id = request.data['user_id']
         message = request.data['message']
 
-        user = User.objects.get(id=user_id)
+        user = get_object_or_404(User, id=user_id)
         course = api_models.Course.objects.get(id=course_id)
         question = api_models.Question_Answer.objects.get(qa_id=qa_id)
         api_models.Question_Answer_Message.objects.create(
@@ -1004,31 +1244,34 @@ class OdevQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         odev_id = self.kwargs['odev_id']
-        odev = api_models.Odev.objects.get(id=odev_id)
+        odev = get_object_or_404(api_models.Odev, id=odev_id)
         return api_models.Question_AnswerOdev.objects.filter(odev=odev)
     
     def create(self, request, *args, **kwargs):
-        odev_id = request.data['odev_id']
-        user_id = request.data['user_id']
-        title = request.data['title']
-        message = request.data['message']
+        odev_id = request.data.get('odev_id')
+        gonderen_id = request.data.get('gonderen_id')
+        title = request.data.get('title')
+        message = request.data.get('message')
 
-        user = User.objects.get(id=user_id)
-        odev = api_models.Odev.objects.get(id=odev_id)
-        
+        odev = get_object_or_404(api_models.Odev, id=odev_id)
+        mesajGonderen = get_object_or_404(User, id=gonderen_id)
+        mesajAlan = odev.hazirlayan
+
         question = api_models.Question_AnswerOdev.objects.create(
             odev=odev,
-            user=user,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
             title=title
         )
 
         api_models.Question_Answer_MessageOdev.objects.create(
             odev=odev,
-            user=user,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
             message=message,
             question=question
         )
-        
+
         return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
 
 class OdevQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
@@ -1036,24 +1279,320 @@ class OdevQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
-        odev_id = request.data['odev_id']
-        qa_id = request.data['qa_id']
-        user_id = request.data['user_id']
-        message = request.data['message']
+        odev_id = request.data.get('odev_id')
+        gonderen_id = request.data.get('gonderen_id')
+        message = request.data.get('message')
+        title = request.data.get('title')
 
-        user = User.objects.get(id=user_id)
-        odev = api_models.Odev.objects.get(id=odev_id)
-        question = api_models.Question_AnswerOdev.objects.get(qa_id=qa_id)
+        # Ödev nesnesini al
+        odev = get_object_or_404(api_models.Odev, id=odev_id)
+    
+        # Koordinatör nesnesi üzerinden User nesnesine ulaşmak
+        mesajGonderen_koord = get_object_or_404(api_models.Koordinator, id=gonderen_id)
+        mesajGonderen = mesajGonderen_koord.user
+    
+        # Mesajı alan kişinin ödevin hazırlayanı olduğunu varsayıyoruz
+        mesajAlan = odev.hazirlayan
+
+        # Soru-Cevap nesnesini filtrele, yoksa oluştur
+        question = api_models.Question_AnswerOdev.objects.filter(
+            odev=odev,
+            mesajiGonderen=mesajGonderen,
+            mesajiAlan=mesajAlan,
+        ).first()
+
+        if not question:
+            question = api_models.Question_AnswerOdev.objects.create(
+                odev=odev,
+                mesajiGonderen=mesajGonderen,
+                mesajiAlan=mesajAlan,
+                title=title,
+            )
+
+        # Mesajı oluştur
         api_models.Question_Answer_MessageOdev.objects.create(
             odev=odev,
-            user=user,
+            mesajiGonderen=mesajGonderen,  # burada gonderen olarak mesajiGonderen kullanılmalı
+            mesajiAlan=mesajAlan,  # burada alan olarak mesajiAlan kullanılmalı
             message=message,
             question=question
         )
 
+        # Soru-Cevap nesnesini serialize et
         question_serializer = api_serializer.Question_AnswerOdevSerializer(question)
-        return Response({"messgae": "Mesaj Gönderildi", "question": question_serializer.data})
 
+        # Başarı mesajı ve veri döndür
+        return Response({
+            "message": "Mesaj Gönderildi",
+            "question": question_serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+class KitapTahliliQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.Question_AnswerKitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        kitaptahlili_id = self.kwargs['kitaptahlili_id']
+        kitaptahlili = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
+        return api_models.Question_AnswerKitapTahlili.objects.filter(kitaptahlili=kitaptahlili)
+    
+    def create(self, request, *args, **kwargs):
+        kitaptahlili_id = request.data.get('kitaptahlili_id')
+        gonderen_id = request.data.get('gonderen_id')
+        title = request.data.get('title')
+        message = request.data.get('message')
+
+        kitaptahlili = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
+        mesajGonderen = get_object_or_404(User, id=gonderen_id)
+        mesajAlan = kitaptahlili.hazirlayan
+
+        question = api_models.Question_AnswerKitapTahlili.objects.create(
+            kitaptahlili=kitaptahlili,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
+            title=title
+        )
+
+        api_models.Question_Answer_MessageKitapTahlili.objects.create(
+            kitaptahlili=kitaptahlili,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
+            message=message,
+            question=question
+        )
+
+        return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
+
+class KitapTahliliQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.Question_Answer_MessageKitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        kitaptahlili_id = request.data.get('kitaptahlili_id')
+        gonderen_id = request.data.get('gonderen_id')
+        message = request.data.get('message')
+        title = request.data.get('title')
+
+        # Ödev nesnesini al
+        kitaptahlili = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
+    
+        # Koordinatör nesnesi üzerinden User nesnesine ulaşmak
+        mesajGonderen_koord = get_object_or_404(api_models.Koordinator, id=gonderen_id)
+        mesajGonderen = mesajGonderen_koord.user
+    
+        # Mesajı alan kişinin ödevin hazırlayanı olduğunu varsayıyoruz
+        mesajAlan = kitaptahlili.hazirlayan
+
+        # Soru-Cevap nesnesini filtrele, yoksa oluştur
+        question = api_models.Question_AnswerKitapTahlili.objects.filter(
+            kitaptahlili=kitaptahlili,
+            mesajiGonderen=mesajGonderen,
+            mesajiAlan=mesajAlan,
+        ).first()
+
+        if not question:
+            question = api_models.Question_AnswerKitapTahlili.objects.create(
+                kitaptahlili=kitaptahlili,
+                mesajiGonderen=mesajGonderen,
+                mesajiAlan=mesajAlan,
+                title=title,
+            )
+
+        # Mesajı oluştur
+        api_models.Question_Answer_MessageKitapTahlili.objects.create(
+            kitaptahlili=kitaptahlili,
+            mesajiGonderen=mesajGonderen,  # burada gonderen olarak mesajiGonderen kullanılmalı
+            mesajiAlan=mesajAlan,  # burada alan olarak mesajiAlan kullanılmalı
+            message=message,
+            question=question
+        )
+
+        # Soru-Cevap nesnesini serialize et
+        question_serializer = api_serializer.Question_AnswerKitapTahliliSerializer(question)
+
+        # Başarı mesajı ve veri döndür
+        return Response({
+            "message": "Mesaj Gönderildi",
+            "question": question_serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+class DersSonuRaporuQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.Question_AnswerDersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        dersSonuRaporu_id = self.kwargs['dersSonuRaporu_id']
+        kitaptahlili = get_object_or_404(api_models.DersSonuRaporu, id=dersSonuRaporu_id)
+        return api_models.Question_AnswerKitapTahlili.objects.filter(kitaptahlili=kitaptahlili)
+    
+    def create(self, request, *args, **kwargs):
+        dersSonuRaporu_id = request.data.get('dersSonuRaporu_id')
+        gonderen_id = request.data.get('gonderen_id')
+        title = request.data.get('title')
+        message = request.data.get('message')
+
+        derssonuraporu = get_object_or_404(api_models.DersSonuRaporu, id=dersSonuRaporu_id)
+        mesajGonderen = get_object_or_404(User, id=gonderen_id)
+        mesajAlan = derssonuraporu.hazirlayan
+
+        question = api_models.Question_AnswerDersSonuRaporu.objects.create(
+            derssonuraporu=derssonuraporu,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
+            title=title
+        )
+
+        api_models.Question_Answer_MessageDersSonuRaporu.objects.create(
+            derssonuraporu=derssonuraporu,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
+            message=message,
+            question=question
+        )
+
+        return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
+
+class DersSonuRaporuQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.Question_Answer_MessageDersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        dersSonuRaporu_id = request.data.get('dersSonuRaporu_id')
+        gonderen_id = request.data.get('gonderen_id')
+        message = request.data.get('message')
+        title = request.data.get('title')
+
+        # Ödev nesnesini al
+        derssonuraporu = get_object_or_404(api_models.DersSonuRaporu, id=dersSonuRaporu_id)
+    
+        # Koordinatör nesnesi üzerinden User nesnesine ulaşmak
+        mesajGonderen_koord = get_object_or_404(api_models.Koordinator, id=gonderen_id)
+        mesajGonderen = mesajGonderen_koord.user
+    
+        # Mesajı alan kişinin ödevin hazırlayanı olduğunu varsayıyoruz
+        mesajAlan = derssonuraporu.hazirlayan
+
+        # Soru-Cevap nesnesini filtrele, yoksa oluştur
+        question = api_models.Question_AnswerDersSonuRaporu.objects.filter(
+            derssonuraporu=derssonuraporu,
+            mesajiGonderen=mesajGonderen,
+            mesajiAlan=mesajAlan,
+        ).first()
+
+        if not question:
+            question = api_models.Question_AnswerDersSonuRaporu.objects.create(
+                derssonuraporu=derssonuraporu,
+                mesajiGonderen=mesajGonderen,
+                mesajiAlan=mesajAlan,
+                title=title,
+            )
+
+        # Mesajı oluştur
+        api_models.Question_Answer_MessageDersSonuRaporu.objects.create(
+            derssonuraporu=derssonuraporu,
+            mesajiGonderen=mesajGonderen,  # burada gonderen olarak mesajiGonderen kullanılmalı
+            mesajiAlan=mesajAlan,  # burada alan olarak mesajiAlan kullanılmalı
+            message=message,
+            question=question
+        )
+
+        # Soru-Cevap nesnesini serialize et
+        question_serializer = api_serializer.Question_AnswerDersSonuRaporuSerializer(question)
+
+        # Başarı mesajı ve veri döndür
+        return Response({
+            "message": "Mesaj Gönderildi",
+            "question": question_serializer.data
+        }, status=status.HTTP_201_CREATED)
+
+class ProjeQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.Question_AnswerEskepProjeSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        proje_id = self.kwargs['proje_id']
+        proje = get_object_or_404(api_models.EskepProje, id=proje_id)
+        return api_models.Question_AnswerEskepProje.objects.filter(proje=proje)
+    
+    def create(self, request, *args, **kwargs):
+        proje_id = request.data.get('proje_id')
+        gonderen_id = request.data.get('gonderen_id')
+        title = request.data.get('title')
+        message = request.data.get('message')
+
+        proje = get_object_or_404(api_models.EskepProje, id=proje_id)
+        mesajGonderen = get_object_or_404(User, id=gonderen_id)
+        mesajAlan = proje.hazirlayan
+
+        question = api_models.Question_AnswerEskepProje.objects.create(
+            proje=proje,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
+            title=title
+        )
+
+        api_models.Question_Answer_MessageEskepProje.objects.create(
+            proje=proje,
+            mesajAlan=mesajAlan,
+            mesajGonderen=mesajGonderen,
+            message=message,
+            question=question
+        )
+
+        return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
+
+class ProjeQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.Question_Answer_MessageEskepProjeSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        proje_id = request.data.get('proje_id')
+        gonderen_id = request.data.get('gonderen_id')
+        message = request.data.get('message')
+        title = request.data.get('title')
+
+        # Ödev nesnesini al
+        proje = get_object_or_404(api_models.EskepProje, id=proje_id)
+    
+        # Koordinatör nesnesi üzerinden User nesnesine ulaşmak
+        mesajGonderen_koord = get_object_or_404(api_models.Koordinator, id=gonderen_id)
+        mesajGonderen = mesajGonderen_koord.user
+    
+        # Mesajı alan kişinin ödevin hazırlayanı olduğunu varsayıyoruz
+        mesajAlan = proje.hazirlayan
+
+        # Soru-Cevap nesnesini filtrele, yoksa oluştur
+        question = api_models.Question_AnswerEskepProje.objects.filter(
+            proje=proje,
+            mesajiGonderen=mesajGonderen,
+            mesajiAlan=mesajAlan,
+        ).first()
+
+        if not question:
+            question = api_models.Question_AnswerEskepProje.objects.create(
+                proje=proje,
+                mesajiGonderen=mesajGonderen,
+                mesajiAlan=mesajAlan,
+                title=title,
+            )
+
+        # Mesajı oluştur
+        api_models.Question_Answer_MessageEskepProje.objects.create(
+            proje=proje,
+            mesajiGonderen=mesajGonderen,  # burada gonderen olarak mesajiGonderen kullanılmalı
+            mesajiAlan=mesajAlan,  # burada alan olarak mesajiAlan kullanılmalı
+            message=message,
+            question=question
+        )
+
+        # Soru-Cevap nesnesini serialize et
+        question_serializer = api_serializer.Question_AnswerEskepProjeSerializer(question)
+
+        # Başarı mesajı ve veri döndür
+        return Response({
+            "message": "Mesaj Gönderildi",
+            "question": question_serializer.data
+        }, status=status.HTTP_201_CREATED)
 
 class TeacherSummaryAPIView(generics.ListAPIView):
     serializer_class = api_serializer.TeacherSummarySerializer
@@ -1115,10 +1654,65 @@ class StajerOdevListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        print(self)
+        print(self.kwargs['stajer_id'])
+        stajer_id = self.kwargs['stajer_id']
+        hazirlayan = api_models.User.objects.get(id=stajer_id)
+        return api_models.Odev.objects.filter(hazirlayan=hazirlayan)
+
+class StajerEskepProjeListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.EskepProjeSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
         stajer_id = self.kwargs['stajer_id']
         stajer = api_models.Stajer.objects.get(id=stajer_id)
-        return api_models.Odev.objects.filter(stajer=stajer)
-    
+        return api_models.EskepProje.objects.filter(stajer=stajer)
+
+class OgrenciOdevListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.OdevSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        ogrenci_id = self.kwargs['ogrenci_id']
+        ogrenci = api_models.Ogrenci.objects.get(id=ogrenci_id)
+        return api_models.Odev.objects.filter(ogrenci=ogrenci)   
+
+class StajerDersSonuRaporuListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.DersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        stajer_id = self.kwargs['stajer_id']
+        stajer = api_models.Stajer.objects.get(id=stajer_id)
+        return api_models.DersSonuRaporu.objects.filter(stajer=stajer)
+
+class OgrenciDersSonuRaporuListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.DersSonuRaporuSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        ogrenci_id = self.kwargs['ogrenci_id']
+        ogrenci = api_models.Ogrenci.objects.get(id=ogrenci_id)
+        return api_models.DersSonuRaporu.objects.filter(ogrenci=ogrenci) 
+
+class StajerKitapTahliliListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.KitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        stajer_id = self.kwargs['stajer_id']
+        stajer = api_models.Stajer.objects.get(id=stajer_id)
+        return api_models.KitapTahlili.objects.filter(stajer=stajer)
+
+class OgrenciKitapTahliliListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.KitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        ogrenci_id = self.kwargs['ogrenci_id']
+        ogrenci = api_models.Ogrenci.objects.get(id=ogrenci_id)
+        return api_models.KitapTahlili.objects.filter(ogrenci=ogrenci) 
 
 class TeacherReviewListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.ReviewSerializer
@@ -1186,9 +1780,9 @@ def TeacherAllMonthEarningAPIView(request, teacher_id):
 
 @api_view(("GET", ))
 def IsAgent(request, user_id):
-    agent = api_models.Agent.objects.get(user_id=user_id)
+    agent = api_models.Agent.objects.filter(user_id=user_id).first()
     if agent is None:
-        return Response(False)
+        print("Bu user_id ile kayıtlı bir Agent bulunamadı.")
     else:
         return Response(True)
         
@@ -1360,8 +1954,229 @@ class OdevCreateAPIView(generics.CreateAPIView):
             serializer.is_valid(raise_exception=True)
             serializer.save(odev=odev_instance)
 
+class DersSonuRaporuCreateAPIView(generics.CreateAPIView):
+    querysect = api_models.DersSonuRaporu.objects.all()
+    serializer_class = api_serializer.DersSonuRaporuSerializer
+    permisscion_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        derssonuraporu_instance = serializer.save()
+
+        variant_data = []
+
+        for key, value in self.request.data.items():
+            if key.startswith('variants') and key.endswith('[title]'):
+                index = key.split('[')[1].split(']')[0]  # Index numarasını al
+                title = value
+                pdf_key = f'variants[{index}][pdf]'
+                pdf_file = self.request.data.get(pdf_key, None)  # PDF dosyasını al
+
+                variant_instance = api_models.VariantDersSonuRaporu.objects.create(
+                    title=title, 
+                    derssonuraporu=derssonuraporu_instance
+                )
+
+                if pdf_file:
+                    api_models.VariantDersSonuRaporuItem.objects.create(
+                        variant=variant_instance,
+                        title=title,  # Aynı başlığı kullanıyoruz
+                        file=pdf_file  # PDF dosyasını ekliyoruz
+                    )
+
+        def save_nested_data(self, derssonuraporu_instance, serializer_class, data):
+            serializer = serializer_class(data=data, many=True, context={"derssonuraporu_instance": derssonuraporu_instance})
+            serializer.is_valid(raise_exception=True)
+            serializer.save(derssonuraporu=derssonuraporu_instance)
+            
+class KitapTahliliCreateAPIView(generics.CreateAPIView):
+    queryset = api_models.KitapTahlili.objects.all()
+    serializer_class = api_serializer.KitapTahliliSerializer
+    permission_classes = [AllowAny]
+
+    def get_koordinator_by_user(self, user):
+        """Kullanıcının bir Stajer ya da Öğrenci olup olmadığını kontrol eder ve varsa Koordinatörünü döner."""
+        try:
+            stajer = api_models.Stajer.objects.get(user=user)
+            return stajer.instructor  # Koordinatör nesnesini döndür
+        except api_models.Stajer.DoesNotExist:
+            try:
+                ogrenci = api_models.Ogrenci.objects.get(user=user)
+                return ogrenci.instructor  # Koordinatör nesnesini döndür
+            except api_models.Ogrenci.DoesNotExist:
+                return None  # Koordinatör yoksa None döner
+
+    def perform_create(self, serializer):
+        # Hazırlayan kullanıcıyı al
+        hazirlayan_id = self.request.data.get("hazirlayan")
+        hazirlayan_user = None
+        koordinator = None
+    
+        if hazirlayan_id:
+            try:
+                hazirlayan_user = User.objects.get(id=hazirlayan_id)
+                instructor_user = self.get_koordinator_by_user(hazirlayan_user)
+                
+                if instructor_user:  # Koordinatör bulunursa
+                    koordinator = instructor_user  # Koordinatör nesnesi zaten doğru tipte
+                else:
+                    raise serializers.ValidationError("Koordinatör bulunamadı.")
+            except User.DoesNotExist:
+                raise serializers.ValidationError("Geçersiz kullanıcı ID")
+    
+        # Koordinatör ve Hazırlayan kullanıcıyı kontrol et
+        if hazirlayan_user and not koordinator:
+            raise serializers.ValidationError("Hazırlayan kullanıcının koordinatörü bulunamadı.")
+
+        # Kitap tahlili kaydını oluştur
+        kitaptahlili_instance = serializer.save(
+            hazirlayan=hazirlayan_user,
+            koordinator=koordinator
+        )
+        
+        print("Hazırlayan User:", hazirlayan_user)
+        print("Koordinatör:", koordinator)
+        
+        # Variant verilerini işle
+        for key in self.request.data:
+            if key.startswith('variants') and key.endswith('[title]'):
+                index = key.split('[')[1].split(']')[0]
+                title = self.request.data[key]
+                pdf_key = f'variants[{index}][pdf]'
+                pdf_file = self.request.data.get(pdf_key)
+
+                # Variant ve varsa PDF içeriğini kaydet
+                variant_instance = api_models.VariantKitapTahlili.objects.create(
+                    title=title,
+                    kitaptahlili=kitaptahlili_instance
+                )
+
+                if pdf_file:
+                    api_models.VariantKitapTahliliItem.objects.create(
+                        variant=variant_instance,
+                        title=title,
+                        file=pdf_file
+                    )
 
 
+
+            
+class EskepProjeCreateAPIView(generics.CreateAPIView):
+    querysect = api_models.EskepProje.objects.all()
+    serializer_class = api_serializer.EskepProjeSerializer
+    permisscion_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        eskepProje_instance = serializer.save()
+
+        variant_data = []
+
+        for key, value in self.request.data.items():
+            if key.startswith('variants') and key.endswith('[title]'):
+                index = key.split('[')[1].split(']')[0]  # Index numarasını al
+                title = value
+                pdf_key = f'variants[{index}][pdf]'
+                pdf_file = self.request.data.get(pdf_key, None)  # PDF dosyasını al
+
+                variant_instance = api_models.VariantEskepProje.objects.create(
+                    title=title, 
+                    eskepProje=eskepProje_instance
+                )
+
+                if pdf_file:
+                    api_models.VariantEskepProjeItem.objects.create(
+                        variant=variant_instance,
+                        title=title,  # Aynı başlığı kullanıyoruz
+                        file=pdf_file  # PDF dosyasını ekliyoruz
+                    )
+
+        def save_nested_data(self, eskepProje_instance, serializer_class, data):
+            serializer = serializer_class(data=data, many=True, context={"eskepProje_instance": eskepProje_instance})
+            serializer.is_valid(raise_exception=True)
+            serializer.save(eskepProje=eskepProje_instance)
+
+
+
+
+# class CoordinatorYetkiAtaAPIView(generics.UpdateAPIView):
+#     serializer_class = api_serializer.CoordinatorSerializer
+#     permission_classes = [AllowAny]
+#     queryset = api_models.Koordinator.objects.all()
+
+#     def update(self, request, *args, **kwargs):
+#         print(request)
+        # coordinator_id = kwargs.get("pk")
+        # coordinator = get_object_or_404(api_models.Koordinator, pk=request)
+
+        # role = request.data.get("role")
+        # active = request.data.get("active")
+
+        # if role:
+        #     coordinator.role = role
+        # if active is not None:
+        #     coordinator.active = active
+
+        # coordinator.save()
+
+        # serializer = self.get_serializer(coordinator)
+        # return Response(serializer.data, status=status.HTTP_200_OK)
+
+# class CoordinatorYetkiAtaAPIView(generics.RetrieveUpdateAPIView):
+#     serializer_class = api_serializer.CoordinatorSerializer
+#     permission_classes = [AllowAny]
+#     queryset = api_models.Koordinator.objects.all()
+
+#     def update(self, request, *args, **kwargs):
+#         print(request)
+
+#     def get_object(self):
+#         teacher_id = self.kwargs['teacher_id']
+#         noti_id = self.kwargs['noti_id']
+#         teacher = api_models.Teacher.objects.get(id=teacher_id)
+#         return api_models.Notification.objects.get(teacher=teacher, id=noti_id)  
+    
+class CoordinatorYetkiAtaAPIView(generics.GenericAPIView):
+    serializer_class = api_serializer.CoordinatorSerializer
+    permission_classes = [AllowAny]
+    queryset = api_models.Koordinator.objects.all()
+
+    def put(self, request, *args, **kwargs):
+        # request.data içeriğini yazdırarak kontrol ediyoruz
+        print(request.data)
+        data = request.data
+        
+        # coordinator_id ile veritabanında güncelleme yapacağımız koordinatörü buluyoruz
+        try:
+            coordinator = api_models.Koordinator.objects.get(id=data['coordinator_id'])
+        except api_models.Koordinator.DoesNotExist:
+            return Response({'message': 'Koordinatör bulunamadı'}, status=404)
+        
+        # Koordinatörün rolünü güncelliyoruz
+        coordinator.role = data['role']
+        coordinator.save()  # Güncellenen kaydı kaydediyoruz
+        
+        # Başarıyla güncellendikten sonra Response dönüyoruz
+        return Response({
+            'message': 'Koordinatör başarıyla güncellendi',
+            'id': coordinator.id,
+            'role': coordinator.role
+        }, status=200)
+
+    # def put(self, request, *args, **kwargs):
+    #     # PUT işlemi yapılacak kod burada
+    #     data = request.data
+        
+    #     # Burada koordinatörü güncelleme işlemi yapabiliriz
+    #     try:
+    #         coordinator = api_models.Koordinator.objects.get(id=kwargs['pk'])
+    #         coordinator.full_name = data['full_name']
+    #         coordinator.role = data['role']
+    #         coordinator.save()
+    #         return Response({'message': 'Koordinatör başarıyla güncellendi'}, status=200)
+    #     except api_models.Koordinator.DoesNotExist:
+    #         return Response({'message': 'Koordinatör bulunamadı'}, status=404)
+    
 class CourseUpdateAPIView(generics.RetrieveUpdateAPIView):
     querysect = api_models.Course.objects.all()
     serializer_class = api_serializer.CourseSerializer
@@ -1837,4 +2652,29 @@ class OrganizationMemberViewSetAPIVIew(generics.ListAPIView):
             return Response(members, status=status.HTTP_200_OK, content_type='application/json')
         except Exception as E:
             return Response({'error': str(E)}, status=status.HTTP_408_REQUEST_TIMEOUT, content_type='application/json') 
-     
+
+def get_user_role(user_id):
+    try:
+        if  api_models.Koordinator.objects.filter(user__id=user_id).exists():
+            return "Koordinator"
+        elif api_models.Stajer.objects.filter(user__id=user_id).exists():
+            return "Stajer"
+        elif api_models.Ogrenci.objects.filter(user__id=user_id).exists():
+            return "Ogrenci"
+        else:
+            return "Unknown"
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+# Örnek kullanım view'i
+def user_role_view(request):
+    print(request)
+    user = request.user
+    role = get_user_role(user.id)
+    print(user)
+    return JsonResponse({"user_id": user.id, "role": role})
+
+def user_role_by_id_view(request, user_id):
+    role = get_user_role(user_id)
+    print(role)
+    return JsonResponse({"user_id": user_id, "role": role})

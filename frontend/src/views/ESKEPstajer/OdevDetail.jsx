@@ -546,7 +546,7 @@ function OdevDetail() {
                                               type="button"
                                               className="btn-close"
                                               data-bs-dismiss="modal"
-                                              aria-label="Close"
+                                              aria-label="Kapat"
                                             />
                                           </div>
                                           <div className="modal-body">
@@ -901,7 +901,7 @@ function OdevDetail() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Close
+          Kapat
           </Button>
         </Modal.Footer>
       </Modal>
@@ -943,7 +943,7 @@ function OdevDetail() {
               className="btn btn-secondary me-2"
               onClick={handleNoteClose}
             >
-              <i className="fas fa-arrow-left"></i> Close
+              <i className="fas fa-arrow-left"></i> Kapat
             </button>
             <button type="submit" className="btn btn-primary">
               Kaydet <i className="fas fa-check-circle"></i>

@@ -29,7 +29,7 @@ function ChangePassword() {
     if (password.confirm_new_password !== password.new_password) {
       Toast().fire({
         icon: "error",
-        title: "Password does not match",
+        title: "Şifreler Eşleşmiyor",
       });
     }
 

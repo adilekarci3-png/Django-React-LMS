@@ -43,7 +43,7 @@ function HafizBilgiCreate() {
   const [adresil, setAdresIl] = useState("");
   const [adresilce, setAdresIlce] = useState("");
   const [kursil, setKursIl] = useState("");
-  const [kursadı, setKursAdi] = useState("");
+  const [kursAdi, setKursAdi] = useState("");
   const [adiSoyadi, setAdiSoyadi] = useState("");
   const [cepTel, setCepTel] = useState("");
   const [meslek, setMeslek] = useState("");
@@ -176,151 +176,137 @@ function HafizBilgiCreate() {
       });
     }
   };
-
   return (
     <>
-      <BaseHeader />
-      <section className="pt-5 pb-5">
-        <div className="container">
-          <form className="col-md-12 col-md-9 col-12" onSubmit={handleSubmit}>
-            {/* Section Başlangıcı */}
-            <section className="py-2 py-md-2 bg-primary rounded-3">
-              <div className="container">
-                <div className="row">
-                  <div className="offset-md-1 col-md-10 col-md-10 col-10">
-                    <div className="d-md-flex align-items-center justify-content-between">
-                      <div className="mb-2 mb-md-0">
-                        <h1 className="text-white mb-1">Bilgilerinizi Girin</h1>
-                        <p className="mb-0 text-white lead">
-                          Alanları Doldurunuz, Kayıt İşlemi tamamlandıktan sonra bilgileriniz EHAD sistemine kaydedilecektir ve bulunduğunuz ilin şube başkanları sizinle iletişime geçecektir
-                        </p>
-                      </div>
-                      <div>
-                        <Link
-                          to="/"
-                          className="btn"
-                          style={{ backgroundColor: "white", width: "150px" }}
-                        >
-                          <i className="fas fa-home"></i> Ana Sayfa
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+    <BaseHeader />
+    <section className="pt-5 pb-5">
+      <div className="container">
+        <form className="row justify-content-center" onSubmit={handleSubmit}>
+          <div className="col-md-10">
+            <div className="card shadow-sm">
+              <div className="card-header bg-primary text-white">
+                <h5 className="mb-0">Hafızlık Bilgi Sistemi Kayıt Formu</h5>
               </div>
-            </section>
-            {/* Form Başlangıcı */}
-            <section className="pb-8 mt-5">
-              <div className="card mb-3">
-                <div className="card-header border-bottom px-4 py-3">
-                  <h4 className="mb-0">Hafızlık Bilgi Sistemi Kayıt Formu</h4>
-                </div>
-                <div className="card-body">
-                  <div className="row">
-                    <div className="col-6">
-                      <TextField
-                        label="Adı Soyadı"
-                        onChange={(e) => setAdiSoyadi(e.target.value)}
-                        variant="outlined"
-                        color="secondary"
-                        sx={{ mb: 3, mt: 3 }}
-                        fullWidth
-                        size="small"
-                      />
-                      <InputLabel id="demo-simple-select-label">Meslek</InputLabel>
-                      <Select
-                        fullWidth
-                        sx={{ mb: 3 }}
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        size="small"
-                        onChange={handleMeslekChange}
-                      >
-                        {meslekler?.map((m) => (
-                          <MenuItem key={m.id} value={m.id}>
-                            {m.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </div>
-                    <div className="col-6">
-                      <TextField
-                        label="Cep Telefonu"
-                        onChange={(e) => setCepTel(e.target.value)}
-                        required
-                        variant="outlined"
-                        color="secondary"
-                        type="phone"
-                        size="small"
-                        fullWidth
-                        sx={{ mb: 3, mt: 3 }}
-                      />
-                      <InputLabel id="demo-simple-select-label">Cinsiyet</InputLabel>
-                      <Select
-                        fullWidth
-                        sx={{ mb: 3 }}
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        size="small"
-                        onChange={handleCinsiyetChange}
-                      >
-                        <MenuItem value={10}>Erkek</MenuItem>
-                        <MenuItem value={20}>Kadın</MenuItem>
-                      </Select>
-                    </div>
+              <div className="card-body">
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <TextField
+                      label="Adı Soyadı"
+                      value={adiSoyadi}
+                      onChange={(e) => setAdiSoyadi(e.target.value)}
+                      fullWidth
+                      size="small"
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <TextField
+                      label="Cep Telefonu"
+                      value={cepTel}
+                      onChange={(e) => setCepTel(e.target.value)}
+                      fullWidth
+                      size="small"
+                      type="tel"
+                    />
                   </div>
                 </div>
-                {/* İletişim Bilgileri */}
-                <div className="row">
-                  <div className="col-6">
-                    <TextField
-                      label="E Posta"
-                      onChange={(e) => setEmail(e.target.value)}
-                      size="small"
-                      variant="outlined"
-                      color="secondary"
-                      type="email"
-                      fullWidth
-                      sx={{ mb: 3, mt: 3 }}
-                    />
-                    <InputLabel id="demo-simple-select-label">İkamet İl</InputLabel>
+
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <InputLabel>Meslek</InputLabel>
                     <Select
                       fullWidth
-                      sx={{ mb: 3 }}
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={adresil}
-                      label="adresIl"
+                      value={meslek}
+                      onChange={(e) => {
+                        setMeslek(e.target.value);
+                        handleMeslekChange(e);
+                      }}
                       size="small"
-                      onChange={(e) => handleAdresIlChange(e.target.value)}
                     >
-                      {iller?.map((i) => (
+                      {meslekler.map((m) => (
+                        <MenuItem key={m.id} value={m.id}>
+                          {m.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </div>
+                  <div className="col-md-6">
+                    <InputLabel>Cinsiyet</InputLabel>
+                    <Select
+                      fullWidth
+                      value={cinsiyet}
+                      onChange={(e) => {
+                        setCinsiyet(e.target.value);
+                        handleCinsiyetChange(e);
+                      }}
+                      size="small"
+                    >
+                      <MenuItem value="Erkek">Erkek</MenuItem>
+                      <MenuItem value="Kadın">Kadın</MenuItem>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <InputLabel>İkamet İl</InputLabel>
+                    <Select
+                      fullWidth
+                      value={adresil}
+                      onChange={(e) => {
+                        setAdresIl(e.target.value);
+                        handleAdresIlChange(e.target.value);
+                      }}
+                      size="small"
+                    >
+                      {iller.map((i) => (
                         <MenuItem key={i.id} value={i.id}>
                           {i.name}
                         </MenuItem>
                       ))}
                     </Select>
                   </div>
-                  <div className="col-6">
+                  <div className="col-md-6">
+                    <InputLabel>İkamet İlçe</InputLabel>
+                    <Select
+                      fullWidth
+                      value={adresilce}
+                      onChange={(e) => {
+                        setAdresIlce(e.target.value);
+                        handleAdresIlceChange(e);
+                      }}
+                      size="small"
+                    >
+                      {ilceler.map((i) => (
+                        <MenuItem key={i.id} value={i.id}>
+                          {i.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="row mb-3">
+                  <div className="col-md-6">
                     <TextField
                       label="Hafızlık Yaptığı Kurs Adı"
+                      value={kursAdi}
                       onChange={(e) => setKursAdi(e.target.value)}
-                      size="small"
-                      variant="outlined"
-                      color="secondary"
                       fullWidth
-                      sx={{ mb: 3, mt: 3 }}
+                      size="small"
                     />
-                    <InputLabel id="demo-simple-select-label">İkamet İlçe</InputLabel>
+                  </div>
+                  <div className="col-md-6">
+                    <InputLabel>Kurs İli</InputLabel>
                     <Select
                       fullWidth
-                      sx={{ mb: 3 }}
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
+                      value={kursil}
+                      onChange={(e) => {
+                        setKursIl(e.target.value);
+                        handleKursIlChange(e);
+                      }}
                       size="small"
-                      onChange={handleAdresIlceChange}
                     >
-                      {ilceler?.map((i) => (
+                      {iller.map((i) => (
                         <MenuItem key={i.id} value={i.id}>
                           {i.name}
                         </MenuItem>
@@ -328,57 +314,68 @@ function HafizBilgiCreate() {
                     </Select>
                   </div>
                 </div>
-                {/* Hafızlık Bilgileri */}
-                <div className="row">
-                  <div className="col-6">
-                    <InputLabel id="demo-simple-select-label">Kurs İli</InputLabel>
+
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <InputLabel>Hafızlık Bitirme Yılı</InputLabel>
                     <Select
                       fullWidth
-                      sx={{ mb: 3 }}
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="hafizlikyaptigikursili"
+                      value={yil}
+                      onChange={(e) => {
+                        setYil(e.target.value);
+                        handleYilChange(e);
+                      }}
                       size="small"
-                      onChange={handleKursIlChange}
                     >
-                      {iller?.map((i) => (
-                        <MenuItem key={i.id} value={i.id}>
-                          {i.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    <InputLabel id="demo-simple-select-label">Hafızlık Bitirme Yılı</InputLabel>
-                    <Select
-                      fullWidth
-                      sx={{ mb: 3 }}
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      label="hafizlikbitirmeyili"
-                      size="small"
-                      onChange={handleYilChange}
-                    >
-                      {yillar?.map((y) => (
+                      {yillar.map((y) => (
                         <MenuItem key={y} value={y}>
                           {y}
                         </MenuItem>
                       ))}
                     </Select>
                   </div>
+                  <div className="col-md-6">
+                    <TextField
+                      label="E-Posta"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      type="email"
+                      fullWidth
+                      size="small"
+                    />
+                  </div>
                 </div>
-                <Button
-                  className="btn btn-lg btn-success w-100 mt-2"
-                  type="submit"
-                >
-                  Bilgilerinizi Kaydedin <i className="fas fa-check-circle"></i>
-                </Button>
+
+                <div className="row mb-4">
+                  <div className="col-12">
+                    <InputLabel>Açıklama</InputLabel>
+                    <CKEditor
+                      editor={ClassicEditor}
+                      data={ckEdtitorData}
+                      onChange={handleCkEditorChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-grid">
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="success"
+                    size="large"
+                  >
+                    Bilgileri Kaydet
+                  </Button>
+                </div>
               </div>
-            </section>
-          </form>
-        </div>
-      </section>
-      <BaseFooter />
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+    <BaseFooter />
     </>
   );
-}
+};
 
 export default HafizBilgiCreate;

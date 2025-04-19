@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from api import models 
 
@@ -26,7 +27,29 @@ admin.site.register(models.VariantOdev)
 admin.site.register(models.VariantOdevItem)
 admin.site.register(models.EnrolledOdev)
 admin.site.register(models.NoteOdev)
+admin.site.register(models.Koordinator)
+admin.site.register(models.Question_AnswerOdev)
+admin.site.register(models.Question_Answer_MessageOdev)
 
+class StajerForm(forms.ModelForm):
+    class Meta:
+        model = models.Stajer
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(StajerForm, self).__init__(*args, **kwargs)
+        # Sadece "Danışman" rolüne sahip olanları getir
+        self.fields['instructor'].queryset = models.Koordinator.objects.filter(role='Stajer')
+
+class OgrenciForm(forms.ModelForm):
+    class Meta:
+        model = models.Ogrenci
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(OgrenciForm, self).__init__(*args, **kwargs)
+        # Sadece "Danışman" rolüne sahip olanları getir
+        self.fields['instructor'].queryset = models.Koordinator.objects.filter(role='Ogrenci')
 
 class CountryAdmin(admin.ModelAdmin):        
     list_display = ('name','active')
@@ -45,9 +68,11 @@ class AgentAdmin(admin.ModelAdmin):
     
 class StajerAdmin(admin.ModelAdmin):        
     list_display = ('full_name','email','ceptel','country','city','active')
+    form = StajerForm
     
 class OgrenciAdmin(admin.ModelAdmin):        
     list_display = ('full_name','email','ceptel','country','city','active')
+    form = OgrenciForm
     
 class HafizbilgileriAdmin(admin.ModelAdmin):        
     list_display = ('full_name','tcno','email','ceptel','country','adresIl','active','onaydurumu')

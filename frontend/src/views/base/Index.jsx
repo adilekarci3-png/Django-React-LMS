@@ -76,7 +76,7 @@ function Index() {
                       <div className="card-body">
                         <div className="text-center">
                           {/* HBS veya ESKEP'e özel link yönlendirmesi */}
-                          {s.name === 'HBS' ? (
+                          {s.name === 'Hafızlık Bilgi Sistemi' ? (
                             <Link className="nav-link" to="/hafizbilgi/create-hafizbilgi/">
                               <img
                                 src={s.image}
@@ -85,7 +85,7 @@ function Index() {
                                 alt="avatar"
                               />
                             </Link>
-                          ) : s.name === 'ESKEP' ? (
+                          ) : s.name === 'EHAD Staj ve Kariyer Eğitimi Programı' ? (
                             <Link className="nav-link" to="/eskep/">
                               <img
                                 src={s.image}

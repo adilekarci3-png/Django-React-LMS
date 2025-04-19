@@ -1,15 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import BaseHeader from '../partials/BaseHeader'
-import BaseFooter from '../partials/BaseFooter'
+import EskepBaseHeader from "../partials/ESKEPBaseHeader";
+import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from './Partials/Sidebar'
 import Header from './Partials/Header'
 
 function QADetail() {
     return (
         <>
-            <BaseHeader />
+            <ESKEPBaseHeader />
 
             <section className="pt-5 pb-5">
                 <div className="container">
@@ -148,7 +148,7 @@ function QADetail() {
                 </div>
             </section>
 
-            <BaseFooter />
+            <ESKEPBaseFooter />
         </>
     )
 }

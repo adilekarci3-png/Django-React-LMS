@@ -22,7 +22,7 @@ function Students() {
   }, []);
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -83,7 +83,7 @@ function Students() {
         </div>
       </section>
 
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

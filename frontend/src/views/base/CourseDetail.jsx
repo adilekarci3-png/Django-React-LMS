@@ -1152,7 +1152,7 @@ function CourseDetail() {
                                         type="button"
                                         className="btn-close"
                                         data-bs-dismiss="modal"
-                                        aria-label="Close"
+                                        aria-label="Kapat"
                                       />
                                     </div>
                                     <div className="modal-body">...</div>

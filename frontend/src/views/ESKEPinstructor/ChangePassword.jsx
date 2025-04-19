@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import React, { useState } from "react";
+import EskepBaseHeader from "../partials/ESKEPBaseHeader";
+import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
@@ -21,7 +21,6 @@ function ChangePassword() {
       [event.target.name]: event.target.value,
     });
   };
-  console.log(password);
 
   const changePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -29,111 +28,104 @@ function ChangePassword() {
     if (password.confirm_new_password !== password.new_password) {
       Toast().fire({
         icon: "error",
-        title: "Password does not match",
+        title: "Şifreler Aynı Değil",
       });
+      return; // Prevent further execution
     }
 
     const formdata = new FormData();
     formdata.append("user_id", UserData()?.user_id);
     formdata.append("old_password", password.old_password);
-    formdata.append("new_password", password.new_passowrd);
+    formdata.append("new_password", password.new_password); // Fixed typo here
 
-    await useAxios()
-      .post(`user/change-password/`, formdata)
-      .then((res) => {
-        
-        console.log(res.data);
-        Toast().fire({
-          icon: res.data.icon,
-          title: res.data.message,
-        });
+    try {
+      const response = await useAxios().post(`user/change-password/`, formdata);
+      Toast().fire({
+        icon: response.data.icon,
+        title: response.data.message,
       });
+    } catch (error) {
+      Toast().fire({
+        icon: "error",
+        title: "Bir Sorun Oluştu, Tekrar Deneyiniz.",
+      });
+    }
   };
 
   return (
     <>
-      <BaseHeader />
+      <EskepBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
-          {/* Header Here */}
           <Header />
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
             <Sidebar />
             <div className="col-lg-9 col-md-8 col-12">
-              {/* Card */}
               <div className="card">
-                {/* Card header */}
                 <div className="card-header">
                   <h3 className="mb-0">Şifre Değiştir</h3>
                 </div>
-                {/* Card body */}
                 <div className="card-body">
-                  <div>
-                    <form
-                      className="row gx-3 needs-validation"
-                      noValidate=""
-                      onSubmit={changePasswordSubmit}
-                    >
-                      {/* First name */}
-                      <div className="mb-3 col-12 col-md-12">
-                        <label className="form-label" htmlFor="fname">
-                          Eski Şifre
-                        </label>
-                        <input
-                          type="password"
-                          id="password"
-                          className="form-control"
-                          placeholder="**************"
-                          required=""
-                          name="old_password"
-                          value={password.old_password}
-                          onChange={handlePasswordChange}
-                        />
-                      </div>
-                      {/* Last name */}
-                      <div className="mb-3 col-12 col-md-12">
-                        <label className="form-label" htmlFor="lname">
-                          Yeni Şifre
-                        </label>
-                        <input
-                          type="password"
-                          id="password"
-                          className="form-control"
-                          placeholder="**************"
-                          required=""
-                          name="new_password"
-                          value={password.new_passowrd}
-                          onChange={handlePasswordChange}
-                        />
-                      </div>
+                  <form
+                    className="row gx-3 needs-validation"
+                    noValidate=""
+                    onSubmit={changePasswordSubmit}
+                  >
+                    <div className="mb-3 col-12 col-md-12">
+                      <label className="form-label" htmlFor="old_password">
+                        Eski Şifre
+                      </label>
+                      <input
+                        type="password"
+                        id="old_password"
+                        className="form-control"
+                        placeholder="**************"
+                        required
+                        name="old_password"
+                        value={password.old_password}
+                        onChange={handlePasswordChange}
+                      />
+                    </div>
 
-                      {/* Country */}
-                      <div className="mb-3 col-12 col-md-12">
-                        <label className="form-label" htmlFor="editCountry">
-                          Yeni Şifre Doğrula
-                        </label>
-                        <input
-                          type="password"
-                          id="password"
-                          className="form-control"
-                          placeholder="**************"
-                          required=""
-                          name="confirm_new_password"
-                          value={password.confirm_new_password}
-                          onChange={handlePasswordChange}
-                        />
-                      </div>
-                      <div className="col-12">
-                        {/* Button */}
-                        <button className="btn btn-primary" type="submit">
-                          Yeni Şifreyi Kaydet{" "}
-                          <i className="fas fa-check-circle"></i>
-                        </button>
-                      </div>
-                    </form>
-                  </div>
+                    <div className="mb-3 col-12 col-md-12">
+                      <label className="form-label" htmlFor="new_password">
+                        Yeni Şifre
+                      </label>
+                      <input
+                        type="password"
+                        id="new_password"
+                        className="form-control"
+                        placeholder="**************"
+                        required
+                        name="new_password"
+                        value={password.new_password} // Fixed typo
+                        onChange={handlePasswordChange}
+                      />
+                    </div>
+
+                    <div className="mb-3 col-12 col-md-12">
+                      <label className="form-label" htmlFor="confirm_new_password">
+                        Yeni Şifre Doğrula
+                      </label>
+                      <input
+                        type="password"
+                        id="confirm_new_password"
+                        className="form-control"
+                        placeholder="**************"
+                        required
+                        name="confirm_new_password"
+                        value={password.confirm_new_password}
+                        onChange={handlePasswordChange}
+                      />
+                    </div>
+                    
+                    <div className="col-12">
+                      <button className="btn btn-primary" type="submit">
+                        Yeni Şifreyi Kaydet <i className="fas fa-check-circle"></i>
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </div>
@@ -141,7 +133,7 @@ function ChangePassword() {
         </div>
       </section>
 
-      <BaseFooter />
+      <EskepBaseFooter />
     </>
   );
 }

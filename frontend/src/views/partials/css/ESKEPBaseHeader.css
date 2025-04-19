@@ -1,0 +1,53 @@
+.section {
+    font-size: 20px; /* Yazılar büyük */
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(135deg, #5bc0de, #ff7f50); /* Açık mavi ve turuncu geçişi */
+    padding: 15px;
+    border-bottom: 4px solid #ffb6b9; /* Açık pembemsi alt çizgi */
+  }
+  
+  .navbar {
+    background-color: rgba(91, 192, 222, 0.9); /* Hafif saydam mavi */
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(6px);
+    font-size: 18px; /* Menü yazıları büyüdü */
+  }
+  
+  .buttonPrimary {
+    background: linear-gradient(90deg, #ff7f50, #ffb6b9); /* Turuncu ve pembe tonları */
+    color: #ffffff;
+    font-size: 18px;
+    padding: 14px 28px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .buttonPrimary:hover {
+    background: linear-gradient(90deg, #ffb6b9, #ff7f50); /* Turuncu ve pembe geçişi */
+  }
+  
+  .buttonSecondary {
+    background-color: #ff7f50; /* Canlı turuncu buton */
+    color: #ffffff; /* Beyaz yazı */
+    font-size: 18px;
+    padding: 14px 28px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .buttonSecondary:hover {
+    background-color: #ff4500; /* Daha koyu turuncu hover efekti */
+  }
+  

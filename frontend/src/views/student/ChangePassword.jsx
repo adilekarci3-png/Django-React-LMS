@@ -81,7 +81,7 @@ function ChangePassword() {
                       {/* First name */}
                       <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="fname">
-                          Old Password
+                          Eski Şifre
                         </label>
                         <input
                           type="password"

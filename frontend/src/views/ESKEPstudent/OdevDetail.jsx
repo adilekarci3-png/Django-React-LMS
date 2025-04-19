@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef, useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import Button from "react-bootstrap/Button";
@@ -28,7 +28,7 @@ function CourseDetail() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [createReview, setCreateReview] = useState({ rating: 1, review: "" });
   const [studentReview, setStudentReview] = useState([]);
-
+  const modalRef = useRef();
   const param = useParams();
   const lastElementRef = useRef();
   // Play Lecture Modal
@@ -525,10 +525,11 @@ function CourseDetail() {
                                     >
                                       Not Ekle <i className="fas fa-pen"></i>
                                     </button>
-                                    <div
+                                    <div  
                                       className="modal fade"
                                       id="exampleModal"
                                       tabIndex={-1}
+                                      ref={modalRef}
                                       aria-labelledby="exampleModalLabel"
                                       aria-hidden="true"
                                     >
@@ -546,7 +547,7 @@ function CourseDetail() {
                                               type="button"
                                               className="btn-close"
                                               data-bs-dismiss="modal"
-                                              aria-label="Close"
+                                              aria-label="Kapat"
                                             />
                                           </div>
                                           <div className="modal-body">
@@ -901,7 +902,7 @@ function CourseDetail() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Close
+          Kapat
           </Button>
         </Modal.Footer>
       </Modal>
@@ -943,7 +944,7 @@ function CourseDetail() {
               className="btn btn-secondary me-2"
               onClick={handleNoteClose}
             >
-              <i className="fas fa-arrow-left"></i> Close
+              <i className="fas fa-arrow-left"></i> Kapat
             </button>
             <button type="submit" className="btn btn-primary">
               Kaydet <i className="fas fa-check-circle"></i>

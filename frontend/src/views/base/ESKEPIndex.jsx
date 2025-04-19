@@ -58,7 +58,7 @@ function ESKEPIndex() {
                 <div className="p-4 d-flex justify-content-between align-items-center">
                   <div>
                     <h3 className="mb-0 text-mint-800">Projeler</h3>
-                    <span className="text-mint-600">Kurslarınıza katılan öğrenciler ile tanışın</span>
+                    <span className="text-mint-600">EHAD Bünyesindeki Projelerin Tamamı</span>
                   </div>
                 </div>
               </div>
@@ -68,7 +68,7 @@ function ESKEPIndex() {
                     <div className="card mb-4 bg-white shadow-md rounded-xl">
                       <div className="card-body">
                         <div className="text-center">
-                          {s.name === 'HBS' ? (
+                          {s.name === 'Hafızlık Bilgi Sistemi' ? (
                             <Link className="nav-link" to="/hafizbilgi/create-hafizbilgi/">
                               <img
                                 src={s.image}

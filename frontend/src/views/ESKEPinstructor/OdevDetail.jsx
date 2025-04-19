@@ -4,8 +4,6 @@ import ReactPlayer from "react-player";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
@@ -32,7 +30,7 @@ function OdevDetail() {
   const [studentReview, setStudentReview] = useState([]);
 
   const param = useParams();
-  const lastElementRef = useRef();
+  const lastElementRef = useRef(null);
   // Play Lecture Modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -60,18 +58,29 @@ function OdevDetail() {
   const handleQuestionShow = () => setAddQuestionShow(true);
 
   const fetchOdevDetail = async () => {
-    useAxios()
-      .get(
-        `instructor/odev-detail/${UserData()?.user_id}/${param.enrollment_id}/`
-      )
-      .then((res) => {
-        setOdev(res.data);
-        setQuestions(res.data.question_answer);setVariantItem
-        setStudentReview(res.data.review);
-        const percentageCompleted =
-          (res.data.completed_lesson?.length / res.data.lectures?.length) * 100;
-        setCompletionPercentage(percentageCompleted?.toFixed(0));
-      });
+    try {
+      debugger;
+      //const { odev_id } = param.odev_id; // URL parametresinden al
+      const response = await useAxios().get(
+        `eskepinstructor/odev-detail/${param.odev_id}/${UserData()?.user_id}/`
+      );
+
+      const data = response.data;
+      setOdev(data);
+      setQuestions(data.question_answers);
+      setStudentReview(data.review);
+      console.log(odev);
+      debugger;
+      // setVariantItem eksik, örnek olarak aşağıya ekliyorum:
+      // setVariantItem(data.variant_item || null);
+      const completed = data.completed_lesson?.length || 0;
+      const total = data.lectures?.length || 1; // sıfıra bölünme hatasını engelle
+
+      const percentageCompleted = (completed / total) * 100;
+      setCompletionPercentage(percentageCompleted.toFixed(0));
+    } catch (error) {
+      console.error("Ödev detayları alınırken hata oluştu:", error);
+    }
   };
   useEffect(() => {
     fetchOdevDetail();
@@ -112,16 +121,16 @@ function OdevDetail() {
   const handleSubmitCreateNote = async (e) => {
     e.preventDefault();
     const formdata = new FormData();
-
-    formdata.append("user_id", UserData()?.user_id);
-    formdata.append("enrollment_id", param.enrollment_id);
+    debugger;
+    formdata.append("koordinator_id", UserData()?.user_id);
+    formdata.append("odev_id", param.odev_id);
     formdata.append("title", createNote.title);
     formdata.append("note", createNote.note);
-
+    //path("eskepinstructor/odev-note/<odev_id>/<koordinator_id>/", api_views.InstructorNoteCreateAPIView.as_view()),
     try {
       await useAxios()
         .post(
-          `instructor/odev-note/${UserData()?.user_id}/${param.enrollment_id}/`,
+          `eskepinstructor/odev-note/${param.odev_id}/${UserData()?.user_id}/`,
           formdata
         )
         .then((res) => {
@@ -142,13 +151,13 @@ function OdevDetail() {
     const formdata = new FormData();
 
     formdata.append("user_id", UserData()?.user_id);
-    formdata.append("enrollment_id", param.enrollment_id);
+    formdata.append("koordinator_id", param.koordinator_id);
     formdata.append("title", createNote.title || selectedNote?.title);
     formdata.append("note", createNote.note || selectedNote?.note);
 
     useAxios()
       .patch(
-        `instructor/odev-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`,
+        `eskepinstructor/odev-note-detail/${param.odev_id}/${UserData()?.user_id}/${noteId}/`,
         formdata
       )
       .then((res) => {
@@ -163,7 +172,7 @@ function OdevDetail() {
   const handleDeleteNote = (noteId) => {
     useAxios()
       .delete(
-        `instructor/odev-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`
+        `eskepinstructor/odev-note-detail/${param.odev_id}/${UserData()?.user_id}/${noteId}/`
       )
       .then((res) => {
         fetchOdevDetail();
@@ -185,18 +194,19 @@ function OdevDetail() {
     e.preventDefault();
     const formdata = new FormData();
 
-    formdata.append("odev_id", odev.odev?.id);
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("odev_id", param.odev_id);
+    formdata.append("gonderen_id", UserData()?.user_id);
+    //formdata.append("koordinator_id", UserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
-
-    
+    debugger;
     await useAxios()
       .post(
-        `instructor/question-answer-list-create/${odev.odev?.id}/`,
+        `eskepinstructor/question-answer-list-create/${param.odev_id}/`,
         formdata
       )
       .then((res) => {
+        debugger;
         fetchOdevDetail();
         handleQuestionClose();
         Toast().fire({
@@ -209,14 +219,16 @@ function OdevDetail() {
   const sendNewMessage = async (e) => {
     e.preventDefault();
     const formdata = new FormData();
-    formdata.append("odev_id", odev.odev?.id);
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("odev_id", param.odev_id);
+    formdata.append("gonderen_id", UserData()?.user_id);
+    //formdata.append("koordinator_id", UserData()?.user_id);
+    formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
-    formdata.append("qa_id", selectedConversation?.qa_id);
-
+    debugger;
     useAxios()
-      .post(`instructor/question-answer-message-create/`, formdata)
+      .post(`eskepinstructor/question-answer-message-create/`, formdata)
       .then((res) => {
+        debugger;
         setSelectedConversation(res.data.question);
       });
   };
@@ -430,21 +442,22 @@ function OdevDetail() {
                                 </div>
                                 {/* Item */}
                                 {odev?.lectures?.map((c, index) => (
-        <div key={index}>
-          <h3>{c.name}</h3> {/* Lecture Name */}
-          <a href={c.file} target="_blank" rel="noopener noreferrer">
-            PDF'yi Görüntüle
-          </a>
-        </div>
-      ))}
+                                  <div key={index}>
+                                    <h3>{c.name}</h3> {/* Lecture Name */}
+                                  </div>
+                                ))}
+
                                 {odev?.curriculum?.map((c, index) => (
-                                  <div className="accordion-item mb-3 p-3 bg-light">
+                                  <div
+                                    className="accordion-item mb-3 p-3 bg-light"
+                                    key={index}
+                                  >
                                     <h6
                                       className="accordion-header font-base"
-                                      id="heading-1"
+                                      id={`heading-${index}`}
                                     >
                                       <button
-                                        className="accordfion-button p-3 w-100 bg-light btn border fw-bold rounded d-sm-flex d-inline-block collapsed"
+                                        className="accordion-button p-3 w-100 bg-light btn border fw-bold rounded d-sm-flex d-inline-block collapsed"
                                         type="button"
                                         data-bs-toggle="collapse"
                                         data-bs-target={`#collapse-${c.variant_id}`}
@@ -462,25 +475,29 @@ function OdevDetail() {
                                     <div
                                       id={`collapse-${c.variant_id}`}
                                       className="accordion-collapse collapse show"
-                                      aria-labelledby="heading-1"
+                                      aria-labelledby={`heading-${index}`}
                                       data-bs-parent="#accordionExample2"
                                     >
                                       <div className="accordion-body mt-3">
-                                        {/* Course lecture */}
-                                        
-                                        {c.variant_items?.map((l, index) => (
-                                          <>
+                                        {c.variant_items?.map((l, idx) => (
+                                          <div key={idx}>
                                             <div className="d-flex justify-content-between align-items-center">
                                               <div className="position-relative d-flex align-items-center">
-                                                <button
-                                                  onClick={() => handleShow(l)}
-                                                  className="btn btn-danger-soft btn-round btn-sm mb-0 stretched-link position-static"
-                                                >
-                                                  <i className="fas fa-play me-0" />
-                                                </button>
-                                                <span className="d-inline-block text-truncate ms-2 mb-0 h6 fw-light w-100px w-sm-200px w-md-400px">
-                                                  {l.title}
-                                                </span>
+                                                {l.file ? (
+                                                  <a
+                                                    href={l.file}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="btn btn-primary-soft btn-round btn-sm mb-0 stretched-link position-static"
+                                                  >
+                                                    <i className="fas fa-file-pdf me-1" />{" "}
+                                                    PDF'yi Görüntüle
+                                                  </a>
+                                                ) : (
+                                                  <span className="text-muted">
+                                                    PDF mevcut değil
+                                                  </span>
+                                                )}
                                               </div>
                                               <div className="d-flex">
                                                 <p className="mb-0">
@@ -490,8 +507,6 @@ function OdevDetail() {
                                                 <input
                                                   type="checkbox"
                                                   className="form-check-input ms-2"
-                                                  name=""
-                                                  id=""
                                                   onChange={() =>
                                                     handleMarkLessonAsCompleted(
                                                       l.variant_item_id
@@ -506,7 +521,7 @@ function OdevDetail() {
                                               </div>
                                             </div>
                                             <hr />
-                                          </>
+                                          </div>
                                         ))}
                                       </div>
                                     </div>
@@ -535,7 +550,7 @@ function OdevDetail() {
                                     >
                                       Not Ekle <i className="fas fa-pen"></i>
                                     </button>
-                                    <div
+                                    <div                                      
                                       className="modal fade"
                                       id="exampleModal"
                                       tabIndex={-1}
@@ -556,7 +571,7 @@ function OdevDetail() {
                                               type="button"
                                               className="btn-close"
                                               data-bs-dismiss="modal"
-                                              aria-label="Close"
+                                              aria-label="Kapat"
                                             />
                                           </div>
                                           <div className="modal-body">
@@ -617,11 +632,11 @@ function OdevDetail() {
                                 </div>
                                 <div className="card-body p-0 pt-3">
                                   {/* Note item start */}
-                                  {odev?.note?.map((n, index) => (
+                                  {odev?.notes?.map((n, index) => (
                                     <div className="row g-4 p-3">
                                       <div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
                                         <h5> {n.title}</h5>
-                                        <p>{n.note}</p>
+                                        <p>{n.notes}</p>
                                         {/* Buttons */}
                                         <div className="hstack gap-3 flex-wrap">
                                           <a
@@ -645,7 +660,7 @@ function OdevDetail() {
                                     </div>
                                   ))}
 
-                                  {odev?.note?.length < 1 && (
+                                  {odev?.notes?.length < 1 && (
                                     <p className="mt-3 p-3">Not Bulunamadı</p>
                                   )}
                                   <hr />
@@ -762,8 +777,9 @@ function OdevDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   {/* Title */}
                                   <h4 className="mb-3 p-3">
-                                  {studentReview?.rating && <p>Not Ver {studentReview.rating}</p>}
-                                    
+                                    {studentReview?.rating && (
+                                      <p>Not Ver {studentReview.rating}</p>
+                                    )}
                                   </h4>
                                   <div className="mt-2">
                                     {!studentReview && (
@@ -911,7 +927,7 @@ function OdevDetail() {
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Close
+            Kapat
           </Button>
         </Modal.Footer>
       </Modal>
@@ -953,7 +969,7 @@ function OdevDetail() {
               className="btn btn-secondary me-2"
               onClick={handleNoteClose}
             >
-              <i className="fas fa-arrow-left"></i> Close
+              <i className="fas fa-arrow-left"></i> Kapat
             </button>
             <button type="submit" className="btn btn-primary">
               Kaydet <i className="fas fa-check-circle"></i>

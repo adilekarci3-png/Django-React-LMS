@@ -4,8 +4,8 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import EskepBaseHeader from "../partials/ESKEPBaseHeader";
+import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import { Link } from "react-router-dom";
 
 import useAxios from "../../utils/useAxios";
@@ -193,7 +193,7 @@ function CourseCreate() {
 
   return (
     <>
-      <BaseHeader />
+      <EskepBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -520,7 +520,7 @@ function CourseCreate() {
         </div>
       </section>
 
-      <BaseFooter />
+      <EskepBaseFooter />
     </>
   );
 }

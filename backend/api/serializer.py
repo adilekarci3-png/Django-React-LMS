@@ -66,6 +66,21 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image', 'slug', 'course_count']
         model = api_models.Category
 
+class CoordinatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ['id', 'full_name','role','active']
+        model = api_models.Koordinator
+
+class StajerSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ['id', 'user','full_name','active']
+        model = api_models.Stajer
+
+class OgrenciSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ['id', 'user', 'active']
+        model = api_models.Ogrenci
+        
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         fields = [ "user", "image", "full_name", "bio", "facebook", "twitter", "linkedin", "about", "country", "students", "courses", "review",]
@@ -173,44 +188,18 @@ class VariantItemDersSonuRaporuSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3 
                   
-class VariantOdevItemSerializer(serializers.ModelSerializer):        
+class VariantItemEskepProjeSerializer(serializers.ModelSerializer):        
     class Meta:
         fields = '__all__'
-        model = api_models.VariantOdevItem
+        model = api_models.VariantEskepProjeItem
     
     def __init__(self, *args, **kwargs):
-        super(VariantOdevItemSerializer, self).__init__(*args, **kwargs)
+        super(VariantItemEskepProjeSerializer, self).__init__(*args, **kwargs)
         request = self.context.get("request")
         if request and request.method == "POST":
             self.Meta.depth = 0
         else:
-            self.Meta.depth = 3
-            
-class VariantKitapTahliliItemSerializer(serializers.ModelSerializer):        
-    class Meta:
-        fields = '__all__'
-        model = api_models.VariantKitapTahliliItem
-    
-    def __init__(self, *args, **kwargs):
-        super(VariantKitapTahliliItemSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
-            
-class VariantDersSonuRaporuItemSerializer(serializers.ModelSerializer):        
-    class Meta:
-        fields = '__all__'
-        model = api_models.VariantDersSonuRaporuItem
-    
-    def __init__(self, *args, **kwargs):
-        super(VariantDersSonuRaporuItemSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
+            self.Meta.depth = 3 
 
 class VariantSerializer(serializers.ModelSerializer):
     variant_items = VariantItemSerializer(many=True)
@@ -229,8 +218,8 @@ class VariantSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 class VariantOdevSerializer(serializers.ModelSerializer):
-    variant_items = VariantOdevItemSerializer(many=True)
-    items = VariantOdevItemSerializer(many=True)
+    variant_items = VariantItemOdevSerializer(many=True)
+    items = VariantItemOdevSerializer(many=True)
     class Meta:
         fields = '__all__'
         model = api_models.VariantOdev
@@ -245,8 +234,8 @@ class VariantOdevSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 class VariantKitapTahliliSerializer(serializers.ModelSerializer):
-    variant_items = VariantKitapTahliliItemSerializer(many=True)
-    items = VariantKitapTahliliItemSerializer(many=True)
+    variant_items = VariantItemKitapTahliliSerializer(many=True)
+    items = VariantItemKitapTahliliSerializer(many=True)
     class Meta:
         fields = '__all__'
         model = api_models.VariantKitapTahlili
@@ -261,8 +250,8 @@ class VariantKitapTahliliSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
             
 class VariantDersSonuRaporuSerializer(serializers.ModelSerializer):
-    variant_items = VariantDersSonuRaporuItemSerializer(many=True)
-    items = VariantDersSonuRaporuItemSerializer(many=True)
+    variant_items = VariantItemDersSonuRaporuSerializer(many=True)
+    items = VariantItemDersSonuRaporuSerializer(many=True)
     class Meta:
         fields = '__all__'
         model = api_models.VariantDersSonuRaporu
@@ -270,6 +259,22 @@ class VariantDersSonuRaporuSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super(VariantDersSonuRaporuSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+            
+class VariantEskepProjeSerializer(serializers.ModelSerializer):
+    variant_items = VariantItemEskepProjeSerializer(many=True)
+    items = VariantItemEskepProjeSerializer(many=True)
+    class Meta:
+        fields = '__all__'
+        model = api_models.VariantEskepProje
+
+
+    def __init__(self, *args, **kwargs):
+        super(VariantEskepProjeSerializer, self).__init__(*args, **kwargs)
         request = self.context.get("request")
         if request and request.method == "POST":
             self.Meta.depth = 0
@@ -303,6 +308,13 @@ class Question_Answer_MessageDersSonuRaporuSerializer(serializers.ModelSerialize
     class Meta:
         fields = '__all__'
         model = api_models.Question_Answer_MessageDersSonuRaporu
+
+class Question_Answer_MessageEskepProjeSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(many=False)
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.Question_Answer_MessageEskepProje
 
 class Question_AnswerSerializer(serializers.ModelSerializer):
     messages = Question_Answer_MessageSerializer(many=True)
@@ -338,6 +350,13 @@ class Question_AnswerDersSonuRaporuSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.Question_AnswerDersSonuRaporu
 
+class Question_AnswerEskepProjeSerializer(serializers.ModelSerializer):
+    messages = Question_Answer_MessageEskepProjeSerializer(many=True)
+    profile = ProfileSerializer(many=False)
+    
+    class Meta:
+        fields = '__all__'
+        model = api_models.Question_AnswerEskepProje
 
 class CartSerializer(serializers.ModelSerializer):
 
@@ -442,7 +461,12 @@ class NoteDersSonuRaporuSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = api_models.NoteDersSonuRaporu
-      
+        
+class NoteEskepProjeSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = api_models.NoteEskepProje
+        
 class ReviewSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
 
@@ -497,6 +521,21 @@ class ReviewDersSonuRaporuSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super(ReviewDersSonuRaporuSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+
+class ReviewEskepProjeSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(many=False)
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.ReviewEskepProje
+
+    def __init__(self, *args, **kwargs):
+        super(ReviewEskepProjeSerializer, self).__init__(*args, **kwargs)
         request = self.context.get("request")
         if request and request.method == "POST":
             self.Meta.depth = 0
@@ -618,9 +657,29 @@ class EnrolledDersSonuRaporuSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+
+class EnrolledEskepProjeSerializer(serializers.ModelSerializer):
+    lectures = VariantItemEskepProjeSerializer(many=True, read_only=True)
+    # completed_lesson = CompletedLessonSerializer(many=True, read_only=True)
+    curriculum =  VariantEskepProjeSerializer(many=True, read_only=True)
+    note = NoteEskepProjeSerializer(many=True, read_only=True)
+    question_answer = Question_AnswerEskepProjeSerializer(many=True, read_only=True)
+    review = ReviewEskepProjeSerializer(many=False, read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = api_models.EnrolledDersSonuRaporu
+
+    def __init__(self, *args, **kwargs):
+        super(EnrolledEskepProjeSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
             
 class InstructorOdevSerializer(serializers.ModelSerializer):
-    lectures = VariantOdevItemSerializer(many=True, read_only=True)
+    lectures = VariantItemOdevSerializer(many=True, read_only=True)
     # completed_lesson = CompletedLessonSerializer(many=True, read_only=True)
     curriculum =  VariantOdevSerializer(many=True, read_only=True)
     note = NoteOdevSerializer(many=True, read_only=True)
@@ -676,9 +735,10 @@ class OdevSerializer(serializers.ModelSerializer):
     # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
     curriculum = VariantSerializer(many=True, required=False, read_only=True,)
     lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
-    # reviews = ReviewSerializer(many=True, read_only=True, required=False)
-    class Meta:
-        fields = ["id", "category", "teacher", "file", "image", "title", "description", "language", "level", "platform_status", "teacher_odev_status", "featured",  "curriculum", "lectures","stajer" ]
+    notes = NoteOdevSerializer(many=True, read_only=True)
+    question_answers = Question_AnswerOdevSerializer(many=True, read_only=True)
+    class Meta:       
+        fields = ["id","category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "odev_status", "koordinator_odev_status", "date","curriculum", "lectures","notes","question_answers"]
         model = api_models.Odev
 
     def __init__(self, *args, **kwargs):
@@ -688,7 +748,57 @@ class OdevSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
-            
+
+class DersSonuRaporuSerializer(serializers.ModelSerializer):
+    # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
+    curriculum = VariantSerializer(many=True, required=False, read_only=True,)
+    lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
+    # reviews = ReviewSerializer(many=True, read_only=True, required=False)
+    class Meta:
+        fields = ["category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "derssonuraporu_status", "koordinator_derssonuraporu_status", "date","curriculum", "lectures"]        
+        model = api_models.DersSonuRaporu
+
+    def __init__(self, *args, **kwargs):
+        super(DersSonuRaporuSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3           
+
+class KitapTahliliSerializer(serializers.ModelSerializer):
+    # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
+    curriculum = VariantSerializer(many=True, required=False, read_only=True,)
+    lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
+    # reviews = ReviewSerializer(many=True, read_only=True, required=False)
+    class Meta:
+        fields = ["category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "kitaptahlili_status", "koordinator_kitaptahlili_status", "date","curriculum", "lectures"]        
+        model = api_models.KitapTahlili
+
+    def __init__(self, *args, **kwargs):
+        super(KitapTahliliSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3  
+
+class EskepProjeSerializer(serializers.ModelSerializer):
+    # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
+    curriculum = VariantSerializer(many=True, required=False, read_only=True,)
+    lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
+    # reviews = ReviewSerializer(many=True, read_only=True, required=False)
+    class Meta:
+        fields = ["category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "eskepProje_status", "koordinator_eskepProje_status", "date","curriculum", "lectures"]        
+        model = api_models.EskepProje
+
+    def __init__(self, *args, **kwargs):
+        super(EskepProjeSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3  
 
 class StudentSummarySerializer(serializers.Serializer):
     total_courses = serializers.IntegerField(default=0)

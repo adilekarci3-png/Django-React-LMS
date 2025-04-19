@@ -128,7 +128,7 @@ function Checkout() {
                   type="button"
                   className="btn btn-warning mb-0 text-primary-hover text-end"
                   data-bs-dismiss="alert"
-                  aria-label="Close"
+                  aria-label="Kapat"
                 >
                   <i className="bi bi-x-lg text-white" />
                 </button>

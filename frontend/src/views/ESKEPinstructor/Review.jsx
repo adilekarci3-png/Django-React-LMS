@@ -5,8 +5,8 @@ import "react-rater/lib/react-rater.css";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
@@ -89,7 +89,7 @@ function Review() {
 
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -266,7 +266,7 @@ function Review() {
         </div>
       </section>
 
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

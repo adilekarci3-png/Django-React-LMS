@@ -3,8 +3,8 @@ import moment from "moment";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import EskepBaseHeader from "../partials/ESKEPBaseHeader";
+import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
@@ -45,7 +45,7 @@ function Courses() {
     
   return (
     <>
-      <BaseHeader />
+      <EskepBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -188,7 +188,7 @@ Kurslarınızı buradan yönetin, derslerinizi arayın, görüntüleyin, düzenl
         </div>
       </section>
 
-      <BaseFooter />
+      <EskepBaseFooter />
     </>
   );
 }
