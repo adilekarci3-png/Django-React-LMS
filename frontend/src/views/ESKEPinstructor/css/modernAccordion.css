@@ -1,0 +1,82 @@
+/* Accordion dış kutusu */
+.modern-accordion .accordion-item {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    background-color: #fefefe;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+  }
+  
+  /* Başlık düğmesi */
+  .modern-accordion .accordion-button {
+    background: linear-gradient(to right, #3b82f6, #06b6d4); /* Deniz Teması */
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .modern-accordion .accordion-button:hover {
+    filter: brightness(1.05);
+  }
+  
+  .modern-accordion .accordion-button:not(.collapsed) {
+    background: linear-gradient(to right, #06b6d4, #0ea5e9); /* Açıldığında daha canlı */
+    color: #fff;
+    box-shadow: none;
+  }
+  
+  /* Accordion içeriği */
+  .modern-accordion .accordion-body {
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-top: 2px solid #e2e8f0;
+  }
+  
+  /* Ders satırı */
+  .modern-accordion .accordion-body .lesson-item {
+    background-color: #f9fafb;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+  }
+  
+  .modern-accordion .accordion-body .lesson-item:hover {
+    background-color: #ecfdf5;
+  }
+  
+  /* PDF bağlantısı */
+  .modern-accordion .accordion-body .lesson-item a {
+    font-weight: 500;
+    color: #0f766e;
+    text-decoration: none;
+  }
+  
+  .modern-accordion .accordion-body .lesson-item a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Ders süresi ve checkbox */
+  .modern-accordion .accordion-body .lesson-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .modern-accordion .badge {
+    font-size: 0.75rem;
+    background-color: #334155;
+    color: #fff;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+    margin-left: 10px;
+  }
+  

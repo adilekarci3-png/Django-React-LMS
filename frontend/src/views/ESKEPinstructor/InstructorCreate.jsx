@@ -4,9 +4,20 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import Swal from "sweetalert2";
-import { InputLabel, TextField, Button, Select, MenuItem } from "@mui/material";
+import {
+  InputLabel,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  Box,
+  Typography,
+} from "@mui/material";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import Sidebar from "./Partials/Sidebar";
+import Header from "./Partials/Header";
 
 function InstructorCreate() {
   const [formData, setFormData] = useState({
@@ -73,39 +84,34 @@ function InstructorCreate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      ...formData,
-      description: editorData,
-    };
+    const payload = { ...formData, description: editorData };
 
     try {
       await axios.post("http://127.0.0.1:8000/api/v1/instructor/create/", payload);
-      Swal.fire({
-        icon: "success",
-        title: "Eğitmen başarıyla oluşturuldu",
-      });
+      Swal.fire({ icon: "success", title: "Eğitmen başarıyla oluşturuldu" });
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Kayıt sırasında hata oluştu.",
-      });
+      Swal.fire({ icon: "error", title: "Kayıt sırasında hata oluştu." });
     }
   };
 
   return (
     <>
       <ESKEPBaseHeader />
+
       <section className="pt-5 pb-5">
         <div className="container">
-          <form className="row justify-content-center" onSubmit={handleSubmit}>
-            <div className="col-md-10">
-              <div className="card shadow-sm">
-                <div className="card-header bg-primary text-white">
-                  <h5 className="mb-0">Eğitmen Oluştur</h5>
-                </div>
-                <div className="card-body">
-                  <div className="row mb-3">
+          <Header />
+          <div className="row mt-0 mt-md-4">
+            <Sidebar />
+
+            <div className="col-lg-10 col-md-8 col-12">
+              <form onSubmit={handleSubmit}>
+                <Box className="card shadow-sm p-4">
+                  <Typography variant="h5" className="mb-4 text-primary fw-bold">
+                    Eğitmen Oluştur
+                  </Typography>
+
+                  <Box className="row mb-3">
                     <div className="col-md-6">
                       <TextField
                         label="Ad Soyad"
@@ -124,9 +130,9 @@ function InstructorCreate() {
                         size="small"
                       />
                     </div>
-                  </div>
+                  </Box>
 
-                  <div className="row mb-3">
+                  <Box className="row mb-3">
                     <div className="col-md-6">
                       <TextField
                         label="E-Posta"
@@ -138,67 +144,55 @@ function InstructorCreate() {
                       />
                     </div>
                     <div className="col-md-6">
-                      <InputLabel>Cinsiyet</InputLabel>
-                      <Select
-                        value={formData.gender}
-                        onChange={handleChange("gender")}
-                        fullWidth
-                        size="small"
-                      >
-                        <MenuItem value="Erkek">Erkek</MenuItem>
-                        <MenuItem value="Kadın">Kadın</MenuItem>
-                      </Select>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Cinsiyet</InputLabel>
+                        <Select value={formData.gender} onChange={handleChange("gender")}>
+                          <MenuItem value="Erkek">Erkek</MenuItem>
+                          <MenuItem value="Kadın">Kadın</MenuItem>
+                        </Select>
+                      </FormControl>
                     </div>
-                  </div>
+                  </Box>
 
-                  <div className="row mb-3">
+                  <Box className="row mb-3">
                     <div className="col-md-6">
-                      <InputLabel>Şehir</InputLabel>
-                      <Select
-                        value={formData.city}
-                        onChange={handleChange("city")}
-                        fullWidth
-                        size="small"
-                      >
-                        {cities.map((city) => (
-                          <MenuItem key={city.id} value={city.id}>
-                            {city.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Şehir</InputLabel>
+                        <Select value={formData.city} onChange={handleChange("city")}>
+                          {cities.map((city) => (
+                            <MenuItem key={city.id} value={city.id}>
+                              {city.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </div>
                     <div className="col-md-6">
-                      <InputLabel>İlçe</InputLabel>
-                      <Select
-                        value={formData.district}
-                        onChange={handleChange("district")}
-                        fullWidth
-                        size="small"
-                      >
-                        {districts.map((district) => (
-                          <MenuItem key={district.id} value={district.id}>
-                            {district.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>İlçe</InputLabel>
+                        <Select value={formData.district} onChange={handleChange("district")}>
+                          {districts.map((district) => (
+                            <MenuItem key={district.id} value={district.id}>
+                              {district.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </div>
-                  </div>
+                  </Box>
 
-                  <div className="row mb-3">
+                  <Box className="row mb-3">
                     <div className="col-md-6">
-                      <InputLabel>Branş</InputLabel>
-                      <Select
-                        value={formData.branch}
-                        onChange={handleChange("branch")}
-                        fullWidth
-                        size="small"
-                      >
-                        {branches.map((b) => (
-                          <MenuItem key={b.id} value={b.id}>
-                            {b.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Branş</InputLabel>
+                        <Select value={formData.branch} onChange={handleChange("branch")}>
+                          {branches.map((b) => (
+                            <MenuItem key={b.id} value={b.id}>
+                              {b.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </div>
                     <div className="col-md-6">
                       <TextField
@@ -209,30 +203,25 @@ function InstructorCreate() {
                         size="small"
                       />
                     </div>
-                  </div>
+                  </Box>
 
-                  <div className="row mb-4">
-                    <div className="col-12">
-                      <InputLabel>Açıklama</InputLabel>
-                      <CKEditor
-                        editor={ClassicEditor}
-                        data={editorData}
-                        onChange={handleEditorChange}
-                      />
-                    </div>
-                  </div>
+                  <Box className="mb-4">
+                    <InputLabel className="mb-2">Açıklama</InputLabel>
+                    <CKEditor editor={ClassicEditor} data={editorData} onChange={handleEditorChange} />
+                  </Box>
 
-                  <div className="d-grid">
+                  <Box className="d-grid">
                     <Button type="submit" variant="contained" color="primary" size="large">
                       Eğitmeni Kaydet
                     </Button>
-                  </div>
-                </div>
-              </div>
+                  </Box>
+                </Box>
+              </form>
             </div>
-          </form>
+          </div>
         </div>
       </section>
+
       <ESKEPBaseFooter />
     </>
   );

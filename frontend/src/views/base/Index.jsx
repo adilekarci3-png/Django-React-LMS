@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useContext, useMemo } from "react";
+import { Link } from "react-router-dom";
 import BaseHeader from "../partials/BaseHeader";
 import BaseFooter from "../partials/BaseFooter";
-import { Link } from "react-router-dom";
 import GetCurrentAddress from "../plugin/UserCountry";
 import UserData from "../plugin/UserData";
 import Toast from "../plugin/Toast";
 import { CartContext } from "../plugin/Context";
 import apiInstance from "../../utils/axios";
+import "./css/Index.css";
 
 function Index() {
   const [projelist, setProjeList] = useState([]);
@@ -16,27 +17,26 @@ function Index() {
   const country = GetCurrentAddress().country;
   const userId = UserData()?.user_id;
 
-  const fetchProjelist = async () => {
-    setIsLoading(true);
-    try {
-      const res = await apiInstance.get(`proje/list/`);
-      setProjeList(res.data);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      Toast().fire({
-        title: "Projeler yüklenemedi",
-        icon: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchProjelist = async () => {
+      setIsLoading(true);
+      try {
+        const res = await apiInstance.get("proje/list/");
+        setProjeList(res.data);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        Toast().fire({
+          title: "Projeler yüklenemedi",
+          icon: "error",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchProjelist();
   }, []);
 
-  // Pagination
   const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -46,74 +46,75 @@ function Index() {
     return projelist.slice(indexOfFirstItem, indexOfLastItem);
   }, [projelist, currentPage]);
 
-  const totalPages = useMemo(() => {
-    return Math.ceil(projelist.length / itemsPerPage);
-  }, [projelist.length]);
+  // Modül açıklamaları
+  const getModuleDescription = (name) => {
+    switch (name) {
+      case "Hafızlık Bilgi Sistemi":
+        return "Hafız kayıtlarını ve gelişim takibini yönetin";
+      case "EHAD Staj ve Kariyer Eğitimi Programı":
+        return "Staj ve proje süreçlerini yönetin";
+      case "EHAD Akademi":
+        return "İslami ilimlerin dijital ortamda takibini sağlayın";
+      case "Hafızlık Dinleme Merkezi":
+        return "Sesli tekrar ve dinleme sistemini yönetin";
+      default:
+        return "Bu modül hakkında yakında bilgi eklenecek.";
+    }
+  };
 
-  const changePage = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  // Modül yönlendirmeleri
+  const getButtonLabelAndLink = (name) => {
+    switch (name) {
+      case "Hafızlık Bilgi Sistemi":
+        return { label: "HBS'ye Git", to: "/hafizbilgi/" };
+      case "EHAD Staj ve Kariyer Eğitimi Programı":
+        return { label: "ESKEP'e Git", to: "/eskep/" };
+      case "EHAD Akademi":
+        return { label: "AKADEMİ'ye Git", to: "/akademi/" };
+      case "Hafızlık Dinleme Merkezi":
+        return { label: "HDM'ye Git", to: "/hdm/" };
+      default:
+        return null;
+    }
   };
 
   return (
     <>
       <BaseHeader />
-      <section className="pt-2 pb-2 bg-mint-100">
-        <div className="container">
-          <div className="row mt-0 mt-md-4">
-            <div className="col-lg-12 col-md-12 col-12">
-              <div className="card mb-4 bg-mint-50 shadow-lg">
-                <div className="p-4 d-flex justify-content-between align-items-center">
-                  <div>
-                    <h3 className="mb-0 text-mint-800">Projeler</h3>
-                    <span className="text-mint-600">Kurslarınıza katılan öğrenciler ile tanışın</span>
-                  </div>
+      <div className="index-container">
+        <div className="index-heading">
+          <h2 className="main-title">İZEM – Hafızların Dijital Kapısı</h2>
+          <p className="sub-title">Akıllı Altyapı, Entegre Sistem</p>
+        </div>
+
+        <div className="index-grid">
+          {currentItems.map((s, index) => {
+            const route = getButtonLabelAndLink(s.name);
+            const description = getModuleDescription(s.name);
+
+            return (
+              <div className="index-card" key={index}>
+                <div className="index-image-container">
+                  <img src={s.image} alt={s.name} className="index-image" />
+                </div>
+                <div className="index-card-body">
+                  <h3 className="index-card-title">{s.name}</h3>
+                  <p className="index-desc">{description}</p>
+                  {route ? (
+                    <Link to={route.to}>
+                      <button className="index-btn">{route.label}</button>
+                    </Link>
+                  ) : (
+                    <button disabled className="index-btn-disabled">
+                      Yakında
+                    </button>
+                  )}
                 </div>
               </div>
-              <div className="row">
-                {currentItems?.map((s, index) => (
-                  <div className="col-lg-4 col-md-6 col-12" key={index}>
-                    <div className="card mb-4 bg-white shadow-md rounded-xl">
-                      <div className="card-body">
-                        <div className="text-center">
-                          {/* HBS veya ESKEP'e özel link yönlendirmesi */}
-                          {s.name === 'Hafızlık Bilgi Sistemi' ? (
-                            <Link className="nav-link" to="/hafizbilgi/create-hafizbilgi/">
-                              <img
-                                src={s.image}
-                                className="avatar-xl mb-3 rounded-full object-cover"
-                                style={{ width: "250px", height: "250px" }}
-                                alt="avatar"
-                              />
-                            </Link>
-                          ) : s.name === 'EHAD Staj ve Kariyer Eğitimi Programı' ? (
-                            <Link className="nav-link" to="/eskep/">
-                              <img
-                                src={s.image}
-                                className="avatar-xl mb-3 rounded-full object-cover"
-                                style={{ width: "250px", height: "250px" }}
-                                alt="avatar"
-                              />
-                            </Link>
-                          ) : (
-                            <img
-                              src={s.image}
-                              className="avatar-xl mb-3 rounded-full object-cover"
-                              style={{ width: "250px", height: "250px" }}
-                              alt="avatar"
-                            />
-                          )}
-                          <h4 className="mb-1 text-mint-800">{s.name}</h4>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
-      </section>
-
+      </div>
       <BaseFooter />
     </>
   );

@@ -153,7 +153,7 @@ function OdevDetail() {
         fetchOdevDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Güncelle",
+          title: "Not Güncellendi",
         });
       });
   };

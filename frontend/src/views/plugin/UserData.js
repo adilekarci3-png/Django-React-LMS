@@ -1,18 +1,25 @@
-import Cookie from "js-cookie";
 import jwtDecode from "jwt-decode";
 
 function UserData() {
-  
-  let access_token = Cookie.get("access_token");
-  let refresh_token = Cookie.get("refresh_token");
+  const access_token = localStorage.getItem("access_token");
 
-  if (access_token && refresh_token) {
-    const token = refresh_token;
-    const decoded = jwtDecode(token);
-    
+  if (!access_token) return null;
+
+  try {
+    const decoded = jwtDecode(access_token);
+
+    // Token süresi kontrolü (isteğe bağlı)
+    const now = Date.now() / 1000;
+    if (decoded.exp && decoded.exp < now) {
+      console.warn("Access token süresi dolmuş.");
+      return null;
+    }
+
     return decoded;
-  } else {
-    // pass
+  } catch (error) {
+    console.error("Token decode hatası:", error);
+    return null;
   }
 }
-export default UserData
+
+export default UserData;

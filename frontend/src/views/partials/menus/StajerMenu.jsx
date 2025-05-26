@@ -15,7 +15,7 @@ const StajerMenu = () => {
         </a>
         <ul className="dropdown-menu">
           <li>
-            <Link className="dropdown-item" to={`/student/dashboard/`}>
+            <Link className="dropdown-item" to={`/eskepstajer/dashboard/`}>
               <i className="fa-solid fa-table-columns"></i> Panel
             </Link>
           </li>
@@ -25,22 +25,22 @@ const StajerMenu = () => {
             </Link>
           </li>
           <li>
-            <Link className="dropdown-item" to={`/stajer/odevs/`}>
+            <Link className="dropdown-item" to={`/eskepstajer/odevs/`}>
               <i className="fa-solid fa-pencil"></i> Ödevlerim
             </Link>
           </li>
           <li>
-            <Link className="dropdown-item" to={`/stajer/kitaptahlils/`}>
+            <Link className="dropdown-item" to={`/eskepstajer/kitaptahlileris/`}>
               <i className="fa-solid fa-book-open-reader"></i> Kitap Tahlillerim
             </Link>
           </li>
           <li>
-            <Link className="dropdown-item" to={`/stajer/dersonuraporus/`}>
+            <Link className="dropdown-item" to={`/eskepstajer/dersonuraporus/`}>
               <i className="fa-solid fa-file-lines"></i> Ders Sonu Raporlarım
             </Link>
           </li>
           <li>
-            <Link className="dropdown-item" to={`/stajer/projedosyalarim/`}>
+            <Link className="dropdown-item" to={`/eskepstajer/projes/`}>
               <i className="fa-solid fa-folder"></i> Proje Dosyalarım
             </Link>
           </li>
@@ -64,7 +64,7 @@ const StajerMenu = () => {
             </Link>
           </li>
           <li>
-            <Link className="dropdown-item" to={`/eskep/create-projedosyasi/`}>
+            <Link className="dropdown-item" to={`/eskep/create-proje/`}>
               <i className="fa-solid fa-folder-plus"></i> Proje Dosyası Oluştur
             </Link>
           </li>

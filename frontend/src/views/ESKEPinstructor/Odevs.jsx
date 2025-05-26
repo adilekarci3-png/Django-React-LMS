@@ -41,7 +41,7 @@ function Odevs() {
             <Sidebar />
             <div className="col-lg-10 col-md-8 col-12">
               <h4 className="mb-4">
-                <i className="fas fa-chalkboard-user"></i> Ödevlerim
+                <i className="fas fa-chalkboard-user"></i> Gönderilen Ödevler
               </h4>
 
               {fetching ? (

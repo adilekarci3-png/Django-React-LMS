@@ -1,3 +1,4 @@
+from asyncio import Event
 from django.contrib.auth.password_validation import validate_password
 from api import models as api_models
 
@@ -203,7 +204,7 @@ class VariantItemEskepProjeSerializer(serializers.ModelSerializer):
 
 class VariantSerializer(serializers.ModelSerializer):
     variant_items = VariantItemSerializer(many=True)
-    items = VariantItemSerializer(many=True)
+    # items = VariantItemSerializer(many=True)
     class Meta:
         fields = '__all__'
         model = api_models.Variant
@@ -217,69 +218,57 @@ class VariantSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3
 
+
+
 class VariantOdevSerializer(serializers.ModelSerializer):
     variant_items = VariantItemOdevSerializer(many=True)
-    items = VariantItemOdevSerializer(many=True)
+
     class Meta:
-        fields = '__all__'
         model = api_models.VariantOdev
+        fields = '__all__'
 
-
-    def __init__(self, *args, **kwargs):
-        super(VariantOdevSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
 
 class VariantKitapTahliliSerializer(serializers.ModelSerializer):
     variant_items = VariantItemKitapTahliliSerializer(many=True)
-    items = VariantItemKitapTahliliSerializer(many=True)
+
     class Meta:
-        fields = '__all__'
         model = api_models.VariantKitapTahlili
+        fields = '__all__'
 
 
-    def __init__(self, *args, **kwargs):
-        super(VariantKitapTahliliSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
-            
 class VariantDersSonuRaporuSerializer(serializers.ModelSerializer):
     variant_items = VariantItemDersSonuRaporuSerializer(many=True)
-    items = VariantItemDersSonuRaporuSerializer(many=True)
+
     class Meta:
-        fields = '__all__'
         model = api_models.VariantDersSonuRaporu
+        fields = '__all__'
 
 
-    def __init__(self, *args, **kwargs):
-        super(VariantDersSonuRaporuSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
-            
 class VariantEskepProjeSerializer(serializers.ModelSerializer):
     variant_items = VariantItemEskepProjeSerializer(many=True)
-    items = VariantItemEskepProjeSerializer(many=True)
+
     class Meta:
-        fields = '__all__'
         model = api_models.VariantEskepProje
+        fields = '__all__'
+        
+class VariantOdevDetailedSerializer(VariantOdevSerializer):
+    class Meta(VariantOdevSerializer.Meta):
+        depth = 3
 
 
-    def __init__(self, *args, **kwargs):
-        super(VariantEskepProjeSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
+class VariantKitapTahliliDetailedSerializer(VariantKitapTahliliSerializer):
+    class Meta(VariantKitapTahliliSerializer.Meta):
+        depth = 3
+
+
+class VariantDersSonuRaporuDetailedSerializer(VariantDersSonuRaporuSerializer):
+    class Meta(VariantDersSonuRaporuSerializer.Meta):
+        depth = 3
+
+
+class VariantEskepProjeDetailedSerializer(VariantEskepProjeSerializer):
+    class Meta(VariantEskepProjeSerializer.Meta):
+        depth = 3
 
 class Question_Answer_MessageSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
@@ -770,18 +759,23 @@ class KitapTahliliSerializer(serializers.ModelSerializer):
     # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
     curriculum = VariantSerializer(many=True, required=False, read_only=True,)
     lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
-    # reviews = ReviewSerializer(many=True, read_only=True, required=False)
+    notes = NoteKitapTahliliSerializer(many=True, read_only=True)
+    question_answers = Question_AnswerKitapTahliliSerializer(many=True, read_only=True)
+    # review = KitapTahliliReviewSerializer(read_only=True)
+    
     class Meta:
-        fields = ["category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "kitaptahlili_status", "koordinator_kitaptahlili_status", "date","curriculum", "lectures"]        
         model = api_models.KitapTahlili
+        fields = [
+            "id", "category", "koordinator", "hazirlayan", "file", "image",
+            "title", "description", "language", "level",
+            "kitaptahlili_status", "koordinator_kitaptahlili_status", "date",
+            "curriculum", "lectures", "notes", "question_answers"
+        ]
 
     def __init__(self, *args, **kwargs):
         super(KitapTahliliSerializer, self).__init__(*args, **kwargs)
         request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3  
+        self.Meta.depth = 0 if request and request.method == "POST" else 3
 
 class EskepProjeSerializer(serializers.ModelSerializer):
     # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
@@ -822,3 +816,10 @@ class TeacherSummarySerializer(serializers.Serializer):
     total_revenue = serializers.IntegerField(default=0)
     monthly_revenue = serializers.IntegerField(default=0)
     
+class ESKEPEventSerializer(serializers.ModelSerializer):
+    owner_username = serializers.CharField(source='owner.username', read_only=True)
+
+    class Meta:
+        model = api_models.ESKEPEvent
+        fields = '__all__'
+        read_only_fields = ['owner', 'created_at']

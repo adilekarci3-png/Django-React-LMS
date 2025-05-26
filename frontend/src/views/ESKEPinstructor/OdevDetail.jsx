@@ -60,9 +60,10 @@ function OdevDetail() {
   const fetchOdevDetail = async () => {
     try {
       debugger;
-      //const { odev_id } = param.odev_id; // URL parametresinden al
+      // const { koordinator_id } = param.koordinator_id; // URL parametresinden al
+      const user_id = UserData()?.user_id; // URL parametresinden al
       const response = await useAxios().get(
-        `eskepinstructor/odev-detail/${param.odev_id}/${UserData()?.user_id}/`
+        `eskepinstructor/odev-detail/${param.odev_id}/${param.koordinator_id}/`
       );
 
       const data = response.data;
@@ -122,7 +123,7 @@ function OdevDetail() {
     e.preventDefault();
     const formdata = new FormData();
     debugger;
-    formdata.append("koordinator_id", UserData()?.user_id);
+    formdata.append("koordinator_id", param.koordinator_id);
     formdata.append("odev_id", param.odev_id);
     formdata.append("title", createNote.title);
     formdata.append("note", createNote.note);
@@ -130,7 +131,7 @@ function OdevDetail() {
     try {
       await useAxios()
         .post(
-          `eskepinstructor/odev-note/${param.odev_id}/${UserData()?.user_id}/`,
+          `eskepinstructor/odev-note/${param.odev_id}/${param.koordinator_id}/`,
           formdata
         )
         .then((res) => {
@@ -157,14 +158,14 @@ function OdevDetail() {
 
     useAxios()
       .patch(
-        `eskepinstructor/odev-note-detail/${param.odev_id}/${UserData()?.user_id}/${noteId}/`,
+        `eskepinstructor/odev-note-detail/${param.odev_id}/${param.koordinator_id}/${noteId}/`,
         formdata
       )
       .then((res) => {
         fetchOdevDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Güncelle",
+          title: "Not Güncellendi",
         });
       });
   };
@@ -172,7 +173,7 @@ function OdevDetail() {
   const handleDeleteNote = (noteId) => {
     useAxios()
       .delete(
-        `eskepinstructor/odev-note-detail/${param.odev_id}/${UserData()?.user_id}/${noteId}/`
+        `eskepinstructor/odev-note-detail/${param.odev_id}/${param.koordinator_id}/${noteId}/`
       )
       .then((res) => {
         fetchOdevDetail();
@@ -190,31 +191,44 @@ function OdevDetail() {
     });
   };
 
-  const handleSaveQuestion = async (e) => {
-    e.preventDefault();
-    const formdata = new FormData();
+ const handleSaveQuestion = async (e) => {
+  e.preventDefault();
 
-    formdata.append("odev_id", param.odev_id);
-    formdata.append("gonderen_id", UserData()?.user_id);
-    //formdata.append("koordinator_id", UserData()?.user_id);
-    formdata.append("title", createMessage.title);
-    formdata.append("message", createMessage.message);
-    debugger;
-    await useAxios()
-      .post(
-        `eskepinstructor/question-answer-list-create/${param.odev_id}/`,
-        formdata
-      )
-      .then((res) => {
-        debugger;
-        fetchOdevDetail();
-        handleQuestionClose();
-        Toast().fire({
-          icon: "success",
-          title: "Mesaj Gönderildi",
-        });
-      });
-  };
+  if (!createMessage.title || !createMessage.message) {
+    Toast().fire({
+      icon: "error",
+      title: "Başlık ve mesaj giriniz",
+    });
+    return;
+  }
+
+  const formdata = new FormData();
+  formdata.append("odev_id", param.odev_id);
+  formdata.append("gonderen_id", UserData()?.user_id);
+  formdata.append("title", createMessage.title);
+  formdata.append("message", createMessage.message);
+
+  try {
+    const response = await useAxios().post(
+      `eskepinstructor/question-answer-list-create/${param.odev_id}/`,
+      formdata
+    );
+
+    fetchOdevDetail();
+    handleQuestionClose();
+    Toast().fire({
+      icon: "success",
+      title: "Mesaj Gönderildi",
+    });
+  } catch (error) {
+    console.error("Sunucu hatası:", error);
+    Toast().fire({
+      icon: "error",
+      title: "Mesaj gönderilemedi",
+    });
+  }
+};
+
 
   const sendNewMessage = async (e) => {
     e.preventDefault();
@@ -542,15 +556,13 @@ function OdevDetail() {
                                   <div className="d-sm-flex justify-content-between align-items-center">
                                     <h4 className="mb-0 p-3">Tüm Notlar</h4>
                                     {/* Add Note Modal */}
-                                    <button
-                                      type="button"
+                                    <Button
                                       className="btn btn-primary me-3"
-                                      data-bs-toggle="modal"
-                                      data-bs-target="#exampleModal"
+                                      onClick={handleNoteShow}
                                     >
                                       Not Ekle <i className="fas fa-pen"></i>
-                                    </button>
-                                    <div                                      
+                                    </Button>
+                                    <div
                                       className="modal fade"
                                       id="exampleModal"
                                       tabIndex={-1}
@@ -633,10 +645,10 @@ function OdevDetail() {
                                 <div className="card-body p-0 pt-3">
                                   {/* Note item start */}
                                   {odev?.notes?.map((n, index) => (
-                                    <div className="row g-4 p-3">
+                                    <div key={n.id} className="row g-4 p-3">
                                       <div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
                                         <h5> {n.title}</h5>
-                                        <p>{n.notes}</p>
+                                        <p>{n.note}</p>
                                         {/* Buttons */}
                                         <div className="hstack gap-3 flex-wrap">
                                           <a
@@ -990,7 +1002,7 @@ function OdevDetail() {
               style={{ overflowY: "scroll", height: "500px" }}
             >
               {selectedConversation?.messages?.map((m, index) => (
-                <li className="comment-item mb-3">
+                <li key={m.id || index} className="comment-item mb-3">
                   <div className="d-flex">
                     <div className="avatar avatar-sm flex-shrink-0">
                       <a href="#">
@@ -1041,7 +1053,7 @@ function OdevDetail() {
               <div ref={lastElementRef}></div>
             </ul>
 
-            <form class="w-100 d-flex" onSubmit={sendNewMessage}>
+            <form className="w-100 d-flex" onSubmit={sendNewMessage}>
               <textarea
                 name="message"
                 class="one form-control pe-4 bg-light w-75"
@@ -1050,7 +1062,7 @@ function OdevDetail() {
                 onChange={handleMessageChange}
                 placeholder="Sorunuz Nedir?"
               ></textarea>
-              <button class="btn btn-primary ms-2 mb-0 w-25" type="submit">
+              <button className="btn btn-primary ms-2 mb-0 w-25" type="submit">
                 Gönder <i className="fas fa-paper-plane"></i>
               </button>
             </form>

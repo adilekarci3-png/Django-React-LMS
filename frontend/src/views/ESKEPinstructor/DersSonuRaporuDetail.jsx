@@ -164,7 +164,7 @@ function DersSonuRaporuDetail() {
         fetchDersSonuRaporuDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Güncelle",
+          title: "Not Güncellendi",
         });
       });
   };

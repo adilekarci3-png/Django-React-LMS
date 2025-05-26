@@ -23,6 +23,9 @@ admin.site.register(models.Wishlist)
 admin.site.register(models.OrganizationMember)
 admin.site.register(models.Designation)
 admin.site.register(models.Odev)
+admin.site.register(models.EskepProje)
+admin.site.register(models.KitapTahlili)
+admin.site.register(models.DersSonuRaporu)
 admin.site.register(models.VariantOdev)
 admin.site.register(models.VariantOdevItem)
 admin.site.register(models.EnrolledOdev)
@@ -30,6 +33,9 @@ admin.site.register(models.NoteOdev)
 admin.site.register(models.Koordinator)
 admin.site.register(models.Question_AnswerOdev)
 admin.site.register(models.Question_Answer_MessageOdev)
+admin.site.register(models.TeacherStudent)
+admin.site.register(models.ESKEPEvent)
+
 
 class StajerForm(forms.ModelForm):
     class Meta:

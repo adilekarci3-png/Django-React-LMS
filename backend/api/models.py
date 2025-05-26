@@ -138,6 +138,26 @@ Teacher._meta.get_field('bio').verbose_name = "Eğitmen Biyografi"
 Teacher._meta.get_field('about').verbose_name = "Eğitmen Hakkında Bilgi"
 Teacher._meta.get_field('country').verbose_name = "Ülke"
 
+class TeacherStudent(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    instructor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="students")
+
+    class Meta:
+        unique_together = ("user", "instructor")
+
+    def __str__(self):
+        return f"{self.instructor.full_name} ↔ {self.user.username}"
+
+# class ESKEPEvent(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)  # etkinliği oluşturan (öğrenci veya eğitmen)
+#     title = models.CharField(max_length=255)
+#     date = models.DateField()
+#     background_color = models.CharField(max_length=20, default="#007bff")
+#     border_color = models.CharField(max_length=20, default="#0056b3")
+    
+#     def __str__(self):
+#         return f"{self.title} - {self.user.username}"
+
 class Koordinator(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
@@ -470,6 +490,7 @@ class VariantDersSonuRaporu(models.Model):
     
     def items(self):
         return VariantDersSonuRaporuItem.objects.filter(variant=self)
+    
     class Meta:
         verbose_name = "Ders Sonu Raporu Müfredat"
         verbose_name_plural = "Ders Sonu Raporu Müfredat Bölümleri"   
@@ -590,6 +611,7 @@ class VariantKitapTahlili(models.Model):
     
     def items(self):
         return VariantKitapTahliliItem.objects.filter(variant=self)
+    
     class Meta:
         verbose_name = "Kitap Tahlili Müfredat"
         verbose_name_plural = "Kitap Tahlili Müfredat Bölümleri" 
@@ -666,7 +688,7 @@ class EskepProje(models.Model):
         return VariantEskepProje.objects.filter(eskepProje=self)
     
     def lectures(self):
-        return VariantEskepProjeItem.objects.filter(variant__eskepProj=self)
+        return VariantEskepProjeItem.objects.filter(variant__eskepProje=self)
     
     # def average_rating(self):
     #     average_rating = Review.objects.filter(odev=self, active=True).aggregate(avg_rating=models.Avg('rating'))
@@ -711,6 +733,7 @@ class VariantEskepProje(models.Model):
     
     def items(self):
         return VariantEskepProjeItem.objects.filter(variant=self)
+    
     class Meta:
         verbose_name = "Eskep Proje Müfredat"
         verbose_name_plural = "Eskep Proje Müfredat Bölümleri" 
@@ -764,16 +787,17 @@ class Variant(models.Model):
     
     def variant_items(self):
         return VariantItem.objects.filter(variant=self)
-    
-    def items(self):
-        return VariantItem.objects.filter(variant=self)
+
     class Meta:
         verbose_name = "Müfredat"
         verbose_name_plural = "Müfredatlar"   
+
+# Alan isimlerini Türkçeleştirme
 Variant._meta.get_field('course').verbose_name = "Ders" 
 Variant._meta.get_field('title').verbose_name = "Ders Başlığı"
 Variant._meta.get_field('variant_id').verbose_name = "Ders Numarası"
-Variant._meta.get_field('date').verbose_name = "Ders Eklenme Tarihi"   
+Variant._meta.get_field('date').verbose_name = "Ders Eklenme Tarihi"
+  
 
 class VariantItem(models.Model):
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, related_name="variant_items")
@@ -2071,3 +2095,25 @@ Ogrenci._meta.get_field('country').verbose_name = "Ülke"
 Ogrenci._meta.get_field('city').verbose_name = "Şehir" 
 Ogrenci._meta.get_field('active').verbose_name = "Aktif/Pasif" 
 Ogrenci._meta.get_field('gender').verbose_name = "Cinsiyet"
+
+class QuranAnnotation(models.Model):
+    SHAPE_CHOICES = [
+        ('line', 'Line'),
+        ('circle', 'Circle'),
+    ]
+    shape_type = models.CharField(max_length=10, choices=SHAPE_CHOICES)
+    coordinates = models.JSONField()  # {"x1": .., "y1": .., "x2": .., "y2": ..} veya {"cx":..,"cy":..,"r":..}
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+class ESKEPEvent(models.Model):
+    title = models.CharField(max_length=200)
+    date = models.DateField()
+    background_color = models.CharField(max_length=20, default="#007bff")
+    border_color = models.CharField(max_length=20, default="#0056b3")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_events")
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.title} ({self.date})"
+    

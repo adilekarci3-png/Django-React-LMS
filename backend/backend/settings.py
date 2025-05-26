@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_admin_logs',
+    "django_extensions",
     #Custom Apps 
     'core',
     'api',

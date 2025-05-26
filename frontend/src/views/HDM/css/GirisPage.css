@@ -1,0 +1,15 @@
+.stat-card {
+  padding: 10px 20px;
+  border-radius: 10px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+}

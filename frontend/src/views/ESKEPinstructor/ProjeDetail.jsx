@@ -164,7 +164,7 @@ function ProjeDetail() {
         fetchProjeDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Güncelle",
+          title: "Not Güncellendi",
         });
       });
   };

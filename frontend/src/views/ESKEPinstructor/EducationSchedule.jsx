@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -8,26 +8,41 @@ import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import useAxios from "../../utils/useAxios";
 
 function EducationSchedule() {
-  const [events] = useState([
-    { title: "Tefsir Dersi", start: "2025-03-15", backgroundColor: "#28a745", borderColor: "#1e7e34" },
-    { title: "Hadis Dersi", start: "2025-03-15", backgroundColor: "#28a745", borderColor: "#1e7e34" },
-    { title: "Kıraat Dersi", start: "2025-03-15", backgroundColor: "#28a745", borderColor: "#1e7e34" },
-    { title: "Hafızlık Çalışması", start: "2025-03-18", backgroundColor: "#ffc107", borderColor: "#d39e00" },
-    { title: "Hadis Konferansı", start: "2025-03-20", backgroundColor: "#dc3545", borderColor: "#bd2130" },
-    { title: "Hadis Dersi", start: "2025-03-22", backgroundColor: "#17a2b8", borderColor: "#117a8b" },
-    { title: "Tefsir Sınavı", start: "2025-03-25", backgroundColor: "#6610f2", borderColor: "#520dc2" },
-  ]);
+  const [events, setEvents] = useState([]);
+  const api = useAxios();
+
+  useEffect(() => {
+    async function fetchSchedule() {
+      try {
+        const response = await api.get(`/events/global_schedule/`);
+        const data = response.data.map(event => ({
+          title: event.title,
+          start: event.date,
+          backgroundColor: event.background_color,
+          borderColor: event.border_color
+        }));
+        setEvents(data);
+      } catch (error) {
+        console.error("Genel takvim verisi alınamadı:", error);
+      }
+    }
+
+    fetchSchedule();
+  }, []);
 
   const handleEventClick = (clickInfo) => {
     Swal.fire({
       title: clickInfo.event.title,
-      text: `Ders Tarihi: ${new Date(clickInfo.event.start).toLocaleDateString("tr-TR")}`,
+      text: `Tarih: ${new Date(clickInfo.event.start).toLocaleDateString("tr-TR")}`,
       icon: "info",
       confirmButtonText: "Tamam",
     });
   };
+
+  const sortedEvents = [...events].sort((a, b) => new Date(a.start) - new Date(b.start));
 
   return (
     <>
@@ -39,27 +54,58 @@ function EducationSchedule() {
             <Sidebar />
             <div className="col-lg-9 col-md-8 col-12">
               <div className="text-center mb-4">
-                <h3 className="fw-bold text-primary">📅 Eğitim Takvimi</h3>
-                <p className="text-muted">Ders programınızı görüntüleyin ve detaylarına ulaşın.</p>
+                <h3 className="fw-bold text-primary">🌐 Genel Takvim</h3>
+                <p className="text-muted">Sistemdeki tüm etkinlikleri buradan takip edebilirsiniz.</p>
               </div>
 
-              <div className="shadow-lg p-4 rounded bg-white">
-                <FullCalendar
-                  plugins={[dayGridPlugin, interactionPlugin]}
-                  initialView="dayGridMonth"
-                  events={events}
-                  locale={trLocale}
-                  eventClick={handleEventClick}
-                  height="auto"
-                  headerToolbar={{
-                    left: "prev,next today",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay",
-                  }}
-                  eventTextColor="#fff"
-                  dayMaxEvents={2}
-                />
+              <div className="row">
+                {/* Takvim */}
+                <div className="col-lg-9 mb-4">
+                  <div className="shadow-lg p-4 rounded bg-white" style={{ minHeight: "700px" }}>
+                    <FullCalendar
+                      plugins={[dayGridPlugin, interactionPlugin]}
+                      initialView="dayGridMonth"
+                      events={events}
+                      locale={trLocale}
+                      eventClick={handleEventClick}
+                      contentHeight={650}
+                      headerToolbar={{
+                        left: "prev,next today",
+                        center: "title",
+                        right: "dayGridMonth,timeGridWeek,timeGridDay",
+                      }}
+                      eventTextColor="#fff"
+                      dayMaxEvents={2}
+                    />
+                  </div>
+                </div>
+
+                {/* Etkinlik Listesi */}
+                <div className="col-lg-3">
+                  <div className="bg-white shadow-lg p-3 rounded h-100">
+                    <h5 className="text-secondary fw-bold mb-3">📋 Etkinlik Listesi</h5>
+                    <ul className="list-group list-group-flush">
+                      {sortedEvents.map((event, index) => (
+                        <li
+                          key={index}
+                          className="list-group-item d-flex justify-content-between align-items-start"
+                        >
+                          <div>
+                            <strong>{event.title}</strong>
+                            <div className="text-muted small">
+                              {new Date(event.start).toLocaleDateString("tr-TR")}
+                            </div>
+                          </div>
+                          <span className="badge" style={{ backgroundColor: event.backgroundColor }}>
+                            &nbsp;
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -70,100 +116,3 @@ function EducationSchedule() {
 }
 
 export default EducationSchedule;
-
-
-// import React, { useState, useEffect, useContext } from "react";
-// import FullCalendar from "@fullcalendar/react";
-// import dayGridPlugin from "@fullcalendar/daygrid";
-// import interactionPlugin from "@fullcalendar/interaction";
-// import trLocale from "@fullcalendar/core/locales/tr";
-// import BaseHeader from "../partials/BaseHeader";
-// import BaseFooter from "../partials/BaseFooter";
-// import Sidebar from "./Partials/Sidebar";
-// import Header from "./Partials/Header";
-// import useAxios from "../../utils/useAxios";
-// import { ProfileContext } from "../plugin/Context";
-// import Swal from "sweetalert2";
-
-// function EducationSchedule() {
-//   const [profile] = useContext(ProfileContext);
-//   const [events, setEvents] = useState([]);
-
-//   useEffect(() => {
-//     async function fetchData() {
-//       try {
-//         const response = await useAxios().get(`lessons/schedule/${profile?.user_id}/`);
-//         const apiEvents = response.data.map((lesson) => ({
-//           title: lesson.title,
-//           start: lesson.date,
-//           backgroundColor: "#007bff",
-//           borderColor: "#0056b3",
-//         }));
-
-//         // Örnek bazı dersleri ekleyelim
-//         const sampleEvents = [
-//           { title: "Matematik Dersi", start: "2025-03-15", backgroundColor: "#28a745", borderColor: "#1e7e34" },
-//           { title: "Fizik Lab Çalışması", start: "2025-03-18", backgroundColor: "#ffc107", borderColor: "#d39e00" },
-//           { title: "Tarih Konferansı", start: "2025-03-20", backgroundColor: "#dc3545", borderColor: "#bd2130" },
-//         ];
-
-//         // API'den gelen ve örnek dersleri birleştir
-//         setEvents([...apiEvents, ...sampleEvents]);
-//       } catch (error) {
-//         console.error("Ders programı alınamadı:", error);
-//       }
-//     }
-//     fetchData();
-//   }, [profile]);
-
-//   const handleEventClick = (clickInfo) => {
-//     Swal.fire({
-//       title: clickInfo.event.title,
-//       text: `Ders Tarihi: ${new Date(clickInfo.event.start).toLocaleDateString("tr-TR")}`,
-//       icon: "info",
-//       confirmButtonText: "Tamam",
-//     });
-//   };
-
-//   return (
-//     <>
-//       <BaseHeader />
-//       <section className="pt-5 pb-5 bg-light">
-//         <div className="container">
-//           <Header />
-//           <div className="row mt-0 mt-md-4">
-//             <Sidebar />
-//             <div className="col-lg-9 col-md-8 col-12">
-//               <div className="text-center mb-4">
-//                 <h3 className="fw-bold text-primary">📅 Eğitim Takvimi</h3>
-//                 <p className="text-muted">Ders programınızı görüntüleyin ve detaylarına ulaşın.</p>
-//               </div>
-
-//               <div className="shadow-lg p-4 rounded bg-white">
-//                 <FullCalendar
-//                   plugins={[dayGridPlugin, interactionPlugin]}
-//                   initialView="dayGridMonth"
-//                   events={events}
-//                   locale={trLocale}
-//                   eventClick={handleEventClick}
-//                   height="auto"
-//                   headerToolbar={{
-//                     left: "prev,next today",
-//                     center: "title",
-//                     right: "dayGridMonth,timeGridWeek,timeGridDay",
-//                   }}
-//                   eventDisplay="block"
-//                   eventTextColor="#fff"
-//                   dayMaxEvents={2}
-//                 />
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </section>
-//       <BaseFooter />
-//     </>
-//   );
-// }
-
-// export default EducationSchedule;

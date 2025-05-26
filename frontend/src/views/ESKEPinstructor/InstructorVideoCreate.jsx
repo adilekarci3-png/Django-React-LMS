@@ -1,13 +1,22 @@
 import { useState } from "react";
 import axios from "axios";
-import { TextField, Button, InputLabel } from "@mui/material";
+import {
+  TextField,
+  Button,
+  InputLabel,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Grid,
+} from "@mui/material";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import Swal from "sweetalert2";
 
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
-import Sidebar from "./Partials/Sidebar";  // Sidebar'ı import ettik
+import Sidebar from "./Partials/Sidebar";
 
 function InstructorVideoCreate() {
   const [formData, setFormData] = useState({
@@ -56,18 +65,36 @@ function InstructorVideoCreate() {
       <section className="pt-5 pb-5">
         <div className="container">
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
             <Sidebar />
             <div className="col-lg-9 col-md-8 col-12">
-              {/* Card */}
-              <div className="card shadow-sm">
-                <div className="card-header bg-success text-white">
-                  <h5 className="mb-0">Eğitmen Video Ekle</h5>
-                </div>
-                <div className="card-body">
-                  <form className="row justify-content-center" onSubmit={handleSubmit}>
-                    <div className="col-md-10">
-                      <div className="mb-3">
+              <Card className="shadow-sm rounded-4">
+                <CardContent>
+                  <Box className="d-flex align-items-center mb-4">
+                    <Box
+                      sx={{
+                        background: "linear-gradient(135deg, #ff416c, #ff4b2b)",
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#fff",
+                        fontSize: 24,
+                        boxShadow: "0 4px 10px rgba(255, 65, 108, 0.4)",
+                        marginRight: 2,
+                      }}
+                    >
+                      <i className="bi bi-camera-video-fill"></i>
+                    </Box>
+                    <Typography variant="h5" className="fw-bold text-primary">
+                      Eğitmen Video Ekle
+                    </Typography>
+                  </Box>
+
+                  <form onSubmit={handleSubmit}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12}>
                         <TextField
                           label="Video Başlığı"
                           fullWidth
@@ -75,18 +102,26 @@ function InstructorVideoCreate() {
                           onChange={handleChange("title")}
                           size="small"
                         />
-                      </div>
+                      </Grid>
 
-                      <div className="mb-3">
-                        <InputLabel>Açıklama</InputLabel>
-                        <CKEditor
-                          editor={ClassicEditor}
-                          data={formData.description}
-                          onChange={handleEditorChange}
-                        />
-                      </div>
+                      <Grid item xs={12}>
+                        <InputLabel sx={{ mb: 1 }}>Açıklama</InputLabel>
+                        <Box
+                          sx={{
+                            border: "1px solid #ddd",
+                            borderRadius: "4px",
+                            padding: "8px",
+                          }}
+                        >
+                          <CKEditor
+                            editor={ClassicEditor}
+                            data={formData.description}
+                            onChange={handleEditorChange}
+                          />
+                        </Box>
+                      </Grid>
 
-                      <div className="mb-3">
+                      <Grid item xs={12}>
                         <TextField
                           label="YouTube/Video URL"
                           fullWidth
@@ -94,22 +129,33 @@ function InstructorVideoCreate() {
                           onChange={handleChange("videoUrl")}
                           size="small"
                         />
-                      </div>
+                      </Grid>
 
-                      <div className="mb-4">
-                        <InputLabel>Video Dosyası Yükle (.mp4)</InputLabel>
-                        <input type="file" accept="video/mp4" onChange={handleChange("videoFile")} />
-                      </div>
+                      <Grid item xs={12}>
+                        <InputLabel sx={{ mb: 1 }}>Video Dosyası Yükle (.mp4)</InputLabel>
+                        <input
+                          type="file"
+                          accept="video/mp4"
+                          onChange={handleChange("videoFile")}
+                          className="form-control"
+                        />
+                      </Grid>
 
-                      <div className="d-grid">
-                        <Button type="submit" variant="contained" color="success" size="large">
+                      <Grid item xs={12}>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          fullWidth
+                        >
                           Videoyu Kaydet
                         </Button>
-                      </div>
-                    </div>
+                      </Grid>
+                    </Grid>
                   </form>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

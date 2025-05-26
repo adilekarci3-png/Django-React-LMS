@@ -20,6 +20,7 @@ urlpatterns = [
 
     # Authentication
     path("user/token/", api_views.MyTokenObtainPairView.as_view()),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("user/token/refresh/", TokenRefreshView.as_view()),
     path("user/register/", api_views.RegisterView.as_view()),
     path("user/password-reset/<email>/", api_views.PasswordResetEmailVerifyAPIView.as_view()),
@@ -88,32 +89,33 @@ urlpatterns = [
     path("teacher/course/variant-item-delete/<variant_id>/<variant_item_id>/<teacher_id>/<course_id>/", api_views.CourseVariantItemDeleteAPIVIew.as_view()),
 
     # Eskep Stajer
-    path("eskepstajer/odev-create/", api_views.OdevCreateAPIView.as_view()),
-    path("eskepstajer/odev-list/<stajer_id>/", api_views.StajerOdevListAPIView.as_view()),
+    path("eskepstajer/odev-create/", api_views.EskepOdevCreateAPIView.as_view()),
+    path("eskepstajer/odev-list/<stajer_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
     path("eskepstajer/odev-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
-    path("eskepstajer/kitaptahlili-create/", api_views.KitapTahliliCreateAPIView.as_view()),
-    path("eskepstajer/kitaptahlili-list/<stajer_id>/", api_views.StajerKitapTahliliListAPIView.as_view()),
+    path("eskepstajer/kitaptahlili-create/", api_views.EskepKitapTahliliCreateAPIView.as_view()),
+    path("eskepstajer/kitaptahlili-list/<stajer_id>/", api_views.EskepStajerKitapTahliliListAPIView.as_view()),
     path("stajer/kitaptahlili-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
-    path("eskepstajer/derssonuraporu-create/", api_views.DersSonuRaporuCreateAPIView.as_view()),
-    path("eskepstajer/derssonuraporu-list/<stajer_id>/", api_views.StajerDersSonuRaporuListAPIView.as_view()),
+    path("eskepstajer/derssonuraporu-create/", api_views.EskepDersSonuRaporuCreateAPIView.as_view()),
+    path("eskepstajer/derssonuraporu-list/<stajer_id>/", api_views.EskepStajerDersSonuRaporuListAPIView.as_view()),
     path("eskepstajer/derssonuraporu-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
     path("eskepstajer/proje-create/", api_views.EskepProjeCreateAPIView.as_view()),
-    path("eskepstajer/proje-list/<stajer_id>/", api_views.StajerEskepProjeListAPIView.as_view()),
+    path("eskepstajer/proje-list/<stajer_id>/", api_views.EskepStajerProjeListAPIView.as_view()),
     path("eskepstajer/proje-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
 
     # Eskep Student
-    path("eskepstudent/odev-create/", api_views.OdevCreateAPIView.as_view()),
-    path("eskepstudent/odev-list/<ogrenci_id>/", api_views.StajerOdevListAPIView.as_view()),
+    path("eskepstudent/odev-create/", api_views.EskepOdevCreateAPIView.as_view()),
+    path("eskepstudent/odev-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
     path("eskepstudent/odev-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
-    path("eskepstudent/kitaptahlili-create/", api_views.KitapTahliliCreateAPIView.as_view()),
-    path("eskepstudent/kitaptahlili-list/<ogrenci_id>/", api_views.StajerOdevListAPIView.as_view()),
+    path("eskepstudent/kitaptahlili-create/", api_views.EskepKitapTahliliCreateAPIView.as_view()),
+    path("eskepstudent/kitaptahlili-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
     path("eskepstudent/kitaptahlili-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
-    path("eskepstudent/derssonuraporu-create/", api_views.DersSonuRaporuCreateAPIView.as_view()),
-    path("eskepstudent/derssonuraporu-list/<ogrenci_id>/", api_views.StajerOdevListAPIView.as_view()),
+    path("eskepstudent/derssonuraporu-create/", api_views.EskepDersSonuRaporuCreateAPIView.as_view()),
+    path("eskepstudent/derssonuraporu-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
     path("eskepstudent/derssonuraporu-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
 
     # Eskep Koordinator
     path("eskepinstructor/odev-list/<user_id>/", api_views.EskepInstructorOdevListAPIView.as_view()),
+    path("eskepinstructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
     path("eskepinstructor/odev-detail/<odev_id>/<koordinator_id>/", api_views.EskepInstructorOdevDetailAPIView.as_view()),
     path("eskepinstructor/odev-completed/", api_views.InstructorOdevCompletedCreateAPIView.as_view()),
     path("eskepinstructor/odev-note/<odev_id>/<koordinator_id>/", api_views.EskepInstructorOdevNoteCreateAPIView.as_view()),
@@ -123,16 +125,16 @@ urlpatterns = [
     path("eskepinstructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
     path("eskepinstructor/kitaptahlili-list/<user_id>/", api_views.EskepInstructorKitapTahliliListAPIView.as_view()),
     path("eskepinstructor/kitaptahlili-detail/<int:kitaptahlili_id>/<int:koordinator_id>/",api_views.EskepInstructorKitapTahliliDetailAPIView.as_view()),
-    path("eskepinstructor/kitaptahlili-note/<kitaptahlili_id>/<koordinator_id>/", api_views.EskepInstructorKitapTahliliNoteCreateAPIView.as_view()),
+    path('eskepinstructor/kitaptahlili-note/<int:kitaptahlili_id>/<int:koordinator_id>/', api_views.EskepInstructorKitapTahliliNoteCreateAPIView.as_view(),name='kitaptahlili-note-create'),
     path("eskepinstructor/kitaptahlili-note-detail/<kitaptahlili_id>/<koordinator_id>/<note_id>/", api_views.EskepInstructorKitapTahliliNoteDetailAPIView.as_view()),
     path("eskepinstructor/rate-kitaptahlili/", api_views.InstructorRateCourseCreateAPIView.as_view()),
-    path("eskepinstructor/question-answer-list-create/<kitaptahlili_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
-    path("eskepinstructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),   
-    path("eskepinstructor/proje-list/<user_id>/", api_views.EskepInstructorEskepProjeListAPIView.as_view()),
+    path("eskepinstructor/question-answer-list-create/<kitaptahlili_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),       
+    path("eskepinstructor/proje-list/<user_id>/", api_views.EskepInstructorProjeListAPIView.as_view()),
     path("eskepinstructor/proje-detail/<user_id>/<koordinator_id>/", api_views.EskepInstructorProjeDetailAPIView.as_view()), 
     path("eskepinstructor/derssonuraporu-list/<user_id>/", api_views.EskepInstructorDersSonuRaporuListAPIView.as_view()),
     path("eskepinstructor/derssonuraporu-detail/<user_id>/<koordinator_id>/", api_views.EskepInstructorDersSonuRaporuDetailAPIView.as_view()), 
     path("eskep/assign-role/", api_views.CoordinatorYetkiAtaAPIView.as_view()),
+    path("eskepinstructor/student-lists/<user_id>/", api_views.EskepInstructorStudentsStajersListAPIView.as_view({'get': 'list'})),
 
     # Eğitmen
     path("instructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
@@ -144,6 +146,13 @@ urlpatterns = [
     path("instructor/question-answer-list-create/<odev_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
     path("instructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
 
+    # Eskep Eğitmen
+
+    path('events/create/', api_views.InstructorEventCreateAPIView.as_view(), name='instructor-event-create'),
+    path('events/instructor/', api_views.InstructorEventListAPIView.as_view(), name='instructor-events'),
+    path('events/student/', api_views.StudentEventListAPIView.as_view(), name='student-events'),
+    path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),
+    
     # Eskep Listeler
     path("eskep/coordinators/", api_views.CoordinatorListAPIView.as_view()),
     path("eskep/users/", api_views.UserListAPIView.as_view(),name="user-list"),

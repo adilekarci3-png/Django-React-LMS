@@ -153,7 +153,7 @@ function CourseDetail() {
         fetchCourseDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Güncelle",
+          title: "Not Güncellendi",
         });
       });
   };

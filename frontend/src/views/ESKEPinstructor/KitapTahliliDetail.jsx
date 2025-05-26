@@ -12,6 +12,8 @@ import Toast from "../plugin/Toast";
 import moment from "moment";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+// import '../css/modernAccordion.css';
+import "./css/modernAccordion.css";
 
 function KitapTahliliDetail() {
   const [kitapTahlili, setKitapTahlili] = useState([]);
@@ -122,11 +124,12 @@ function KitapTahliliDetail() {
     e.preventDefault();
     const formdata = new FormData();
     debugger;
+    console.log(UserData());
     formdata.append("koordinator_id", UserData()?.user_id);
     formdata.append("kitaptahlili_id", param.kitaptahlili_id);
     formdata.append("title", createNote.title);
     formdata.append("note", createNote.note);
-    
+
     try {
       await useAxios()
         .post(
@@ -164,7 +167,7 @@ function KitapTahliliDetail() {
         fetchKitapTahliliDetail();
         Toast().fire({
           icon: "success",
-          title: "Notu Güncelle",
+          title: "Not Güncellendi",
         });
       });
   };
@@ -423,104 +426,83 @@ function KitapTahliliDetail() {
                             >
                               {/* Accordion START */}
                               <div
-                                className="accordion accordion-icon accordion-border"
+                                className="accordion modern-accordion"
                                 id="accordionExample2"
                               >
-                                <div className="progress mb-3">
-                                  <div
-                                    className="progress-bar"
-                                    role="progressbar"
-                                    style={{
-                                      width: `${completionPercentage}%`,
-                                    }}
-                                    aria-valuenow={completionPercentage}
-                                    aria-valuemin={0}
-                                    aria-valuemax={100}
-                                  >
-                                    {completionPercentage}%
-                                  </div>
-                                </div>
-                                {/* Item */}
-                                {kitapTahlili?.lectures?.map((c, index) => (
-                                  <div key={index}>
-                                    <h3>{c.name}</h3> {/* Lecture Name */}
-                                  </div>
-                                ))}
-
                                 {kitapTahlili?.curriculum?.map((c, index) => (
                                   <div
-                                    className="accordion-item mb-3 p-3 bg-light"
+                                    className="accordion-item modern-item mb-3"
                                     key={index}
                                   >
-                                    <h6
-                                      className="accordion-header font-base"
+                                    <h2
+                                      className="accordion-header"
                                       id={`heading-${index}`}
                                     >
                                       <button
-                                        className="accordion-button p-3 w-100 bg-light btn border fw-bold rounded d-sm-flex d-inline-block collapsed"
+                                        className="accordion-button modern-button collapsed"
                                         type="button"
                                         data-bs-toggle="collapse"
                                         data-bs-target={`#collapse-${c.variant_id}`}
-                                        aria-expanded="true"
+                                        aria-expanded="false"
                                         aria-controls={`collapse-${c.variant_id}`}
                                       >
-                                        {c.title}
-                                        <span className="small ms-0 ms-sm-2">
-                                          ({c.variant_items?.length} Ders
-                                          {c.variant_items?.length > 1 && "s"})
+                                        <span className="fw-bold">
+                                          {c.title}
+                                        </span>
+                                        <span className="badge bg-secondary ms-2">
+                                          {c.variant_items?.length} Ders
                                         </span>
                                       </button>
-                                    </h6>
-
+                                    </h2>
                                     <div
                                       id={`collapse-${c.variant_id}`}
-                                      className="accordion-collapse collapse show"
+                                      className="accordion-collapse collapse"
                                       aria-labelledby={`heading-${index}`}
                                       data-bs-parent="#accordionExample2"
                                     >
-                                      <div className="accordion-body mt-3">
+                                      <div className="accordion-body">
                                         {c.variant_items?.map((l, idx) => (
-                                          <div key={idx}>
-                                            <div className="d-flex justify-content-between align-items-center">
-                                              <div className="position-relative d-flex align-items-center">
-                                                {l.file ? (
-                                                  <a
-                                                    href={l.file}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="btn btn-primary-soft btn-round btn-sm mb-0 stretched-link position-static"
-                                                  >
-                                                    <i className="fas fa-file-pdf me-1" />{" "}
-                                                    PDF'yi Görüntüle
-                                                  </a>
-                                                ) : (
-                                                  <span className="text-muted">
-                                                    PDF mevcut değil
-                                                  </span>
-                                                )}
-                                              </div>
-                                              <div className="d-flex">
-                                                <p className="mb-0">
-                                                  {l.content_duration ||
-                                                    "0m 0s"}
-                                                </p>
-                                                <input
-                                                  type="checkbox"
-                                                  className="form-check-input ms-2"
-                                                  onChange={() =>
-                                                    handleMarkLessonAsCompleted(
-                                                      l.variant_item_id
-                                                    )
-                                                  }
-                                                  checked={kitapTahlili.completed_lesson?.some(
-                                                    (cl) =>
-                                                      cl.variant_item.id ===
-                                                      l.id
-                                                  )}
-                                                />
-                                              </div>
+                                          <div
+                                            key={idx}
+                                            className="lesson-item"
+                                          >
+                                            <div>
+                                              <strong>
+                                                {l.title || `Ders ${idx + 1}`}
+                                              </strong>
+                                              <br />
+                                              {l.file ? (
+                                                <a
+                                                  href={l.file}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                >
+                                                  PDF'yi Görüntüle
+                                                </a>
+                                              ) : (
+                                                <span className="text-muted">
+                                                  PDF mevcut değil
+                                                </span>
+                                              )}
                                             </div>
-                                            <hr />
+                                            <div className="lesson-info">
+                                              <span className="text-muted">
+                                                {l.content_duration || "0m 0s"}
+                                              </span>
+                                              <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                onChange={() =>
+                                                  handleMarkLessonAsCompleted(
+                                                    l.variant_item_id
+                                                  )
+                                                }
+                                                checked={kitapTahlili.completed_lesson?.some(
+                                                  (cl) =>
+                                                    cl.variant_item.id === l.id
+                                                )}
+                                              />
+                                            </div>
                                           </div>
                                         ))}
                                       </div>
@@ -528,6 +510,7 @@ function KitapTahliliDetail() {
                                   </div>
                                 ))}
                               </div>
+
                               {/* Accordion END */}
                             </div>
 
@@ -550,7 +533,7 @@ function KitapTahliliDetail() {
                                     >
                                       Not Ekle <i className="fas fa-pen"></i>
                                     </button>
-                                    <div                                      
+                                    <div
                                       className="modal fade"
                                       id="exampleModal"
                                       tabIndex={-1}
