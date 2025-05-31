@@ -55,15 +55,15 @@ const CoordinatorMenu = () => {
       </Link>
     </li>
     <li>
-      <Link className="dropdown-item" to={`/instructor/odevs/`}>
-        <i className="fas fa-users"></i> Öğrenci Listesi
+      <Link className="dropdown-item" to={`/eskepinstructor/ogrenci-stajer/`}>
+        <i className="fas fa-users"></i> Öğrenci/Stajer Listesi
       </Link>
     </li>
-    <li>
+    {/* <li>
       <Link className="dropdown-item" to={`/instructor/odevs/`}>
         <i className="fas fa-user-graduate"></i> Stajer Listesi
       </Link>
-    </li>
+    </li> */}
     <li>
       <Link className="dropdown-item" to={`/eskep/eğitmenler/`}>
         <i className="fas fa-chalkboard-teacher"></i> Eğitmen Listesi

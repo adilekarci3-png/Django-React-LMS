@@ -7,6 +7,7 @@ import useAxios from "../../utils/useAxios";
 import KoordinatorMenu from "../partials/menus/CoordinatorMenu";
 import StajerMenu from "../partials/menus/StajerMenu";
 import OgrenciMenu from "../partials/menus/OgrenciMenu";
+import EgitmenMenu from "../partials/menus/EgitmenMenu";
 
 function ESKEPBaseHeader() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,6 +113,7 @@ function ESKEPBaseHeader() {
               {userRole === "Koordinator" && <KoordinatorMenu />}
               {userRole === "Stajer" && <StajerMenu />}
               {userRole === "Ogrenci" && <OgrenciMenu />}
+              {<EgitmenMenu />}
             </ul>
 
             {isLoggedIn() ? (

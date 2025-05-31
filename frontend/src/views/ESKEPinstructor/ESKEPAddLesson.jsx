@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
@@ -9,11 +9,12 @@ import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
 function ESKEPAddLesson() {
+  const today = new Date().toISOString().split("T")[0];
   const [formData, setFormData] = useState({
     title: "",
-    date: "",
+    date: today,
     background_color: "#007bff",
-    border_color: "#0056b3"
+    border_color: "#0056b3",
   });
 
   const api = useAxios();
@@ -21,9 +22,9 @@ function ESKEPAddLesson() {
   const profile = UserData(); // ✅ Token'dan user_id, username vb. alınır
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -36,14 +37,22 @@ function ESKEPAddLesson() {
     }
 
     try {
-      await api.post("/events/create/", formData);
+      const payload = {
+        ...formData,
+        user_id: profile.user_id, // ✅ user_id eklendi
+      };
+
+      await api.post("/events/create/", payload);
       Swal.fire("Başarılı", "Etkinlik eklendi!", "success");
-      navigate("/egitmen/takvim");
+      navigate("/eskep/egitim-takvimi/");
     } catch (err) {
       console.error("Hata:", err);
       Swal.fire("Hata", "Etkinlik eklenemedi.", "error");
     }
   };
+  useEffect(() => {
+    if (!profile?.user_id) navigate("/login");
+  }, [profile]);
 
   return (
     <>

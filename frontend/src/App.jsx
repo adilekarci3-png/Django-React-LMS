@@ -64,7 +64,10 @@ import EHADAcademiDashboard from "./views/Akademi/EHADAcademiDashboard";
 //HDM Pages
 import HDMIndex from "./views/base/HDMIndex";
 import HafizlikDinlemeDashboard from "./views/HDM/HafizlikDinlemeDashboard";
-
+import HafizTakip from "./views/HDM/HafizTakip";
+import KuranDinleme from "./views/HDM/KuranDinleme";
+import EgitmenDetay from "./views/HDM/EgitmenDetay";
+import HafizDetay from "./views/HDM/HafizDetay";
 // ESKEP Pages
 import ESKEPDashboard from "./views/ESKEPinstructor/ESKEPDashboard";
 import ESKEPIndex from "./views/base/ESKEPIndex";
@@ -75,6 +78,7 @@ import KitapTahliliCreate from "./views/ESKEPstajer/KitapTahliliCreate";
 import DersSonuRaporuCreate from "./views/ESKEPstajer/DersSonuRaporuCreate";
 import ProjeCreate from "./views/ESKEPstajer/ProjeCreate";
 
+//Eskep Instructor Pages
 import ESKEPinstructorDashboard from "./views/ESKEPinstructor/EskepInstructorDashboard";
 import ESKEPinstructorOdevs from "./views/ESKEPinstructor/Odevs";
 import ESKEPinstructorKitapTahlils from "./views/ESKEPinstructor/KitapTahlils";
@@ -84,6 +88,12 @@ import ESKEPinstructorKitapTahliliDetail from "./views/ESKEPinstructor/KitapTahl
 import ESKEPinstructorAssingCoordinator from "./views/ESKEPinstructor/AssignCoordinator";
 import EskepInstructorStudents from "./views/ESKEPinstructor/EskepInstructorStudents";
 import EskepInstructorProfile from "./views/ESKEPinstructor/EskepInstructorProfile";
+import EskepInstructorStudentStajerList from "./views/ESKEPinstructor/EskepInstructorStudentStajerList";
+import StajerListesi from "./views/ESKEPinstructor/StajerListesi";
+import OgrenciListesi from "./views/ESKEPinstructor/OgrenciListesi";
+import StajerDetay from "./views/ESKEPinstructor/StajerDetay";
+import StajerDuzenle from "./views/ESKEPinstructor/StajerDuzenle";
+//Eskep Eğitmen Pages
 import ESKEPEgitmenDersSaatiEkle from "./views/ESKEPinstructor/ESKEPAddLesson";
 import ESKEPEgitmenCreate from "./views/ESKEPinstructor/InstructorCreate";
 import ESKEPEgitmenVideoCreate from "./views/ESKEPinstructor/InstructorVideoCreate";
@@ -92,6 +102,7 @@ import ESKEPEgitmenVideoLinkCreate from "./views/ESKEPinstructor/InstructorVideo
 import ESKEPEgitmenProfil from "./views/ESKEPinstructor/EskepInstructorProfile";
 import ESKEPEgitmenVideoList from "./views/ESKEPinstructor/InstructorVideoList";
 import ESKEPEgitmenYoutubeCanli from "./views/ESKEPinstructor/YouTubeLivePage";
+import ESKEPEgitmenSchedule from "./views/ESKEPEgitmen/ESKEPEgitmenSchedule";
 
 //Eskep Stajer Pages
 import EskepStajerOdevs from "./views/ESKEPstajer/EskepStajerOdevs";
@@ -112,22 +123,26 @@ import AgentHafizBilgiList from "./views/agent/HafizBilgiList";
 // Misc
 import CrudTableDeneme from "./views/CrudTable/CrudTableDeneme";
 
-//HDM
-import KuranDinleme from "./views/HDM/KuranDinleme";
-
 function App() {
   const [cartCount, setCartCount] = useState(0);
-  const [profile, setProfile] = useState([]);
+  const [profile, setProfile] = useState(null);
+  const user = UserData(); // user_id vs içerir
+  const axiosJWT = useAxios();
 
   useEffect(() => {
+    // 🛒 Sepet sayısını getir (anonim de olabilir)
     apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
       setCartCount(res.data?.length || 0);
     });
 
-    useAxios()
-      .get(`user/profile/${UserData()?.user_id}/`)
-      .then((res) => setProfile(res.data));
-  }, []);
+    // 👤 Kullanıcı profili (eğer login ise)
+    if (user?.user_id) {
+      axiosJWT
+        .get(`user/profile/${user.user_id}/`)
+        .then((res) => setProfile(res.data))
+        .catch((err) => console.warn("Profil alınamadı:", err));
+    }
+  }, [user?.user_id]);
 
   return (
     <CartContext.Provider value={[cartCount, setCartCount]}>
@@ -158,7 +173,10 @@ function App() {
 
               {/* Hafız Bilgi */}
               <Route path="/hafizbilgi/" element={<HafizBilgiIndex />} />
-              <Route path="/hafizbilgi/dashboard" element={<HafizBilgiDashboard />} />
+              <Route
+                path="/hafizbilgi/dashboard"
+                element={<HafizBilgiDashboard />}
+              />
               <Route path="/hafizbilgi/list/" element={<HafizBilgiList />} />
               <Route
                 path="/hafizbilgi/create-hafizbilgi/"
@@ -243,12 +261,21 @@ function App() {
 
               {/* EHAD AKADEMİ */}
               <Route path="/akademi/" element={<AkademiIndex />} />
-              <Route path="/akademi/dashboard" element={<EHADAcademiDashboard />} />
+              <Route
+                path="/akademi/dashboard"
+                element={<EHADAcademiDashboard />}
+              />
 
               {/* HDM */}
               <Route path="/hdm/" element={<HDMIndex />} />
-              <Route path="/hdm/dashboard" element={<HafizlikDinlemeDashboard />} />              
-              <Route path="/hdm/kuranoku" element={<KuranDinleme />} />              
+              <Route
+                path="/hdm/dashboard"
+                element={<HafizlikDinlemeDashboard />}
+              />
+              <Route path="/hdm/kuranoku" element={<KuranDinleme />} />
+              <Route path="/hdm/hafiztakip" element={<HafizTakip />} />
+              <Route path="/hdm/egitmendetay" element={<EgitmenDetay />} />
+              <Route path="/hdm/hafizdetay" element={<HafizDetay />} />
 
               {/* ESKEP */}
               <Route path="/eskep/dashboard" element={<ESKEPDashboard />} />
@@ -339,6 +366,26 @@ function App() {
                 path="/eskepinstructor/profile/"
                 element={<EskepInstructorProfile />}
               />
+              <Route
+                path="/eskepinstructor/ogrenci-stajer/"
+                element={<EskepInstructorStudentStajerList />}
+              />
+              <Route
+                path="/eskepinstructor/stajer-list/"
+                element={<StajerListesi />}
+              />
+              <Route
+                path="/eskepinstructor/ogrenci-list/"
+                element={<OgrenciListesi />}
+              />
+              <Route
+                path="/eskepinstructor/stajer/:id/detay"
+                element={<StajerDetay />}
+              />
+              <Route
+                path="/eskepinstructor/stajer/:id/duzenle"
+                element={<StajerDuzenle />}
+              />
 
               {/* ESKEP Stajer */}
               <Route
@@ -408,6 +455,10 @@ function App() {
               <Route
                 path="/eskepegitmen/youtube-canli/"
                 element={<ESKEPEgitmenYoutubeCanli />}
+              />
+              <Route
+                path="/eskepegitmen/takvim/"
+                element={<ESKEPEgitmenSchedule />}
               />
             </Routes>
           </MainWrapper>

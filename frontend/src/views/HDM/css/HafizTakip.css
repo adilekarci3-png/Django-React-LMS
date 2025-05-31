@@ -1,0 +1,92 @@
+.custom-calendar {
+  width: 100% !important;
+  min-height: 420px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.react-calendar__tile--active {
+  background: #198754 !important; /* Bootstrap success rengi */
+  color: white !important;
+  border-radius: 6px;
+}
+
+.react-calendar__tile--now {
+  background: #ffc107 !important; /* Bugünün rengi */
+  color: #000 !important;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+/* Takvim görünümü */
+.custom-calendar {
+  width: 100% !important;
+  min-height: 420px;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8f9fa; /* açık gri arka plan */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Seçilen gün */
+.react-calendar__tile--active {
+  background: #198754 !important; /* Bootstrap success rengi */
+  color: #fff !important;
+  border-radius: 6px;
+}
+
+/* Bugün */
+.react-calendar__tile--now {
+  background: #ffc107 !important; /* sarı renk */
+  color: #000 !important;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+/* Hover efekti */
+.react-calendar__tile:hover {
+  background-color: #e2e6ea;
+  cursor: pointer;
+}
+
+/* Ders ata butonu */
+.ders-ata-button {
+  margin-top: 10px;
+  width: 100%;
+  font-weight: bold;
+}
+
+/* Kart yapısı */
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Başlık */
+.card h5 {
+  font-weight: 600;
+  color: #343a40;
+}
+.hafiz-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.calendar-container {
+  flex: 1;
+  max-width: 350px;
+}
+
+.dersler-container {
+  flex: 1;
+}
+
+.hatalar-container {
+  flex: 1;
+  max-height: 400px;
+  overflow-y: auto;
+}

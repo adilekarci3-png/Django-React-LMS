@@ -1,35 +1,51 @@
-from api import views as api_views
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
+from api import views as api_views
+
+# ViewSet'ler için router
+router = DefaultRouter()
+router.register(r"egitmenler", api_views.HDMEgitmenViewSet)
+router.register(r"hafizlar", api_views.HDMHafizViewSet)
+router.register(r"ders-atamalari", api_views.DersAtamasiViewSet)
+router.register(r"dersler", api_views.DersViewSet)
+router.register(r"hatalar", api_views.HataNotuViewSet)
+router.register(r"cizimler", api_views.AnnotationViewSet)
+router.register(r'stajer', api_views.StajerViewSet, basename='stajer')
+router.register(r'ogrenci', api_views.OgrenciViewSet, basename='ogrenci')
 
 urlpatterns = [
+    # Router ViewSet yolları
+    path("", include(router.urls)),
+
+    # Özel HDM endpoint
+    path("dersler/<int:hafiz_id>/<str:date>/", api_views.dersler_by_date, name="hafiz-dersler-by-date"),
+
     # Hafız Bilgi
-    path("hafizbilgi/create/", api_views.HafizBilgiCreateAPIView.as_view()),   
-    path("hafizbilgi/list/", api_views.HafizsListAPIView.as_view()),   
+    path("hafizbilgi/create/", api_views.HafizBilgiCreateAPIView.as_view(), name="hafizbilgi-create"),   
+    path("hafizbilgi/list/", api_views.HafizsListAPIView.as_view(), name="hafizbilgi-list"),   
 
-    # Meslek, İl, İlçe
-    path("job/list/", api_views.JobListAPIView.as_view()),
-    path("city/list/", api_views.CityListAPIView.as_view()),
-    path("district/list/", api_views.DistrictListAPIView.as_view()),
-
-    # Proje
-    path("proje/list/", api_views.ProjeListAPIView.as_view()),
+    # Konum ve Proje
+    path("job/list/", api_views.JobListAPIView.as_view(), name="job-list"),
+    path("city/list/", api_views.CityListAPIView.as_view(), name="city-list"),
+    path("country/list/", api_views.CountryListAPIView.as_view(), name="country-list"),
+    path("district/list/", api_views.DistrictListAPIView.as_view(), name="district-list"),
+    path("proje/list/", api_views.ProjeListAPIView.as_view(), name="proje-list"),
 
     # Organizasyon Şeması
-    path("admin/organizationchart/", api_views.OrganizationMemberViewSetAPIVIew.as_view()),
+    path("admin/organizationchart/", api_views.OrganizationMemberViewSetAPIVIew.as_view(), name="organization-chart"),
 
-    # Authentication
-    path("user/token/", api_views.MyTokenObtainPairView.as_view()),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("user/token/refresh/", TokenRefreshView.as_view()),
-    path("user/register/", api_views.RegisterView.as_view()),
-    path("user/password-reset/<email>/", api_views.PasswordResetEmailVerifyAPIView.as_view()),
-    path("user/password-change/", api_views.PasswordChangeAPIView.as_view()),
-    path("user/profile/<user_id>/", api_views.ProfileAPIView.as_view()),
-    path("user/change-password/", api_views.ChangePasswordAPIView.as_view()),
-    path("user/role/", api_views.user_role_view),
-    path("user/role/<int:user_id>/", api_views.user_role_by_id_view),
-    
+    # Kullanıcı & Auth
+    path("user/token/", api_views.MyTokenObtainPairView.as_view(), name="token-obtain"),
+    path("user/token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
+    path("user/register/", api_views.RegisterView.as_view(), name="user-register"),
+    path("user/password-reset/<email>/", api_views.PasswordResetEmailVerifyAPIView.as_view(), name="password-reset"),
+    path("user/password-change/", api_views.PasswordChangeAPIView.as_view(), name="password-change"),
+    path("user/change-password/", api_views.ChangePasswordAPIView.as_view(), name="change-password"),
+    path("user/profile/<user_id>/", api_views.ProfileAPIView.as_view(), name="profile"),
+    path("user/role/", api_views.user_role_view, name="user-role"),
+    path("user/role/<int:user_id>/", api_views.user_role_by_id_view, name="user-role-by-id"),   
+   
     # Course
     path("course/category/", api_views.CategoryListAPIView.as_view()),
     path("course/course-list/", api_views.CourseListAPIView.as_view()),
@@ -135,7 +151,8 @@ urlpatterns = [
     path("eskepinstructor/derssonuraporu-detail/<user_id>/<koordinator_id>/", api_views.EskepInstructorDersSonuRaporuDetailAPIView.as_view()), 
     path("eskep/assign-role/", api_views.CoordinatorYetkiAtaAPIView.as_view()),
     path("eskepinstructor/student-lists/<user_id>/", api_views.EskepInstructorStudentsStajersListAPIView.as_view({'get': 'list'})),
-
+    path('eskepinstructor/<int:user_id>/kisisel-liste/', api_views.koordinator_students_stajers, name='koordinator-student-stajer-list'),
+    
     # Eğitmen
     path("instructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
     # path("instructor/odev-note/<user_id>/<enrollment_id>/", api_views.InstructorNoteCreateAPIView.as_view()),
@@ -147,9 +164,8 @@ urlpatterns = [
     path("instructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
 
     # Eskep Eğitmen
-
-    path('events/create/', api_views.InstructorEventCreateAPIView.as_view(), name='instructor-event-create'),
-    path('events/instructor/', api_views.InstructorEventListAPIView.as_view(), name='instructor-events'),
+    path('events/create/', api_views.ESKEPEventCreateAPIView.as_view(), name='instructor-event-create'),
+    path('events/teacher_schedule/<int:user_id>/', api_views.InstructorEventListAPIView.as_view(), name='teacher-schedule'),
     path('events/student/', api_views.StudentEventListAPIView.as_view(), name='student-events'),
     path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),
     
@@ -161,6 +177,13 @@ urlpatterns = [
     path("eskep/egitmens/", api_views.EgitmenListAPIView.as_view()),
     path("eskep/create-student", api_views.EgitmenListAPIView.as_view()),
     path("eskep/create-intern", api_views.EgitmenListAPIView.as_view()),
+    path("eskep/update_coordinator_role", api_views.UpdateCoordinatorRole.as_view()),
     
-    
+    # Ders ve etkinlik örnekleri
+    path('events/create/', api_views.ESKEPEventCreateAPIView.as_view(), name='event-create'),
+    path('events/teacher_schedule/<int:user_id>/', api_views.InstructorEventListAPIView.as_view(), name='teacher-schedule'),
+    path('events/student/', api_views.StudentEventListAPIView.as_view(), name='student-events'),
+    path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),
+    path("egitmen/<int:egitmen_id>/detay/", api_views.egitmen_detay),
+    path("hafiz/<int:hafiz_id>/detay/", api_views.hafiz_detay),
 ]

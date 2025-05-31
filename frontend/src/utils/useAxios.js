@@ -3,32 +3,38 @@ import { getRefreshedToken, isAccessTokenExpired, setAuthUser } from "./auth";
 import { API_BASE_URL } from "./constants";
 
 const useAxios = () => {
-  const accessToken = localStorage.getItem("access_token");
   const refreshToken = localStorage.getItem("refresh_token");
 
   const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
 
   axiosInstance.interceptors.request.use(async (req) => {
-    // Doğru kullanım: fonksiyon çağrılıyor
+    let accessToken = localStorage.getItem("access_token");
+
+    // Token süresi dolmamışsa doğrudan ekle
     if (!isAccessTokenExpired()) {
+      req.headers.Authorization = `Bearer ${accessToken}`;
       return req;
     }
 
+    // Süresi dolmuşsa yeni token al
     try {
       const response = await getRefreshedToken(refreshToken);
-      setAuthUser(response.access, response.refresh);
-      req.headers.Authorization = `Bearer ${response.access}`;
-    } catch (err) {
-      console.error("Token yenileme başarısız", err);
-      // Logout işlemi yapılabilir
-    }
+      const newAccessToken = response.access;
+      const newRefreshToken = response.refresh;
 
-    return req;
+      // localStorage'a yaz
+      setAuthUser(newAccessToken, newRefreshToken);
+
+      // Yeni access token'ı isteğe ekle
+      req.headers.Authorization = `Bearer ${newAccessToken}`;
+      return req;
+    } catch (error) {
+      console.error("Token yenileme başarısız:", error);
+      // Gerekirse logout işlemi yapılabilir
+      return req; // yine de isteği geri döndür ama token olmayabilir
+    }
   });
 
   return axiosInstance;

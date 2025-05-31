@@ -9,7 +9,6 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.functions import ExtractMonth
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from api import serializer as api_serializer
@@ -23,9 +22,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,action
 from rest_framework.views import APIView
-
+from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly
 import random
 from decimal import Decimal
 import stripe
@@ -2584,6 +2583,15 @@ class CityListAPIView(generics.ListAPIView):
     def get_queryset(self):        
         queryset = api_models.City.objects.all()
         print(queryset)      
+        return queryset  
+     
+class CountryListAPIView(generics.ListAPIView):   
+    serializer_class = api_serializer.CountrySerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):        
+        queryset = api_models.Country.objects.all()
+        print(queryset)      
         return queryset   
     
 class ProjeListAPIView(generics.ListAPIView):   
@@ -2721,21 +2729,26 @@ def user_role_by_id_view(request, user_id):
     return JsonResponse({"user_id": user_id, "role": role})
 
 # 🟩 Eğitmen etkinlik oluşturur
-class InstructorEventCreateAPIView(generics.CreateAPIView):
+class ESKEPEventCreateAPIView(generics.CreateAPIView):
     queryset = api_models.ESKEPEvent.objects.all()
     serializer_class = api_serializer.ESKEPEventSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
+    def get_serializer_context(self):
+        return {"request": self.request}
+    
     def perform_create(self, serializer):
+        print(self.request.user)
         serializer.save(owner=self.request.user)
-
+    
 # 🟨 Eğitmen: kendi etkinlikleri
 class InstructorEventListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.ESKEPEventSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]  # veya IsAuthenticated
 
     def get_queryset(self):
-        return api_models.ESKEPEvent.objects.filter(owner=self.request.user).order_by("date")
+        user_id = self.kwargs.get("user_id")
+        return api_models.ESKEPEvent.objects.filter(owner_id=user_id).order_by("date")
 
 # 🟦 Öğrenci: sadece kendi eğitmeninin etkinlikleri
 class StudentEventListAPIView(generics.ListAPIView):
@@ -2755,3 +2768,124 @@ class GeneralEventListAPIView(generics.ListAPIView):
     queryset = api_models.ESKEPEvent.objects.all().order_by("date")
     serializer_class = api_serializer.ESKEPEventSerializer
     permission_classes = [AllowAny]
+    
+@api_view(['GET'])
+def koordinator_students_stajers(request, koordinator_user_id):
+    try:
+        koordinator = api_models.Koordinator.objects.get(user_id=koordinator_user_id)
+    except api_models.Koordinator.DoesNotExist:
+        return Response({"error": "Koordinatör bulunamadı"}, status=404)
+
+    ogrenciler = api_models.Ogrenci.objects.filter(instructor=koordinator)
+    stajerler = api_models.Stajer.objects.filter(instructor=koordinator)
+
+    def format_person(person):
+        return {
+            "full_name": person.full_name,
+            "image": person.image.url if person.image else None,
+            "email": person.email,
+            "gender": person.gender,
+            "country": person.country,
+            "city": str(person.city) if person.city else None
+        }
+
+    return Response({
+        "ogrenciler": [format_person(o) for o in ogrenciler],
+        "stajerler": [format_person(s) for s in stajerler],
+    })
+    
+@api_view(['GET'])
+def dersler_by_date(request, hafiz_id, date):
+    dersler = api_models.Ders.objects.filter(hafiz_id=hafiz_id, date=date)
+    serializer = api_serializer.DersSerializer(dersler, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def egitmen_detay(request, egitmen_id):
+    egitmen = api_models.HDMEgitmen.objects.get(id=egitmen_id)
+    hafizlar = api_models.HDMHafiz.objects.filter(egitmen=egitmen)
+    dersler = api_models.DersAtamasi.objects.filter(instructor=egitmen).select_related("hafiz")
+
+    hafizlar_data = api_serializer.HDMHafizSerializer(hafizlar, many=True).data
+
+    dersler_data = []
+    for ders in dersler:
+        ders_json = api_serializer.DersAtamasiSerializer(ders).data
+        ders_json["hafiz"] = ders.hafiz.id                   # İD ile eşleştirme için
+        ders_json["hafiz_adi"] = ders.hafiz.full_name       # 👈 Hafız adı burada
+        dersler_data.append(ders_json)
+
+    data = {
+        "id": egitmen.id,
+        "full_name": egitmen.full_name,        
+        "hafizlar": hafizlar_data,
+        "dersler": dersler_data
+    }
+    return Response(data)
+
+@api_view(['GET'])
+def hafiz_detay(request, hafiz_id):
+    hafiz = api_models.HDMHafiz.objects.get(id=hafiz_id)
+    dersler = api_models.DersAtamasi.objects.filter(hafiz=hafiz)
+    egitmen = hafiz.egitmen
+
+    data = {
+        "id": hafiz.id,
+        "full_name": hafiz.full_name,
+        "egitmen": {
+            "id": egitmen.id,
+            "full_name": egitmen.full_name
+        },
+        "dersler": api_serializer.DersAtamasiSerializer(dersler, many=True).data
+    }
+    return Response(data)
+class HDMEgitmenViewSet(viewsets.ModelViewSet):
+    queryset = api_models.HDMEgitmen.objects.all()
+    serializer_class = api_serializer.HDMEgitmenSerializer
+
+class HDMHafizViewSet(viewsets.ModelViewSet):
+    queryset = api_models.HDMHafiz.objects.all()
+    serializer_class = api_serializer.HDMHafizSerializer
+
+class DersAtamasiViewSet(viewsets.ModelViewSet):
+    queryset = api_models.DersAtamasi.objects.all()
+    serializer_class = api_serializer.DersAtamasiSerializer
+
+class DersViewSet(viewsets.ModelViewSet):
+    queryset = api_models.Ders.objects.all()
+    serializer_class = api_serializer.DersSerializer
+
+class HataNotuViewSet(viewsets.ModelViewSet):
+    queryset = api_models.HataNotu.objects.all()
+    serializer_class = api_serializer.HataNotuSerializer
+
+class AnnotationViewSet(viewsets.ModelViewSet):
+    queryset = api_models.Annotation.objects.all()
+    serializer_class = api_serializer.AnnotationSerializer
+    
+class StajerViewSet(viewsets.ModelViewSet):
+    queryset = api_models.Stajer.objects.all()
+    serializer_class = api_serializer.StajerSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    # parser_classes = (MultiPartParser, FormParser)
+
+class OgrenciViewSet(viewsets.ModelViewSet):
+    queryset = api_models.Ogrenci.objects.all()
+    serializer_class = api_serializer.OgrenciSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]   
+
+class UpdateCoordinatorRole(APIView):
+    def post(self, request):
+        coordinator_id = request.data.get('coordinator_id')
+        role = request.data.get('role')
+
+        if not coordinator_id or not role:
+            return Response({"error": "Eksik veri"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            coordinator = api_models.Koordinator.objects.get(id=coordinator_id)
+            coordinator.role = role
+            coordinator.save()
+            return Response({"detail": "Rol güncellendi"}, status=status.HTTP_200_OK)
+        except api_models.Koordinator.DoesNotExist:
+            return Response({"error": "Koordinatör bulunamadı"}, status=status.HTTP_404_NOT_FOUND)

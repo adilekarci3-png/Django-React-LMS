@@ -2012,13 +2012,13 @@ Proje._meta.get_field('image').verbose_name = "Proje Resmi"
 class Stajer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     instructor = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True)
-    image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
+    image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")    
     full_name = models.CharField(max_length=100)
     bio = models.CharField(max_length=100, null=True, blank=True)
     evtel = models.CharField(max_length=150, default="")
     istel = models.CharField(max_length=150, default="")
     ceptel = models.CharField(max_length=150, default="", unique=True)
-    email = models.CharField(max_length=150, default="", unique=True)
+    # email = models.CharField(max_length=150, default="", unique=True)
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
     linkedin = models.URLField(null=True, blank=True)
@@ -2043,7 +2043,7 @@ Stajer._meta.get_field('bio').verbose_name = "Biografi"
 Stajer._meta.get_field('evtel').verbose_name = "Ev Telefonu" 
 Stajer._meta.get_field('istel').verbose_name = "İş Telefonu" 
 Stajer._meta.get_field('ceptel').verbose_name = "Cep Telefonu"     
-Stajer._meta.get_field('email').verbose_name = "E-posta Adresi"     
+# Stajer._meta.get_field('email').verbose_name = "E-posta Adresi"     
 Stajer._meta.get_field('facebook').verbose_name = "Facebook" 
 Stajer._meta.get_field('twitter').verbose_name = "Twitter" 
 Stajer._meta.get_field('linkedin').verbose_name = "Linkedin"     
@@ -2062,7 +2062,7 @@ class Ogrenci(models.Model):
     evtel = models.CharField(max_length=150, default="")
     istel = models.CharField(max_length=150, default="")
     ceptel = models.CharField(max_length=150, default="", unique=True)
-    email = models.CharField(max_length=150, default="", unique=True)
+    # email = models.CharField(max_length=150, default="", unique=True)
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
     linkedin = models.URLField(null=True, blank=True)
@@ -2086,7 +2086,7 @@ Ogrenci._meta.get_field('bio').verbose_name = "Biografi"
 Ogrenci._meta.get_field('evtel').verbose_name = "Ev Telefonu" 
 Ogrenci._meta.get_field('istel').verbose_name = "İş Telefonu" 
 Ogrenci._meta.get_field('ceptel').verbose_name = "Cep Telefonu"     
-Ogrenci._meta.get_field('email').verbose_name = "E-posta Adresi"     
+# Ogrenci._meta.get_field('email').verbose_name = "E-posta Adresi"     
 Ogrenci._meta.get_field('facebook').verbose_name = "Facebook" 
 Ogrenci._meta.get_field('twitter').verbose_name = "Twitter" 
 Ogrenci._meta.get_field('linkedin').verbose_name = "Linkedin"     
@@ -2111,9 +2111,67 @@ class ESKEPEvent(models.Model):
     date = models.DateField()
     background_color = models.CharField(max_length=20, default="#007bff")
     border_color = models.CharField(max_length=20, default="#0056b3")
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_events")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="events")
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.title} ({self.date})"
     
+
+class HDMEgitmen(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=100)
+    photo = models.ImageField(upload_to='instructors/', null=True, blank=True)
+    
+    def __str__(self):
+        return self.full_name
+
+class HDMHafiz(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    egitmen = models.ForeignKey(HDMEgitmen, on_delete=models.CASCADE, related_name="hafizlar")
+    full_name = models.CharField(max_length=100)
+    photo = models.ImageField(upload_to='hafizlar/', null=True, blank=True)
+
+    def __str__(self):
+        return self.full_name
+
+class DersAtamasi(models.Model):
+    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE, related_name="dersler")
+    instructor = models.ForeignKey(HDMEgitmen, on_delete=models.CASCADE)
+    baslangic = models.DateTimeField()
+    bitis = models.DateTimeField()
+    date = models.DateTimeField(default=timezone.now)
+    time = models.TimeField(default=timezone.now)  # yeni eklenen alan
+    aciklama = models.TextField(blank=True, null=True)
+    topic = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.hafiz.full_name} - {self.date.date()} {self.time}"
+    
+class Ders(models.Model):
+    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE)
+    Instructor = models.ForeignKey(HDMEgitmen, on_delete=models.CASCADE)
+    date = models.DateTimeField(default=timezone.now)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.hafiz.full_name} - {self.date}"
+    
+class HataNotu(models.Model):
+    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE, related_name="hatalar")
+    lesson = models.ForeignKey(Ders, on_delete=models.SET_NULL, null=True, blank=True)
+    sayfa = models.IntegerField()
+    aciklama = models.TextField()
+    tarih = models.DateField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.hafiz.full_name} - Sayfa {self.page_number}"
+    
+class Annotation(models.Model):
+    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE, related_name="annotations")
+    page = models.IntegerField()
+    shape_type = models.CharField(max_length=20, choices=[("line", "Line"), ("circle", "Circle")])
+    coordinates = models.JSONField()
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

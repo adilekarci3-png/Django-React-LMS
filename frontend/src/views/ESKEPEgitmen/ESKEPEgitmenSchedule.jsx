@@ -9,33 +9,33 @@ import Header from "./Partials/Header";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import useAxios from "../../utils/useAxios";
-import { ProfileContext } from "../plugin/UserData";
+import UserData from "../plugin/UserData";
 
 function ESKEPEgitmenSchedule() {
-  const [events, setEvents] = useState([]);
-  const [profile] = useContext(ProfileContext);
+  const [events, setEvents] = useState([]);  
+  const profile = UserData(); 
   const api = useAxios();
 
-  useEffect(() => {
-    async function fetchSchedule() {
-      if (!profile?.user_id) return;
+useEffect(() => {
+  if (!profile?.user_id) return;
 
-      try {
-        const response = await api.get(`/events/teacher_schedule/${profile.user_id}/`);
-        const data = response.data.map(event => ({
-          title: event.title,
-          start: event.date,
-          backgroundColor: event.background_color,
-          borderColor: event.border_color
-        }));
-        setEvents(data);
-      } catch (error) {
-        console.error("Takvim verisi alınamadı:", error);
-      }
+  const fetchSchedule = async () => {
+    try {
+      const response = await api.get(`/events/teacher_schedule/${profile.user_id}/`);
+      const data = response.data.map(event => ({
+        title: event.title,
+        start: event.date,
+        backgroundColor: event.background_color,
+        borderColor: event.border_color
+      }));
+      setEvents(data);
+    } catch (error) {
+      console.error("Takvim verisi alınamadı:", error);
     }
+  };
 
-    fetchSchedule();
-  }, [profile]);
+  fetchSchedule();
+}, [profile?.user_id]); 
 
   const handleEventClick = (clickInfo) => {
     Swal.fire({
@@ -46,8 +46,12 @@ function ESKEPEgitmenSchedule() {
     });
   };
 
-  const sortedEvents = [...events].sort((a, b) => new Date(a.start) - new Date(b.start));
-
+  const sortedEvents = [...events].sort(
+    (a, b) => new Date(a.start) - new Date(b.start)
+  );
+  useEffect(() => {
+    if (!profile?.user_id) navigate("/login");
+  }, [profile]);
   return (
     <>
       <ESKEPBaseHeader />
@@ -58,14 +62,21 @@ function ESKEPEgitmenSchedule() {
             <Sidebar />
             <div className="col-lg-9 col-md-8 col-12">
               <div className="text-center mb-4">
-                <h3 className="fw-bold text-primary">📅 Eğitmen Eğitim Takvimi</h3>
-                <p className="text-muted">Ders programınızı görüntüleyin ve detaylarına ulaşın.</p>
+                <h3 className="fw-bold text-primary">
+                  📅 Eğitmen Eğitim Takvimi
+                </h3>
+                <p className="text-muted">
+                  Ders programınızı görüntüleyin ve detaylarına ulaşın.
+                </p>
               </div>
 
               <div className="row">
                 {/* Takvim */}
                 <div className="col-lg-9 mb-4">
-                  <div className="shadow-lg p-4 rounded bg-white" style={{ minHeight: "700px" }}>
+                  <div
+                    className="shadow-lg p-4 rounded bg-white"
+                    style={{ minHeight: "700px" }}
+                  >
                     <FullCalendar
                       plugins={[dayGridPlugin, interactionPlugin]}
                       initialView="dayGridMonth"
@@ -87,7 +98,9 @@ function ESKEPEgitmenSchedule() {
                 {/* Etkinlik Listesi */}
                 <div className="col-lg-3">
                   <div className="bg-white shadow-lg p-3 rounded h-100">
-                    <h5 className="text-secondary fw-bold mb-3">🗂️ Etkinlik Listesi</h5>
+                    <h5 className="text-secondary fw-bold mb-3">
+                      🗂️ Etkinlik Listesi
+                    </h5>
                     <ul className="list-group list-group-flush">
                       {sortedEvents.map((event, index) => (
                         <li
@@ -97,10 +110,15 @@ function ESKEPEgitmenSchedule() {
                           <div>
                             <strong>{event.title}</strong>
                             <div className="text-muted small">
-                              {new Date(event.start).toLocaleDateString("tr-TR")}
+                              {new Date(event.start).toLocaleDateString(
+                                "tr-TR"
+                              )}
                             </div>
                           </div>
-                          <span className="badge" style={{ backgroundColor: event.backgroundColor }}>
+                          <span
+                            className="badge"
+                            style={{ backgroundColor: event.backgroundColor }}
+                          >
                             &nbsp;
                           </span>
                         </li>
@@ -109,7 +127,6 @@ function ESKEPEgitmenSchedule() {
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>

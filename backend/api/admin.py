@@ -35,6 +35,12 @@ admin.site.register(models.Question_AnswerOdev)
 admin.site.register(models.Question_Answer_MessageOdev)
 admin.site.register(models.TeacherStudent)
 admin.site.register(models.ESKEPEvent)
+admin.site.register(models.HDMEgitmen)
+admin.site.register(models.HDMHafiz)
+admin.site.register(models.DersAtamasi)
+admin.site.register(models.Ders)
+admin.site.register(models.HataNotu)
+admin.site.register(models.Annotation)
 
 
 class StajerForm(forms.ModelForm):
@@ -73,11 +79,11 @@ class AgentAdmin(admin.ModelAdmin):
     list_display = ('full_name','email','ceptel','country','city','active')
     
 class StajerAdmin(admin.ModelAdmin):        
-    list_display = ('full_name','email','ceptel','country','city','active')
+    list_display = ('full_name','ceptel','country','city','active')
     form = StajerForm
     
 class OgrenciAdmin(admin.ModelAdmin):        
-    list_display = ('full_name','email','ceptel','country','city','active')
+    list_display = ('full_name','ceptel','country','city','active')
     form = OgrenciForm
     
 class HafizbilgileriAdmin(admin.ModelAdmin):        

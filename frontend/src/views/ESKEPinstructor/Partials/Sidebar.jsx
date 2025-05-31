@@ -3,27 +3,26 @@ import { Link } from "react-router-dom";
 
 function Sidebar() {
   return (
-    <div className="col-lg-2 col-md-4 col-12">
-      <nav className="navbar navbar-expand-md shadow-sm mb-4 mb-lg-0 sidenav">
-        <button
-          className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light m-3"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#sidenav"
-          aria-controls="sidenav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span className="bi bi-grid" />
-        </button>
-        <div className="collapse navbar-collapse p-3" id="sidenav">
-          <ul className="navbar-nav flex-column w-100">
-            <li className="nav-item mb-2">
-              <Link className="nav-link" to={`/eskepinstructor/dashboard/`}>
-                <i className="bi bi-grid-fill me-2"></i> Panel
-              </Link>
-            </li>
-            <li className="nav-item mb-2">
+    <nav className="navbar navbar-expand-md shadow-sm mb-4 mb-lg-0 sidenav">
+      <button
+        className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light m-3"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#sidenav"
+        aria-controls="sidenav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span className="bi bi-grid" />
+      </button>
+      <div className="collapse navbar-collapse p-3" id="sidenav">
+        <ul className="navbar-nav flex-column w-100">
+          <li className="nav-item mb-2">
+            <Link className="nav-link" to={`/eskepinstructor/dashboard/`}>
+              <i className="bi bi-grid-fill me-2"></i> Panel
+            </Link>
+          </li>
+          <li className="nav-item mb-2">
               <Link className="nav-link" to={`/instructor/courses/`}>
                 <i className="fas fa-chalkboard-user me-2"></i> Kurslarım
               </Link>
@@ -97,10 +96,9 @@ function Sidebar() {
                 <i className="fas fa-sign-out-alt me-2"></i> Çıkış Yap
               </Link>
             </li>
-          </ul>
-        </div>
-      </nav>
-    </div>
+        </ul>
+      </div>
+    </nav>
   );
 }
 

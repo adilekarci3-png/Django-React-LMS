@@ -17,7 +17,7 @@ function EducationSchedule() {
   useEffect(() => {
     async function fetchSchedule() {
       try {
-        const response = await api.get(`/events/global_schedule/`);
+        const response = await api.get(`/events/all/`);
         const data = response.data.map(event => ({
           title: event.title,
           start: event.date,

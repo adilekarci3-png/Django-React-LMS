@@ -6,6 +6,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from userauths.models import Profile, User
+from django.utils.crypto import get_random_string
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -73,14 +74,70 @@ class CoordinatorSerializer(serializers.ModelSerializer):
         model = api_models.Koordinator
 
 class StajerSerializer(serializers.ModelSerializer):
+    image = serializers.FileField(required=False, allow_null=True)
+    email = serializers.SerializerMethodField()
+    input_email = serializers.EmailField(write_only=True, required=False)
+
     class Meta:
-        fields = ['id', 'user','full_name','active']
         model = api_models.Stajer
+        fields = [
+            'id', 'full_name', 'evtel', 'istel', 'ceptel', 'bio',
+            'user', 'image', 'email', 'input_email', 'facebook', 'twitter', 'linkedin', 'about', 'gender',
+            'country', 'city', 'active'
+        ]
+        extra_kwargs = {
+            'user': {'read_only': True}
+        }
+
+    def get_email(self, obj):
+        return obj.user.email if obj.user else None
+
+    def create(self, validated_data):
+        input_email = validated_data.pop('input_email', None)
+
+        if not input_email:
+            raise serializers.ValidationError({'input_email': 'Email zorunludur.'})
+
+        if User.objects.filter(email=input_email).exists():
+            raise serializers.ValidationError({'input_email': 'Bu e-posta ile kayıtlı bir kullanıcı zaten mevcut.'})
+
+        user = User.objects.create_user(
+            username=input_email,
+            email=input_email,
+            password=User.objects.make_random_password()
+        )
+        stajer = api_models.Stajer.objects.create(user=user, **validated_data)
+        return stajer
 
 class OgrenciSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(write_only=True)
+
     class Meta:
-        fields = ['id', 'user', 'active']
         model = api_models.Ogrenci
+        fields = ['id', 'full_name', 'evtel', 'istel', 'ceptel', 'bio',
+            'user', 'image', 'email', 'input_email', 'facebook', 'twitter', 'linkedin', 'about', 'gender',
+            'country', 'city', 'active']
+        extra_kwargs = {
+            'user': {'read_only': True}
+        }
+
+    def create(self, validated_data):
+        email = validated_data.pop('email')
+
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError({'email': 'Bu e-posta ile kayıtlı bir kullanıcı zaten mevcut.'})
+
+        password = get_random_string(length=10)
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+        )
+
+        validated_data['user'] = user
+        ogrenci = api_models.Ogrenci.objects.create(**validated_data)
+        return ogrenci
+
         
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
@@ -817,9 +874,58 @@ class TeacherSummarySerializer(serializers.Serializer):
     monthly_revenue = serializers.IntegerField(default=0)
     
 class ESKEPEventSerializer(serializers.ModelSerializer):
-    owner_username = serializers.CharField(source='owner.username', read_only=True)
-
     class Meta:
         model = api_models.ESKEPEvent
-        fields = '__all__'
-        read_only_fields = ['owner', 'created_at']
+        fields = ['id', 'title', 'date', 'background_color', 'border_color']
+        read_only_fields = ['id']
+        
+class HDMEgitmenSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = api_models.HDMEgitmen
+        fields = ["id", "user", "full_name", "photo"]
+
+
+class HDMHafizSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    egitmen = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMEgitmen.objects.all())
+
+    class Meta:
+        model = api_models.HDMHafiz
+        fields = ["id", "user", "egitmen", "full_name", "photo"]
+
+
+class DersAtamasiSerializer(serializers.ModelSerializer):
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
+    instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMEgitmen.objects.all())
+
+    class Meta:
+        model = api_models.DersAtamasi
+        fields = ["id", "hafiz", "instructor", "baslangic", "bitis", "aciklama", "topic"]
+
+
+class DersSerializer(serializers.ModelSerializer):
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
+    Instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMEgitmen.objects.all())
+
+    class Meta:
+        model = api_models.Ders
+        fields = ["id", "hafiz", "Instructor", "date", "start_time", "end_time", "description"]
+
+
+class HataNotuSerializer(serializers.ModelSerializer):
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
+    lesson = serializers.PrimaryKeyRelatedField(queryset=api_models.Ders.objects.all(), allow_null=True, required=False)
+
+    class Meta:
+        model = api_models.HataNotu
+        fields = ["id", "hafiz", "lesson", "sayfa", "aciklama", "tarih"]
+
+
+class AnnotationSerializer(serializers.ModelSerializer):
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
+
+    class Meta:
+        model = api_models.Annotation
+        fields = ["id", "hafiz", "page", "shape_type", "coordinates", "text", "created_at"]
