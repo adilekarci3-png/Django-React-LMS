@@ -7,7 +7,6 @@ function UserData() {
 
   try {
     const decoded = jwtDecode(access_token);
-
     // Token süresi kontrolü (isteğe bağlı)
     const now = Date.now() / 1000;
     if (decoded.exp && decoded.exp < now) {

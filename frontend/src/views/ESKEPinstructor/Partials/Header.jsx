@@ -4,41 +4,51 @@ import { ProfileContext } from "../../plugin/Context";
 function Header() {
   const [profile] = useContext(ProfileContext);
 
-  if (!profile || !profile.full_name || !profile.image) {
-    return null;
+  if (!profile) {
+    return (
+      <div className="text-muted py-4">
+        <div className="spinner-border spinner-border-sm me-2" role="status" />
+        Profil yükleniyor...
+      </div>
+    );
   }
 
+  const imageSrc =
+    profile.image && !profile.image.includes("default.jpg")
+      ? profile.image
+      : "/assets/images/avatar.jpg"; // default avatar yolunu gerektiğinde değiştir
+
   return (
-    <div className="row align-items-center">
-      <div className="col-xl-12 col-lg-12 col-md-12 col-12">
-        <div className="card px-4 pt-4 pb-4 shadow-sm rounded-3 border border-light-subtle">
-          <div className="d-flex align-items-end justify-content-between flex-wrap">
+    <div className="row align-items-center mb-4">
+      <div className="col-12">
+        <div className="card px-4 pt-3 pb-4 shadow-sm rounded-3">
+          <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
             <div className="d-flex align-items-center">
-              <div className="me-3 position-relative mt-n5">
+              <div className="me-3">
                 <img
-                  src={profile.image}
-                  alt="avatar"
-                  className="rounded-circle border border-4 border-white shadow"
+                  src={imageSrc}
+                  className="rounded-circle border border-4 border-white"
+                  alt="Profil"
                   style={{
-                    width: "100px",
-                    height: "100px",
+                    width: "70px",
+                    height: "70px",
                     objectFit: "cover",
                   }}
                 />
               </div>
-              <div className="lh-1">
+              <div>
                 <h2 className="mb-1">{profile.full_name}</h2>
-                {profile.about && (
-                  <p className="mb-0 text-muted">{profile.about}</p>
-                )}
+                <p className="mb-0 text-muted">
+                  {profile.about || "Hakkında bilgi eklenmemiş"}
+                </p>
               </div>
             </div>
-            <div className="text-end mt-3 mt-md-0">
+            <div>
               <a
                 href="/profile-edit"
-                className="btn btn-primary btn-sm"
+                className="btn btn-sm btn-primary"
               >
-                Hesap Ayarları <i className="fas fa-gear fa-spin ms-1"></i>
+                Hesap Ayarları <i className="fas fa-gear fa-spin ms-1" />
               </a>
             </div>
           </div>

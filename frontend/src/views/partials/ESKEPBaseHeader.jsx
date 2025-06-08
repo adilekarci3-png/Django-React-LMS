@@ -26,7 +26,7 @@ function ESKEPBaseHeader() {
       try {
         const userId = UserData()?.user_id;
         if (!userId) return;
-
+        debugger;
         const res = await api.get(`/user/role/${userId}/`);
         // Eğer backend şu şekilde bir JSON döndürüyorsa: { "role": "Koordinator" }
         setUserRole(res.data.role);

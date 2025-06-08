@@ -1,193 +1,252 @@
 import { useState, useEffect } from "react";
 import moment from "moment";
-
+import { Link } from "react-router-dom";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import BaseHeader from "../partials/BaseHeader";
 import BaseFooter from "../partials/BaseFooter";
-
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
-import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function Courses() {
-    const [courses, setCourses] = useState([]);
+  const api = useAxios();
+  const [courses, setCourses] = useState([]);
+  const [allCourses, setAllCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const fetchCourseData = () => {
-      useAxios()
-        .get(`teacher/course-lists/${UserData()?.teacher_id}/`)
-        .then((res) => {
-          console.log(res.data);
-          setCourses(res.data);
-        });
-    };
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-    useEffect(() => {
-      fetchCourseData();
-    }, []);
+  const totalPages = Math.ceil(courses.length / itemsPerPage);
+  const paginatedCourses = courses.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-    const handleSearch = (event) => {
-      const query = event.target.value.toLowerCase();
-      console.log(query);
-      if (query === "") {
+  const fetchCourseData = () => {
+    setLoading(true);
+    api
+      .get(`teacher/course-lists/${UserData()?.user_id}/`)
+      .then((res) => {
+        console.log(res.data);
+        setCourses(res.data);
+        setAllCourses(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Kurs verisi alınamadı", err);
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchCourseData();
+  }, []);
+
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    if (query === "") {
+      setCourses(allCourses);
+    } else {
+      const filtered = allCourses.filter((c) =>
+        c.title.toLowerCase().includes(query)
+      );
+      setCourses(filtered);
+      setCurrentPage(1);
+    }
+  };
+
+  const handleFilter = (key, value) => {
+    if (value === "") return setCourses(allCourses);
+    const filtered = allCourses.filter((c) => c[key] === value);
+    setCourses(filtered);
+    setCurrentPage(1);
+  };
+
+  const handleDelete = async (id) => {
+    const confirm = await Swal.fire({
+      title: "Emin misiniz?",
+      text: "Bu kurs silinecek!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Evet, sil",
+      cancelButtonText: "Vazgeç",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await api.delete(`course/course-delete/${id}/`);
+        Swal.fire("Silindi!", "Kurs başarıyla silindi.", "success");
         fetchCourseData();
-      } else {
-        const filtered = courses.filter((c) => {
-          return c.title.toLowerCase().includes(query);
-        });
-        setCourses(filtered);
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Hata!", "Kurs silinemedi.", "error");
       }
-    };
+    }
+  };
 
-
-    
-
-    
   return (
     <>
       <BaseHeader />
-
       <section className="pt-5 pb-5">
         <div className="container">
-          {/* Header Here */}
           <Header />
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
-            <Sidebar />
-            <div className="col-lg-10 col-md-8 col-12">
-              <div className="row mb-4">
-                <h4 className="mb-0 mb-2 mt-4">
-                  {" "}
-                  <i className="bi bi-grid-fill"></i> Kurslar
+            <div className="col-lg-2 col-md-4 mb-4">
+              <Sidebar />
+            </div>
+            <div className="col-lg-10 col-md-8">
+              <div className="card shadow-sm p-4">
+                <h4 className="mb-4">
+                  <i className="bi bi-grid-fill"></i> Kurslarım
                 </h4>
-              </div>
-              <div className="card mb-4">
-                <div className="card-header">
-                  <h3 className="mb-0">Kurslar</h3>
-                  <span>
-                   
-Kurslarınızı buradan yönetin, derslerinizi arayın, görüntüleyin, düzenleyin veya silin
-                    
-                  </span>
+
+                {/* Filtre ve Arama */}
+                <div className="d-flex flex-wrap gap-2 mb-3">
+                  <input
+                    type="search"
+                    className="form-control w-auto"
+                    placeholder="Kurs adında ara..."
+                    onChange={handleSearch}
+                  />
+                  <select
+                    className="form-select w-auto"
+                    onChange={(e) => handleFilter("level", e.target.value)}
+                  >
+                    <option value="">Seviye</option>
+                    <option value="Başlangic">Başlangıç</option>
+                    <option value="Orta">Orta</option>
+                    <option value="Ileri Seviye">İleri Seviye</option>
+                  </select>
+                  <select
+                    className="form-select w-auto"
+                    onChange={(e) => handleFilter("language", e.target.value)}
+                  >
+                    <option value="">Dil</option>
+                    <option value="Turkce">Türkçe</option>
+                    <option value="Ingilizce">İngilizce</option>
+                    <option value="Arapca">Arapça</option>
+                  </select>
                 </div>
-                <div className="card-body">
-                  <form className="row gx-3">
-                    <div className="col-lg-12 col-md-12 col-12 mb-lg-0 mb-2">
-                      <input
-                        type="search"
-                        className="form-control"
-                        placeholder="Kurslarında Ara"
-                        onChange={handleSearch}
-                      />
+
+                {/* İçerik */}
+                {loading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Yükleniyor...</span>
                     </div>
-                  </form>
-                </div>
-                <div className="table-responsive overflow-y-hidden">
-                  <table className="table mb-0 text-nowrap table-hover table-centered text-nowrap">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Kurslar</th>
-                        <th>Kaydedenler</th>
-                        <th>Seviye</th>
-                        <th>Durum</th>
-                        <th>Oluşturulma Tarihi</th>
-                        <th>İşlem</th>
-                        <th />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {courses?.map((c, index) => (
-                        <tr>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div>
-                                <a href="#">
+                  </div>
+                ) : (
+                  <>
+                    <div className="table-responsive">
+                      <table className="table table-hover text-nowrap align-middle">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Kurs</th>
+                            <th>Öğrenci</th>
+                            <th>Seviye</th>
+                            <th>Durum</th>
+                            <th>Oluşturulma</th>
+                            <th>İşlem</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paginatedCourses.map((course) => (
+                            <tr key={course.id}>
+                              <td>
+                                <div className="d-flex align-items-center">
                                   <img
-                                    src={c.image}
+                                    src={course.image}
                                     alt="course"
-                                    className="rounded img-4by3-lg"
+                                    className="rounded"
                                     style={{
                                       width: "100px",
                                       height: "70px",
-                                      borderRadius: "50%",
                                       objectFit: "cover",
+                                      borderRadius: "8px",
                                     }}
                                   />
-                                </a>
-                              </div>
-                              <div className="ms-3">
-                                <h4 className="mb-1 h6">
-                                  <a
-                                    href="#"
-                                    className="text-inherit text-decoration-none text-dark"
-                                  >
-                                    {c.title}
-                                  </a>
-                                </h4>
-                                <ul className="list-inline fs-6 mb-0">
-                                  <li className="list-inline-item">
-                                    <small>
-                                      <i className="fas fa-user"></i>
-                                      <span className="ms-1">{c.language}</span>
+                                  <div className="ms-3">
+                                    <h6 className="mb-1">{course.title}</h6>
+                                    <small className="text-muted">
+                                      {course.language} – {course.level}
                                     </small>
-                                  </li>
-                                  <li className="list-inline-item">
-                                    <small>
-                                      <i className="bi bi-reception-4"></i>
-                                      <span className="ms-1">{c.level}</span>
-                                    </small>
-                                  </li>
-                                  <li className="list-inline-item">
-                                    <small>
-                                      {/* <i className="fas fa-turkish-lira"></i> */}
-                                      <span>{c.price}</span>
-                                    </small>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <p className="mt-3">{c.students?.length}</p>
-                          </td>
-                          <td>
-                            <p className="mt-3 badge bg-success">{c.level}</p>
-                          </td>
-                          <td>
-                            <p className="mt-3 badge bg-warning text-dark">
-                              Orta Seviye
-                            </p>
-                          </td>
-                          <td>
-                            <p className="mt-3">
-                              {moment(c.date).format("DD MMM, YYYY")}
-                            </p>
-                          </td>
-                          <td>
-                            <Link
-                              to={`/instructor/edit-course/${c.course_id}/`}
-                              className="btn btn-primary btn-sm mt-3 me-1"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </Link>
-                            <button className="btn btn-danger btn-sm mt-3 me-1">
-                              <i className="fas fa-trash"></i>
-                            </button>
-                            <button className="btn btn-secondary btn-sm mt-3 me-1">
-                              <i className="fas fa-eye"></i>
-                            </button>
-                          </td>
-                        </tr>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>{course.students?.length || 0}</td>
+                              <td>
+                                <span className="badge bg-success">
+                                  {course.level}
+                                </span>
+                              </td>
+                              <td>
+                                <span className="badge bg-warning text-dark">
+                                  Yayınlandı
+                                </span>
+                              </td>
+                              <td>{moment(course.date).format("DD MMM, YYYY")}</td>
+                              <td>
+                                <Link
+                                  to={`/instructor/edit-course/${course.course_id}`}
+                                  className="btn btn-sm btn-primary me-1"
+                                  title="Düzenle"
+                                >
+                                  <i className="fas fa-edit"></i>
+                                </Link>
+                                <Link
+                                  to={`/instructor/course-detay/${course.id}`}
+                                  className="btn btn-sm btn-primary me-1"
+                                  title="Kurs Detayları"
+                                >
+                                  <i className="fas fa-info"></i>
+                                </Link>
+                                <button
+                                  className="btn btn-sm btn-danger me-1"
+                                  onClick={() => handleDelete(course.id)}
+                                  title="Sil"
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </button>
+                                <button className="btn btn-sm btn-secondary" title="Görüntüle">
+                                  <i className="fas fa-eye"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {paginatedCourses.length === 0 && (
+                            <tr>
+                              <td colSpan="6" className="text-center text-muted">
+                                Kurs bulunamadı.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Sayfalama */}
+                    <div className="mt-3 text-center">
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i}
+                          className={`btn btn-sm me-1 ${
+                            currentPage === i + 1 ? "btn-primary" : "btn-outline-primary"
+                          }`}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </button>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
-
       <BaseFooter />
     </>
   );

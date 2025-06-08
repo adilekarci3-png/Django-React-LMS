@@ -2,38 +2,53 @@ import React, { useContext } from "react";
 import { ProfileContext } from "../../plugin/Context";
 
 function Header() {
-  const [profile, setProfile] = useContext(ProfileContext);
+  const [profile] = useContext(ProfileContext);
+
+  if (!profile) {
+    return (
+      <div className="text-muted py-4">
+        <div className="spinner-border spinner-border-sm me-2" role="status" />
+        Profil yükleniyor...
+      </div>
+    );
+  }
+
+  const imageSrc =
+    profile.image && !profile.image.includes("default.jpg")
+      ? profile.image
+      : "/assets/images/avatar.jpg"; // default avatar yolunu gerektiğinde değiştir
 
   return (
-    <div className="row align-items-center">
-      <div className="col-xl-12 col-lg-12 col-md-12 col-12">
-        <div className="card px-4 pt-2 pb-4 shadow-sm rounded-3">
-          <div className="d-flex align-items-end justify-content-between">
+    <div className="row align-items-center mb-4">
+      <div className="col-12">
+        <div className="card px-4 pt-3 pb-4 shadow-sm rounded-3">
+          <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
             <div className="d-flex align-items-center">
-              <div className="me-2 position-relative d-flex justify-content-end align-items-end mt-n5">
+              <div className="me-3">
                 <img
-                  src={profile.image}
-                  className="avatar-xl rounded-circle border border-4 border-white"
-                  alt="avatar"
+                  src={imageSrc}
+                  className="rounded-circle border border-4 border-white"
+                  alt="Profil"
                   style={{
                     width: "70px",
                     height: "70px",
-                    borderRadius: "50%",
                     objectFit: "cover",
                   }}
                 />
               </div>
-              <div className="lh-1">
-                <h2 className="mb-0"> {profile.full_name}</h2>
-                <p className="mb-0 d-block">{profile.about}</p>
+              <div>
+                <h2 className="mb-1">{profile.full_name}</h2>
+                <p className="mb-0 text-muted">
+                  {profile.about || "Hakkında bilgi eklenmemiş"}
+                </p>
               </div>
             </div>
             <div>
               <a
-                href="profile-edit.html"
-                className="btn btn-primary btn-sm d-none d-md-block"
+                href="/profile-edit"
+                className="btn btn-sm btn-primary"
               >
-                Hesap Ayarları <i className="fas fa-gear fa-spin"></i>
+                Hesap Ayarları <i className="fas fa-gear fa-spin ms-1" />
               </a>
             </div>
           </div>

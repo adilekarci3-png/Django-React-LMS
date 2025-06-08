@@ -44,6 +44,7 @@
     "react-player": "^2.14.1",
     "react-rater": "^6.0.5",
     "react-router-dom": "6.10.0",
+    "react-to-print": "^3.1.0",
     "sweetalert2": "^11.7.32",
     "xlsx": "^0.18.5",
     "yet-another-react-lightbox": "^3.14.0",

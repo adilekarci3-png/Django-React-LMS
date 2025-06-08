@@ -21,7 +21,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         except:
             token['teacher_id'] = 0
 
-
         return token
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -68,10 +67,17 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'image', 'slug', 'course_count']
         model = api_models.Category
 
-class CoordinatorSerializer(serializers.ModelSerializer):
+class KoordinatorRoleSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ['id', 'full_name','role','active']
+        model = api_models.KoordinatorRole
+        fields = ['id', 'name']
+
+class KoordinatorSerializer(serializers.ModelSerializer):
+    roles = KoordinatorRoleSerializer(many=True, read_only=True)
+
+    class Meta:
         model = api_models.Koordinator
+        fields = '__all__'
 
 class StajerSerializer(serializers.ModelSerializer):
     image = serializers.FileField(required=False, allow_null=True)
@@ -141,7 +147,7 @@ class OgrenciSerializer(serializers.ModelSerializer):
         
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = [ "user", "image", "full_name", "bio", "facebook", "twitter", "linkedin", "about", "country", "students", "courses", "review",]
+        fields = ["id","user", "image", "full_name", "bio", "facebook", "twitter", "linkedin", "about", "country", "students", "courses", "review","roles"]
         model = api_models.Teacher
 
 class AgentSerializer(serializers.ModelSerializer):
@@ -776,7 +782,19 @@ class CourseSerializer(serializers.ModelSerializer):
         else:
             self.Meta.depth = 3
 
+class CourseDetailSerializer(serializers.ModelSerializer):
+    students = EnrolledCourseSerializer(many=True, required=False, read_only=True)
+    variants = VariantSerializer(many=True)
+    reviews = ReviewSerializer(many=True)  # varsa
 
+    class Meta:
+        model = api_models.Course
+        fields = [
+            'id', 'course_id', 'title', 'description', 'image', 'level',
+            'language', 'price', 'date', 'teacher_name', 'students',
+            'variants', 'reviews'
+        ]
+        
 class OdevSerializer(serializers.ModelSerializer):
     # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
     curriculum = VariantSerializer(many=True, required=False, read_only=True,)

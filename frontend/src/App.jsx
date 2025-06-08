@@ -19,7 +19,7 @@ import CreateNewPassword from "./views/auth/CreateNewPassword";
 
 // Base Pages
 import Index from "./views/base/Index";
-import CourseDetail from "./views/base/CourseDetail";
+// import CourseDetail from "./views/base/CourseDetail";
 import Cart from "./views/base/Cart";
 import Checkout from "./views/base/Checkout";
 import Success from "./views/base/Success";
@@ -56,6 +56,7 @@ import ChangePassword from "./views/instructor/ChangePassword";
 import Profile from "./views/instructor/Profile";
 import CourseCreate from "./views/instructor/CourseCreate";
 import CourseEdit from "./views/instructor/CourseEdit";
+import CourseDetail from "./views/instructor/CourseDetail";
 
 //EHAD Akademi Pages
 import AkademiIndex from "./views/base/AkademiIndex";
@@ -162,7 +163,7 @@ function App() {
 
               {/* Base */}
               <Route path="/" element={<Index />} />
-              <Route path="/course-detail/:slug/" element={<CourseDetail />} />
+              {/* <Route path="/course-detail/:slug/" element={<CourseDetail />} /> */}
               <Route path="/cart/" element={<Cart />} />
               <Route path="/checkout/:order_oid/" element={<Checkout />} />
               <Route
@@ -258,7 +259,10 @@ function App() {
                 path="/instructor/edit-course/:course_id/"
                 element={<CourseEdit />}
               />
-
+              <Route
+                path="/instructor/course-detay/:course_id"
+                element={<CourseDetail />}
+              />
               {/* EHAD AKADEMİ */}
               <Route path="/akademi/" element={<AkademiIndex />} />
               <Route

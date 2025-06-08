@@ -465,7 +465,7 @@ class CategoryListAPIView(generics.ListAPIView):
 
 class CoordinatorListAPIView(generics.ListAPIView):
     queryset = api_models.Koordinator.objects.filter(active=True)  
-    serializer_class = api_serializer.CoordinatorSerializer
+    serializer_class = api_serializer.KoordinatorSerializer
     permission_classes = [AllowAny]
 
 class UserListAPIView(generics.ListAPIView):
@@ -503,16 +503,29 @@ class CourseListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
 
-class CourseDetailAPIView(generics.RetrieveAPIView):
-    serializer_class = api_serializer.CourseSerializer
-    permission_classes = [AllowAny]
-    queryset = api_models.Course.objects.filter(platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
+# class CourseDetailAPIView(generics.RetrieveAPIView):
+#     serializer_class = api_serializer.CourseSerializer
+#     permission_classes = [AllowAny]
+#     queryset = api_models.Course.objects.filter(platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
 
-    def get_object(self):
-        slug = self.kwargs['slug']
-        course = api_models.Course.objects.get(slug=slug, platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
-        return course
-    
+#     def get_object(self):
+#         slug = self.kwargs['slug']
+#         course = api_models.Course.objects.get(slug=slug, platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
+#         return course
+
+class CourseDeleteView(APIView):
+    def delete(self, request, pk):
+        course = get_object_or_404(api_models.Course, pk=pk)
+        course.delete()
+        return Response({"detail": "Silindi"}, status=204)
+
+class CourseDetailAPIView(APIView):
+    def get(self, request,pk):
+        print(request)
+        course = get_object_or_404(api_models.Course, id=pk)
+        serializer = api_serializer.CourseSerializer(course)
+        return Response(serializer.data)
+      
 class CartAPIView(generics.CreateAPIView):
     queryset = api_models.Cart.objects.all()
     serializer_class = api_serializer.CartSerializer
@@ -2177,7 +2190,7 @@ class CourseCreateAPIView(generics.CreateAPIView):
  
     
 class CoordinatorYetkiAtaAPIView(generics.GenericAPIView):
-    serializer_class = api_serializer.CoordinatorSerializer
+    serializer_class = api_serializer.KoordinatorSerializer
     permission_classes = [AllowAny]
     queryset = api_models.Koordinator.objects.all()
 
@@ -2608,6 +2621,15 @@ class DistrictListAPIView(generics.ListAPIView):
     
     def get_queryset(self):        
         queryset = api_models.District.objects.all()
+        print(queryset)      
+        return queryset  
+   
+class EgitmenListAPIView(generics.ListAPIView):   
+    serializer_class = api_serializer.TeacherSerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):        
+        queryset = api_models.Teacher.objects.all()
         print(queryset)      
         return queryset  
     

@@ -68,7 +68,32 @@ KOORDINATOR_STATUS = (
 KOORDINATOR_ROLE = (
     ("Ogrenci", "Ogrenci"),    
     ("Stajer", "Stajer"),
-    ("Genel", "Genel"),
+    ("Genel", "Genel"),       
+    ("AkademiKoordinator", "AkademiKoordinator"),
+    ("HBSKoordinator", "HBSKoordinator"),
+    ("HDMKoordinator", "HDMKoordinator")   
+)
+
+# TEACHER_ROLE = (
+#     ("Ogrenci", "Ogrenci"),    
+#     ("Stajer", "Stajer"),
+#     ("Genel", "Genel"),       
+#     ("AkademiKoordinator", "AkademiKoordinator"),
+#     ("HBSKoordinator", "HBSKoordinator"),
+#     ("HDMKoordinator", "HDMKoordinator")   
+# )
+
+TEACHER_ROLE = (        
+    ("AkademiTeacher", "AkademiTeacher"),
+    ("ESKEPTeacher", "ESKEPTeacher"),
+    ("HBSTeacher", "HBSTeacher"),
+    ("HDMTeacher", "HDMTeacher")   
+)
+
+STUDENT_ROLE = (        
+    ("AkademiStudent", "AkademiStudent"),
+    ("HBSStudent", "HBSStudent"),
+    ("HDMStudent", "HDMStudent")   
 )
 
 PAYMENT_STATUS = (
@@ -107,6 +132,7 @@ class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
     full_name = models.CharField(max_length=100)
+    roles = models.ManyToManyField('TeacherRole', verbose_name="Roller")  
     bio = models.CharField(max_length=100, null=True, blank=True)
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
@@ -148,21 +174,43 @@ class TeacherStudent(models.Model):
     def __str__(self):
         return f"{self.instructor.full_name} ↔ {self.user.username}"
 
-# class ESKEPEvent(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)  # etkinliği oluşturan (öğrenci veya eğitmen)
-#     title = models.CharField(max_length=255)
-#     date = models.DateField()
-#     background_color = models.CharField(max_length=20, default="#007bff")
-#     border_color = models.CharField(max_length=20, default="#0056b3")
+class TeacherRole(models.Model):
+    name = models.CharField(
+        max_length=50,
+        choices=[
+          ("AkademiTeacher", "AkademiTeacher"),
+          ("ESKEPTeacher", "ESKEPTeacher"),
+          ("HBSTeacher", "HBSTeacher"),
+          ("HDMTeacher", "HDMTeacher")  
+        ],
+        unique=True
+    )
+    def __str__(self):
+        return self.get_name_display()
     
-#     def __str__(self):
-#         return f"{self.title} - {self.user.username}"
+
+class KoordinatorRole(models.Model):
+    name = models.CharField(
+        max_length=50,
+        choices=[
+            ("Ogrenci", "Ogrenci"),
+            ("Stajer", "Stajer"),
+            ("Genel", "Genel"),
+            ("AkademiKoordinator", "AkademiKoordinator"),
+            ("HBSKoordinator", "HBSKoordinator"),
+            ("HDMKoordinator", "HDMKoordinator"),
+        ],
+        unique=True
+    )
+
+    def __str__(self):
+        return self.get_name_display()
 
 class Koordinator(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
     full_name = models.CharField(max_length=100)
-    role = models.CharField(choices=KOORDINATOR_ROLE, max_length=100)    
+    roles = models.ManyToManyField(KoordinatorRole, verbose_name="Roller")   
     bio = models.CharField(max_length=100, null=True, blank=True)
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
@@ -197,7 +245,7 @@ Koordinator._meta.get_field('bio').verbose_name = "Koordinator Biyografi"
 Koordinator._meta.get_field('about').verbose_name = "Koordinator Hakkında Bilgi"
 Koordinator._meta.get_field('country').verbose_name = "Ülke"
 Koordinator._meta.get_field('active').verbose_name = "Aktif/Pasif"
- 
+
 class Category(models.Model):
     title = models.CharField(max_length=100)
     image = models.FileField(upload_to="course-file", default="category.jpg", null=True, blank=True)

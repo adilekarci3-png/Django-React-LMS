@@ -1,41 +1,75 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { CartContext } from "../plugin/Context";
+
 import UserData from "../plugin/UserData";
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
 
+
 function BaseHeader() {
-  const [cartCount, setCartCount] = useContext(CartContext);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-
-  const [isLoggedIn, user] = useAuthStore((state) => [state.isLoggedIn, state.user]);
+  const [userRole, setUserRole] = useState(null);
   const [isAgent, setIsAgent] = useState(false);
   const [isTeacher, setIsTeacher] = useState(true);
   const [isStudent, setIsStudent] = useState(true);
+
+  const [isLoggedIn, user] = useAuthStore((state) => [
+    state.isLoggedIn,
+    state.user,
+  ]);
+
+  const api = useAxios();
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const userId = UserData()?.user_id;
+        if (!userId) return;
+        debugger;
+        const res = await api.get(`/user/role/${userId}/`);
+        // Eğer backend şu şekilde bir JSON döndürüyorsa: { "role": "Koordinator" }
+        setUserRole(res.data.role);
+        console.log("Kullanıcı rolü:", res.data.role);
+      } catch (error) {
+        console.error("Rol alınamadı:", error);
+      }
+    };
+
+    if (isLoggedIn()) {
+      fetchUserRole();
+    }
+  }, [isLoggedIn]);
 
   const handleSearchSubmit = () => {
     navigate(`/search/?search=${searchQuery}`);
   };
 
-  const IsUserAgent = () => {
-    useAxios()
-      .get(`agent/${UserData()?.user_id}/`)
-      .then((res) => {
-        setIsAgent(res.data);
-      })
-      .catch((err) => console.error("Temsilci kontrolü başarısız", err));
+  const styles = {
+    section: {
+      fontSize: "20px",
+      fontWeight: "bold",
+      color: "#ffffff",
+      background: "linear-gradient(135deg, #5bc0de, #ff7f50)",
+      padding: "15px",
+      borderBottom: "4px solid #ffb6b9",
+    },
+    buttonPrimary: {
+      background: "linear-gradient(90deg, #ff7f50, #ffb6b9)",
+      color: "#ffffff",
+      fontSize: "18px",
+      padding: "14px 28px",
+      borderRadius: "50px",
+      border: "none",
+      cursor: "pointer",
+      fontWeight: "bold",
+      transition: "0.3s",
+      boxShadow: "0px 5px 10px rgba(0,0,0,0.2)",
+    },
   };
-
-  useEffect(() => {
-    IsUserAgent();
-  }, []);
-
   const menuItemStyle = { color: "#000000" };
   const navLinkStyle = { color: "#ffffff" };
-
-  return (
+ return (
     <nav className="navbar navbar-expand-lg" style={{ background: "linear-gradient(to right, #023e8a, #03045e, #0077b6)" }}>
       <div className="container">
         <Link className="navbar-brand text-white" to="/">

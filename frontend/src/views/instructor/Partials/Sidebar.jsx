@@ -1,18 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Sidebar() {
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <div className="col-lg-2 col-md-4 col-12">
-      <nav className="navbar navbar-expand-md shadow-sm mb-4 mb-lg-0 sidenav">
-        <a
-          className="d-xl-none d-lg-none d-md-none text-inherit fw-bold text-decoration-none text-dark p-3"
-          href="#"
-        >
-          Menu
-        </a>
+    <div className="col-12">
+      <nav className="navbar navbar-expand-md shadow-sm mb-4 sidenav bg-white rounded border px-3 position-sticky top-0">
         <button
-          className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light m-3"
+          className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light my-3"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#sidenav"
@@ -22,90 +20,76 @@ function Sidebar() {
         >
           <span className="bi bi-grid" />
         </button>
-        <div className="collapse navbar-collapse p-3" id="sidenav">
+        <div className="collapse navbar-collapse" id="sidenav">
           <div className="navbar-nav flex-column">
-            <ul className="list-unstyled ms-n2 mb-4">
+            <ul className="list-unstyled mb-4">
               <li className="nav-item">
-                <Link className="nav-link " to={`/instructor/dashboard/`}>
-                  {" "}
+                <Link className={`nav-link ${isActive("/instructor/dashboard/") ? "active fw-bold text-primary" : ""}`} to="/instructor/dashboard/">
                   <i className="bi bi-grid-fill me-2"></i> Panel
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link " to={`/instructor/courses/`}>
-                  {" "}
-                  <i className="fas fa-chalkboard-user me-2"></i>Kurslarım
+                <Link className={`nav-link ${isActive("/instructor/courses/") ? "active fw-bold text-primary" : ""}`} to="/instructor/courses/">
+                  <i className="fas fa-chalkboard-user me-2"></i> Kurslarım
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link " to={`/instructor/create-course/`}>
-                  {" "}
-                  <i className="fas fa-plus me-2"></i>Kurs Oluştur
+                <Link className={`nav-link ${isActive("/instructor/create-course/") ? "active fw-bold text-primary" : ""}`} to="/instructor/create-course/">
+                  <i className="fas fa-plus me-2"></i> Kurs Oluştur
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link " to={`/instructor/reviews/`}>
-                  {" "}
-                  <i className="fas fa-star me-2"></i>Yorum
+                <Link className={`nav-link ${isActive("/instructor/reviews/") ? "active fw-bold text-primary" : ""}`} to="/instructor/reviews/">
+                  <i className="fas fa-star me-2"></i> Yorumlar
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link " to={`/instructor/students/`}>
-                  {" "}
-                  <i className="fas fa-graduation-cap me-2"></i>Öğrenciler
+                <Link className={`nav-link ${isActive("/instructor/students/") ? "active fw-bold text-primary" : ""}`} to="/instructor/students/">
+                  <i className="fas fa-graduation-cap me-2"></i> Öğrenciler
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link " to={`/instructor/earning/`}>
-                  {" "}
-                  <i className="fas fa-turkish-lira me-2"></i>Bağış
+                <Link className={`nav-link ${isActive("/instructor/earning/") ? "active fw-bold text-primary" : ""}`} to="/instructor/earning/">
+                  <i className="fas fa-turkish-lira me-2"></i> Bağışlar
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link " to={`/instructor/coupon/`}>
-                  {" "}
-                  <i className="fas fa-tag me-2"></i>Ödüller
-                </Link>
-                <li className="nav-item">
-                  <Link className="nav-link " to={`/instructor/notifications/`}>
-                    {" "}
-                    <i className="fas fa-bell me-2"></i>Bildirimler
-                  </Link>
-                </li>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to={`/instructor/orders/`}>
-                  {" "}
-                  <i className="fas fa-commenting"></i> Kurs Talepleri{" "}
+                <Link className={`nav-link ${isActive("/instructor/coupon/") ? "active fw-bold text-primary" : ""}`} to="/instructor/coupon/">
+                  <i className="fas fa-tag me-2"></i> Ödüller
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to={`/instructor/question-answer/`}>
-                  {" "}
-                  <i className="fas fa-envelope me-2"></i> Soru/Cevap{" "}
+                <Link className={`nav-link ${isActive("/instructor/notifications/") ? "active fw-bold text-primary" : ""}`} to="/instructor/notifications/">
+                  <i className="fas fa-bell me-2"></i> Bildirimler
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className={`nav-link ${isActive("/instructor/orders/") ? "active fw-bold text-primary" : ""}`} to="/instructor/orders/">
+                  <i className="fas fa-commenting me-2"></i> Kurs Talepleri
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className={`nav-link ${isActive("/instructor/question-answer/") ? "active fw-bold text-primary" : ""}`} to="/instructor/question-answer/">
+                  <i className="fas fa-envelope me-2"></i> Soru / Cevap
                 </Link>
               </li>
             </ul>
-
-            {/* Navbar header */}
-            <span className="navbar-header mb-3">Hesap Ayarları</span>
-            <ul className="list-unstyled ms-n2 mb-0">
+            <hr />
+            <span className="navbar-header text-muted mb-2">Hesap Ayarları</span>
+            <ul className="list-unstyled">
               <li className="nav-item">
-                <Link className="nav-link" to={`/instructor/profile/`}>
-                  {" "}
-                  <i className="fas fa-edit"></i> Profili Düzenle
-                </Link>
-              </li>
-              <li className="nav-item ">
-                <Link className="nav-link" to={`/instructor/change-password/`}>
-                  {" "}
-                  <i className="fas fa-lock"></i> Şifre Değiştir
+                <Link className={`nav-link ${isActive("/instructor/profile/") ? "active fw-bold text-primary" : ""}`} to="/instructor/profile/">
+                  <i className="fas fa-edit me-2"></i> Profili Düzenle
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to={`/login/`}>
-                  {" "}
-                  <i className="fas fa-sign-out-alt"></i> Çıkış Yap
+                <Link className={`nav-link ${isActive("/instructor/change-password/") ? "active fw-bold text-primary" : ""}`} to="/instructor/change-password/">
+                  <i className="fas fa-lock me-2"></i> Şifre Değiştir
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link text-danger" to="/login/">
+                  <i className="fas fa-sign-out-alt me-2"></i> Çıkış Yap
                 </Link>
               </li>
             </ul>

@@ -18,6 +18,9 @@ urlpatterns = [
     # Router ViewSet yolları
     path("", include(router.urls)),
 
+    #Roller ve Yetkiler
+    path("egitmen/list/", api_views.EgitmenListAPIView.as_view(), name="job-list"),
+    
     # Özel HDM endpoint
     path("dersler/<int:hafiz_id>/<str:date>/", api_views.dersler_by_date, name="hafiz-dersler-by-date"),
 
@@ -49,13 +52,13 @@ urlpatterns = [
     # Course
     path("course/category/", api_views.CategoryListAPIView.as_view()),
     path("course/course-list/", api_views.CourseListAPIView.as_view()),
-    path("course/search/", api_views.SearchCourseAPIView.as_view()),
-    path("course/course-detail/<slug>/", api_views.CourseDetailAPIView.as_view()),
+    path("course/search/", api_views.SearchCourseAPIView.as_view()),  
     path("course/cart/", api_views.CartAPIView.as_view()),
     path("course/cart-list/<cart_id>/", api_views.CartListAPIView.as_view()),
     path("cart/stats/<cart_id>/", api_views.CartStatsAPIView.as_view()),
     path("course/cart-item-delete/<cart_id>/<item_id>/", api_views.CartItemDeleteAPIView.as_view()),
-
+    path("course/course-delete/<int:pk>/", api_views.CourseDeleteView.as_view()),
+    path("course/course-detay/<int:pk>/", api_views.CourseDetailAPIView.as_view()),
     # Order & Payment
     path("order/create-order/", api_views.CreateOrderAPIView.as_view()),
     path("order/checkout/<oid>/", api_views.CheckoutAPIView.as_view()),
@@ -162,6 +165,7 @@ urlpatterns = [
     path("instructor/wishlist/<user_id>/", api_views.InstructorWishListListCreateAPIView.as_view()),
     path("instructor/question-answer-list-create/<odev_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
     path("instructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
+    
 
     # Eskep Eğitmen
     path('events/create/', api_views.ESKEPEventCreateAPIView.as_view(), name='instructor-event-create'),

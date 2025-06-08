@@ -30,7 +30,7 @@ admin.site.register(models.VariantOdev)
 admin.site.register(models.VariantOdevItem)
 admin.site.register(models.EnrolledOdev)
 admin.site.register(models.NoteOdev)
-admin.site.register(models.Koordinator)
+admin.site.register(models.KoordinatorRole)
 admin.site.register(models.Question_AnswerOdev)
 admin.site.register(models.Question_Answer_MessageOdev)
 admin.site.register(models.TeacherStudent)
@@ -41,6 +41,7 @@ admin.site.register(models.DersAtamasi)
 admin.site.register(models.Ders)
 admin.site.register(models.HataNotu)
 admin.site.register(models.Annotation)
+admin.site.register(models.TeacherRole)
 
 
 class StajerForm(forms.ModelForm):
@@ -101,6 +102,9 @@ class HafizbilgileriAdmin(admin.ModelAdmin):
 class DistrictAdmin(admin.ModelAdmin):        
     list_display = ('name','city','active')
     
+class KoordinatorAdmin(admin.ModelAdmin):
+    filter_horizontal = ("roles",)  
+      
 admin.site.register(models.City, CityAdmin)
 admin.site.register(models.Proje, ProjeAdmin)
 admin.site.register(models.District, DistrictAdmin)
@@ -110,4 +114,4 @@ admin.site.register(models.Job, JobAdmin)
 admin.site.register(models.Country,CountryAdmin)
 admin.site.register(models.Stajer,StajerAdmin)
 admin.site.register(models.Ogrenci,OgrenciAdmin)
-
+admin.site.register(models.Koordinator, KoordinatorAdmin)
