@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import { register } from "../../utils/auth";
 import Toast from "../plugin/Toast";
 
@@ -57,7 +57,7 @@ function Register() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
       <section className="container d-flex flex-column vh-100" style={{ marginTop: "150px" }}>
         <div className="row align-items-center justify-content-center g-0 h-lg-100 py-8">
           <div className="col-lg-5 col-md-8 py-8 py-xl-0">
@@ -139,7 +139,7 @@ function Register() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

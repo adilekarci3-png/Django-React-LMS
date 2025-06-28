@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 
-import BaseHeader from "../partials/ESKEPBaseHeader";
-import BaseFooter from "../partials/ESKEPBaseFooter";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
@@ -53,7 +53,7 @@ function Dashboard() {
 
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -252,7 +252,7 @@ function Dashboard() {
         </div>
       </section>
 
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

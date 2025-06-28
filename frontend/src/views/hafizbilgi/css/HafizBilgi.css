@@ -1,0 +1,43 @@
+/* .modal-overlay-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content-custom {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 500px;
+  outline: none;
+  max-height: 90vh;
+  overflow-y: auto;
+} */
+
+.ReactModal__Overlay {
+  position: fixed !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 1000;
+}
+
+.ReactModal__Content {
+  padding: 2rem !important;
+  border-radius: 1rem;
+  max-width: 600px;
+  width: 100%;
+  background-color: white;
+  outline: none;
+  position: relative;
+}

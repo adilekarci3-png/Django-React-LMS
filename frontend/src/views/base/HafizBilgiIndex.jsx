@@ -1,13 +1,15 @@
 import React from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+
+import HBSBaseHeader from "../partials/HBSBaseHeader";
+
+import HBSBaseFooter from "../partials/HBSBaseFooter";
 import "./css/GirisPage.css";
 import hafizlikImage from "./images/4.png";
 
 function HafizBilgiIndex() {
   return (
     <>
-      <BaseHeader />
+      <HBSBaseHeader />
       <section className="hafizlik-asymmetrical-section">
         <div className="hafizlik-asymmetrical-container">
           <div className="hafizlik-asymmetrical-header">
@@ -21,7 +23,7 @@ function HafizBilgiIndex() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <HBSBaseFooter />
     </>
   );
 }

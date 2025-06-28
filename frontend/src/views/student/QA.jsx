@@ -1,15 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import BaseHeader from '../partials/BaseHeader'
-import BaseFooter from '../partials/BaseFooter'
+import AkademiBaseHeader from '../partials/AkademiBaseHeader'
+import AkademiBaseFooter from '../partials/AkademiBaseFooter'
 import Sidebar from './Partials/Sidebar'
 import Header from './Partials/Header'
 
 function QA() {
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -99,7 +99,7 @@ function QA() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   )
 }

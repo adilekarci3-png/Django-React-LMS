@@ -3,8 +3,8 @@ import moment from "moment";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 import useAxios from "../../utils/useAxios";
 import Useta from "../plugin/UserData";
@@ -24,7 +24,7 @@ function Orders() {
   }, []);
   return (
     <>
-      <EskepBaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -81,7 +81,7 @@ function Orders() {
         </div>
       </section>
 
-      <EskepBaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

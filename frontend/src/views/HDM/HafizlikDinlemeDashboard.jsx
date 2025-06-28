@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import HBSBaseHeader from "../partials/HBSBaseHeader";
+import HBSBaseFooter from "../partials/HBSBaseFooter";
 import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import "./css/GirisPage.css";
@@ -76,7 +76,7 @@ function HafizlikDinlemeDashboard() {
 
   return (
     <>
-      <BaseHeader />
+      <HBSBaseHeader />
       <section className="pt-5 pb-5 bg-light">
         <div className="container">
           {/* Üst Kısım */}
@@ -151,7 +151,7 @@ function HafizlikDinlemeDashboard() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <HBSBaseFooter />
     </>
   );
 }

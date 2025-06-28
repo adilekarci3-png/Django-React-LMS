@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, useMemo } from "react";
 import { Link } from "react-router-dom";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import GetCurrentAddress from "../plugin/UserCountry";
 import UserData from "../plugin/UserData";
 import Toast from "../plugin/Toast";
@@ -80,7 +80,7 @@ function Index() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
       <div className="index-container">
         <div className="index-heading">
           <h2 className="main-title">İZEM – Hafızların Dijital Kapısı</h2>
@@ -115,7 +115,7 @@ function Index() {
           })}
         </div>
       </div>
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

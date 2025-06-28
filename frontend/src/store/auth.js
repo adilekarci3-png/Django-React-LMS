@@ -5,10 +5,9 @@ const useAuthStore = create((set, get) => ({
   allUserData: null,
   loading: false,
 
-  user: () => ({    
+  user: () => ({
     user_id: get().allUserData?.user_id || null,
     username: get().allUserData?.username || null,
-    // accessToken: get().allUserData?.accessToken ||null
   }),
 
   setUser: (user) =>
@@ -19,8 +18,11 @@ const useAuthStore = create((set, get) => ({
   setLoading: (loading) => set({ loading }),
 
   isLoggedIn: () => get().allUserData !== null,
-}));
 
+  // ✅ Yeni: roleData yönetimi
+  roleData: null,
+  setRoleData: (role) => set({ roleData: role }),
+}));
 
 if (import.meta.env.DEV) {
   mountStoreDevtool("Store", useAuthStore);

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import moment from "moment";
 import useAxios from "../../utils/useAxios";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import Swal from "sweetalert2";
 
 function CourseDetail() {
@@ -60,7 +60,7 @@ function CourseDetail() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
       <section className="pt-5 pb-5">
         <div className="container">
           <div className="card shadow-sm p-4">
@@ -172,7 +172,7 @@ function CourseDetail() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

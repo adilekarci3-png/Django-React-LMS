@@ -1,7 +1,7 @@
 from asyncio import Event
 from django.contrib.auth.password_validation import validate_password
 from api import models as api_models
-
+from api import serializer as api_serializer
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -121,7 +121,7 @@ class OgrenciSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.Ogrenci
         fields = ['id', 'full_name', 'evtel', 'istel', 'ceptel', 'bio',
-            'user', 'image', 'email', 'input_email', 'facebook', 'twitter', 'linkedin', 'about', 'gender',
+            'user', 'image', 'email', 'facebook', 'twitter', 'linkedin', 'about', 'gender',
             'country', 'city', 'active']
         extra_kwargs = {
             'user': {'read_only': True}
@@ -144,22 +144,41 @@ class OgrenciSerializer(serializers.ModelSerializer):
         ogrenci = api_models.Ogrenci.objects.create(**validated_data)
         return ogrenci
 
+class HafizSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.Hafiz
+        fields = ["id", "full_name", "ceptel","adres"]
         
 class TeacherSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    courses = serializers.SerializerMethodField()
+    hafizlar = serializers.SerializerMethodField()
+
     class Meta:
-        fields = ["id","user", "image", "full_name", "bio", "facebook", "twitter", "linkedin", "about", "country", "students", "courses", "review","roles"]
         model = api_models.Teacher
+        fields = [
+            "id", "user", "image", "full_name", "bio", "facebook", "twitter",
+            "linkedin", "about", "country", "students", "courses", "review", "roles", "hafizlar"
+        ]
+
+    def get_courses(self, obj):
+        courses = obj.courses()
+        return CourseSerializer(courses, many=True).data
+
+    def get_hafizlar(self, obj):
+        return HafizSimpleSerializer(obj.hafiz_ogrencileri.all(), many=True).data
+
 
 class AgentSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = [ "user", "image", "full_name", "bio", "evtel", "istel", "ceptel", "email", "facebook", "twitter", "linkedin", "about","country","city","active"]
+        fields = ["id", "user", "image", "full_name", "bio", "evtel", "istel", "ceptel", "email", "facebook", "twitter", "linkedin", "about","country","city","active","gender"]
         model = api_models.Agent
     
             
 class HafizBilgiSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
-        model = api_models.Hafizbilgileri 
+        model = api_models.Hafiz 
    
             
 class JobSerializer(serializers.ModelSerializer):
@@ -755,7 +774,7 @@ class AttendHafizSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = api_models.Hafizbilgileri
+        model = api_models.Hafiz
 
     def __init__(self, *args, **kwargs):
         super(AttendHafizSerializer, self).__init__(*args, **kwargs)
@@ -897,53 +916,108 @@ class ESKEPEventSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'date', 'background_color', 'border_color']
         read_only_fields = ['id']
         
-class HDMEgitmenSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+# class HDMEgitmenSerializer(serializers.ModelSerializer):
+#     user = UserSerializer(read_only=True)
 
-    class Meta:
-        model = api_models.HDMEgitmen
-        fields = ["id", "user", "full_name", "photo"]
-
-
-class HDMHafizSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    egitmen = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMEgitmen.objects.all())
-
-    class Meta:
-        model = api_models.HDMHafiz
-        fields = ["id", "user", "egitmen", "full_name", "photo"]
+#     class Meta:
+#         model = api_models.HDMEgitmen
+#         fields = ["id", "user", "full_name", "photo"]
 
 
 class DersAtamasiSerializer(serializers.ModelSerializer):
-    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
-    instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMEgitmen.objects.all())
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.Hafiz.objects.all(), write_only=True)
+    instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.Teacher.objects.all(), write_only=True)
+
+    hafiz_detail = api_serializer.HafizSimpleSerializer(source="hafiz", read_only=True)
+    instructor_detail = api_serializer.TeacherSerializer(source="instructor", read_only=True)
 
     class Meta:
         model = api_models.DersAtamasi
-        fields = ["id", "hafiz", "instructor", "baslangic", "bitis", "aciklama", "topic"]
+        fields = [
+            "id",
+            "hafiz",               # sadece POST/PUT için (id)
+            "instructor",          # sadece POST/PUT için (id)
+            "hafiz_detail",        # sadece GET için
+            "instructor_detail",   # sadece GET için
+            "start_time",
+            "end_time",
+            "aciklama",
+            "topic"
+        ]
 
 
-class DersSerializer(serializers.ModelSerializer):
-    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
-    Instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMEgitmen.objects.all())
+class DersSerializer(serializers.ModelSerializer):   
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.Hafiz.objects.all(), write_only=True)
+    instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.Teacher.objects.all(), write_only=True)
+
+    hafiz_detail = api_serializer.HafizSimpleSerializer(source="hafiz", read_only=True)
+    instructor_detail = api_serializer.TeacherSerializer(source="instructor", read_only=True)
 
     class Meta:
         model = api_models.Ders
-        fields = ["id", "hafiz", "Instructor", "date", "start_time", "end_time", "description"]
+        fields = [
+            "id",
+            "hafiz",               # sadece POST/PUT için (id)
+            "instructor",          # sadece POST/PUT için (id)
+            "hafiz_detail",        # sadece GET için
+            "instructor_detail",   # sadece GET için
+            "start_time",
+            "end_time",
+            "description",
+            "topic",
+            "date"
+        ]
 
-
-class HataNotuSerializer(serializers.ModelSerializer):
-    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
-    lesson = serializers.PrimaryKeyRelatedField(queryset=api_models.Ders.objects.all(), allow_null=True, required=False)
+class HafizSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    hdm_egitmen = TeacherSerializer(read_only=True)
+    hdm_egitmen_id = serializers.PrimaryKeyRelatedField(
+        queryset=api_models.Teacher.objects.none(),
+        source='hdm_egitmen',
+        write_only=True
+    )
 
     class Meta:
-        model = api_models.HataNotu
-        fields = ["id", "hafiz", "lesson", "sayfa", "aciklama", "tarih"]
+        model = api_models.Hafiz
+        fields = ["id", "full_name", "hdm_egitmen",'hdm_egitmen_id', "dersler","user","ceptel"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            role = api_models.TeacherRole.objects.get(name="HDMEgitmen")
+            self.fields["hdm_egitmen_id"].queryset = api_models.Teacher.objects.filter(roles=role)
+        except api_models.TeacherRole.DoesNotExist:
+            self.fields["hdm_egitmen_id"].queryset = api_models.Teacher.objects.none()
+
+    def get_dersler(self, obj):        
+        dersler = obj.dersler.all()
+        return DersSerializer(dersler, many=True).data
+    
+class HataNotuSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.HataNotu
+        fields = '__all__'
 
 class AnnotationSerializer(serializers.ModelSerializer):
-    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.HDMHafiz.objects.all())
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.Hafiz.objects.all())
 
     class Meta:
         model = api_models.Annotation
         fields = ["id", "hafiz", "page", "shape_type", "coordinates", "text", "created_at"]
+
+class PeerIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.PeerID
+        fields = ['user', 'peer_id']
+
+
+class AnnotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.Annotation
+        fields = ['id', 'user', 'page', 'shape_type', 'x1', 'y1', 'x2', 'y2', 'text']
+
+
+class QuranPageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.QuranPage
+        fields = ['page_number', 'image']

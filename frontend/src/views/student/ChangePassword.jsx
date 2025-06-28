@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
@@ -54,7 +54,7 @@ function ChangePassword() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -143,7 +143,7 @@ function ChangePassword() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

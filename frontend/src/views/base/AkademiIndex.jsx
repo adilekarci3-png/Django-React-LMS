@@ -1,13 +1,13 @@
 import React from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import "./css/GirisPage.css";
 import hafizlikImage from "./images/2.png";
 
 function AkademiIndex() {
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
       <section className="hafizlik-asymmetrical-section">
         <div className="hafizlik-asymmetrical-container">
           <div className="hafizlik-asymmetrical-header">
@@ -21,7 +21,7 @@ function AkademiIndex() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import apiInstance from "../../utils/axios";
 import { login } from "../../utils/auth";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
@@ -27,7 +27,7 @@ function Login() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section
         className="container d-flex flex-column vh-100"
@@ -134,7 +134,7 @@ function Login() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

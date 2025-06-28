@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import "./css/GirisPage.css";
@@ -76,7 +76,7 @@ function EHADAcademiDashboard() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
       <section className="pt-5 pb-5 bg-light">
         <div className="container">
           {/* Üst Kısım */}
@@ -156,7 +156,7 @@ function EHADAcademiDashboard() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

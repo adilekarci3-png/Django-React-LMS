@@ -6,8 +6,8 @@ import Button from "react-bootstrap/Button";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import HBSBaseHeader from "../partials/HBSBaseHeader";
+import HBSBaseFooter from "../partials/HBSBaseFooter";
 
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
@@ -112,7 +112,7 @@ function Coupon() {
 
   return (
     <>
-      <BaseHeader />
+      <HBSBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -292,7 +292,7 @@ function Coupon() {
         </Modal.Body>
       </Modal>
 
-      <BaseFooter />
+      <HBSBaseFooter />
     </>
   );
 }

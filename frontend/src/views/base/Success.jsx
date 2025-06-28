@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 
 import apiInstance from "../../utils/axios";
 
@@ -42,7 +42,7 @@ function Success() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section className="pt-0  position-relative overflow-hidden my-auto">
         <div className="container position-relative">
@@ -154,7 +154,7 @@ function Success() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

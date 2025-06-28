@@ -60,15 +60,19 @@ import CourseDetail from "./views/instructor/CourseDetail";
 
 //EHAD Akademi Pages
 import AkademiIndex from "./views/base/AkademiIndex";
+import AkademiCourses from "./views/Akademi/Courses";
 import EHADAcademiDashboard from "./views/Akademi/EHADAcademiDashboard";
 
 //HDM Pages
 import HDMIndex from "./views/base/HDMIndex";
 import HafizlikDinlemeDashboard from "./views/HDM/HafizlikDinlemeDashboard";
 import HafizTakip from "./views/HDM/HafizTakip";
+import HafizGenelTakvim from "./views/HDM/HafizGenelTakvim";
 import KuranDinleme from "./views/HDM/KuranDinleme";
 import EgitmenDetay from "./views/HDM/EgitmenDetay";
 import HafizDetay from "./views/HDM/HafizDetay";
+import EgitmenHafizListesi from "./views/HDM/EgitmenHafizListesi";
+
 // ESKEP Pages
 import ESKEPDashboard from "./views/ESKEPinstructor/ESKEPDashboard";
 import ESKEPIndex from "./views/base/ESKEPIndex";
@@ -119,10 +123,10 @@ import InstructorList from "./views/ESKEPinstructor/InstructorList";
 import OrganizationChart from "./views/admin/OrganizationChart";
 
 // Agent Pages
-import AgentHafizBilgiList from "./views/agent/HafizBilgiList";
+import AgentHafizBilgiList from "./views/agent/AgentHafizBilgiList";
 
 // Misc
-import CrudTableDeneme from "./views/CrudTable/CrudTableDeneme";
+
 
 function App() {
   const [cartCount, setCartCount] = useState(0);
@@ -182,11 +186,7 @@ function App() {
               <Route
                 path="/hafizbilgi/create-hafizbilgi/"
                 element={<HafizBilgiCreate />}
-              />
-              <Route
-                path="/hafizbilgi/crudtable/"
-                element={<CrudTableDeneme />}
-              />
+              />              
               <Route
                 path="/hafizbilgi/HafizCountPage/"
                 element={<HafizCountPage />}
@@ -200,7 +200,7 @@ function App() {
                 element={<UygulamaUzerindenHafizPage />}
               />
 
-              {/* Agent */}
+              Agent
               <Route
                 path="/agent/hafizbilgi/list/"
                 element={<AgentHafizBilgiList />}
@@ -269,6 +269,7 @@ function App() {
                 path="/akademi/dashboard"
                 element={<EHADAcademiDashboard />}
               />
+              <Route path="/akademi/courses" element={<AkademiCourses />} />
 
               {/* HDM */}
               <Route path="/hdm/" element={<HDMIndex />} />
@@ -278,8 +279,11 @@ function App() {
               />
               <Route path="/hdm/kuranoku" element={<KuranDinleme />} />
               <Route path="/hdm/hafiztakip" element={<HafizTakip />} />
+              <Route path="/hdm/hafizgeneltakvim" element={<HafizGenelTakvim />} />
               <Route path="/hdm/egitmendetay" element={<EgitmenDetay />} />
               <Route path="/hdm/hafizdetay" element={<HafizDetay />} />
+              <Route path="/hdm/egitmenhafizlistesi" element={<EgitmenHafizListesi />} />
+              
 
               {/* ESKEP */}
               <Route path="/eskep/dashboard" element={<ESKEPDashboard />} />

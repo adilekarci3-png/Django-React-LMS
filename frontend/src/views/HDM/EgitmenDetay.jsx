@@ -141,7 +141,7 @@ function EgitmenDetay({ egitmenId }) {
                     <ul className="list-group mt-2">
                       {hafizaAitDersler.map((d) => (
                         <li key={d.id} className="list-group-item">
-                          {new Date(d.baslangic).toLocaleString()} - {d.topic}
+                          {new Date(d.start_time).toLocaleString()} - {d.topic}
                         </li>
                       ))}
                     </ul>
@@ -158,7 +158,7 @@ function EgitmenDetay({ egitmenId }) {
                   <ul className="list-group mt-2">
                     {veri.dersler.map((d) => (
                       <li key={d.id} className="list-group-item">
-                        {new Date(d.baslangic).toLocaleString()} - {d.topic}{" "}
+                        {new Date(d.start_time).toLocaleString()} - {d.topic}{" "}
                         <span className="text-muted">({d.hafiz_adi})</span>
                       </li>
                     ))}

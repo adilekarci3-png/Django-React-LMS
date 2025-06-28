@@ -3,8 +3,8 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
 import Swal from "sweetalert2";
@@ -88,7 +88,7 @@ function Courses() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
       <section className="pt-5 pb-5">
         <div className="container">
           <Header />
@@ -247,7 +247,7 @@ function Courses() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

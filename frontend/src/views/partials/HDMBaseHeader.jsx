@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-import UserData from "../plugin/UserData";
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
+
 import KoordinatorMenu from "../partials/menus/CoordinatorMenu";
 import StajerMenu from "../partials/menus/StajerMenu";
 import OgrenciMenu from "../partials/menus/OgrenciMenu";
 import EgitmenMenu from "../partials/menus/EgitmenMenu";
+import HafizMenu from "../partials/menus/HafizMenu";
 
 function HDMBaseHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
-  const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
+  const [roleData, setRoleData] = useState({ base_role: null, sub_roles: [] });
 
+  const navigate = useNavigate();
   const [isLoggedIn, user] = useAuthStore((state) => [
     state.isLoggedIn,
     state.user,
@@ -25,10 +25,8 @@ function HDMBaseHeader() {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const userId = UserData()?.user_id;
-        if (!userId) return;
-        const res = await api.get(`/user/role/${userId}/`);
-        setUserRole(res.data.role);
+        const res = await api.get(`user-role-detail/`);
+        setRoleData(res.data); // { base_role: "...", sub_roles: [...] }
       } catch (error) {
         console.error("Rol alınamadı:", error);
       }
@@ -38,14 +36,13 @@ function HDMBaseHeader() {
     }
   }, [isLoggedIn]);
 
-  // Saat güncellemesi
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const formatDateTime = (date) => {
-    return date
+  const formatDateTime = (date) =>
+    date
       .toLocaleString("tr-TR", {
         day: "2-digit",
         month: "2-digit",
@@ -55,14 +52,16 @@ function HDMBaseHeader() {
         second: "2-digit",
       })
       .replace(",", "");
-  };
+
   const styles = {
     section: {
-     background: "linear-gradient(135deg, #1b4965,rgb(89, 117, 40))",
+      background: "linear-gradient(135deg, #1b4965, rgb(89, 117, 40))",
       padding: "10px 0",
       borderBottom: "4px solid #2f6f64",
     },
   };
+
+  const { base_role, sub_roles } = roleData;
 
   return (
     <div style={styles.section}>
@@ -76,9 +75,6 @@ function HDMBaseHeader() {
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
           >
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -91,14 +87,31 @@ function HDMBaseHeader() {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link className="nav-link text-white" to="/hdm/hafizgeneltakvim/">
+                  <i className="fas fa-calendar"></i> Genel Takvim
+                </Link>
+              </li>
+              <li className="nav-item">
                 <Link className="nav-link text-white" to="/pages/about-us/">
                   <i className="fas fa-address-card"></i> Hakkımızda
                 </Link>
               </li>
-              {userRole === "Koordinator" && <KoordinatorMenu />}
-              {userRole === "Stajer" && <StajerMenu />}
-              {userRole === "Ogrenci" && <OgrenciMenu />}
-              {userRole === "Egitmen" && <EgitmenMenu />}
+
+              {base_role === "Koordinator" && sub_roles.includes("HDMKoordinator") && (
+                <KoordinatorMenu />
+              )}
+              {base_role === "Stajer" && sub_roles.includes("HDMStajer") && (
+                <StajerMenu />
+              )}
+              {base_role === "Ogrenci" && sub_roles.includes("HDMOgrenci") && (
+                <OgrenciMenu />
+              )}
+              {base_role === "Teacher" && sub_roles.includes("HDMEgitmen") && (
+                <EgitmenMenu />
+              )}
+              {base_role === "Hafiz" && sub_roles.includes("HDMHafiz") && (
+                <HafizMenu />
+              )}
             </ul>
 
             <span className="navbar-text text-white me-3 d-none d-lg-block">

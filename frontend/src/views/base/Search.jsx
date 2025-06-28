@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import { Link } from "react-router-dom";
 import Rater from "react-rater";
 import "react-rater/lib/react-rater.css";
@@ -89,7 +89,7 @@ function Search() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section className="mb-5" style={{ marginTop: "100px" }}>
         <div className="container mb-lg-8 ">
@@ -287,7 +287,7 @@ function Search() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

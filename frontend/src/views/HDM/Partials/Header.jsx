@@ -13,7 +13,7 @@ function Header() {
             <div className="d-flex align-items-center">
               <div className="me-3 mt-n5">
                 <img
-                  src={profile?.photo || "/default-profile.jpg"}
+                  src={profile?.image || "/default-profile.jpg"}
                   className="avatar-xl border border-4 border-white shadow-sm"
                   alt="avatar"
                   style={{

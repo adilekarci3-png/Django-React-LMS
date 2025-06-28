@@ -30,6 +30,7 @@ from decimal import Decimal
 import stripe
 import requests
 from datetime import datetime, timedelta
+from django_filters.rest_framework import DjangoFilterBackend
 # import distutils
 # from distutils.util import strtobool
 
@@ -969,7 +970,7 @@ class AgentSummaryAPIView(generics.ListAPIView):
         # total_courses = api_models.EnrolledCourse.objects.filter(user=agent).count()
         # completed_lessons = api_models.CompletedLesson.objects.filter(user=agent).count()
         # achieved_certificates = api_models.Certificate.objects.filter(user=agent).count()
-        total_hafizs = api_models.Hafizbilgileri.objects.filter(agent=agent).count()
+        total_hafizs = api_models.Hafiz.objects.filter(agent=agent).count()
 
         return [{
             # "total_courses": total_courses,
@@ -2408,147 +2409,64 @@ class CourseVariantItemDeleteAPIVIew(generics.DestroyAPIView):
 
 
 class HafizBilgiCreateAPIView(generics.CreateAPIView):
-    querysect = api_models.Hafizbilgileri.objects.all()    
+    queryset = api_models.Hafiz.objects.all()
     serializer_class = api_serializer.HafizBilgiSerializer
-    permission_classes = [AllowAny]
+    permission_classes = []  # Girişsiz kullanım için boş
 
-
-    def create(self, request, *args, **kwargs):
-        yasVar=0
-        if "yas" in request.POST:
-            yas = response.POST["yas"]
-            yasVar = yas
-            
-        city_id = request.data['adresIl']
-        kurscity_id = request.data['hafizlikyaptigikursili']
-        ilce_id = request.data['adresIlce']
-        job_id = request.data["job"]
-        full_name=request.data['full_name']        
-            
-        babaadi=request.data['babaadi']
-        tcno=request.data['tcno']
-        adres=request.data['adres']       
-        hafizlikbitirmeyili=request.data['hafizlikbitirmeyili']
-        evtel=request.data['evtel']
-        istel=request.data['istel']
-        ceptel=request.data['ceptel']
-        isMarried=request.data['isMarried']
-        email=request.data['email']
-        hafizlikyaptigikursadi=request.data['hafizlikyaptigikursadi']        
-        gorev=request.data['gorev']
-        hafizlikhocaadi=request.data['hafizlikhocaadi']
-        hafizlikhocasoyadi=request.data['hafizlikhocasoyadi']
-        hafizlikhocaceptel=request.data['hafizlikhocaceptel']
-        hafizlikarkadasadi=request.data['hafizlikarkadasadi']
-        hafizlikarkadasoyad=request.data['hafizlikarkadasoyad']
-        hafizlikarkadasceptel=request.data['hafizlikarkadasceptel']
-        referanstcno=request.data['referanstcno']
-        onaydurumu='Onaylanmadı'
-        description=request.data['description']
-        gender=request.data['gender']        
-
-        adresDistrict = api_models.District.objects.get(id=ilce_id)
-        adrescity = api_models.City.objects.get(id=city_id)
-        kurscity = api_models.City.objects.get(id=kurscity_id)
-        job = api_models.Job.objects.get(id=job_id)
-        agent = api_models.Agent.objects.get(city=adrescity, gender=gender)
-        
-        api_models.Hafizbilgileri.objects.create(         
-            full_name=full_name,            
-            babaadi=babaadi,
-            tcno=tcno,
-            adres=adres,
-            adresIl=adrescity,
-            adresIlce=adresDistrict,
-            hafizlikbitirmeyili=hafizlikbitirmeyili,
-            evtel=evtel,
-            istel=istel,
-            ceptel=ceptel,
-            isMarried=isMarried,
-            email=email,
-            hafizlikyaptigikursadi=hafizlikyaptigikursadi,
-            hafizlikyaptigikursili=kurscity,
-            gorev=gorev,
-            hafizlikhocaadi=hafizlikhocaadi,
-            hafizlikhocasoyadi=hafizlikhocasoyadi,
-            hafizlikhocaceptel=hafizlikhocaceptel,
-            hafizlikarkadasadi=hafizlikarkadasadi,
-            hafizlikarkadasoyad=hafizlikarkadasoyad,
-            hafizlikarkadasceptel=hafizlikarkadasceptel,
-            referanstcno=referanstcno,
-            onaydurumu=onaydurumu,
-            description=description,
-            gender=gender,
-            job=job,
-            yas=yasVar,
-            agent =agent,
-            active=False
-        )
+    def perform_create(self, serializer):
+        serializer.save()
 
         return Response({"message": "Hafız bilgisi başarılı bir şekilde eklendi"}, status=status.HTTP_201_CREATED)
 
+
 class HafizBilgiUpdateAPIView(generics.RetrieveUpdateAPIView):
-    querysect = api_models.Hafizbilgileri.objects.all()
+    queryset = api_models.Hafiz.objects.all()
     serializer_class = api_serializer.HafizBilgiSerializer
-    permisscion_classes = [AllowAny]
+    permission_classes = [AllowAny]
 
     def get_object(self):
-        agent_id = self.kwargs['agent_id']
-        print(agent_id)
-        hafizbilgi_id = self.kwargs['hafizbilgi_id']
+        agent_id = self.kwargs.get('agent_id')
+        hafizbilgi_id = self.kwargs.get('hafizbilgi_id')
 
-        agent = api_models.Agent.objects.get(full_name=str(agent_id))
-        print(agent.id)
-        print(hafizbilgi_id)
-        self.kwargs['agent_id'] = agent.id
-        hafizBilgi = api_models.Hafizbilgileri.objects.get(id=hafizbilgi_id)
+        # Agent doğrulaması (ID ile)
+        agent = get_object_or_404(api_models.Agent, id=agent_id)
 
-        return hafizBilgi
-    
+        # Hafiz bilgisi sadece bu agent'e bağlıysa get edilsin (isteğe bağlı bağlama kontrolü)
+        return get_object_or_404(api_models.Hafiz, id=hafizbilgi_id)
+
     def update(self, request, *args, **kwargs):
-        il = api_models.City.objects.all()
-        ilce = api_models.District.objects.all()
-        job = api_models.Job.objects.all()  
-                
-        if "yas" in request.data:
-            request.data['yas'] = int(request.data['yas']) 
-            
-        if "agent" in request.data:
-            agentBilgi = request.data['agent']
-            print(agentBilgi)
-            agent = api_models.Agent.objects.get(full_name=str(agentBilgi))
-            print(agent)
-            request.data['agent'] = int(agent.id) 
-            
-        if "adresIl" in request.data:
-            if type(request.data['adresIl']) != int:
-                for ilitem in il:
-                    if ilitem == request.data['adresIl']:
-                        request.data['adresIl']=ilitem.id
-                        print(ilitem)  
-           
-     
-                
-        hafizBilgi = self.get_object()
-        serializer = self.get_serializer(hafizBilgi, data=request.data)         
-        print(request.data)
-        serializer.is_valid(raise_exception=True)
+        data = request.data.copy()
 
-        # if "gender" in request.data:
-        #     if request.data['image']=='Kadın':
-        #         hafizBilgi.gender = 'kadin'
-        #     elif request.data['image']=='Erkek':
-        #         hafizBilgi.gender = 'erkek'
-                
-        # if "onaydurumu" in request.data:
-        #     if request.data['onaydurumu']=='Onaylanmadı':
-        #         hafizBilgi.gender = 'onaylanmadi'
-        #     elif request.data['onaydurumu']=='Onaylanmdı':
-        #         hafizBilgi.gender = 'onaylandi'
-       
+        # Yaş sayısal değilse dönüştür
+        if "yas" in data:
+            try:
+                data["yas"] = int(data["yas"])
+            except ValueError:
+                return Response({"yas": ["Geçersiz yaş."]}, status=400)
+
+        # Agent ID düzeltme (gelen veri isimse hatalıdır)
+        if "agent" in data:
+            try:
+                agent = api_models.Agent.objects.get(id=data["agent"])
+                data["agent"] = agent.id
+            except api_models.Agent.DoesNotExist:
+                return Response({"agent": ["Temsilci bulunamadı."]}, status=400)
+
+        # adresIl düzeltme
+        if "adresIl" in data and not isinstance(data["adresIl"], int):
+            try:
+                city = api_models.City.objects.get(name=data["adresIl"])
+                data["adresIl"] = city.id
+            except api_models.City.DoesNotExist:
+                return Response({"adresIl": ["İl bulunamadı."]}, status=400)
+
+        hafiz_bilgi = self.get_object()
+        serializer = self.get_serializer(hafiz_bilgi, data=data)
+        serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        # self.update_variant(hafizBilgi, request.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)   
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 # class AgentHafizListAPIView(generics.ListAPIView):
 #     serializer_class = api_serializer.HafizBilgiSerializer
@@ -2566,7 +2484,7 @@ class AgentHafizListAPIView(generics.ListAPIView):
     def get_queryset(self):  
         agent_id = self.kwargs['agent_id']
         agent =  api_models.Agent.objects.get(id=agent_id) 
-        queryset = api_models.Hafizbilgileri.objects.filter(agent=agent)        
+        queryset = api_models.Hafiz.objects.filter(agent=agent)        
            
         return queryset        
      
@@ -2575,7 +2493,7 @@ class HafizsListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):        
-        queryset = api_models.Hafizbilgileri.objects.all()
+        queryset = api_models.Hafiz.objects.all()
         print(queryset)      
         return queryset   
 
@@ -2614,7 +2532,15 @@ class ProjeListAPIView(generics.ListAPIView):
         queryset = api_models.Proje.objects.all()
         print(queryset)      
         return queryset 
+
+class AgentListAPIView(generics.ListAPIView):   
+    serializer_class = api_serializer.AgentSerializer   
     
+    def get_queryset(self):        
+        queryset = api_models.Agent.objects.all()
+        print(queryset)      
+        return queryset 
+   
 class DistrictListAPIView(generics.ListAPIView):   
     serializer_class = api_serializer.DistrictSerializer 
     permission_classes = [AllowAny]
@@ -2638,7 +2564,7 @@ class HafizListViewSetAPIVIew(viewsets.ViewSet):
     def list(self, request, agent_id=None):
         agent = api_models.Agent.objects.get(id=agent_id)
 
-        HafizBilgis = api_models.Hafizbilgileri.objects.filter(agent=agent)
+        HafizBilgis = api_models.Hafiz.objects.filter(agent=agent)
         unique_agent_ids = set()
         hafizs = []
 
@@ -2824,22 +2750,30 @@ def dersler_by_date(request, hafiz_id, date):
 
 @api_view(['GET'])
 def egitmen_detay(request, egitmen_id):
-    egitmen = api_models.HDMEgitmen.objects.get(id=egitmen_id)
-    hafizlar = api_models.HDMHafiz.objects.filter(egitmen=egitmen)
+    try:
+        egitmen = api_models.Teacher.objects.get(id=egitmen_id)
+    except api_models.Teacher.DoesNotExist:
+        return Response({"error": "Eğitmen bulunamadı."}, status=404)
+
+    # Bu eğitmene bağlı ders atamalarını al
     dersler = api_models.DersAtamasi.objects.filter(instructor=egitmen).select_related("hafiz")
 
-    hafizlar_data = api_serializer.HDMHafizSerializer(hafizlar, many=True).data
+    # Bu eğitmenin atama yaptığı tüm hafızları çek (dolaylı olarak)
+    hafiz_ids = dersler.values_list("hafiz_id", flat=True).distinct()
+    hafizlar = api_models.Hafiz.objects.filter(id__in=hafiz_ids)
+
+    hafizlar_data = api_serializer.HafizSerializer(hafizlar, many=True).data
 
     dersler_data = []
     for ders in dersler:
         ders_json = api_serializer.DersAtamasiSerializer(ders).data
-        ders_json["hafiz"] = ders.hafiz.id                   # İD ile eşleştirme için
-        ders_json["hafiz_adi"] = ders.hafiz.full_name       # 👈 Hafız adı burada
+        ders_json["hafiz"] = ders.hafiz.id
+        ders_json["hafiz_adi"] = ders.hafiz.full_name
         dersler_data.append(ders_json)
 
     data = {
         "id": egitmen.id,
-        "full_name": egitmen.full_name,        
+        "full_name": egitmen.full_name,
         "hafizlar": hafizlar_data,
         "dersler": dersler_data
     }
@@ -2847,9 +2781,15 @@ def egitmen_detay(request, egitmen_id):
 
 @api_view(['GET'])
 def hafiz_detay(request, hafiz_id):
-    hafiz = api_models.HDMHafiz.objects.get(id=hafiz_id)
-    dersler = api_models.DersAtamasi.objects.filter(hafiz=hafiz)
-    egitmen = hafiz.egitmen
+    try:
+        hafiz = api_models.Hafiz.objects.get(id=hafiz_id)
+    except api_models.Hafiz.DoesNotExist:
+        return Response({"error": "Hafız bulunamadı."}, status=404)
+
+    dersler = api_models.DersAtamasi.objects.filter(hafiz=hafiz).select_related("instructor")
+
+    # Son atanan eğitmeni al (varsa)
+    egitmen = dersler.last().instructor if dersler.exists() else None
 
     data = {
         "id": hafiz.id,
@@ -2857,17 +2797,41 @@ def hafiz_detay(request, hafiz_id):
         "egitmen": {
             "id": egitmen.id,
             "full_name": egitmen.full_name
-        },
+        } if egitmen else None,
         "dersler": api_serializer.DersAtamasiSerializer(dersler, many=True).data
     }
     return Response(data)
-class HDMEgitmenViewSet(viewsets.ModelViewSet):
-    queryset = api_models.HDMEgitmen.objects.all()
-    serializer_class = api_serializer.HDMEgitmenSerializer
 
-class HDMHafizViewSet(viewsets.ModelViewSet):
-    queryset = api_models.HDMHafiz.objects.all()
-    serializer_class = api_serializer.HDMHafizSerializer
+
+class TeacherViewSet(viewsets.ModelViewSet):
+    queryset = api_models.Teacher.objects.all()
+    serializer_class = api_serializer.TeacherSerializer
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get"], url_path="hafizlar")
+    def hafizlar(self, request):
+        user = request.user
+        teacher = getattr(user, "teacher", None)
+        if not teacher:
+            return Response([])
+
+        hafiz_qs = api_models.Hafiz.objects.filter(hdm_egitmen=teacher)
+        serializer = api_serializer.HafizSerializer(hafiz_qs, many=True)
+        return Response(serializer.data)
+    
+class HafizViewSet(viewsets.ModelViewSet):
+    queryset = api_models.Hafiz.objects.all()
+    serializer_class = api_serializer.HafizSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['hdm_egitmen']
+
+    @action(detail=True, methods=["get"], url_path="dersler")
+    def dersler(self, request, pk=None):
+        hafiz = self.get_object()
+        dersler = hafiz.dersler.all()  # related_name='dersler' varsayımı
+        serializer = api_serializer.DersSerializer(dersler, many=True)
+        return Response(serializer.data)
+   
 
 class DersAtamasiViewSet(viewsets.ModelViewSet):
     queryset = api_models.DersAtamasi.objects.all()
@@ -2911,3 +2875,77 @@ class UpdateCoordinatorRole(APIView):
             return Response({"detail": "Rol güncellendi"}, status=status.HTTP_200_OK)
         except api_models.Koordinator.DoesNotExist:
             return Response({"error": "Koordinatör bulunamadı"}, status=status.HTTP_404_NOT_FOUND)
+
+class QuranPageViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = api_models.QuranPage.objects.all()
+    serializer_class = api_serializer.QuranPageSerializer
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def peer_id_view(request):
+    if request.method == 'POST':
+        peer_id = request.data.get("peer_id")
+        if not peer_id:
+            return Response({"error": "peer_id is required"}, status=400)
+
+        obj, _ = api_models.PeerID.objects.update_or_create(user=request.user, defaults={"peer_id": peer_id})
+        return Response({"peer_id": obj.peer_id})
+
+    elif request.method == 'GET':
+        user_id = request.query_params.get("user_id")
+        try:
+            peer_obj = api_models.PeerID.objects.get(user_id=user_id)
+            return Response({"peer_id": peer_obj.peer_id})
+        except api_models.PeerID.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_role_detail(request):
+    user = request.user
+    data = {
+        "base_role": None,
+        "sub_roles": [],
+    }
+
+    # TEACHER
+    if api_models.Teacher.objects.filter(user=user).exists():
+        teacher = api_models.Teacher.objects.get(user=user)
+        data["base_role"] = "Teacher"
+        data["sub_roles"] = list(teacher.roles.values_list("name", flat=True))
+        return Response(data)
+
+    # KOORDINATOR
+    if api_models.Koordinator.objects.filter(user=user).exists():
+        koordinator = api_models.Koordinator.objects.get(user=user)
+        data["base_role"] = "Koordinator"
+        data["sub_roles"] = list(koordinator.roles.values_list("name", flat=True))
+        return Response(data)
+
+    # Ogrenci
+    if api_models.Ogrenci.objects.filter(user=user).exists():
+        ogrenci = api_models.Ogrenci.objects.get(user=user)
+        data["base_role"] = "Ogrenci"
+        data["sub_roles"] = list(ogrenci.roles.values_list("name", flat=True))
+        return Response(data)
+
+    # STAJER
+    if api_models.Stajer.objects.filter(user=user).exists():
+        stajer = api_models.Stajer.objects.get(user=user)
+        data["base_role"] = "Stajer"
+        data["sub_roles"] = list(stajer.roles.values_list("name", flat=True))
+        return Response(data)
+
+    # HAFIZ
+    if api_models.Hafiz.objects.filter(email=user.email).exists():
+        hafiz = api_models.Hafiz.objects.get(email=user.email)
+        data["base_role"] = "Hafiz"
+        data["sub_roles"] = list(hafiz.roles.values_list("name", flat=True))
+        return Response(data)
+
+    # AGENT
+    if api_models.Agent.objects.filter(user=user).exists():
+        data["base_role"] = "Agent"
+        data["sub_roles"] = []  # Agent için sub-role yoksa
+
+    return Response(data)

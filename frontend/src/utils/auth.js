@@ -59,7 +59,7 @@ export const setUser = async () => {
   const refresh_token = localStorage.getItem("refresh_token");
 
   if (!access_token || !refresh_token) {
-    Swal.fire("Uyarı", "Token bilgileri eksik.", "warning");
+    // Swal.fire("Uyarı", "Token bilgileri eksik.", "warning");
     return;
   }
 

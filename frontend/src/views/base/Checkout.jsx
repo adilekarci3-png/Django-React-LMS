@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import apiInstance from "../../utils/axios";
 import CartId from "../plugin/CartId";
 import Toast from "../plugin/Toast";
@@ -70,7 +70,7 @@ function Checkout() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section className="py-0">
         <div className="container">
@@ -350,7 +350,7 @@ function Checkout() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

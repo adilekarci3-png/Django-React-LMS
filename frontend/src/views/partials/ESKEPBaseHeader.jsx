@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import UserData from "../plugin/UserData";
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
+
+// Menü parçaları
 import KoordinatorMenu from "../partials/menus/CoordinatorMenu";
 import StajerMenu from "../partials/menus/StajerMenu";
 import OgrenciMenu from "../partials/menus/OgrenciMenu";
@@ -11,9 +13,9 @@ import EgitmenMenu from "../partials/menus/EgitmenMenu";
 
 function ESKEPBaseHeader() {
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
+  const [roleData, setRoleData] = useState({ base_role: null, sub_roles: [] });
 
+  const navigate = useNavigate();
   const [isLoggedIn, user] = useAuthStore((state) => [
     state.isLoggedIn,
     state.user,
@@ -24,13 +26,8 @@ function ESKEPBaseHeader() {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const userId = UserData()?.user_id;
-        if (!userId) return;
-        debugger;
-        const res = await api.get(`/user/role/${userId}/`);
-        // Eğer backend şu şekilde bir JSON döndürüyorsa: { "role": "Koordinator" }
-        setUserRole(res.data.role);
-        console.log("Kullanıcı rolü:", res.data.role);
+        const res = await api.get(`user-role-detail/`);
+        setRoleData(res.data); // { base_role: "Koordinator", sub_roles: ["ESKEPKoordinator"] }
       } catch (error) {
         console.error("Rol alınamadı:", error);
       }
@@ -68,21 +65,18 @@ function ESKEPBaseHeader() {
     },
   };
 
+  const { base_role, sub_roles } = roleData;
+
   return (
     <div style={styles.section}>
       <nav className="navbar navbar-expand-lg navbar-green bg-green">
         <div className="container">
-          <Link className="navbar-brand" to="/">
-            EHAD
-          </Link>
+          <Link className="navbar-brand" to="/">EHAD</Link>
           <button
             className="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
           >
             <span className="navbar-toggler-icon" />
           </button>
@@ -110,26 +104,40 @@ function ESKEPBaseHeader() {
                 </Link>
               </li>
 
-              {userRole === "Koordinator" && <KoordinatorMenu />}
-              {userRole === "Stajer" && <StajerMenu />}
-              {userRole === "Ogrenci" && <OgrenciMenu />}
-              {<EgitmenMenu />}
+              {/* === Dinamik Rollere Göre Menüler === */}
+              {base_role === "Koordinator" && sub_roles.includes("ESKEPKoordinator") && <KoordinatorMenu />}
+              {base_role === "Stajer" && sub_roles.includes("ESKEPStajer") && <StajerMenu />}
+              {base_role === "Ogrenci" && sub_roles.includes("ESKEPOgrenci") && <OgrenciMenu />}
+              {base_role === "Teacher" && sub_roles.includes("ESKEPEgitmen") && <EgitmenMenu />}
             </ul>
 
-            {isLoggedIn() ? (
-              <Link to="/logout/" className="btn btn-primary ms-2">
-                Çıkış Yap <i className="fas fa-sign-out-alt"></i>
-              </Link>
-            ) : (
-              <>
-                <Link to="/login/" className="btn btn-primary ms-2">
-                  Giriş Yap <i className="fas fa-sign-in-alt"></i>
+            {/* Arama ve Giriş/Çıkış */}
+            <div className="d-flex align-items-center">
+              <input
+                className="form-control me-2"
+                type="search"
+                placeholder="Ara"
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="btn btn-outline-light me-2" onClick={handleSearchSubmit}>
+                <i className="fas fa-search"></i>
+              </button>
+
+              {isLoggedIn() ? (
+                <Link to="/logout/" className="btn btn-danger ms-2">
+                  Çıkış <i className="fas fa-sign-out-alt"></i>
                 </Link>
-                <Link to="/register/" className="btn btn-primary ms-2">
-                  Kayıt Ol <i className="fas fa-user-plus"></i>
-                </Link>
-              </>
-            )}
+              ) : (
+                <>
+                  <Link to="/login/" className="btn btn-outline-light ms-2">
+                    Giriş <i className="fas fa-sign-in-alt"></i>
+                  </Link>
+                  <Link to="/register/" className="btn btn-light ms-2">
+                    Kayıt <i className="fas fa-user-plus"></i>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>

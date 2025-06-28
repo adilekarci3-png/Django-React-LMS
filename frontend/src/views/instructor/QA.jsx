@@ -4,8 +4,8 @@ import Header from "./Partials/Header";
 import Modal from "react-bootstrap/Modal";
 import moment from "moment";
 
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import { Link } from "react-router-dom";
 
 import useAxios from "../../utils/useAxios";
@@ -81,7 +81,7 @@ function QA() {
   };
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -256,7 +256,7 @@ function QA() {
         </Modal.Body>
       </Modal>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

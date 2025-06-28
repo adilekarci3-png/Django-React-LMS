@@ -65,37 +65,6 @@ KOORDINATOR_STATUS = (
     ("Not Verildi", "Not Verildi"),
 )
 
-KOORDINATOR_ROLE = (
-    ("Ogrenci", "Ogrenci"),    
-    ("Stajer", "Stajer"),
-    ("Genel", "Genel"),       
-    ("AkademiKoordinator", "AkademiKoordinator"),
-    ("HBSKoordinator", "HBSKoordinator"),
-    ("HDMKoordinator", "HDMKoordinator")   
-)
-
-# TEACHER_ROLE = (
-#     ("Ogrenci", "Ogrenci"),    
-#     ("Stajer", "Stajer"),
-#     ("Genel", "Genel"),       
-#     ("AkademiKoordinator", "AkademiKoordinator"),
-#     ("HBSKoordinator", "HBSKoordinator"),
-#     ("HDMKoordinator", "HDMKoordinator")   
-# )
-
-TEACHER_ROLE = (        
-    ("AkademiTeacher", "AkademiTeacher"),
-    ("ESKEPTeacher", "ESKEPTeacher"),
-    ("HBSTeacher", "HBSTeacher"),
-    ("HDMTeacher", "HDMTeacher")   
-)
-
-STUDENT_ROLE = (        
-    ("AkademiStudent", "AkademiStudent"),
-    ("HBSStudent", "HBSStudent"),
-    ("HDMStudent", "HDMStudent")   
-)
-
 PAYMENT_STATUS = (
     ("Ödendi", "Paid"),
     ("İşleniyor", "İşleniyor"),
@@ -147,6 +116,9 @@ class Teacher(models.Model):
     def students(self):
         return CartOrderItem.objects.filter(teacher=self)
     
+    def hafizs(self):
+        return self.hafiz_ogrencileri.all()
+
     def courses(self):
         return Course.objects.filter(teacher=self)
     
@@ -178,16 +150,62 @@ class TeacherRole(models.Model):
     name = models.CharField(
         max_length=50,
         choices=[
-          ("AkademiTeacher", "AkademiTeacher"),
-          ("ESKEPTeacher", "ESKEPTeacher"),
-          ("HBSTeacher", "HBSTeacher"),
-          ("HDMTeacher", "HDMTeacher")  
+          ("AkademiEgitmen", "AkademiEgitmen"),
+          ("ESKEPEgitmen", "ESKEPEgitmen"),
+          ("HBSEgitmen", "HBSEgitmen"),
+          ("HDMEgitmen", "HDMEgitmen")  
         ],
         unique=True
     )
     def __str__(self):
         return self.get_name_display()
+
+class StajerRole(models.Model):
+    name = models.CharField(
+        max_length=50,
+        choices=[          
+          ("ESKEPStajer", "ESKEPStajer")           
+        ],
+        unique=True
+    )
+    def __str__(self):
+        return self.get_name_display()  
     
+class AgentRole(models.Model):
+    name = models.CharField(
+        max_length=50,
+        choices=[          
+          ("HBSTemsilci", "HBSTemsilci")           
+        ],
+        unique=True
+    )
+    def __str__(self):
+        return self.get_name_display()  
+     
+class OgrenciRole(models.Model):
+    name = models.CharField(
+        max_length=50,
+        choices=[          
+          ("AkademiOgrenci", "AkademiOgrenci"),
+          ("HBSOgrenci", "HBSOgrenci"),
+          ("HDMOgrenci", "HDMOgrenci")         
+        ],
+        unique=True
+    )
+    def __str__(self):
+        return self.get_name_display() 
+
+class HafizRole(models.Model):
+    name = models.CharField(
+        max_length=50,
+        choices=[
+          ("HBSHafiz", "HBSHafiz"),
+          ("HDMHafiz", "HDMHafiz")       
+        ],
+        unique=True
+    )
+    def __str__(self):
+        return self.get_name_display() 
 
 class KoordinatorRole(models.Model):
     name = models.CharField(
@@ -1852,13 +1870,14 @@ class Job(models.Model):
 Job._meta.get_field('name').verbose_name = "Meslek" 
 Job._meta.get_field('active').verbose_name = "Aktif/Pasif" 
 
-class Hafizbilgileri(models.Model):    
+class Hafiz(models.Model):    
     full_name = models.CharField(max_length=100,default="")
     babaadi = models.CharField(max_length=150,default="",null=True, blank=True)
     tcno = models.CharField(max_length=150,default="",null=True, blank=True)
     adres = models.CharField(max_length=150, default="",null=True, blank=True)
     adresIl = models.ForeignKey("City",related_name="AdresIl", null=True, blank=True, on_delete=models.SET_NULL)
     adresIlce = models.ForeignKey("District", null=True, blank=True, on_delete=models.SET_NULL)
+    roles = models.ManyToManyField(HafizRole, verbose_name="Roller")
     hafizlikbitirmeyili = models.CharField(max_length=8, choices=tuple(sorted(YEAR))  ,default="")
     evtel = models.CharField(max_length=150, default="",null=True, blank=True)
     istel = models.CharField(max_length=150, default="",null=True, blank=True)
@@ -1883,7 +1902,8 @@ class Hafizbilgileri(models.Model):
     active = models.BooleanField(default=True)
     agent = models.ForeignKey("Agent", null=True, blank=True, on_delete=models.SET_NULL)    
     country = models.ForeignKey("Country", null=True, blank=True, on_delete=models.SET_NULL)
-    
+    hdm_egitmen = models.ForeignKey("Teacher",on_delete=models.SET_NULL,null=True,blank=True,verbose_name="HDM Eğitmeni",related_name="hafiz_ogrencileri")
+
     def __str__(self):
         return self.full_name
     
@@ -1891,40 +1911,41 @@ class Hafizbilgileri(models.Model):
         verbose_name = "Hafız Bilgi"
         verbose_name_plural = "Hafız Bilgileri"   
 
-Hafizbilgileri._meta.get_field('full_name').verbose_name = "Adı Soyadı" 
-Hafizbilgileri._meta.get_field('babaadi').verbose_name = "Baba Adı" 
-Hafizbilgileri._meta.get_field('tcno').verbose_name = "TC Kimlik NO"     
-Hafizbilgileri._meta.get_field('adres').verbose_name = "Adres" 
-Hafizbilgileri._meta.get_field('adresIl').verbose_name = "İl" 
-Hafizbilgileri._meta.get_field('adresIlce').verbose_name = "İlçe"     
-Hafizbilgileri._meta.get_field('hafizlikbitirmeyili').verbose_name = "Hafızlık Bitirme Yılı" 
-Hafizbilgileri._meta.get_field('evtel').verbose_name = "Ev Telefonu" 
-Hafizbilgileri._meta.get_field('istel').verbose_name = "İş Telefonu"     
-Hafizbilgileri._meta.get_field('ceptel').verbose_name = "Cep Telefonu" 
-Hafizbilgileri._meta.get_field('isMarried').verbose_name = "Medeni Hali" 
-Hafizbilgileri._meta.get_field('email').verbose_name = "E-Posta Adresi" 
-Hafizbilgileri._meta.get_field('hafizlikyaptigikursadi').verbose_name = "Hafızlık Yaptığı Kurs Adı" 
-Hafizbilgileri._meta.get_field('hafizlikyaptigikursili').verbose_name = "Hafızlık Yaptığı Kurs İli" 
-Hafizbilgileri._meta.get_field('gorev').verbose_name = "Görevi" 
-Hafizbilgileri._meta.get_field('hafizlikhocaadi').verbose_name = "Hoca Adı" 
-Hafizbilgileri._meta.get_field('hafizlikhocasoyadi').verbose_name = "Hoca Soyadı" 
-Hafizbilgileri._meta.get_field('hafizlikhocaceptel').verbose_name = "Hoca Cep Telefonu" 
-Hafizbilgileri._meta.get_field('hafizlikarkadasadi').verbose_name = "Hafız Arkadaş Adı" 
-Hafizbilgileri._meta.get_field('hafizlikarkadasoyad').verbose_name = "Hafız Arkadaş Soyadı" 
-Hafizbilgileri._meta.get_field('hafizlikarkadasceptel').verbose_name = "Hafız Arkadaş Cep Telefonu" 
-Hafizbilgileri._meta.get_field('referanstcno').verbose_name = "Referanst TC Kimlik NO" 
-Hafizbilgileri._meta.get_field('onaydurumu').verbose_name = "Onay Durumu" 
-Hafizbilgileri._meta.get_field('description').verbose_name = "Hakkında" 
-Hafizbilgileri._meta.get_field('gender').verbose_name = "Cinsiyet" 
-Hafizbilgileri._meta.get_field('job').verbose_name = "Meslek" 
-Hafizbilgileri._meta.get_field('yas').verbose_name = "Yaş" 
-Hafizbilgileri._meta.get_field('active').verbose_name = "Aktif/Pasif" 
-Hafizbilgileri._meta.get_field('agent').verbose_name = "İl Temsilcisi" 
-Hafizbilgileri._meta.get_field('country').verbose_name = "Ülke" 
+Hafiz._meta.get_field('full_name').verbose_name = "Adı Soyadı" 
+Hafiz._meta.get_field('babaadi').verbose_name = "Baba Adı" 
+Hafiz._meta.get_field('tcno').verbose_name = "TC Kimlik NO"     
+Hafiz._meta.get_field('adres').verbose_name = "Adres" 
+Hafiz._meta.get_field('adresIl').verbose_name = "İl" 
+Hafiz._meta.get_field('adresIlce').verbose_name = "İlçe"     
+Hafiz._meta.get_field('hafizlikbitirmeyili').verbose_name = "Hafızlık Bitirme Yılı" 
+Hafiz._meta.get_field('evtel').verbose_name = "Ev Telefonu" 
+Hafiz._meta.get_field('istel').verbose_name = "İş Telefonu"     
+Hafiz._meta.get_field('ceptel').verbose_name = "Cep Telefonu" 
+Hafiz._meta.get_field('isMarried').verbose_name = "Medeni Hali" 
+Hafiz._meta.get_field('email').verbose_name = "E-Posta Adresi" 
+Hafiz._meta.get_field('hafizlikyaptigikursadi').verbose_name = "Hafızlık Yaptığı Kurs Adı" 
+Hafiz._meta.get_field('hafizlikyaptigikursili').verbose_name = "Hafızlık Yaptığı Kurs İli" 
+Hafiz._meta.get_field('gorev').verbose_name = "Görevi" 
+Hafiz._meta.get_field('hafizlikhocaadi').verbose_name = "Hoca Adı" 
+Hafiz._meta.get_field('hafizlikhocasoyadi').verbose_name = "Hoca Soyadı" 
+Hafiz._meta.get_field('hafizlikhocaceptel').verbose_name = "Hoca Cep Telefonu" 
+Hafiz._meta.get_field('hafizlikarkadasadi').verbose_name = "Hafız Arkadaş Adı" 
+Hafiz._meta.get_field('hafizlikarkadasoyad').verbose_name = "Hafız Arkadaş Soyadı" 
+Hafiz._meta.get_field('hafizlikarkadasceptel').verbose_name = "Hafız Arkadaş Cep Telefonu" 
+Hafiz._meta.get_field('referanstcno').verbose_name = "Referanst TC Kimlik NO" 
+Hafiz._meta.get_field('onaydurumu').verbose_name = "Onay Durumu" 
+Hafiz._meta.get_field('description').verbose_name = "Hakkında" 
+Hafiz._meta.get_field('gender').verbose_name = "Cinsiyet" 
+Hafiz._meta.get_field('job').verbose_name = "Meslek" 
+Hafiz._meta.get_field('yas').verbose_name = "Yaş" 
+Hafiz._meta.get_field('active').verbose_name = "Aktif/Pasif" 
+Hafiz._meta.get_field('agent').verbose_name = "İl Temsilcisi" 
+Hafiz._meta.get_field('country').verbose_name = "Ülke" 
 
 class Agent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
+    roles = models.ManyToManyField(AgentRole, verbose_name="Roller")
     full_name = models.CharField(max_length=100)
     bio = models.CharField(max_length=100, null=True, blank=True)
     evtel = models.CharField(max_length=150, default="")
@@ -1944,7 +1965,7 @@ class Agent(models.Model):
         return self.full_name 
     
     def Hafizs(self):
-        return Hafizbilgileri.objects.filter(agent=self)   
+        return Hafiz.objects.filter(agent=self)   
     
     class Meta:
         verbose_name = "Temsilci"
@@ -2066,7 +2087,7 @@ class Stajer(models.Model):
     evtel = models.CharField(max_length=150, default="")
     istel = models.CharField(max_length=150, default="")
     ceptel = models.CharField(max_length=150, default="", unique=True)
-    # email = models.CharField(max_length=150, default="", unique=True)
+    roles = models.ManyToManyField('StajerRole', verbose_name="Roller")  
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
     linkedin = models.URLField(null=True, blank=True)
@@ -2110,7 +2131,7 @@ class Ogrenci(models.Model):
     evtel = models.CharField(max_length=150, default="")
     istel = models.CharField(max_length=150, default="")
     ceptel = models.CharField(max_length=150, default="", unique=True)
-    # email = models.CharField(max_length=150, default="", unique=True)
+    roles = models.ManyToManyField('OgrenciRole', verbose_name="Roller")    
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
     linkedin = models.URLField(null=True, blank=True)
@@ -2166,28 +2187,28 @@ class ESKEPEvent(models.Model):
         return f"{self.title} ({self.date})"
     
 
-class HDMEgitmen(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=100)
-    photo = models.ImageField(upload_to='instructors/', null=True, blank=True)
+# class HDMEgitmen(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     full_name = models.CharField(max_length=100)
+#     photo = models.ImageField(upload_to='instructors/', null=True, blank=True)
     
-    def __str__(self):
-        return self.full_name
+#     def __str__(self):
+#         return self.full_name
 
-class HDMHafiz(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    egitmen = models.ForeignKey(HDMEgitmen, on_delete=models.CASCADE, related_name="hafizlar")
-    full_name = models.CharField(max_length=100)
-    photo = models.ImageField(upload_to='hafizlar/', null=True, blank=True)
+# class HDMHafiz(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     egitmen = models.ForeignKey(HDMEgitmen, on_delete=models.CASCADE, related_name="hafizlar")
+#     full_name = models.CharField(max_length=100)
+#     photo = models.ImageField(upload_to='hafizlar/', null=True, blank=True)
 
-    def __str__(self):
-        return self.full_name
+#     def __str__(self):
+#         return self.full_name
 
 class DersAtamasi(models.Model):
-    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE, related_name="dersler")
-    instructor = models.ForeignKey(HDMEgitmen, on_delete=models.CASCADE)
-    baslangic = models.DateTimeField()
-    bitis = models.DateTimeField()
+    hafiz = models.ForeignKey(Hafiz, on_delete=models.CASCADE, related_name="dersler")
+    instructor = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     date = models.DateTimeField(default=timezone.now)
     time = models.TimeField(default=timezone.now)  # yeni eklenen alan
     aciklama = models.TextField(blank=True, null=True)
@@ -2197,29 +2218,59 @@ class DersAtamasi(models.Model):
         return f"{self.hafiz.full_name} - {self.date.date()} {self.time}"
     
 class Ders(models.Model):
-    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE)
-    Instructor = models.ForeignKey(HDMEgitmen, on_delete=models.CASCADE)
+    hafiz = models.ForeignKey(Hafiz, on_delete=models.CASCADE)
+    Instructor = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     date = models.DateTimeField(default=timezone.now)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     description = models.TextField(blank=True)
+    topic = models.CharField(max_length=255,default="")
 
     def __str__(self):
         return f"{self.hafiz.full_name} - {self.date}"
     
 class HataNotu(models.Model):
-    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE, related_name="hatalar")
+    hafiz = models.ForeignKey(Hafiz, on_delete=models.CASCADE, related_name="hatalar")
     lesson = models.ForeignKey(Ders, on_delete=models.SET_NULL, null=True, blank=True)
-    sayfa = models.IntegerField()
-    aciklama = models.TextField()
-    tarih = models.DateField(auto_now_add=True)
+    sayfa = models.IntegerField()    
+    tarih = models.DateField(auto_now_add=True)    
+    shape_type = models.CharField(max_length=20,null=True, blank=True)
+    coordinates = models.JSONField(null=True, blank=True)
+    text = models.TextField(null=True, blank=True)
+    hata_turu = models.CharField(max_length=50,null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True,null=True, blank=True)
+
     def __str__(self):
         return f"{self.hafiz.full_name} - Sayfa {self.page_number}"
     
+
+
+class PeerID(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    peer_id = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.peer_id}"
+
+
+class QuranPage(models.Model):
+    page_number = models.PositiveIntegerField(unique=True)
+    image = models.ImageField(upload_to='quran_pages/')
+
+    def __str__(self):
+        return f"Page {self.page_number}"
+
+
 class Annotation(models.Model):
-    hafiz = models.ForeignKey(HDMHafiz, on_delete=models.CASCADE, related_name="annotations")
-    page = models.IntegerField()
-    shape_type = models.CharField(max_length=20, choices=[("line", "Line"), ("circle", "Circle")])
-    coordinates = models.JSONField()
-    text = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,default=0)
+    page = models.ForeignKey(QuranPage, on_delete=models.CASCADE)
+    shape_type = models.CharField(max_length=10, choices=[('line', 'Line'), ('circle', 'Circle')])
+    x1 = models.FloatField(default=0.0)
+    y1 = models.FloatField(default=0.0)
+    x2 = models.FloatField(default=0.0)
+    y2 = models.FloatField(default=0.0)
+    text = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Page {self.page.page_number} - {self.shape_type}"

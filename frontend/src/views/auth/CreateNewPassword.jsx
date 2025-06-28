@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import apiInstance from "../../utils/axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Toast from "../plugin/Toast";
@@ -56,7 +56,7 @@ function CreateNewPassword() {
   };
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section
         className="container d-flex flex-column vh-100"
@@ -138,7 +138,7 @@ function CreateNewPassword() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

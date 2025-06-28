@@ -4,8 +4,8 @@ import ReactPlayer from "react-player";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
@@ -291,7 +291,7 @@ function CourseDetail() {
 
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -1098,7 +1098,7 @@ function CourseDetail() {
         </Modal.Body>
       </Modal>
 
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

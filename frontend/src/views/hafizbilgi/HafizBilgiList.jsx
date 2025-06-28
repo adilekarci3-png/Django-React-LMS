@@ -1,178 +1,159 @@
-import { useState, useEffect, useMemo } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
-
+import { useEffect, useState } from "react";
 import useAxios from "../../utils/useAxios";
-import Spinner from "../Spinner/Spinner";
-import CrudTable from "../CrudTable/CrudTable";
+import HBSBaseHeader from "../partials/HBSBaseHeader";
+import HBSBaseFooter from "../partials/HBSBaseFooter";
+import Swal from "sweetalert2";
+import HafizBilgiEditModal from "./HafizBilgiEditModal";
+import HafizBilgiDetailModal from "./HafizBilgiDetailModal";
 
 function HafizBilgiList() {
-  const [hafizBilgi, setHafizBilgis] = useState([]);
-  const [meslekler, setMeslekler] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const crud_url = "hafizbilgi/list/";
+  const api = useAxios();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentItem, setCurrentItem] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
-  const [validationErrors, setValidationErrors] = useState({});
-  const onaydurumu_choise = ["Onaylandı", "Onaylanmadı"];
-  var meslek_choise = [];
-
-  const fetchHafizBilgis = () => {
-    setIsLoading(true);
-    useAxios()
-      .get(`hafizbilgi/list/`)
-      .then((res) => {
-        setHafizBilgis(res.data);
-        setIsLoading(false);
-      });
-  };
-
-  const FetchMesleks = () => {
-    setIsLoading(true);
-    useAxios()
-      .get(`job/list/`)
-      .then((res) => {
-        setMeslekler(res.data);
-        res.data.forEach(function (meslek) {
-          meslek_choise.push(meslek.name);
-        });
-        setIsLoading(false);
-      });
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get("hafizbilgi/list/");
+      setData(res.data);
+    } catch (err) {
+      console.error("Veri alınamadı", err);
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchHafizBilgis();
-    FetchMesleks();
+    fetchData();
   }, []);
 
-  // Column Headers
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: "full_name",
-        header: "Adı",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.full_name,
-          helperText: validationErrors?.full_name,
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              full_name: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "adres",
-        header: "Adres",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.adres,
-          helperText: validationErrors?.adres,
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              adres: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "babaadi",
-        header: "Baba Adı",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.babaadi,
-          helperText: validationErrors?.babaadi,
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              babaadi: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "tcno",
-        header: "TC Kimlik NO",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.tcno,
-          helperText: validationErrors?.tcno,
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              tcno: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "decription",
-        header: "Hakkında",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.description,
-          helperText: validationErrors?.description,
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              description: undefined,
-            }),
-        },
-      },
-      {
-        accessorKey: "job",
-        header: "Meslek",
-        editVariant: "select",
-        editSelectOptions: meslek_choise,
-        muiEditTextFieldProps: {
-          select: true,
-          error: !!validationErrors?.job,
-          helperText: validationErrors?.job,
-        },
-      },
-      {
-        accessorKey: "onaydurumu",
-        header: "Onay Durumu",
-        editVariant: "select",
-        editSelectOptions: onaydurumu_choise,
-        muiEditTextFieldProps: {
-          select: true,
-          error: !!validationErrors?.onaydurumu,
-          helperText: validationErrors?.onaydurumu,
-        },
-      },
-    ],
-    [validationErrors]
-  );
+  const handleDelete = async (id) => {
+    const confirm = await Swal.fire({
+      title: "Emin misiniz?",
+      text: "Bu kayıt silinecek!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Evet, sil",
+      cancelButtonText: "İptal",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await api.delete(`hafiz/hafizbilgileri/${id}/`);
+        Swal.fire("Silindi!", "Kayıt başarıyla silindi.", "success");
+        fetchData();
+      } catch (err) {
+        Swal.fire("Hata!", "Silme işlemi başarısız.", "error");
+      }
+    }
+  };
+
+  const openEditModal = (item = null) => {
+    setCurrentItem(item);
+    setShowEditModal(true);
+  };
+
+  const openDetailModal = (item) => {
+    setCurrentItem(item);
+    setShowDetailModal(true);
+  };
 
   return (
     <>
-      <BaseHeader />
-      <section className="py-10 bg-gray-100 min-h-screen">
-        <div className="container mx-auto">
-          <h3 className="text-3xl font-semibold text-center mb-6 text-gray-800">
-            Hafız Bilgi Listesi
-          </h3>
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            {isLoading ? (
-              <div className="flex justify-center items-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-500"></div>
+      <HBSBaseHeader />
+      <section className="pt-5 pb-5">
+        <div className="container">
+          <div className="card shadow-sm p-4">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h4 className="mb-0">
+                <i className="bi bi-person-lines-fill"></i> Hafız Bilgileri
+              </h4>
+              <button
+                className="btn btn-success"
+                onClick={() => openEditModal(null)}
+              >
+                <i className="fas fa-plus"></i> Yeni Ekle
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary"></div>
               </div>
-            ) : hafizBilgi.length === 0 ? (
-              <p className="text-center text-gray-600">
-                Hafız Bilgi Bulunamadı
-              </p>
             ) : (
-              <CrudTable
-                data={hafizBilgi}
-                fetchData={fetchHafizBilgis}
-                setValidationErrors={setValidationErrors}
-                columns={columns}
-                crud_url={crud_url}
-              />
+              <div className="table-responsive">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Ad Soyad</th>
+                      <th>Telefon</th>
+                      <th>Adres</th>
+                      <th>Yıl</th>
+                      <th>İşlem</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.full_name}</td>
+                        <td>{item.ceptel}</td>
+                        <td>{item.adres}</td>
+                        <td>{item.hafizlikbitirmeyili}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-primary me-1"
+                            onClick={() => openEditModal(item)}
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-info me-1"
+                            onClick={() => openDetailModal(item)}
+                          >
+                            <i className="fas fa-eye"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {data.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="text-center text-muted">
+                          Kayıt bulunamadı.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
       </section>
-      <BaseFooter />
+
+      <HBSBaseFooter />
+
+      {showEditModal && (
+        <HafizBilgiEditModal
+          item={currentItem}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={fetchData}
+        />
+      )}
+
+      {showDetailModal && (
+        <HafizBilgiDetailModal
+          item={currentItem}
+          onClose={() => setShowDetailModal(false)}
+        />
+      )}
     </>
   );
 }

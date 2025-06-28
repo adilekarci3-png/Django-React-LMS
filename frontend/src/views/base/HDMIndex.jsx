@@ -1,13 +1,14 @@
 import React from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import HDMBaseHeader from "../partials/HDMBaseHeader";
+import HDMBaseFooter from "../partials/HDMBaseFooter";
 import "./css/GirisPage.css";
 import hafizlikImage from "./images/3.png";
 
-function HDMIndex() {
+function HDMIndex() { 
+
   return (
     <>
-      <BaseHeader />
+      <HDMBaseHeader />
       <section className="hafizlik-asymmetrical-section">
         <div className="hafizlik-asymmetrical-container">
           <div className="hafizlik-asymmetrical-header">
@@ -21,7 +22,7 @@ function HDMIndex() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <HDMBaseFooter />
     </>
   );
 }

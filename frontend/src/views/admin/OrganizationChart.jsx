@@ -3,8 +3,8 @@ import useAxios from "../../utils/useAxios";
 import React from "react";
 
 import UseOrganizationChart from "../../utils/UseOrganizationChart.js";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 
 function OrganizationChart() {
     const [members, setMembers] = useState([]);
@@ -52,14 +52,14 @@ function OrganizationChart() {
 
     return (
         <> 
-            <BaseHeader />
+            <AkademiBaseHeader />
             <section className="pt-10 pb-10 bg-gray-50">
                 <div className="container mx-auto">
                     <h1 className="text-3xl font-bold text-center mb-6 text-green-600">Organizasyon Şeması</h1>
                     <div id="diagram" className="shadow-lg rounded-lg bg-white p-4" />
                 </div>
             </section>
-            <BaseFooter />
+            <AkademiBaseFooter />
         </>
     );
 }

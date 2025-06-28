@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
@@ -101,7 +101,7 @@ function Profile() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       {/* Toast mesajını burada göster */}
       {toastMessage && <Toast message={toastMessage} />}
@@ -210,7 +210,7 @@ function Profile() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

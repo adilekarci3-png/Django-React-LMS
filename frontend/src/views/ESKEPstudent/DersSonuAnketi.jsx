@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 
-import BaseHeader from "../partials/ESKEPBaseHeader";
-import BaseFooter from "../partials/ESKEPBaseFooter";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 //import "../../assets/css/derssonuanket.css";
@@ -36,7 +36,7 @@ const DersSonuAnketi = () => {
     };
     return (
         <>
-          <BaseHeader />
+          <ESKEPBaseHeader />
     
           <section className="pt-5 pb-5">
             <div className="container">
@@ -164,7 +164,7 @@ const DersSonuAnketi = () => {
             </div>
           </section>
     
-          <BaseFooter />
+          <ESKEPBaseFooter />
         </>
       );
     return (

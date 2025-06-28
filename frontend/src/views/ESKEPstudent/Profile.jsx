@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
@@ -87,7 +87,7 @@ function Profile() {
 
   return (
     <>
-      <BaseHeader />
+      <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
         <div className="container">
@@ -217,7 +217,7 @@ function Profile() {
         </div>
       </section>
 
-      <BaseFooter />
+      <ESKEPBaseFooter />
     </>
   );
 }

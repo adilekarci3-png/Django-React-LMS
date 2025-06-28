@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import useAxios from "../../utils/useAxios";
 import Calendar from "react-calendar";
 import HDMBaseHeader from "../partials/HDMBaseHeader";
 import HDMBaseFooter from "../partials/HDMBaseFooter";
@@ -17,31 +17,52 @@ const HafizTakip = () => {
   const [selectedHafizId, setSelectedHafizId] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dersAtamalari, setDersAtamalari] = useState([]);
+  const api = useAxios();
+  const pad = (num) => num.toString().padStart(2, "0");
 
+  const formatTime = (date) => {
+    return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+      date.getSeconds()
+    )}`;
+  };
   useEffect(() => {
-    axios
+    api
       .get("http://localhost:8000/api/v1/egitmenler/1/")
       .then((res) => {
+        console.log(res.data);
         setEgitmen(res.data);
-        return axios.get(`http://localhost:8000/api/v1/hafizlar/?egitmen=${res.data.id}`);
+        return api.get(
+          `http://localhost:8000/api/v1/hafizlar/?hdm_egitmen=${res.data.id}`
+        );
       })
-      .then((res) => setHafizlar(res.data))
+      .then((res) => {
+        setHafizlar(res.data);
+        console.log(hafizlar);
+      })
       .catch((err) => console.error("Veri alınamadı", err));
 
-    axios
+    api
       .get("http://localhost:8000/api/v1/ders-atamalari/")
       .then((res) => setDersAtamalari(res.data))
       .catch((err) => console.error("Tüm ders atamaları alınamadı", err));
   }, []);
 
   const handleSelectHafiz = (hafizId) => {
+    console.log(hafizId);
     setSelectedHafizId(hafizId);
-    axios.get(`http://localhost:8000/api/v1/hatalar/?hafiz=${hafizId}`)
+    api
+      .get(`http://localhost:8000/api/v1/hatalar/?hafiz=${hafizId}`)
       .then((res) => setHatalar(res.data))
       .catch((err) => console.error("Hatalar alınamadı", err));
 
-    axios.get(`http://localhost:8000/api/v1/ders-atamalari/?hafiz=${hafizId}`)
-      .then((res) => setDersAtamalari(res.data))
+    api
+      .get(`http://localhost:8000/api/v1/ders-atamalari/?hafiz=${hafizId}`)
+      .then((res) => {
+        setDersAtamalari(res.data);
+        console.log(res.data);
+        console.log("hafiz id");
+        console.log("hafiz id", hafizId);
+      })
       .catch((err) => console.error("Ders atamaları alınamadı", err));
   };
 
@@ -51,12 +72,12 @@ const HafizTakip = () => {
       return;
     }
 
-    axios
+    api
       .post("http://localhost:8000/api/v1/ders-atamalari/", {
         hafiz: selectedHafizId,
         instructor: egitmen.id,
-        baslangic: selectedDate.toISOString(),
-        bitis: new Date(selectedDate.getTime() + 3600000).toISOString(),
+        start_time: selectedDate.toISOString(),
+        end_time: new Date(selectedDate.getTime() + 3600000).toISOString(),
         aciklama: "Yeni ders ataması",
         topic: "Ezber",
       })
@@ -64,7 +85,10 @@ const HafizTakip = () => {
         Swal.fire("Başarılı", "Ders atandı.", "success");
         handleSelectHafiz(selectedHafizId);
       })
-      .catch((err) => Swal.fire("Hata", "Ders ataması başarısız: " + err, "error"));
+      .catch((err) => {
+        console.log(err);
+        Swal.fire("Hata", "Ders ataması başarısız: " + err, "error");
+      });
   };
 
   const handleDeleteDers = (dersId) => {
@@ -74,22 +98,24 @@ const HafizTakip = () => {
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Evet, sil!",
-      cancelButtonText: "Vazgeç"
+      cancelButtonText: "Vazgeç",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios
+        api
           .delete(`http://localhost:8000/api/v1/ders-atamalari/${dersId}/`)
           .then(() => {
             setDersAtamalari((prev) => prev.filter((d) => d.id !== dersId));
             Swal.fire("Silindi", "Ders başarıyla silindi.", "success");
           })
-          .catch((err) => Swal.fire("Hata", "Silme işlemi başarısız: " + err, "error"));
+          .catch((err) =>
+            Swal.fire("Hata", "Silme işlemi başarısız: " + err, "error")
+          );
       }
     });
   };
 
   const filteredDersler = dersAtamalari.filter((d) => {
-    const dersDate = new Date(d.baslangic);
+    const dersDate = new Date(d.start_time);
     return (
       dersDate.toDateString() === selectedDate.toDateString() &&
       (!selectedHafizId || d.hafiz === selectedHafizId)
@@ -148,23 +174,49 @@ const HafizTakip = () => {
                   </button>
                   <hr />
                   <h6 className="text-center text-muted">🎓 Atanmış Dersler</h6>
-                  {filteredDersler.length > 0 ? (
+                  {dersAtamalari.length > 0 ? (
                     <ul className="list-group list-group-flush">
-                      {filteredDersler.map((d) => (
+                      {dersAtamalari.map((d) => (
                         <li
                           key={d.id}
                           className="list-group-item small d-flex justify-content-between align-items-start"
                         >
                           <div>
-                            <strong>{new Date(d.baslangic).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</strong>
-                            : {d.topic}
-                            <div className="text-muted small">
-                              {getHafizName(d.hafiz)} - {new Date(d.baslangic).toLocaleDateString()}
+                            <div className="fw-bold">🎯 {d.topic}</div>
+
+                            <div className="text-muted small mt-1">
+                              ⏰{" "}
+                              {new Date(d.start_time).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}{" "}
+                              -{" "}
+                              {new Date(d.start_time).toLocaleDateString(
+                                "tr-TR",
+                                {
+                                  weekday: "long",
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                }
+                              )}
                             </div>
+
+                            <div className="text-muted small">
+                              🧕 {d.hafiz_detail?.full_name}{" "}
+                              <span className="text-secondary">(Hafız)</span>
+                              <br />
+                              👩‍🏫 {d.instructor_detail?.full_name}{" "}
+                              <span className="text-secondary">(Eğitmen)</span>
+                            </div>
+
                             {d.aciklama && (
-                              <div className="text-muted small">{d.aciklama}</div>
+                              <div className="text-muted small mt-1">
+                                📝 {d.aciklama}
+                              </div>
                             )}
                           </div>
+
                           <button
                             className="btn btn-sm btn-outline-danger"
                             onClick={() => handleDeleteDers(d.id)}

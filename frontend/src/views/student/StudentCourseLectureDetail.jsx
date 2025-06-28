@@ -1,6 +1,6 @@
 import React from 'react'
-import BaseHeader from '../partials/BaseHeader'
-import BaseFooter from '../partials/BaseFooter'
+import AkademiBaseHeader from '../partials/AkademiBaseHeader'
+import AkademiBaseFooter from '../partials/AkademiBaseFooter'
 import Sidebar from './Partials/Sidebar'
 import Header from './Partials/Header'
 
@@ -9,7 +9,7 @@ import ReactPlayer from 'react-player'
 function StudentCourseLectureDetail() {
     return (
         <>
-            <BaseHeader />
+            <AkademiBaseHeader />
 
             <section className="pt-5 pb-5">
                 <div className="container">
@@ -1361,7 +1361,7 @@ function StudentCourseLectureDetail() {
                 </div>
             </section>
 
-            <BaseFooter />
+            <AkademiBaseFooter />
         </>
     )
 }

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import { logout } from "../../utils/auth";
 import { Link } from "react-router-dom";
 
@@ -11,7 +11,7 @@ function Logout() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
 
       <section
         className="container d-flex flex-column vh-100"
@@ -43,7 +43,7 @@ function Logout() {
         </div>
       </section>
 
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

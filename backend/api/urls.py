@@ -2,24 +2,33 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from api import views as api_views
+from .views import (
+    AnnotationViewSet, DersAtamasiViewSet, HafizViewSet, HataNotuViewSet, QuranPageViewSet, get_user_role_detail,
+    peer_id_view
+)
 
 # ViewSet'ler için router
 router = DefaultRouter()
-router.register(r"egitmenler", api_views.HDMEgitmenViewSet)
-router.register(r"hafizlar", api_views.HDMHafizViewSet)
-router.register(r"ders-atamalari", api_views.DersAtamasiViewSet)
+router.register(r"egitmenler", api_views.TeacherViewSet,basename="egitmen")
+router.register(r"hafizlar", HafizViewSet, basename="hafiz")
+router.register(r"ders-atamalari", DersAtamasiViewSet, basename="ders-atamalari")
+router.register(r"hatalar", HataNotuViewSet, basename="hatalar")
 router.register(r"dersler", api_views.DersViewSet)
-router.register(r"hatalar", api_views.HataNotuViewSet)
 router.register(r"cizimler", api_views.AnnotationViewSet)
 router.register(r'stajer', api_views.StajerViewSet, basename='stajer')
 router.register(r'ogrenci', api_views.OgrenciViewSet, basename='ogrenci')
+router.register(r'annotation', api_views.AnnotationViewSet, basename='annotation')
+router.register(r'quran-page', api_views.QuranPageViewSet, basename='quran-page')
 
 urlpatterns = [
     # Router ViewSet yolları
     path("", include(router.urls)),
 
+    path('peer-id/', peer_id_view, name='peer_id'),
+
     #Roller ve Yetkiler
     path("egitmen/list/", api_views.EgitmenListAPIView.as_view(), name="job-list"),
+    path("user-role-detail/", api_views.get_user_role_detail, name="role-detail"),
     
     # Özel HDM endpoint
     path("dersler/<int:hafiz_id>/<str:date>/", api_views.dersler_by_date, name="hafiz-dersler-by-date"),
@@ -34,6 +43,7 @@ urlpatterns = [
     path("country/list/", api_views.CountryListAPIView.as_view(), name="country-list"),
     path("district/list/", api_views.DistrictListAPIView.as_view(), name="district-list"),
     path("proje/list/", api_views.ProjeListAPIView.as_view(), name="proje-list"),
+    path("agent/list/", api_views.AgentListAPIView.as_view(), name="agent-list"),
 
     # Organizasyon Şeması
     path("admin/organizationchart/", api_views.OrganizationMemberViewSetAPIVIew.as_view(), name="organization-chart"),
@@ -59,6 +69,7 @@ urlpatterns = [
     path("course/cart-item-delete/<cart_id>/<item_id>/", api_views.CartItemDeleteAPIView.as_view()),
     path("course/course-delete/<int:pk>/", api_views.CourseDeleteView.as_view()),
     path("course/course-detay/<int:pk>/", api_views.CourseDetailAPIView.as_view()),
+    
     # Order & Payment
     path("order/create-order/", api_views.CreateOrderAPIView.as_view()),
     path("order/checkout/<oid>/", api_views.CheckoutAPIView.as_view()),

@@ -9,8 +9,8 @@ import Swal from "sweetalert2";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 
 const validationSchema = Yup.object({
   title: Yup.string().required("Başlık zorunludur").max(60),
@@ -97,7 +97,7 @@ function CourseCreate() {
 
   return (
     <>
-      <BaseHeader />
+      <AkademiBaseHeader />
       <section className="pt-5 pb-5">
         <div className="container">
           <Header />
@@ -462,7 +462,7 @@ function CourseCreate() {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <AkademiBaseFooter />
     </>
   );
 }

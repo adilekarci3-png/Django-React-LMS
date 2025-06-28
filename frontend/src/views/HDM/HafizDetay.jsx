@@ -43,7 +43,7 @@ function HafizDetay() {
                   <ul className="list-group mt-2">
                     {veri.dersler.map((d) => (
                       <li key={d.id} className="list-group-item">
-                        {new Date(d.baslangic).toLocaleString()} – {d.topic}
+                        {new Date(d.start).toLocaleString()} – {d.topic}
                       </li>
                     ))}
                   </ul>
@@ -75,7 +75,7 @@ function HafizDetay() {
                   <ul className="list-group mt-2">
                     {veri.birakilan_dersler?.map((d) => (
                       <li key={d.id} className="list-group-item text-muted">
-                        {new Date(d.baslangic).toLocaleString()} – {d.topic}
+                        {new Date(d.start_time).toLocaleString()} – {d.topic}
                       </li>
                     ))}
                   </ul>

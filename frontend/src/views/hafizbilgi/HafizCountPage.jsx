@@ -1,6 +1,6 @@
 import React from "react";
-import BaseHeader from "../partials/BaseHeader";
-import BaseFooter from "../partials/BaseFooter";
+import HBSBaseHeader from "../partials/HBSBaseHeader";
+import HBSBaseFooter from "../partials/HBSBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
@@ -83,7 +83,7 @@ const HafizCountPage = () => {
 
   return (
     <>
-      <BaseHeader />
+      <HBSBaseHeader />
       <section className="pt-5 pb-5 bg-light">
         <div className="container">
           <Header />
@@ -103,7 +103,7 @@ const HafizCountPage = () => {
           </div>
         </div>
       </section>
-      <BaseFooter />
+      <HBSBaseFooter />
     </>
   );
 };
