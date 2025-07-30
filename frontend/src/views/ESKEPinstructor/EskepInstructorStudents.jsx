@@ -4,7 +4,7 @@ import moment from "moment";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
@@ -13,7 +13,7 @@ function EskepInstructorStudents() {
 
   useEffect(() => {
     useAxios()
-      .get(`eskepinstructor/student-lists/${UserData()?.user_id}/`)
+      .get(`eskepinstructor/student-lists/${useUserData()?.user_id}/`)
       .then((res) => {
         debugger;
         console.log("res.data: ", res.data);

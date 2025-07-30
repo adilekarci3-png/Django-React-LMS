@@ -69,7 +69,7 @@ const OgrenciMenu = () => {
             </Link>
           </li>
           <li>
-            <Link className="dropdown-item" to={`/agent/hafizbilgi/list/`}>
+            <Link className="dropdown-item" to={`/temsilci/hafizbilgi/list/`}>
               <i className="fa-solid fa-user-graduate"></i> Hafız Bilgileri
             </Link>
           </li>

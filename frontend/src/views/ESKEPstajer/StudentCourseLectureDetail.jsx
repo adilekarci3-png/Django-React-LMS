@@ -70,7 +70,7 @@ function StudentCourseLectureDetail() {
                                                                 aria-controls="course-pills-3"
                                                                 aria-selected="false"
                                                             >
-                                                                Discussion
+                                                                Müzakere
                                                             </button>
                                                         </li>
 
@@ -85,7 +85,7 @@ function StudentCourseLectureDetail() {
                                                                 aria-controls="course-pills-4"
                                                                 aria-selected="false"
                                                             >
-                                                                Leave a Review
+                                                                Fikir Beyan Et :)
                                                             </button>
                                                         </li>
                                                     </ul>
@@ -1052,7 +1052,7 @@ function StudentCourseLectureDetail() {
                                                             <div className="card">
                                                                 <div className="card-header border-bottom p-0 pb-3">
                                                                     <div className="d-sm-flex justify-content-between align-items-center">
-                                                                        <h4 className="mb-0 p-3">All Notes</h4>
+                                                                        <h4 className="mb-0 p-3">Tüm Notlar</h4>
                                                                     </div>
                                                                 </div>
                                                                 <div className="card-body p-0 pt-3">
@@ -1096,7 +1096,7 @@ function StudentCourseLectureDetail() {
                                                                 {/* Card header */}
                                                                 <div className="card-header border-bottom p-0 pb-3">
                                                                     {/* Title */}
-                                                                    <h4 className="mb-3 p-3">Discussion</h4>
+                                                                    <h4 className="mb-3 p-3">Müzakere</h4>
                                                                     <form className="row g-4 p-3">
                                                                         {/* Search */}
                                                                         <div className="col-sm-6 col-lg-9">
@@ -1114,7 +1114,7 @@ function StudentCourseLectureDetail() {
                                                                                 data-bs-toggle="modal"
                                                                                 data-bs-target="#modalCreatePost"
                                                                             >
-                                                                                Ask Question
+                                                                                Soru Sor
                                                                             </a>
                                                                         </div>
                                                                     </form>

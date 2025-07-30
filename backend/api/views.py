@@ -1,4 +1,7 @@
+from itertools import count
 from urllib import response
+from django.utils.timezone import now, localdate
+from django.forms import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.core.mail import EmailMultiAlternatives
@@ -15,7 +18,9 @@ from api import serializer as api_serializer
 from api import models as api_models
 from setuptools.dist import strtobool
 from userauths.models import User, Profile
+from django.db.models import Count
 
+from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status, viewsets
 from rest_framework.permissions import AllowAny
@@ -31,6 +36,9 @@ import stripe
 import requests
 from datetime import datetime, timedelta
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import BasePermission
+from rest_framework.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist
 # import distutils
 # from distutils.util import strtobool
 
@@ -84,8 +92,85 @@ class BaseListAPIView(generics.ListAPIView):
 class BaseDestroyAPIView(generics.DestroyAPIView):
     permission_classes = [AllowAny]
 
-# Role-Based List Views
+class IsEskepKoordinatorOrTeacher(BasePermission):
+    """
+    - Kullanıcı Koordinator tablosunda ve rolü ESKEPKoordinator ise izin verilir.
+    - Kullanıcı Teacher tablosunda ve rolü ESKEPEgitmen ise izin verilir.
+    """
+    def has_permission(self, request, view):
+        user = request.user
 
+        if not user.is_authenticated:
+            return False
+
+        # Koordinator kontrolü
+        try:
+            koordinator = api_models.Koordinator.objects.get(user=user)
+            if koordinator.roles.filter(name="ESKEPKoordinator").exists():
+                return True
+        except ObjectDoesNotExist:
+            pass
+
+        # Teacher kontrolü
+        try:
+            teacher = api_models.Teacher.objects.get(user=user)
+            if teacher.roles.filter(name="ESKEPEgitmen").exists():
+                return True
+        except ObjectDoesNotExist:
+            pass
+
+        return False
+
+
+class IsGeneralKoordinator(BasePermission):
+    """
+    Kullanıcının Koordinator tablosunda olup,
+    rolleri arasında aşağıdaki sub_roles'ten biri varsa izin verilir.
+    """
+    allowed_sub_roles = [
+        "HBSKoordinator",
+        "HDMKoordinator",
+        "AkademiKoordinator",
+        "ESKEPKoordinator",
+    ]
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        try:
+            koordinator = api_models.Koordinator.objects.get(user=user)
+            return koordinator.roles.filter(name__in=self.allowed_sub_roles).exists()
+        except ObjectDoesNotExist:
+            return False
+
+
+class IsGeneralTeacher(BasePermission):
+    """
+    Kullanıcının Teacher tablosunda olup,
+    rolleri arasında aşağıdaki teacher_roles'ten biri varsa izin verilir.
+    """
+    allowed_teacher_roles = [
+        "HBSEgitmen",
+        "HDMEgitmen",
+        "AkademiEgitmen",
+        "ESKEPEgitmen",
+    ]
+
+    def has_permission(self, request, view):
+        user = request.user
+
+        if not user.is_authenticated:
+            return False
+
+        try:
+            teacher = api_models.Teacher.objects.get(user=user)
+            return teacher.roles.filter(name__in=self.allowed_teacher_roles).exists()
+        except ObjectDoesNotExist:
+            return False
+        
 class EskepOgrenciDersSonuRaporuListAPIView(BaseListAPIView):
     serializer_class = api_serializer.DersSonuRaporuSerializer
 
@@ -144,8 +229,9 @@ class EskepInstructorProjeListAPIView(BaseListAPIView):
 
 class EskepInstructorOdevListAPIView(BaseListAPIView):
     serializer_class = api_serializer.OdevSerializer
-
+    
     def get_queryset(self):
+        print(self.kwargs['user_id'])
         user_id = self.kwargs['user_id']
         koordinator = api_models.Koordinator.objects.get(user__id=user_id)
         return api_models.Odev.objects.filter(koordinator=koordinator)
@@ -489,11 +575,16 @@ class StajerListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.StajerSerializer
     permission_classes = [AllowAny]
 
-class EgitmenListAPIView(generics.ListAPIView):
-    queryset = api_models.Teacher.objects.filter(active=True)  
-    serializer_class = api_serializer.TeacherSerializer
+class EskepEgitmenListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.TeacherSimpleSerializer
     permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        return api_models.Teacher.objects.filter(
+            active=True,
+            roles__name="ESKEPEgitmen"
+        ).distinct() 
+    
 class OgrenciListAPIView(generics.ListAPIView):
     queryset = api_models.Ogrenci.objects.filter(active=True)  
     serializer_class = api_serializer.OgrenciSerializer
@@ -504,15 +595,33 @@ class CourseListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
 
-# class CourseDetailAPIView(generics.RetrieveAPIView):
-#     serializer_class = api_serializer.CourseSerializer
-#     permission_classes = [AllowAny]
-#     queryset = api_models.Course.objects.filter(platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
 
-#     def get_object(self):
-#         slug = self.kwargs['slug']
-#         course = api_models.Course.objects.get(slug=slug, platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
-#         return course
+class MyCourseListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CourseSerializer    
+    permission_classes = [IsEskepKoordinatorOrTeacher]    
+    
+    def get_queryset(self):
+        user_id = self.kwargs.get("user_id")
+        print("Kullanıcı:", self.request.user)
+        print("Base role:", getattr(self.request.user, "base_roles", None))
+        print("Sub roles:", getattr(self.request.user, "sub_roles", None))
+        
+        return api_models.Course.objects.filter(
+            inserteduser__id=user_id,
+            platform_status="Yayinlanmis",
+            teacher_course_status="Yayinlanmis",
+            active=True
+        ).select_related("teacher", "category")
+
+class CourseDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.CourseSerializer
+    permission_classes = [AllowAny]
+    queryset = api_models.Course.objects.filter(platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
+
+    def get_object(self):
+        slug = self.kwargs['slug']
+        course = api_models.Course.objects.get(slug=slug, platform_status="Yayinlanmis", teacher_course_status="Yayinlanmis")
+        return course
 
 class CourseDeleteView(APIView):
     def delete(self, request, pk):
@@ -1099,14 +1208,20 @@ class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        print(request.data['variant_item_id'])
+        print(request.data['user_id'])
+        print(request.data['course_id'])
         user_id = request.data['user_id']
         course_id = request.data['course_id']
         variant_item_id = request.data['variant_item_id']
-
+        
+        if not variant_item_id:
+            return Response({"error": "variant_item_id gönderilmedi"}, status=400)
+        
         user = get_object_or_404(User, id=user_id)
         course = api_models.Course.objects.get(id=course_id)
         variant_item = api_models.VariantItem.objects.get(variant_item_id=variant_item_id)
-
+        print(variant_item)
         completed_lessons = api_models.CompletedLesson.objects.filter(user=user, course=course, variant_item=variant_item).first()
 
         if completed_lessons:
@@ -1125,7 +1240,10 @@ class InstructorOdevCompletedCreateAPIView(generics.CreateAPIView):
         user_id = request.data['user_id']
         odev_id = request.data['odev_id']
         variant_item_id = request.data['variant_item_id']
-
+        
+        if not variant_item_id:
+            return Response({"error": "variant_item_id gönderilmedi"}, status=400)
+        
         user = get_object_or_404(User, id=user_id)
         odev = api_models.Odev.objects.get(id=odev_id)
         variant_item = api_models.VariantOdevItem.objects.get(variant_item_id=variant_item_id)
@@ -1894,39 +2012,29 @@ class TeacherSummaryAPIView(generics.ListAPIView):
         one_month_ago = datetime.today() - timedelta(days=28)
 
         total_courses = api_models.Course.objects.filter(teacher=teacher).count()
-        # total_revenue = api_models.CartOrderItem.objects.filter(teacher=teacher, order__payment_status="Paid").aggregate(total_revenue=models.Sum("price"))['total_revenue'] or 0
-        total_revenue = api_models.CartOrderItem.objects.filter(teacher=teacher).count() or 0
-        # monthly_revenue = api_models.CartOrderItem.objects.filter(teacher=teacher, order__payment_status="Paid", date__gte=one_month_ago).aggregate(total_revenue=models.Sum("price"))['total_revenue'] or 0
-        monthly_revenue = api_models.CartOrderItem.objects.filter(teacher=teacher, date__gte=one_month_ago).count() or 0
+        total_revenue = (
+            api_models.CartOrderItem.objects
+            .filter(teacher=teacher, order__payment_status="Paid")
+            .aggregate(total=models.Sum("price"))["total"] or 0
+        )
+        monthly_revenue = (
+            api_models.CartOrderItem.objects
+            .filter(teacher=teacher, order__payment_status="Paid", date__gte=one_month_ago)
+            .aggregate(total=models.Sum("price"))["total"] or 0
+        )
 
         enrolled_courses = api_models.EnrolledCourse.objects.filter(teacher=teacher)
         unique_student_ids = set()
-        students = []
-
         for course in enrolled_courses:
-            if course.user_id not in unique_student_ids:
-                user = User.objects.get(id=course.user_id)
-                student = {
-                    "full_name": user.profile.full_name,
-                    "image": user.profile.image.url,
-                    "country": user.profile.country,
-                    "date": course.date
-                }
-
-                students.append(student)
-                unique_student_ids.add(course.user_id)
+            unique_student_ids.add(course.user_id)
 
         return [{
             "total_courses": total_courses,
             "total_revenue": total_revenue,
             "monthly_revenue": monthly_revenue,
-            "total_students": len(students),
+            "total_students": len(unique_student_ids),
         }]
-    
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+
     
 
 class TeacherCourseListAPIView(generics.ListAPIView):
@@ -2053,12 +2161,13 @@ def IsAgent(request, user_id):
     if agent is None:
         return Response({"is_agent": False})  # veya sadece False
     else:
-        return Response({"is_agent": True})
+        return Response({"is_agent": True,"agent_id": agent.id})
         
-
+class CartOrderItemListAPIView(generics.ListAPIView):
+    queryset = api_models.CartOrderItem.objects.all()
+    serializer_class = api_serializer.CartOrderItemSerializer
 
 class TeacherBestSellingCourseAPIView(viewsets.ViewSet):
-
     def list(self, request, teacher_id=None):
         teacher = api_models.Teacher.objects.get(id=teacher_id)
         courses_with_total_price = []
@@ -2083,9 +2192,7 @@ class TeacherCourseOrdersListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         teacher_id = self.kwargs['teacher_id']
-        teacher = api_models.Teacher.objects.get(id=teacher_id)
-
-        return api_models.CartOrderItem.objects.filter(teacher=teacher)
+        return api_models.CartOrderItem.objects.filter(teacher__id=teacher_id)
 
 class TeacherQuestionAnswerListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.Question_AnswerSerializer
@@ -2414,9 +2521,53 @@ class HafizBilgiCreateAPIView(generics.CreateAPIView):
     permission_classes = []  # Girişsiz kullanım için boş
 
     def perform_create(self, serializer):
-        serializer.save()
+        # Hafızın bilgilerini al
+        gender = serializer.validated_data.get("gender")
+        adres_il = serializer.validated_data.get("adresIl")
 
-        return Response({"message": "Hafız bilgisi başarılı bir şekilde eklendi"}, status=status.HTTP_201_CREATED)
+        try:
+            ankara_city = api_models.City.objects.get(name__iexact="Ankara")
+        except api_models.City.DoesNotExist:
+            raise ValidationError("Ankara şehri bulunamadı.")
+    
+        matching_agent = api_models.Agent.objects.filter(
+            gender=gender,
+            city=adres_il
+        ).first()
+
+        # 2) gender + Ankara
+        if not matching_agent:
+            matching_agent = api_models.Agent.objects.filter(
+                gender=gender,
+                city=ankara_city.id
+            ).first()
+
+        # 3) opposite gender + city
+        if not matching_agent:
+            opposite_gender = "Kadın" if gender == "Erkek" else "Erkek"
+            matching_agent = api_models.Agent.objects.filter(
+                gender=opposite_gender,
+                city=adres_il
+            ).first()
+
+        # 4) opposite gender + Ankara
+        if not matching_agent:
+            matching_agent = api_models.Agent.objects.filter(
+                gender=opposite_gender,
+                city=ankara_city.id
+            ).first()
+
+        # 5) Hiçbiri yoksa hata
+        if not matching_agent:
+            raise ValidationError("Uygun Agent bulunamadı.")
+        # Hafızı kaydet
+        instance = serializer.save(agent=matching_agent)
+
+        # İsteğe göre mesaj dönecek
+        return Response(
+            {"message": "Hafız bilgisi başarılı bir şekilde eklendi"},
+            status=status.HTTP_201_CREATED
+        )
 
 
 class HafizBilgiUpdateAPIView(generics.RetrieveUpdateAPIView):
@@ -2497,7 +2648,14 @@ class HafizsListAPIView(generics.ListAPIView):
         print(queryset)      
         return queryset   
 
+class HafizsListByAgentAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.HafizBilgiSerializer
+    permission_classes = [AllowAny]
 
+    def get_queryset(self):
+        agent = self.kwargs["agent"]
+        return api_models.Hafiz.objects.filter(agent=agent) 
+    
 class JobListAPIView(generics.ListAPIView):   
     serializer_class = api_serializer.JobSerializer 
     permission_classes = [AllowAny]
@@ -2677,6 +2835,7 @@ def user_role_by_id_view(request, user_id):
     return JsonResponse({"user_id": user_id, "role": role})
 
 # 🟩 Eğitmen etkinlik oluşturur
+@permission_classes([IsAuthenticated])
 class ESKEPEventCreateAPIView(generics.CreateAPIView):
     queryset = api_models.ESKEPEvent.objects.all()
     serializer_class = api_serializer.ESKEPEventSerializer
@@ -2690,12 +2849,20 @@ class ESKEPEventCreateAPIView(generics.CreateAPIView):
         serializer.save(owner=self.request.user)
     
 # 🟨 Eğitmen: kendi etkinlikleri
+@permission_classes([IsAuthenticated])
 class InstructorEventListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.ESKEPEventSerializer
-    permission_classes = [IsAuthenticated]  # veya IsAuthenticated
+    permission_classes = [IsAuthenticated, IsGeneralTeacher]
 
     def get_queryset(self):
         user_id = self.kwargs.get("user_id")
+
+        try:
+            target_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise PermissionDenied("Kullanıcı bulunamadı.")
+
+        # Burada tekrar base_role veya sub_role kontrolüne gerek yok
         return api_models.ESKEPEvent.objects.filter(owner_id=user_id).order_by("date")
 
 # 🟦 Öğrenci: sadece kendi eğitmeninin etkinlikleri
@@ -2715,7 +2882,7 @@ class StudentEventListAPIView(generics.ListAPIView):
 class GeneralEventListAPIView(generics.ListAPIView):
     queryset = api_models.ESKEPEvent.objects.all().order_by("date")
     serializer_class = api_serializer.ESKEPEventSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsGeneralKoordinator]
     
 @api_view(['GET'])
 def koordinator_students_stajers(request, koordinator_user_id):
@@ -2861,20 +3028,37 @@ class OgrenciViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]   
 
 class UpdateCoordinatorRole(APIView):
+    ROLE_MAP = {
+        "Ogrenci": "ESKEPOgrenciKoordinator",
+        "Stajer": "ESKEPStajerKoordinator",
+        "Genel": "ESKEPGenelKoordinator",
+    }
+
     def post(self, request):
         coordinator_id = request.data.get('coordinator_id')
-        role = request.data.get('role')
-
-        if not coordinator_id or not role:
+        role_key = request.data.get('role')  # "Öğrenci" gibi sade ad geliyor
+        print(request.data)
+        
+        if not coordinator_id or not role_key:
             return Response({"error": "Eksik veri"}, status=status.HTTP_400_BAD_REQUEST)
+
+        role_name = self.ROLE_MAP.get(role_key)
+        if not role_name:
+            return Response({"error": "Geçersiz rol adı"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             coordinator = api_models.Koordinator.objects.get(id=coordinator_id)
-            coordinator.role = role
-            coordinator.save()
-            return Response({"detail": "Rol güncellendi"}, status=status.HTTP_200_OK)
         except api_models.Koordinator.DoesNotExist:
             return Response({"error": "Koordinatör bulunamadı"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            role = api_models.KoordinatorRole.objects.get(name=role_name)
+        except api_models.KoordinatorRole.DoesNotExist:
+            return Response({"error": f"{role_name} adlı rol bulunamadı"}, status=status.HTTP_400_BAD_REQUEST)
+
+        coordinator.roles.set([role])
+        return Response({"detail": f"{role_key} rolü başarıyla atandı"}, status=status.HTTP_200_OK)
+
 
 class QuranPageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = api_models.QuranPage.objects.all()
@@ -2904,48 +3088,221 @@ def peer_id_view(request):
 def get_user_role_detail(request):
     user = request.user
     data = {
-        "base_role": None,
+        "base_roles": [],     # DİKKAT: çoğul hale getirildi
         "sub_roles": [],
     }
 
-    # TEACHER
+    # Her role için ayrı kontrol ve ekleme
     if api_models.Teacher.objects.filter(user=user).exists():
         teacher = api_models.Teacher.objects.get(user=user)
-        data["base_role"] = "Teacher"
-        data["sub_roles"] = list(teacher.roles.values_list("name", flat=True))
-        return Response(data)
+        data["base_roles"].append("Teacher")
+        data["sub_roles"].extend(teacher.roles.values_list("name", flat=True))
 
-    # KOORDINATOR
     if api_models.Koordinator.objects.filter(user=user).exists():
         koordinator = api_models.Koordinator.objects.get(user=user)
-        data["base_role"] = "Koordinator"
-        data["sub_roles"] = list(koordinator.roles.values_list("name", flat=True))
-        return Response(data)
+        data["base_roles"].append("Koordinator")
+        data["sub_roles"].extend(koordinator.roles.values_list("name", flat=True))
 
-    # Ogrenci
     if api_models.Ogrenci.objects.filter(user=user).exists():
         ogrenci = api_models.Ogrenci.objects.get(user=user)
-        data["base_role"] = "Ogrenci"
-        data["sub_roles"] = list(ogrenci.roles.values_list("name", flat=True))
-        return Response(data)
+        data["base_roles"].append("Ogrenci")
+        data["sub_roles"].extend(ogrenci.roles.values_list("name", flat=True))
 
-    # STAJER
     if api_models.Stajer.objects.filter(user=user).exists():
         stajer = api_models.Stajer.objects.get(user=user)
-        data["base_role"] = "Stajer"
-        data["sub_roles"] = list(stajer.roles.values_list("name", flat=True))
-        return Response(data)
+        data["base_roles"].append("Stajer")
+        data["sub_roles"].extend(stajer.roles.values_list("name", flat=True))
 
-    # HAFIZ
     if api_models.Hafiz.objects.filter(email=user.email).exists():
         hafiz = api_models.Hafiz.objects.get(email=user.email)
-        data["base_role"] = "Hafiz"
-        data["sub_roles"] = list(hafiz.roles.values_list("name", flat=True))
-        return Response(data)
+        data["base_roles"].append("Hafiz")
+        data["sub_roles"].extend(hafiz.roles.values_list("name", flat=True))
 
-    # AGENT
     if api_models.Agent.objects.filter(user=user).exists():
-        data["base_role"] = "Agent"
-        data["sub_roles"] = []  # Agent için sub-role yoksa
+        agent = api_models.Agent.objects.get(email=user.email)
+        data["base_roles"].append("Agent")
+        data["sub_roles"].extend(agent.roles.values_list("name", flat=True))
+
+    # Aynı sub_role tekrar edebilir, benzersizleştir
+    data["sub_roles"] = list(set(data["sub_roles"]))
+    data["base_roles"] = list(set(data["base_roles"]))
 
     return Response(data)
+
+@api_view(["POST"])
+def check_ceptel(request):
+    ceptel = request.data.get("ceptel")
+    exists = api_models.Hafiz.objects.filter(ceptel=ceptel).exists()
+    return Response({"exists": exists})
+
+@api_view(["POST"])
+def check_email(request):
+    email = request.data.get("email")
+    exists = api_models.Hafiz.objects.filter(email=email).exists()
+    return Response({"exists": exists})
+
+
+class Top5TemsilciByHafizAPIView(APIView):
+    def get(self, request):
+        temsilciler = (
+            api_models.Agent.objects
+            .annotate(hafiz_sayisi=Count("hafizlar"))
+            .order_by("-hafiz_sayisi")[:5]
+        )
+        data = [
+            {
+                "ad": t.full_name,
+                "adet": t.hafiz_sayisi
+            }
+            for t in temsilciler
+        ]
+        return Response(data)
+
+class RecentHafizAssignmentSerializer(serializers.ModelSerializer):
+    hafiz_name = serializers.CharField(source="full_name")
+    egitmen_name = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = api_models.Hafiz
+        fields = ["hafiz_name", "egitmen_name", "date"]
+
+    def get_egitmen_name(self, obj):
+        return obj.hdm_egitmen.full_name if obj.hdm_egitmen else "-"
+
+    def get_date(self, obj):
+        tarih = getattr(obj, "modified", None) or getattr(obj, "created", None)
+        return tarih.strftime("%Y-%m-%d") if tarih else "-"
+    
+class AssignmentChartSerializer(serializers.ModelSerializer):
+    egitmen = serializers.CharField(source="full_name")
+    hafiz_sayisi = serializers.IntegerField()
+
+    class Meta:
+        model = api_models.Teacher
+        fields = ["egitmen", "hafiz_sayisi"]
+
+class SummaryStatsSerializer(serializers.Serializer):
+    total_hafiz = serializers.IntegerField()
+    total_egitmen = serializers.IntegerField()
+    assigned_hafiz = serializers.IntegerField()
+    unassigned_hafiz = serializers.IntegerField()    
+
+class HBSKoordinatorDashboardViewSet(ViewSet):
+    def summary(self, request):
+        stats = {
+            "total_hafiz": api_models.Hafiz.objects.count(),
+            "total_egitmen": api_models.Agent.objects.count(),
+            "assigned_hafiz": api_models.Hafiz.objects.filter(active=True, onaydurumu="Onaylandı").count(),
+            "unassigned_hafiz": api_models.Hafiz.objects.filter(active=False, onaydurumu="Onaylanmadı").count()            
+        }
+        serializer = SummaryStatsSerializer(stats)
+        print(serializer.data)
+        return Response({"stats": serializer.data})
+
+    def recent_assignments(self, request):
+        queryset = api_models.Hafiz.objects.filter(hdm_egitmen__isnull=False).order_by("-id")[:20]
+        serializer = RecentHafizAssignmentSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def assignments_chart(self, request):
+        queryset = (
+            api_models.Agent.objects
+            .annotate(hafiz_sayisi=Count("hafizlar")) 
+            .order_by("-hafiz_sayisi")[:5]
+        )
+        serializer = AssignmentChartSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+class HBSTemsilciDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # 🧮 Sayısal özet
+        total_hafiz = api_models.Hafiz.objects.count()
+        confirmed_hafiz = api_models.Hafiz.objects.filter(onaydurumu="Onaylandı").count() 
+        unconfirmed_hafiz = api_models.Hafiz.objects.filter(onaydurumu="Onaylanmadı").count() 
+        total_egitmen = api_models.Teacher.objects.count()
+         
+        today = localdate()        
+        agent = api_models.Agent.objects.get(user=request.user)
+        
+        if hasattr(request.user, "agent"):
+            assigned_hafiz = api_models.Hafiz.objects.filter(agent=agent).count()
+            hafizs = api_models.Hafiz.objects.filter(agent=agent)
+            print(hafizs)
+        else:
+            assigned_hafiz = 0
+        # ⚠️ Uyarılar    
+        alerts = []
+        if unconfirmed_hafiz > 0:
+            alerts.append({"message": f"Onaylanmamış {unconfirmed_hafiz} hafız var."})        
+
+        # 📊 Eğitmen başına hafız grafiği
+        chart_data = (api_models.Hafiz.objects.values("agent__full_name").annotate(hafiz_sayisi=Count("id")).order_by("-hafiz_sayisi"))       
+
+        return Response({
+            "stats": {
+                "total_hafiz": total_hafiz,
+                "confirmed_hafiz": confirmed_hafiz,
+                "unconfirmed_hafiz": unconfirmed_hafiz,
+                "total_egitmen": total_egitmen,
+                "assigned_hafiz": assigned_hafiz,   
+                "hafizlar":hafizs.values("id", "full_name","agent","active")             
+            },            
+            "alerts": alerts,            
+        })
+        
+class LiveLessonViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = api_models.LiveLesson.objects.all()
+    serializer_class = api_serializer.LiveLessonSerializer
+    
+class CombinedEventListAPIView(APIView):    
+    # permission_classes = [IsAuthenticated, IsGeneralTeacher]
+    
+    def get(self, request, user_id): 
+        print(request)
+        print(request.user.profile.role)   
+        try:
+            user = User.objects.get(id=user_id)            
+        except User.DoesNotExist:
+            raise PermissionDenied("Kullanıcı bulunamadı.")
+
+        events = api_models.ESKEPEvent.objects.filter(owner_id=user_id)
+        live_lessons = api_models.LiveLesson.objects.filter(owner_id=user_id)
+
+        serialized_data = []
+
+        for event in events:
+            serialized_data.append({
+                "id": event.id,
+                "title": event.title,
+                "date": event.date,
+                "background_color": event.background_color,
+                "border_color": event.border_color,
+                "type": "event"
+            })
+
+        for lesson in live_lessons:
+            serialized_data.append({
+                "id": lesson.id,
+                "title": lesson.title,
+                "date": lesson.datetime,
+                "background_color": "#28a745",
+                "border_color": "#1e7e34",
+                "type": "live_lesson"
+            })
+
+        return Response(serialized_data)
+    
+class KoordinatorByRoleAPIView(APIView):
+    def get(self, request):
+        role_name = request.query_params.get("role")
+        try:
+            role = api_models.KoordinatorRole.objects.get(name=role_name)
+            coordinators = api_models.Koordinator.objects.filter(roles=role)
+            serializer = api_serializer.KoordinatorSerializer(coordinators, many=True)
+            return Response(serializer.data)
+        except api_models.KoordinatorRole.DoesNotExist:
+            return Response({"error": "Rol bulunamadı"}, status=400)

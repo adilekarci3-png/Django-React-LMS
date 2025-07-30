@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
@@ -12,29 +12,17 @@ import HafizMenu from "../partials/menus/HafizMenu";
 function HDMBaseHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [roleData, setRoleData] = useState({ base_role: null, sub_roles: [] });
-
   const navigate = useNavigate();
+
   const [isLoggedIn, user] = useAuthStore((state) => [
     state.isLoggedIn,
     state.user,
   ]);
 
-  const api = useAxios();
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const res = await api.get(`user-role-detail/`);
-        setRoleData(res.data); // { base_role: "...", sub_roles: [...] }
-      } catch (error) {
-        console.error("Rol alınamadı:", error);
-      }
-    };
-    if (isLoggedIn()) {
-      fetchUserRole();
-    }
-  }, [isLoggedIn]);
+  const [baseRoles, subRoles] = useAuthStore((state) => [
+    state.allUserData?.base_roles || [],
+    state.allUserData?.sub_roles || []
+  ]);
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -60,8 +48,6 @@ function HDMBaseHeader() {
       borderBottom: "4px solid #2f6f64",
     },
   };
-
-  const { base_role, sub_roles } = roleData;
 
   return (
     <div style={styles.section}>
@@ -97,19 +83,19 @@ function HDMBaseHeader() {
                 </Link>
               </li>
 
-              {base_role === "Koordinator" && sub_roles.includes("HDMKoordinator") && (
+              {baseRoles.includes("Koordinator") && subRoles.includes("HDMKoordinator") && (
                 <KoordinatorMenu />
               )}
-              {base_role === "Stajer" && sub_roles.includes("HDMStajer") && (
+              {baseRoles.includes("Stajer") && subRoles.includes("HDMStajer") && (
                 <StajerMenu />
               )}
-              {base_role === "Ogrenci" && sub_roles.includes("HDMOgrenci") && (
+              {baseRoles.includes("Ogrenci") && subRoles.includes("HDMOgrenci") && (
                 <OgrenciMenu />
               )}
-              {base_role === "Teacher" && sub_roles.includes("HDMEgitmen") && (
+              {baseRoles.includes("Teacher") && subRoles.includes("HDMEgitmen") && (
                 <EgitmenMenu />
               )}
-              {base_role === "Hafiz" && sub_roles.includes("HDMHafiz") && (
+              {baseRoles.includes("Hafiz") && subRoles.includes("HDMHafiz") && (
                 <HafizMenu />
               )}
             </ul>

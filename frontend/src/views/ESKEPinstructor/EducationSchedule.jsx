@@ -46,72 +46,82 @@ function EducationSchedule() {
 
   return (
     <>
-      <ESKEPBaseHeader />
-      <section className="pt-5 pb-5 bg-light">
-        <div className="container">
-          <Header />
-          <div className="row mt-0 mt-md-4">
-            <Sidebar />
-            <div className="col-lg-9 col-md-8 col-12">
-              <div className="text-center mb-4">
-                <h3 className="fw-bold text-primary">🌐 Genel Takvim</h3>
-                <p className="text-muted">Sistemdeki tüm etkinlikleri buradan takip edebilirsiniz.</p>
+  <ESKEPBaseHeader />
+  <section className="pt-5 pb-5 bg-light">
+    <div className="container">
+      <Header />
+      <div className="row mt-0 mt-md-4 align-items-start">
+        {/* Sidebar */}
+        <div className="col-lg-3 col-md-4 col-12 mb-4">
+          <Sidebar />
+        </div>
+
+        {/* Ana içerik */}
+        <div className="col-lg-9 col-md-8 col-12">
+          <div className="text-center mb-4">
+            <h3 className="fw-bold text-primary">🌐 Genel Takvim</h3>
+            <p className="text-muted">
+              Sistemdeki tüm etkinlikleri buradan takip edebilirsiniz.
+            </p>
+          </div>
+
+          <div className="row">
+            {/* Takvim */}
+            <div className="col-lg-9 mb-4">
+              <div className="shadow-lg p-4 rounded bg-white" style={{ minHeight: "700px" }}>
+                <FullCalendar
+                  plugins={[dayGridPlugin, interactionPlugin]}
+                  initialView="dayGridMonth"
+                  events={events}
+                  locale={trLocale}
+                  eventClick={handleEventClick}
+                  contentHeight={650}
+                  headerToolbar={{
+                    left: "prev,next today",
+                    center: "title",
+                    right: "dayGridMonth,timeGridWeek,timeGridDay",
+                  }}
+                  eventTextColor="#fff"
+                  dayMaxEvents={2}
+                />
               </div>
+            </div>
 
-              <div className="row">
-                {/* Takvim */}
-                <div className="col-lg-9 mb-4">
-                  <div className="shadow-lg p-4 rounded bg-white" style={{ minHeight: "700px" }}>
-                    <FullCalendar
-                      plugins={[dayGridPlugin, interactionPlugin]}
-                      initialView="dayGridMonth"
-                      events={events}
-                      locale={trLocale}
-                      eventClick={handleEventClick}
-                      contentHeight={650}
-                      headerToolbar={{
-                        left: "prev,next today",
-                        center: "title",
-                        right: "dayGridMonth,timeGridWeek,timeGridDay",
-                      }}
-                      eventTextColor="#fff"
-                      dayMaxEvents={2}
-                    />
-                  </div>
-                </div>
-
-                {/* Etkinlik Listesi */}
-                <div className="col-lg-3">
-                  <div className="bg-white shadow-lg p-3 rounded h-100">
-                    <h5 className="text-secondary fw-bold mb-3">📋 Etkinlik Listesi</h5>
-                    <ul className="list-group list-group-flush">
-                      {sortedEvents.map((event, index) => (
-                        <li
-                          key={index}
-                          className="list-group-item d-flex justify-content-between align-items-start"
-                        >
-                          <div>
-                            <strong>{event.title}</strong>
-                            <div className="text-muted small">
-                              {new Date(event.start).toLocaleDateString("tr-TR")}
-                            </div>
-                          </div>
-                          <span className="badge" style={{ backgroundColor: event.backgroundColor }}>
-                            &nbsp;
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+            {/* Etkinlik Listesi */}
+            <div className="col-lg-3">
+              <div className="bg-white shadow-lg p-3 rounded h-100">
+                <h5 className="text-secondary fw-bold mb-3">📋 Etkinlik Listesi</h5>
+                <ul className="list-group list-group-flush">
+                  {sortedEvents.map((event, index) => (
+                    <li
+                      key={index}
+                      className="list-group-item d-flex justify-content-between align-items-start"
+                    >
+                      <div>
+                        <strong>{event.title}</strong>
+                        <div className="text-muted small">
+                          {new Date(event.start).toLocaleDateString("tr-TR")}
+                        </div>
+                      </div>
+                      <span
+                        className="badge"
+                        style={{ backgroundColor: event.backgroundColor }}
+                      >
+                        &nbsp;
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-
             </div>
           </div>
         </div>
-      </section>
-      <ESKEPBaseFooter />
-    </>
+      </div>
+    </div>
+  </section>
+  <ESKEPBaseFooter />
+</>
+
   );
 }
 

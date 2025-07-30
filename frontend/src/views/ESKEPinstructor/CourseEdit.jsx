@@ -9,7 +9,7 @@ import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import { Link, useParams } from "react-router-dom";
 
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Swal from "sweetalert2";
 import Toast from "../plugin/Toast";
 
@@ -142,7 +142,7 @@ function CourseEdit() {
 
     useAxios()
       .delete(
-        `teacher/course/variant-delete/${variantId}/${UserData()?.teacher_id}/${param.course_id}/`
+        `teacher/course/variant-delete/${variantId}/${useUserData()?.teacher_id}/${param.course_id}/`
       )
       .then((res) => {
         console.log(res.data);
@@ -173,7 +173,7 @@ function CourseEdit() {
 
     useAxios()
       .delete(
-        `teacher/course/variant-item-delete/${variantId}/${itemId}/${UserData()?.teacher_id}/${param.course_id}/`
+        `teacher/course/variant-item-delete/${variantId}/${itemId}/${useUserData()?.teacher_id}/${param.course_id}/`
       )
       .then((res) => {
         console.log(res.data);
@@ -194,7 +194,7 @@ function CourseEdit() {
     formdata.append("price", course.price);
     formdata.append("level", course.level);
     formdata.append("language", course.language);
-    formdata.append("teacher", parseInt(UserData()?.teacher_id));
+    formdata.append("teacher", parseInt(useUserData()?.teacher_id));
     console.log(course.category);
 
     if (course.file !== null || course.file !== "") {
@@ -225,7 +225,7 @@ function CourseEdit() {
     });
 
     const response = await useAxios().patch(
-      `teacher/course-update/${UserData()?.teacher_id}/${param.course_id}/`,
+      `teacher/course-update/${useUserData()?.teacher_id}/${param.course_id}/`,
       formdata
     );
     console.log(response.data);

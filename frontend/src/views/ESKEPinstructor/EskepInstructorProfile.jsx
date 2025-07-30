@@ -4,7 +4,7 @@ import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import { ProfileContext } from "../plugin/Context";
 
 function Profile() {
@@ -21,7 +21,7 @@ function Profile() {
 
   const fetchProfile = () => {
     useAxios()
-      .get(`user/profile/${UserData()?.user_id}/`)
+      .get(`user/profile/${useUserData()?.user_id}/`)
       .then((res) => {
         console.log(res.data);
         setProfile(res.data);
@@ -61,7 +61,7 @@ function Profile() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await useAxios().get(`user/profile/${UserData()?.user_id}/`);
+    const res = await useAxios().get(`user/profile/${useUserData()?.user_id}/`);
     const formdata = new FormData();
     if (profileData.image && profileData.image !== res.data.image) {
       formdata.append("image", profileData.image);
@@ -74,7 +74,7 @@ function Profile() {
     formdata.append("expertise", profileData.expertise); // Eğitmenler için uzmanlık bilgisi ekleniyor
 
     await useAxios()
-      .patch(`user/profile/${UserData()?.user_id}/`, formdata, {
+      .patch(`user/profile/${useUserData()?.user_id}/`, formdata, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

@@ -9,33 +9,35 @@ import Header from "./Partials/Header";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 
 function ESKEPEgitmenSchedule() {
-  const [events, setEvents] = useState([]);  
-  const profile = UserData(); 
+  const [events, setEvents] = useState([]);
+  const profile = useUserData();
   const api = useAxios();
 
-useEffect(() => {
-  if (!profile?.user_id) return;
+  useEffect(() => {
+    if (!profile?.user_id) return;
 
-  const fetchSchedule = async () => {
-    try {
-      const response = await api.get(`/events/teacher_schedule/${profile.user_id}/`);
-      const data = response.data.map(event => ({
-        title: event.title,
-        start: event.date,
-        backgroundColor: event.background_color,
-        borderColor: event.border_color
-      }));
-      setEvents(data);
-    } catch (error) {
-      console.error("Takvim verisi alınamadı:", error);
-    }
-  };
+    const fetchSchedule = async () => {
+      try {
+        const response = await api.get(
+          `/events/teacher_schedule/${profile.user_id}/`
+        );
+        const data = response.data.map((event) => ({
+          title: event.title,
+          start: event.date,
+          backgroundColor: event.background_color,
+          borderColor: event.border_color,
+        }));
+        setEvents(data);
+      } catch (error) {
+        console.error("Takvim verisi alınamadı:", error);
+      }
+    };
 
-  fetchSchedule();
-}, [profile?.user_id]); 
+    fetchSchedule();
+  }, [profile?.user_id]);
 
   const handleEventClick = (clickInfo) => {
     Swal.fire({
@@ -50,7 +52,8 @@ useEffect(() => {
     (a, b) => new Date(a.start) - new Date(b.start)
   );
   useEffect(() => {
-    if (!profile?.user_id) navigate("/login");
+    debugger;
+    // if (!profile?.user_id) navigate("/login");
   }, [profile]);
   return (
     <>
@@ -59,7 +62,9 @@ useEffect(() => {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <Sidebar />
+            <div className="col-lg-3">
+              <Sidebar />
+            </div>
             <div className="col-lg-9 col-md-8 col-12">
               <div className="text-center mb-4">
                 <h3 className="fw-bold text-primary">

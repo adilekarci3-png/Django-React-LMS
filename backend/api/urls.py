@@ -3,8 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from api import views as api_views
 from .views import (
-    AnnotationViewSet, DersAtamasiViewSet, HafizViewSet, HataNotuViewSet, QuranPageViewSet, get_user_role_detail,
-    peer_id_view
+    AnnotationViewSet, DersAtamasiViewSet, HBSKoordinatorDashboardViewSet, HafizViewSet, HataNotuViewSet, KoordinatorByRoleAPIView, peer_id_view
 )
 
 # ViewSet'ler için router
@@ -19,6 +18,19 @@ router.register(r'stajer', api_views.StajerViewSet, basename='stajer')
 router.register(r'ogrenci', api_views.OgrenciViewSet, basename='ogrenci')
 router.register(r'annotation', api_views.AnnotationViewSet, basename='annotation')
 router.register(r'quran-page', api_views.QuranPageViewSet, basename='quran-page')
+router.register(r'live-lessons', api_views.LiveLessonViewSet)
+
+dashboard = HBSKoordinatorDashboardViewSet.as_view({
+    'get': 'summary'
+})
+
+assignments_chart = HBSKoordinatorDashboardViewSet.as_view({
+    'get': 'assignments_chart'
+})
+
+recent_assignments = HBSKoordinatorDashboardViewSet.as_view({
+    'get': 'recent_assignments'
+})
 
 urlpatterns = [
     # Router ViewSet yolları
@@ -33,10 +45,21 @@ urlpatterns = [
     # Özel HDM endpoint
     path("dersler/<int:hafiz_id>/<str:date>/", api_views.dersler_by_date, name="hafiz-dersler-by-date"),
 
-    # Hafız Bilgi
+    # HBS Hafız Bilgi
     path("hafizbilgi/create/", api_views.HafizBilgiCreateAPIView.as_view(), name="hafizbilgi-create"),   
     path("hafizbilgi/list/", api_views.HafizsListAPIView.as_view(), name="hafizbilgi-list"),   
+    path("hafizbilgi/list/<int:agent>", api_views.HafizsListByAgentAPIView.as_view(), name="hafizbilgiByAgent-list"),   
+    path("hafizbilgi/check-ceptel/", api_views.check_ceptel, name="check-ceptel"),
+    path("hafizbilgi/check-email/", api_views.check_email, name="check-email"),
 
+    # HBS Koordinator
+    path("istatistik/temsilci-top5/", api_views.Top5TemsilciByHafizAPIView.as_view()),
+
+    #HBS Dashboard
+    path("dashboard/summary/", dashboard),
+    path("dashboard/assignments_chart/", assignments_chart),
+    path("dashboard/recent_assignments/", recent_assignments),
+    
     # Konum ve Proje
     path("job/list/", api_views.JobListAPIView.as_view(), name="job-list"),
     path("city/list/", api_views.CityListAPIView.as_view(), name="city-list"),
@@ -90,13 +113,14 @@ urlpatterns = [
     path("student/question-answer-list-create/<course_id>/", api_views.QuestionAnswerListCreateAPIView.as_view()),
     path("student/question-answer-message-create/", api_views.QuestionAnswerMessageSendAPIView.as_view()),
 
-    # Agent
+    # HBS Temsilci
     path("agent/summary/<agent_id>/", api_views.AgentSummaryAPIView.as_view()),
     path("agent/course-list/<user_id>/", api_views.StudentCourseListAPIView.as_view()),
     path("agent/hafiz-list/<agent_id>/", api_views.HafizListViewSetAPIVIew.as_view({'get': 'list'})),
     path("agent/<user_id>/", api_views.IsAgent),
     path("agent/hafizbilgi-update/<agent_id>/<hafizbilgi_id>/", api_views.HafizBilgiUpdateAPIView.as_view()),
     path("agent/hafizbilgi-create/", api_views.HafizBilgiCreateAPIView.as_view()),
+    path("agent/dashboard/summary/", api_views.HBSTemsilciDashboardView.as_view(), name="hbstem_dashboard_summary"),
 
     # Teacher
     path("teacher/summary/<teacher_id>/", api_views.TeacherSummaryAPIView.as_view()),
@@ -166,6 +190,8 @@ urlpatterns = [
     path("eskep/assign-role/", api_views.CoordinatorYetkiAtaAPIView.as_view()),
     path("eskepinstructor/student-lists/<user_id>/", api_views.EskepInstructorStudentsStajersListAPIView.as_view({'get': 'list'})),
     path('eskepinstructor/<int:user_id>/kisisel-liste/', api_views.koordinator_students_stajers, name='koordinator-student-stajer-list'),
+    path("eskepinstructor/koordinatorler/by-role/", KoordinatorByRoleAPIView.as_view()),
+    path("eskepinstructor/course-list/<user_id>/", api_views.MyCourseListAPIView.as_view()),
     
     # Eğitmen
     path("instructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
@@ -179,8 +205,9 @@ urlpatterns = [
     
 
     # Eskep Eğitmen
+    path("eskepEgitmen/list/", api_views.EskepEgitmenListAPIView.as_view(), name="job-list"),
     path('events/create/', api_views.ESKEPEventCreateAPIView.as_view(), name='instructor-event-create'),
-    path('events/teacher_schedule/<int:user_id>/', api_views.InstructorEventListAPIView.as_view(), name='teacher-schedule'),
+    path('events/teacher_schedule/<int:user_id>/', api_views.CombinedEventListAPIView.as_view(), name='teacher-schedule'),
     path('events/student/', api_views.StudentEventListAPIView.as_view(), name='student-events'),
     path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),
     

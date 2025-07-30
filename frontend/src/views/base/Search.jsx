@@ -6,9 +6,9 @@ import Rater from "react-rater";
 import "react-rater/lib/react-rater.css";
 
 import useAxios from "../../utils/useAxios";
-import CartId from "../plugin/CartId";
+// import CartId from "../plugin/CartId";
 import GetCurrentAddress from "../plugin/UserCountry";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
 import { CartContext } from "../plugin/Context";
 import apiInstance from "../../utils/axios";
@@ -19,8 +19,8 @@ function Search() {
   const [cartCount, setCartCount] = useContext(CartContext);
 
   const country = GetCurrentAddress().country;
-  const userId = UserData()?.user_id;
-  const cartId = CartId();
+  const userId = useUserData()?.user_id;
+  // const cartId = CartId();
 
   const fetchCourse = async () => {
     setIsLoading(true);
@@ -60,9 +60,10 @@ function Search() {
           });
 
           // Set cart count after adding to cart
-          apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
-            setCartCount(res.data?.length);
-          });
+          // if (!cartId) return;
+          // apiInstance.get(`course/cart-list/${cartId}/`).then((res) => {
+          //   setCartCount(res.data?.length);
+          // });
         });
     } catch (error) {
       console.log(error);

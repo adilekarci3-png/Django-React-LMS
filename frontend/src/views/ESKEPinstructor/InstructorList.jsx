@@ -107,7 +107,7 @@ function InstructorList() {
                           <Link to="/eskepegitmen/ders-saat-ekle/">
                             <FaClock
                               className="text-info mx-2 fs-4" // fs-4 sınıfı ile ikon boyutunu büyüttük
-                              title="Ders Saatleri"
+                              title="Ders Ekle"
                             />
                           </Link>
                           <Link to="/eskepegitmen/video-olustur">

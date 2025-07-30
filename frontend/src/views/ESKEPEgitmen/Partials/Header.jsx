@@ -2,7 +2,9 @@ import React, { useContext } from "react";
 import { ProfileContext } from "../../plugin/Context";
 
 function Header() {
-  const [profile, setProfile] = useContext(ProfileContext);
+  const [profile] = useContext(ProfileContext);
+
+  if (!profile) return null; // profil gelmemişse hiç gösterme
 
   return (
     <div className="row align-items-center">
@@ -12,7 +14,7 @@ function Header() {
             <div className="d-flex align-items-center">
               <div className="me-2 position-relative d-flex justify-content-end align-items-end mt-n5">
                 <img
-                  src={profile.image}
+                  src={profile.image || "/default-avatar.png"}
                   className="avatar-xl rounded-circle border border-4 border-white"
                   alt="avatar"
                   style={{
@@ -24,8 +26,8 @@ function Header() {
                 />
               </div>
               <div className="lh-1">
-                <h2 className="mb-0"> {profile.full_name}</h2>
-                <p className="mb-0 d-block">{profile.about}</p>
+                <h2 className="mb-0">{profile.full_name || "Bilinmeyen Kullanıcı"}</h2>
+                <p className="mb-0 d-block">{profile.about || "Profil bilgisi yok"}</p>
               </div>
             </div>
             <div>

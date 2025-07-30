@@ -7,39 +7,40 @@ import EskepBaseHeader from "../partials/ESKEPBaseHeader";
 import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 
 function EskepInstructorDashboard() {
-  const [stats, setStats] = useState([]);
+  const [stats, setStats] = useState({});
   const [homeworks, setHomeworks] = useState([]);
   const [bookReviews, setBookReviews] = useState([]);
   const [projects, setProjects] = useState([]);
   const [lessonReports, setLessonReports] = useState([]);
   const [fetching, setFetching] = useState(true);
 
-  const userId = UserData()?.user_id;
+  const userId = useUserData()?.user_id;
   const api = useAxios();
 
   const fetchData = async () => {
     setFetching(true);
     try {
-      const [summary, hw, books, proj, reports] = await Promise.all([
-        // api.get(`eskepinstructor/summary/${userId}/`),
+      const [hw, books, proj, reports] = await Promise.all([
         api.get(`eskepinstructor/odev-list/${userId}/`),
         api.get(`eskepinstructor/kitaptahlili-list/${userId}/`),
         api.get(`eskepinstructor/proje-list/${userId}/`),
-        api.get(`eskepinstructor/derssonuraporu-list/${userId}/`)
+        api.get(`eskepinstructor/derssonuraporu-list/${userId}/`),
       ]);
-      debugger;
-      // setStats(summary.data[0]);
       setHomeworks(hw.data);
-      console.log(hw.data);
       setBookReviews(books.data);
-      console.log(books.data);
       setProjects(proj.data);
-      console.log(proj.data);
       setLessonReports(reports.data);
-      console.log(reports.data);
+
+      // Örnek stat verisi
+      setStats({
+        total_students: 25,
+        total_interns: 10,
+        total_graduates: 8,
+        total_certificates: 12,
+      });
     } catch (error) {
       console.error("Veri çekme hatası:", error);
     } finally {
@@ -52,22 +53,32 @@ function EskepInstructorDashboard() {
   }, []);
 
   const renderList = (title, data, labelKey = "title") => (
-    <div className="card mb-4">
-      <div className="card-header">
-        <h5 className="mb-0">{title}</h5>
+    <div className="card shadow-sm mb-4 border-0">
+      <div className="card-header bg-light">
+        <h6 className="mb-0">{title}</h6>
       </div>
       <div className="card-body">
         {data.length > 0 ? (
-          <ul className="list-group">
+          <ul className="list-group list-group-flush">
             {data.map((item, index) => (
-              <li className="list-group-item d-flex justify-content-between align-items-center" key={index}>
-                <span>{item[labelKey]}</span>
-                <span className="badge bg-primary">{moment(item.date).format("DD MMM YYYY")}</span>
+              <li
+                className="list-group-item d-flex justify-content-between align-items-center"
+                key={index}
+              >
+                <div>
+                  <i className="bi bi-file-earmark-text me-2 text-primary"></i>
+                  {item[labelKey]}
+                </div>
+                <span className="badge bg-secondary rounded-pill">
+                  {moment(item.date).format("DD MMM YYYY")}
+                </span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-muted">Henüz içerik bulunamadı.</p>
+          <p className="text-muted small fst-italic mb-0">
+            Henüz içerik bulunamadı.
+          </p>
         )}
       </div>
     </div>
@@ -80,58 +91,71 @@ function EskepInstructorDashboard() {
       <section className="pt-5 pb-5">
         <div className="container">
           <Header />
-          <div className="row mt-0 mt-md-4">
-            <Sidebar />
-            <div className="col-lg-10 col-md-8 col-12">
-              <div className="row mb-4">
-                <h4 className="mb-0 mb-4">
-                  <i className="bi bi-grid-fill"></i> Koordinatör Paneli
-                </h4>
+          <div className="row mt-0 mt-md-2">
+            <div className="col-lg-2 col-md-3 col-12">
+              <Sidebar />
+            </div>
+            <div className="col-lg-10 col-md-9 col-12">
+              <h4 className="mb-4 d-flex align-items-center">
+                <i className="bi bi-speedometer2 me-2 text-primary"></i>
+                Koordinatör Paneli
+              </h4>
 
-                {/* İstatistik kutuları */}
-                <div className="col-sm-6 col-lg-3 mb-3">
-                  <div className="bg-warning bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-user-graduate display-6 text-warning me-3" />
-                    <div>
-                      <h5 className="fw-bold mb-0">{stats.total_students}</h5>
-                      <p className="mb-0">Tüm Öğrenciler</p>
+              {/* İstatistik Kartları */}
+              <div className="row g-4 mb-4">
+                {[
+                  {
+                    icon: "fa-user-graduate",
+                    color: "warning",
+                    value: stats.total_students,
+                    label: "Tüm Öğrenciler",
+                  },
+                  {
+                    icon: "fa-briefcase",
+                    color: "info",
+                    value: stats.total_interns,
+                    label: "Tüm Stajyerler",
+                  },
+                  {
+                    icon: "fa-user-check",
+                    color: "success",
+                    value: stats.total_graduates,
+                    label: "Tüm Mezunlar",
+                  },
+                  {
+                    icon: "fa-medal",
+                    color: "primary",
+                    value: stats.total_certificates,
+                    label: "Verdiği Sertifika",
+                  },
+                ].map(({ icon, color, value, label }, idx) => (
+                  <div className="col-sm-6 col-lg-3" key={idx}>
+                    <div
+                      className={`border-start border-4 border-${color} p-4 shadow-sm rounded bg-white`}
+                    >
+                      <div className="d-flex align-items-center">
+                        <i
+                          className={`fas ${icon} fa-2x text-${color} me-3`}
+                        ></i>
+                        <div>
+                          <h5 className="fw-bold mb-0">{value ?? 0}</h5>
+                          <small className="text-muted">{label}</small>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="col-sm-6 col-lg-3 mb-3">
-                  <div className="bg-info bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-briefcase display-6 text-info me-3" />
-                    <div>
-                      <h5 className="fw-bold mb-0">{stats.total_interns}</h5>
-                      <p className="mb-0">Tüm Stajyerler</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-sm-6 col-lg-3 mb-3">
-                  <div className="bg-success bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-user-check display-6 text-success me-3" />
-                    <div>
-                      <h5 className="fw-bold mb-0">{stats.total_graduates}</h5>
-                      <p className="mb-0">Tüm Mezunlar</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-sm-6 col-lg-3 mb-3">
-                  <div className="bg-primary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-medal display-6 text-primary me-3" />
-                    <div>
-                      <h5 className="fw-bold mb-0">{stats.total_certificates}</h5>
-                      <p className="mb-0">Verdiği Sertifika</p>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
 
+              {/* İçerikler */}
               {fetching ? (
-                <p className="p-3">İçerikler yükleniyor...</p>
+                <div className="text-center p-5">
+                  <div
+                    className="spinner-border text-primary mb-3"
+                    role="status"
+                  ></div>
+                  <p>İçerikler yükleniyor...</p>
+                </div>
               ) : (
                 <>
                   {renderList("Gönderilen Ödevler", homeworks)}

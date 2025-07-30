@@ -3,24 +3,29 @@ import { Link } from "react-router-dom";
 import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import GetCurrentAddress from "../plugin/UserCountry";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
 import { CartContext } from "../plugin/Context";
 import apiInstance from "../../utils/axios";
 import "./css/Index.css";
+import { useAuthStore } from "../../store/auth";
 
 function Index() {
   const [projelist, setProjeList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [cartCount, setCartCount] = useContext(CartContext);
-
+  // const [cartCount, setCartCount] = useContext(CartContext);
+  const rehydrated = useAuthStore((state) => state.rehydrated);
   const country = GetCurrentAddress().country;
-  const userId = UserData()?.user_id;
+  const userId = useUserData()?.user_id;
+
+  if (!rehydrated) return null;
 
   useEffect(() => {
+    debugger;
     const fetchProjelist = async () => {
       setIsLoading(true);
       try {
+        debugger;
         const res = await apiInstance.get("proje/list/");
         setProjeList(res.data);
       } catch (error) {

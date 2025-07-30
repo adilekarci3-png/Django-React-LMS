@@ -1,161 +1,163 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "./Partials/Sidebar";
-import Header from "./Partials/Header";
-import useAxios from "../../utils/useAxios";
-import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
-import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-import { useFormik } from "formik";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import InputMask from "react-input-mask";
+import { IMaskInput } from "react-imask";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+import Sidebar from "./Partials/Sidebar";
+import Header from "./Partials/Header";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import useAxios from "../../utils/useAxios";
+
+const schema = Yup.object().shape({
+  role: Yup.string().required("Kullanıcı tipi zorunludur."),
+  full_name: Yup.string().required("Ad soyad zorunludur."),
+  email: Yup.string().email("Geçerli bir e-posta giriniz"),
+  ceptel: Yup.string()
+    .required("Cep telefonu zorunludur.")
+    .test("is-filled", "Cep telefonu eksik", (val) => val && val.replace(/[^0-9]/g, "").length === 10),
+  gender: Yup.string().required("Cinsiyet zorunludur."),
+  coordinator_id: Yup.number()
+    .transform((_, val) => (val ? +val : null))
+    .typeError("Koordinatör seçimi zorunludur.")
+    .required("Koordinatör seçimi zorunludur."),
+});
+
+const defaultValues = {
+  role: "",
+  full_name: "",
+  evtel: "",
+  istel: "",
+  ceptel: "",
+  email: "",
+  gender: "",
+  coordinator_id: "",
+  active: false,
+};
+
 function AssignCoordinator() {
   const [coordinators, setCoordinators] = useState([]);
-  const [filteredCoordinators, setFilteredCoordinators] = useState([]);
   const [students, setStudents] = useState([]);
   const [interns, setInterns] = useState([]);
-
+  const [generalMessage, setGeneralMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
   const [selectedCoordinator, setSelectedCoordinator] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedUserToAssign, setSelectedUserToAssign] = useState("");
-
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("");
-
+  // const [filteredCoordinators, setFilteredCoordinators] = useState([]);
   const api = useAxios();
 
-  const exportToExcel = (data, fileName) => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sayfa1");
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, `${fileName}.xlsx`);
+  const {
+  handleSubmit,
+  control,
+  reset,
+  watch,
+  formState: { errors, isSubmitting, isValid }
+} = useForm({
+  defaultValues,
+  resolver: yupResolver(schema),
+  mode: "onChange", // ekle
+});
+
+  const role = watch("role");
+  const matchedRoleName =
+    role === "Ogrenci"
+      ? "ESKEPOgrenciKoordinator"
+      : role === "Stajer"
+        ? "ESKEPStajerKoordinator"
+        : "";
+
+  const filteredCoordinators = coordinators.filter((c) =>
+    c.roles?.some((r) => r.name === matchedRoleName)
+  );
+
+  console.log(filteredCoordinators);
+
+  const fetchData = async () => {
+    try {
+      const [coordinatorsRes, studentsRes, internsRes] = await Promise.all([
+        api.get("eskep/coordinators"),
+        api.get("eskep/ogrencis"),
+        api.get("eskep/stajers"),
+      ]);
+
+      setCoordinators(coordinatorsRes.data);
+      setStudents(studentsRes.data);
+      setInterns(internsRes.data);
+
+      // Varsayılan olarak Ogrenci rolü atanmışsa filtrele
+      // const selectedRole = watch("role");
+      // if (selectedRole === "Ogrenci") {
+      //   fetchCoordinatorsByRole("ESKEPOgrenciKoordinator");
+      // } else if (selectedRole === "Stajer") {
+      //   fetchCoordinatorsByRole("ESKEPStajerKoordinator");
+      // }
+    } catch (error) {
+      console.error("Veriler alınırken hata oluştu", error);
+    }
   };
 
-  const formik = useFormik({
-    initialValues: {
-      role: "",
-      full_name: "",
-      evtel: "",
-      istel: "",
-      ceptel: "",
-      email: "",
-      gender: "",
-      instructor: "",
-    },
-    validationSchema: Yup.object({
-      role: Yup.string().required("Kullanıcı tipi zorunludur."),
-      full_name: Yup.string().required("Ad soyad zorunludur."),
-      email: Yup.string().email("Geçerli bir e-posta giriniz"),
-      ceptel: Yup.string().required("Cep telefonu zorunludur."),
-      gender: Yup.string().required("Cinsiyet zorunludur."),
-      instructor: Yup.string().required("Koordinatör seçimi zorunludur."),
-    }),
-    onSubmit: async (values, { resetForm, setFieldError, setSubmitting }) => {
-      const endpoint = values.role === "Ogrenci" ? "ogrenci/" : "stajer/";
-
-      try {
-        const response = await api.post(endpoint, values);
-
-        setMessage(
-          `${values.role === "Ogrenci" ? "Öğrenci" : "Stajyer"} başarıyla oluşturuldu.`
-        );
-        setMessageType("success");
-
-        if (values.role === "Ogrenci") {
-          setStudents((prev) => [...prev, response.data]);
-        } else {
-          setInterns((prev) => [...prev, response.data]);
-        }
-
-        resetForm();
-      } catch (error) {
-        if (error.response?.data) {
-          const errors = error.response.data;
-          for (const key in errors) {
-            setFieldError(key, errors[key][0]);
-          }
-          const msg = Object.values(errors).flat().join(" ");
-          setMessage(msg);
-        } else {
-          setMessage("Kullanıcı oluşturulurken hata oluştu.");
-        }
-        setMessageType("error");
-      } finally {
-        setSubmitting(false);
-      }
-    },
-  });
-
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [coordinatorsRes, studentsRes, internsRes] = await Promise.all([
-          api.get("eskep/coordinators"),
-          api.get("eskep/ogrencis"),
-          api.get("eskep/stajers"),
-        ]);
-
-        setCoordinators(coordinatorsRes.data);
-        setStudents(studentsRes.data);
-        setInterns(internsRes.data);
-      } catch (error) {
-        console.error("Veriler alınırken hata oluştu", error);
-      }
-    }
-
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage("");
-        setMessageType("");
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-
-  useEffect(() => {
-    if (formik.values.role) {
-      const filtered = coordinators.filter((c) =>
-        formik.values.role === "Ogrenci"
-          ? c.role === "Ogrenci"
-          : c.role === "Stajer"
+  const onSubmit = async (data) => {
+    console.log("Form verisi:", data); 
+    debugger;
+    const endpoint = data.role === "Ogrenci" ? "ogrenci/" : "stajer/";
+    try {
+      const response = await api.post(endpoint, data);
+      debugger;
+      setGeneralMessage(
+        `${data.role === "Ogrenci" ? "Öğrenci" : "Stajyer"} başarıyla oluşturuldu.`
       );
-      setFilteredCoordinators(filtered);
-    } else {
-      setFilteredCoordinators([]);
+      setMessageType("success");
+      if (data.role === "Ogrenci") {
+        setStudents((prev) => [...prev, response.data]);
+      } else {
+        setInterns((prev) => [...prev, response.data]);
+      }
+      reset();
+    } catch (err) {
+      setGeneralMessage("Kullanıcı oluşturulurken hata oluştu.");
+      setMessageType("error");
     }
-  }, [formik.values.role, coordinators]);
+  };
+
+  // const fetchCoordinatorsByRole = async (roleName) => {
+  //   try {
+  //     const response = await api.get(
+  //       `eskepinstructor/koordinatorler/by-role/?role=${roleName}`
+  //     );
+      
+  //     setFilteredCoordinators(response.data);
+  //   } catch (error) {
+  //     console.error("Rol bazlı koordinatörler alınamadı", error);
+  //   }
+  // };
 
   const handleRoleUpdate = async (e) => {
+    
     e.preventDefault();
     if (!selectedCoordinator || !selectedRole) {
-      setMessage("Lütfen koordinatör ve rol seçiniz.");
+      setGeneralMessage("Lütfen koordinatör ve rol seçiniz.");
       setMessageType("error");
       return;
     }
-
     try {
       await api.post("/eskep/update_coordinator_role", {
         coordinator_id: selectedCoordinator,
         role: selectedRole,
       });
-
-      setMessage("Koordinatör rolü başarıyla güncellendi.");
+      setGeneralMessage("Koordinatör rolü başarıyla güncellendi.");
       setMessageType("success");
-
-      // ✅ Sayfayı tamamen yenile
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000); // 1 saniye sonra yenile (mesaj görünür kalır)
+      fetchData();
     } catch (error) {
       console.error(error);
-      setMessage("Rol güncelleme sırasında hata oluştu.");
+      setGeneralMessage("Rol güncelleme sırasında hata oluştu.");
       setMessageType("error");
     }
   };
@@ -163,11 +165,10 @@ function AssignCoordinator() {
   const handleUserAssign = async (e) => {
     e.preventDefault();
     if (!selectedCoordinator || !selectedUserToAssign || !selectedRole) {
-      setMessage("Tüm alanlar doldurulmalıdır.");
+      setGeneralMessage("Tüm alanlar doldurulmalıdır.");
       setMessageType("error");
       return;
     }
-
     try {
       const endpoint =
         selectedRole === "Ogrenci"
@@ -183,15 +184,23 @@ function AssignCoordinator() {
               coordinator_id: selectedCoordinator,
               intern_id: selectedUserToAssign,
             };
-
       await api.post(endpoint, payload);
-      setMessage("Eşleştirme başarıyla yapıldı.");
+      setGeneralMessage("Eşleştirme başarıyla yapıldı.");
       setMessageType("success");
     } catch (err) {
       console.error(err);
-      setMessage("Eşleştirme sırasında hata oluştu.");
+      setGeneralMessage("Eşleştirme sırasında hata oluştu.");
       setMessageType("error");
     }
+  };
+
+  const exportToExcel = (data, fileName) => {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sayfa1");
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `${fileName}.xlsx`);
   };
 
   return (
@@ -210,14 +219,13 @@ function AssignCoordinator() {
                   <h3 className="mb-0">Koordinatör Yönetimi</h3>
                 </div>
                 <div className="card-body p-4">
-                  {message && (
+                  {generalMessage && (
                     <div
                       className={`alert alert-${messageType === "success" ? "success" : "danger"}`}
                     >
-                      {message}
+                      {generalMessage}
                     </div>
                   )}
-
                   <form onSubmit={handleRoleUpdate} className="mb-4">
                     <h5 className="text-primary">Koordinatör Rolü Güncelle</h5>
                     <div className="row">
@@ -258,141 +266,156 @@ function AssignCoordinator() {
                   </form>
 
                   <form
-                    onSubmit={formik.handleSubmit}
+                    onSubmit={handleSubmit(onSubmit)}
                     className="border-top pt-4"
                   >
                     <h5 className="text-info">Yeni Stajer / Öğrenci Oluştur</h5>
                     <div className="row">
                       <div className="col-md-6">
-                        <select
+                        <Controller
                           name="role"
-                          className="form-control mt-2"
-                          value={formik.values.role}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        >
-                          <option value="">Kullanıcı Tipi Seç</option>
-                          <option value="Ogrenci">Öğrenci</option>
-                          <option value="Stajer">Stajyer</option>
-                        </select>
-                        {formik.touched.role && formik.errors.role && (
+                          control={control}
+                          render={({ field }) => (
+                            <select className="form-control mt-2" {...field}>
+                              <option value="">Kullanıcı Tipi Seç</option>
+                              <option value="Ogrenci">Öğrenci</option>
+                              <option value="Stajer">Stajyer</option>
+                            </select>
+                          )}
+                        />
+                        {errors.role && (
                           <div className="text-danger">
-                            {formik.errors.role}
+                            {errors.role.message}
                           </div>
                         )}
 
-                        <input
+                        <Controller
                           name="full_name"
-                          className="form-control mt-2"
-                          placeholder="Ad Soyad"
-                          value={formik.values.full_name}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        />
-                        {formik.touched.full_name &&
-                          formik.errors.full_name && (
-                            <div className="text-danger">
-                              {formik.errors.full_name}
-                            </div>
-                          )}
-
-                        <input
-                          name="evtel"
-                          className="form-control mt-2"
-                          placeholder="Ev Telefonu"
-                          value={formik.values.evtel}
-                          onChange={formik.handleChange}
-                        />
-
-                        <InputMask
-                          mask="(999) 999-9999"
-                          value={formik.values.ceptel}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        >
-                          {(inputProps) => (
+                          control={control}
+                          render={({ field }) => (
                             <input
-                              {...inputProps}
-                              name="ceptel"
                               className="form-control mt-2"
+                              placeholder="Ad Soyad"
+                              {...field}
+                            />
+                          )}
+                        />
+                        {errors.full_name && (
+                          <div className="text-danger">
+                            {errors.full_name.message}
+                          </div>
+                        )}
+
+                        <Controller
+                          name="evtel"
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              className="form-control mt-2"
+                              placeholder="Ev Telefonu"
+                              {...field}
+                            />
+                          )}
+                        />
+
+                        <Controller
+                          name="ceptel"
+                          control={control}
+                          render={({ field }) => (
+                            <IMaskInput
+                              {...field}
+                              mask="(000) 000-0000"
+                              className="form-control"
                               placeholder="Cep Telefonu"
                             />
                           )}
-                        </InputMask>
-                        {formik.touched.ceptel && formik.errors.ceptel && (
+                        />
+                        {errors.ceptel && (
                           <div className="text-danger">
-                            {formik.errors.ceptel}
+                            {errors.ceptel.message}
                           </div>
                         )}
 
-                        <select
-                          name="instructor"
-                          className="form-control mt-2"
-                          value={formik.values.instructor || ""}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        >
-                          <option value="">Koordinatör Seç</option>
-                          {filteredCoordinators.map((k) => (
-                            <option key={k.id} value={k.id}>
-                              {k.full_name}
-                            </option>
-                          ))}
-                        </select>
-                        {formik.touched.instructor &&
-                          formik.errors.instructor && (
-                            <div className="text-danger">
-                              {formik.errors.instructor}
-                            </div>
+                        <Controller
+                          name="coordinator_id"
+                          control={control}
+                          render={({ field }) => (
+                            <select className="form-control mt-2" {...field}>
+                              <option value="">Koordinatör Seç</option>
+                              {filteredCoordinators.map((coord) => (
+                                <option key={coord.id} value={coord.id}>
+                                  {coord.full_name}
+                                </option>
+                              ))}
+                            </select>
                           )}
+                        />
+                        {errors.instructor && (
+                          <div className="text-danger">
+                            {errors.instructor.message}
+                          </div>
+                        )}
                       </div>
 
                       <div className="col-md-6">
-                        <input
+                        <Controller
                           name="istel"
-                          className="form-control mt-2"
-                          placeholder="İş Telefonu"
-                          value={formik.values.istel}
-                          onChange={formik.handleChange}
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              className="form-control mt-2"
+                              placeholder="İŞ Telefonu"
+                              {...field}
+                            />
+                          )}
                         />
 
-                        <input
+                        <Controller
                           name="email"
-                          className="form-control mt-2"
-                          placeholder="E-posta"
-                          type="email"
-                          value={formik.values.email}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              type="email"
+                              className="form-control mt-2"
+                              placeholder="E-posta"
+                              {...field}
+                            />
+                          )}
                         />
-                        {formik.touched.email && formik.errors.email && (
+                        {errors.email && (
                           <div className="text-danger">
-                            {formik.errors.email}
+                            {errors.email.message}
                           </div>
                         )}
 
-                        <select
+                        <Controller
                           name="gender"
-                          className="form-control mt-2"
-                          value={formik.values.gender}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        >
-                          <option value="">Cinsiyet Seç</option>
-                          <option value="Erkek">Erkek</option>
-                          <option value="Kadın">Kadın</option>
-                        </select>
-                        {formik.touched.gender && formik.errors.gender && (
+                          control={control}
+                          render={({ field }) => (
+                            <select className="form-control mt-2" {...field}>
+                              <option value="">Cinsiyet Seç</option>
+                              <option value="Erkek">Erkek</option>
+                              <option value="Kadın">Kadın</option>
+                            </select>
+                          )}
+                        />
+                        {errors.gender && (
                           <div className="text-danger">
-                            {formik.errors.gender}
+                            {errors.gender.message}
                           </div>
                         )}
-                        <input
+
+                        <Controller
                           name="active"
-                          type="checkbox"
-                          checked={formik.values.active}
-                          readOnly
-                          disabled
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              type="checkbox"
+                              className="mt-3"
+                              {...field}
+                              disabled
+                            />
+                          )}
                         />
                       </div>
                     </div>
@@ -400,22 +423,14 @@ function AssignCoordinator() {
                     <button
                       type="submit"
                       className="btn btn-info mt-3 w-100"
-                      disabled={formik.isSubmitting}
+                      disabled={isSubmitting}
                     >
-                      {formik.isSubmitting
+                      {isSubmitting
                         ? "Gönderiliyor..."
-                        : formik.values.role === "Ogrenci"
+                        : role === "Ogrenci"
                           ? "Öğrenci Oluştur"
                           : "Stajyer Oluştur"}
                     </button>
-
-                    {message && (
-                      <div
-                        className={`alert mt-3 alert-${messageType === "success" ? "success" : "danger"}`}
-                      >
-                        {message}
-                      </div>
-                    )}
                   </form>
 
                   <hr className="my-4" />

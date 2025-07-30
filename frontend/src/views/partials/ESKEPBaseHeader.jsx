@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-import UserData from "../plugin/UserData";
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
 
@@ -13,65 +11,65 @@ import EgitmenMenu from "../partials/menus/EgitmenMenu";
 
 function ESKEPBaseHeader() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleData, setRoleData] = useState({ base_role: null, sub_roles: [] });
-
   const navigate = useNavigate();
-  const [isLoggedIn, user] = useAuthStore((state) => [
-    state.isLoggedIn,
-    state.user,
-  ]);
-
   const api = useAxios();
 
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const res = await api.get(`user-role-detail/`);
-        setRoleData(res.data); // { base_role: "Koordinator", sub_roles: ["ESKEPKoordinator"] }
-      } catch (error) {
-        console.error("Rol alınamadı:", error);
-      }
-    };
+  const rehydrated = useAuthStore((state) => state.rehydrated);
+  const [isLoggedIn, hasBaseRole, hasSubRole, hasAnySubRole] = useAuthStore(
+    (state) => [
+      state.isLoggedIn,
+      state.hasBaseRole,
+      state.hasSubRole,
+      state.hasAnySubRole,
+    ]
+  );
 
-    if (isLoggedIn()) {
-      fetchUserRole();
+  useEffect(() => {
+    if (!rehydrated) return;
+
+    const loggedIn = isLoggedIn?.();
+
+    if (!loggedIn) {
+      navigate("/login/");
+      return;
     }
-  }, [isLoggedIn]);
+
+    // Roller yüklenmemişse getir
+    api
+      .get(`user-role-detail/`)
+      .then((res) => {
+        useAuthStore.getState().setRoleData(res.data);
+      })
+      .catch((err) => {
+        console.error("Rol alınamadı:", err);
+      });
+  }, [rehydrated, isLoggedIn]);
 
   const handleSearchSubmit = () => {
-    navigate(`/search/?search=${searchQuery}`);
+    if (searchQuery.trim()) {
+      navigate(`/search/?search=${searchQuery}`);
+    }
   };
+
+  if (!rehydrated) return null;
 
   const styles = {
     section: {
-      fontSize: "20px",
-      fontWeight: "bold",
+      fontSize: "16px",
+      fontWeight: "500",
       color: "#ffffff",
       background: "linear-gradient(135deg, #5bc0de, #ff7f50)",
-      padding: "15px",
       borderBottom: "4px solid #ffb6b9",
-    },
-    buttonPrimary: {
-      background: "linear-gradient(90deg, #ff7f50, #ffb6b9)",
-      color: "#ffffff",
-      fontSize: "18px",
-      padding: "14px 28px",
-      borderRadius: "50px",
-      border: "none",
-      cursor: "pointer",
-      fontWeight: "bold",
-      transition: "0.3s",
-      boxShadow: "0px 5px 10px rgba(0,0,0,0.2)",
     },
   };
 
-  const { base_role, sub_roles } = roleData;
-
   return (
     <div style={styles.section}>
-      <nav className="navbar navbar-expand-lg navbar-green bg-green">
+      <nav className="navbar navbar-expand-lg py-2 px-3">
         <div className="container">
-          <Link className="navbar-brand" to="/">EHAD</Link>
+          <Link className="navbar-brand text-white fw-bold" to="/">
+            EHAD
+          </Link>
           <button
             className="navbar-toggler"
             type="button"
@@ -84,34 +82,58 @@ function ESKEPBaseHeader() {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link" to="/pages/contact-us/">
-                  <i className="fas fa-phone"></i> İletişim
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/pages/about-us/">
+                <Link className="nav-link text-white" to="/pages/about-us/">
                   <i className="fas fa-address-card"></i> Hakkımızda
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/admin/OrganizationChart/">
-                  <i className="fas fa-address-card"></i> Organizasyon Şemaları
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/eskep/egitim-takvimi/">
-                  <i className="fas fa-calendar-alt"></i> Genel Eğitim Takvimi
+                <Link
+                  className="nav-link text-white"
+                  to="/admin/OrganizationChart/"
+                >
+                  <i className="fas fa-sitemap"></i> Organizasyon Şemaları
                 </Link>
               </li>
 
-              {/* === Dinamik Rollere Göre Menüler === */}
-              {base_role === "Koordinator" && sub_roles.includes("ESKEPKoordinator") && <KoordinatorMenu />}
-              {base_role === "Stajer" && sub_roles.includes("ESKEPStajer") && <StajerMenu />}
-              {base_role === "Ogrenci" && sub_roles.includes("ESKEPOgrenci") && <OgrenciMenu />}
-              {base_role === "Teacher" && sub_roles.includes("ESKEPEgitmen") && <EgitmenMenu />}
+              {hasBaseRole("Koordinator") &&
+                hasAnySubRole([
+                  "HBSKoordinator",
+                  "HDMKoordinator",
+                  "AkademiKoordinator",
+                  "ESKEPKoordinator",
+                ]) && (
+                  <li className="nav-item">
+                    <Link
+                      className="nav-link text-white"
+                      to="/eskep/egitim-takvimi/"
+                    >
+                      <i className="fas fa-calendar-alt"></i> Genel Eğitim Takvimi
+                    </Link>
+                  </li>
+                )}
+
+              {hasAnySubRole([
+                "ESKEPEgitmen",
+                "ESKEPOgrenci",
+                "ESKEPStajer",
+                "ESKEPGenelKoordinator",
+              ]) && (
+                <>
+                  {hasBaseRole("Koordinator") && <KoordinatorMenu />}
+                  {hasBaseRole("Stajer") && hasSubRole("ESKEPStajer") && (
+                    <StajerMenu />
+                  )}
+                  {hasBaseRole("Ogrenci") && hasSubRole("ESKEPOgrenci") && (
+                    <OgrenciMenu />
+                  )}
+                  {hasBaseRole("Teacher") && hasSubRole("ESKEPEgitmen") && (
+                    <EgitmenMenu />
+                  )}
+                </>
+              )}
             </ul>
 
-            {/* Arama ve Giriş/Çıkış */}
+            {/* Arama ve Giriş/Çıkış butonları */}
             <div className="d-flex align-items-center">
               <input
                 className="form-control me-2"
@@ -119,21 +141,24 @@ function ESKEPBaseHeader() {
                 placeholder="Ara"
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="btn btn-outline-light me-2" onClick={handleSearchSubmit}>
+              <button
+                className="btn btn-outline-light me-2"
+                onClick={handleSearchSubmit}
+              >
                 <i className="fas fa-search"></i>
               </button>
 
               {isLoggedIn() ? (
                 <Link to="/logout/" className="btn btn-danger ms-2">
-                  Çıkış <i className="fas fa-sign-out-alt"></i>
+                  <i className="fas fa-sign-out-alt"></i> Çıkış
                 </Link>
               ) : (
                 <>
                   <Link to="/login/" className="btn btn-outline-light ms-2">
-                    Giriş <i className="fas fa-sign-in-alt"></i>
+                    <i className="fas fa-sign-in-alt"></i> Giriş
                   </Link>
                   <Link to="/register/" className="btn btn-light ms-2">
-                    Kayıt <i className="fas fa-user-plus"></i>
+                    <i className="fas fa-user-plus"></i> Kayıt
                   </Link>
                 </>
               )}

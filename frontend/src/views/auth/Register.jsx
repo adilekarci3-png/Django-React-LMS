@@ -67,7 +67,7 @@ function Register() {
                   <h1 className="mb-1 fw-bold">Yeni Üyelik</h1>
                   <span>
                     Zaten bir hesabınız var mı?
-                    <Link to="/login/" className="ms-1">Giriş Yap</Link>
+                    {/* <Link to="/login/" className="ms-1">Giriş Yap</Link> */}
                   </span>
                 </div>
 

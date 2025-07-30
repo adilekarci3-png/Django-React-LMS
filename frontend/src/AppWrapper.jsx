@@ -1,29 +1,36 @@
-// src/AppWrapper.jsx
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "./store/auth";
 import useAxios from "./utils/useAxios";
-import UserData from "./views/plugin/UserData";
-import apiInstance from "./utils/axios";
 import { CartContext, ProfileContext } from "./views/plugin/Context";
-import App from "./App"; // senin yukarıdaki App yapın
+import App from "./App";
+import Loading from "./views/partials/Loading";
+import { setUser } from "./utils/auth"; // ✅ Eklenmeli
 
 function AppWrapper() {
   const [cartCount, setCartCount] = useState(0);
   const [profile, setProfile] = useState(null);
+
   const axiosJWT = useAxios();
-  const user = UserData();
+  const user = useAuthStore((state) => state.user?.());
+  const rehydrated = useAuthStore((state) => state.rehydrated);
 
+  // ✅ 1. Uygulama açıldığında JWT'den kullanıcıyı yükle
   useEffect(() => {
-    apiInstance.get(`course/cart-list/${localStorage.getItem("cart_id")}/`).then((res) => {
-      setCartCount(res.data?.length || 0);
-    });
+    setUser();
+  }, []);
 
-    if (user?.user_id) {
-      axiosJWT
-        .get(`user/profile/${user.user_id}/`)
-        .then((res) => setProfile(res.data))
-        .catch((err) => console.warn("Profil alınamadı:", err));
-    }
-  }, [user?.user_id]);
+  // ✅ 2. rehydrated ve user geldiyse profil getir
+  useEffect(() => {
+    if (!rehydrated || !user?.user_id) return;
+
+    axiosJWT
+      .get(`user/profile/${user.user_id}/`)
+      .then((res) => setProfile(res.data))
+      .catch((err) => console.warn("Profil alınamadı:", err));
+  }, [rehydrated, user?.user_id]);
+
+  // ✅ 3. Henüz rehydrate edilmediyse loading göster
+  if (!rehydrated) return <Loading />;
 
   return (
     <CartContext.Provider value={[cartCount, setCartCount]}>

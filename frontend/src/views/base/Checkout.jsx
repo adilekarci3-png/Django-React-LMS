@@ -5,7 +5,7 @@ import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import apiInstance from "../../utils/axios";
-import CartId from "../plugin/CartId";
+// import CartId from "../plugin/CartId";
 import Toast from "../plugin/Toast";
 import { CartContext } from "../plugin/Context";
 import { userId } from "../../utils/constants";

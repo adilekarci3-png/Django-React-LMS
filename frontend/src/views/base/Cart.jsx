@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import apiInstance from "../../utils/axios";
-import CartId from "../plugin/CartId";
+// import CartId from "../plugin/CartId";
 import Toast from "../plugin/Toast";
 import { CartContext } from "../plugin/Context";
 import { userId } from "../../utils/constants";
@@ -18,14 +18,16 @@ function Cart() {
     email: "",
     country: "",
   });
+  // const cartId = CartId();
   const fetchCartItem = async () => {
     try {
-      await apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
-        console.log(res.data);
-        setCart(res.data);
-      });
+      // if (!cartId) return;
+      // await apiInstance.get(`course/cart-list/${cartId}/`).then((res) => {
+      //   console.log(res.data);
+      //   setCart(res.data);
+      // });
 
-      await apiInstance.get(`cart/stats/${CartId()}/`).then((res) => {
+      await apiInstance.get(`cart/stats/${cartId}/`).then((res) => {
         console.log(res.data);
         setCartStats(res.data);
       });
@@ -38,11 +40,11 @@ function Cart() {
     fetchCartItem();
   }, []);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const cartItemDelete = async (itemId) => {
     await apiInstance
-      .delete(`course/cart-item-delete/${CartId()}/${itemId}/`)
+      .delete(`course/cart-item-delete/${cartId}/${itemId}/`)
       .then((res) => {
         console.log(res.data);
         fetchCartItem();
@@ -51,7 +53,8 @@ function Cart() {
           title: "Cart Item Deleted",
         });
         // Set cart count after adding to cart
-        apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
+        if (!cartId) return;
+        apiInstance.get(`course/cart-list/${cartId}/`).then((res) => {
           setCartCount(res.data?.length);
         });
       });
@@ -65,12 +68,12 @@ function Cart() {
   };
 
   const createOrder = async (e) => {
-    e.preventDefault()
-    const formdata = new FormData()
+    e.preventDefault();
+    const formdata = new FormData();
     formdata.append("full_name", bioData.full_name);
     formdata.append("email", bioData.email);
     formdata.append("country", bioData.country);
-    formdata.append("cart_id", CartId());
+    formdata.append("cart_id", cartId);
     formdata.append("user_id", userId);
 
     try {
@@ -129,7 +132,10 @@ function Cart() {
               {/* Main content START */}
               <div className="col-lg-8 mb-4 mb-sm-0">
                 <div className="p-4 shadow rounded-3">
-                  <h5 className="mb-0 mb-3"> Talep Ettiğim Kurs Öğesi ({cart?.length})</h5>
+                  <h5 className="mb-0 mb-3">
+                    {" "}
+                    Talep Ettiğim Kurs Öğesi ({cart?.length})
+                  </h5>
 
                   <div className="table-responsive border-0 rounded-3">
                     <table className="table align-middle p-4 mb-0">
@@ -261,14 +267,19 @@ function Cart() {
                   </ul>
                   <div className="d-grid">
                     <button type="submit" className="btn btn-lg btn-success">
-                     Kayıt Ol
+                      Kayıt Ol
                     </button>
                   </div>
-                  <p className="small mb-0 mt-2 text-center">                    
-Kayıt İşleminden önce dersi almak istediğiniz tarihi belirleyin, eğitmeniniz tarafından onaylandıktan sonra talep edilen kurs listenizde görüntülenecektir{" "}
+                  <p className="small mb-0 mt-2 text-center">
+                    Kayıt İşleminden önce dersi almak istediğiniz tarihi
+                    belirleyin, eğitmeniniz tarafından onaylandıktan sonra talep
+                    edilen kurs listenizde görüntülenecektir{" "}
                     <a href="#">
                       {" "}
-                      <strong>Eğitmeniniz tarafından onaylandıktan sonra talep edilen kurs listenizde görüntülenecektir</strong>
+                      <strong>
+                        Eğitmeniniz tarafından onaylandıktan sonra talep edilen
+                        kurs listenizde görüntülenecektir
+                      </strong>
                     </a>
                   </p>
                 </div>

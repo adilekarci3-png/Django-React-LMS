@@ -3,24 +3,15 @@ function CartId() {
     const length = 6;
     const characters = "1234567890";
     let randomString = "";
-
-    for(let i = 0; i < length; i++){
-        const randomIndex = Math.floor(Math.random() * characters.length) 
-        randomString += characters.charAt(randomIndex)
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      randomString += characters.charAt(randomIndex);
     }
-
-    localStorage.setItem('randomString', randomString)
+    localStorage.setItem("randomString", randomString);
+    return randomString;
   };
 
   const existingRandomString = localStorage.getItem("randomString");
 
-  if(!existingRandomString){
-    generateRandomString()
-  } else {
-    // pass
-  }
-
-  return existingRandomString
+  return existingRandomString || generateRandomString();
 }
-
-export default CartId

@@ -80,6 +80,13 @@ PLATFORM_STATUS = (
     ("Yayinlanmis", "Yayınlanmış"),
 )
 
+PLATFORM_CHOICES = [
+        ('zoom', 'Zoom'),
+        ('meet', 'Google Meet'),
+        ('teams', 'Microsoft Teams'),
+        ('jitsi', 'Jitsi Meet'),
+    ]
+
 RATING = (
     (1, "1 Yıldız"),
     (2, "2 Yıldız"),
@@ -188,7 +195,8 @@ class OgrenciRole(models.Model):
         choices=[          
           ("AkademiOgrenci", "AkademiOgrenci"),
           ("HBSOgrenci", "HBSOgrenci"),
-          ("HDMOgrenci", "HDMOgrenci")         
+          ("HDMOgrenci", "HDMOgrenci") ,
+          ("ESKEPOgrenci", "ESKEPOgrenci")         
         ],
         unique=True
     )
@@ -211,9 +219,9 @@ class KoordinatorRole(models.Model):
     name = models.CharField(
         max_length=50,
         choices=[
-            ("Ogrenci", "Ogrenci"),
-            ("Stajer", "Stajer"),
-            ("Genel", "Genel"),
+            ("ESKEPOgrenciKoordinator", "ESKEPOgrenciKoordinator"),
+            ("ESKEPStajerKoordinator", "ESKEPStajerKoordinator"),
+            ("ESKEPGenelKoordinator", "ESKEPGenelKoordinator"),
             ("AkademiKoordinator", "AkademiKoordinator"),
             ("HBSKoordinator", "HBSKoordinator"),
             ("HDMKoordinator", "HDMKoordinator"),
@@ -301,7 +309,7 @@ class Course(models.Model):
     image = models.FileField(upload_to="course-file", blank=True, null=True)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
-    # price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     language = models.CharField(choices=LANGUAGE, default="Turkce", max_length=100)
     level = models.CharField(choices=LEVEL, default="Baslangic", max_length=100)
     platform_status = models.CharField(choices=PLATFORM_STATUS, default="Yayinlanmis", max_length=100)
@@ -310,7 +318,8 @@ class Course(models.Model):
     course_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     slug = models.SlugField(unique=True, null=True, blank=True)
     date = models.DateTimeField(default=timezone.now)
-
+    inserteduser =models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -356,12 +365,12 @@ Course._meta.get_field('teacher_course_status').verbose_name = "Eğitmenin Siste
 Course._meta.get_field('featured').verbose_name = "Öne Çıksın Mı?"
 Course._meta.get_field('course_id').verbose_name = "Kurs Numarası"
 Course._meta.get_field('slug').verbose_name = "Etiket"
+Course._meta.get_field('price').verbose_name = "Fiyatı"
 Course._meta.get_field('date').verbose_name = "Kurs Eklenme Tarihi"
 
 class Odev(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
-    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL,null=True, blank=True)
-    hazirlayan = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
+    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL,null=True, blank=True)    
     file = models.FileField(upload_to="course-file", blank=True, null=True)
     image = models.FileField(upload_to="course-file", blank=True, null=True)
     title = models.CharField(max_length=200)
@@ -373,7 +382,8 @@ class Odev(models.Model):
     koordinator_odev_status = models.CharField(choices=KOORDINATOR_STATUS, max_length=100,blank=True, null=True)
     # featured = models.BooleanField(default=False)    
     date = models.DateTimeField(default=timezone.now)
-
+    inserteduser =models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
@@ -409,7 +419,7 @@ class Odev(models.Model):
 Odev._meta.get_field('category').verbose_name = "Kategori" 
 Odev._meta.get_field('koordinator').verbose_name = "Ödev Koordinatorü"
 Odev._meta.get_field('image').verbose_name = "Ödev Resmi"
-Odev._meta.get_field('hazirlayan').verbose_name = "Ödevi Hazırlayan"
+Odev._meta.get_field('inserteduser').verbose_name = "Ödevi Hazırlayan"
 Odev._meta.get_field('file').verbose_name = "Ödev Dosyası"
 Odev._meta.get_field('title').verbose_name = "Ödev Başlığı" 
 Odev._meta.get_field('language').verbose_name = "Ödev Dili"
@@ -427,7 +437,9 @@ class VariantOdev(models.Model):
     title = models.CharField(max_length=1000)
     variant_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
-
+    inserteduser =models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    active = models.BooleanField(default=False)
+    
     def __str__(self):
         return self.title
     
@@ -1331,7 +1343,7 @@ Certificate._meta.get_field('certificate_id').verbose_name = "Sertifikası Numar
 Certificate._meta.get_field('date').verbose_name = "Sertifika Alınan Tarih" 
    
 class CompletedLesson(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="completed_lessons")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     variant_item = models.ForeignKey(VariantItem, on_delete=models.CASCADE)
     date = models.DateTimeField(default=timezone.now)
@@ -1900,7 +1912,7 @@ class Hafiz(models.Model):
     job = models.ForeignKey("Job", null=True, blank=True, on_delete=models.SET_NULL)
     yas = models.IntegerField(null=True, blank=True)
     active = models.BooleanField(default=True)
-    agent = models.ForeignKey("Agent", null=True, blank=True, on_delete=models.SET_NULL)    
+    agent = models.ForeignKey("Agent", null=True, blank=True, on_delete=models.SET_NULL,related_name="hafizlar")    
     country = models.ForeignKey("Country", null=True, blank=True, on_delete=models.SET_NULL)
     hdm_egitmen = models.ForeignKey("Teacher",on_delete=models.SET_NULL,null=True,blank=True,verbose_name="HDM Eğitmeni",related_name="hafiz_ogrencileri")
 
@@ -1945,7 +1957,7 @@ Hafiz._meta.get_field('country').verbose_name = "Ülke"
 class Agent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
-    roles = models.ManyToManyField(AgentRole, verbose_name="Roller")
+    roles = models.ManyToManyField(AgentRole, verbose_name="Roller",default="HBSTemsilci")
     full_name = models.CharField(max_length=100)
     bio = models.CharField(max_length=100, null=True, blank=True)
     evtel = models.CharField(max_length=150, default="")
@@ -2004,7 +2016,7 @@ City._meta.get_field('active').verbose_name = "Aktif/Pasif"
 
      
 class District(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     city = models.ForeignKey("City", related_name="Cities", null=True, blank=True, on_delete=models.SET_NULL)
     active = models.BooleanField(default=True)
 
@@ -2274,3 +2286,13 @@ class Annotation(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - Page {self.page.page_number} - {self.shape_type}"
+    
+class LiveLesson(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    datetime = models.DateTimeField()
+    platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES)
+    platform_url = models.URLField()
+
+    def __str__(self):
+        return self.title

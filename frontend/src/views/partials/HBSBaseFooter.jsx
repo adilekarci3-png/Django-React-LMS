@@ -1,16 +1,22 @@
 import React from 'react';
 
-
 function HBSBaseFooter() {
   return (
-    <footer className="pt-lg-8 pt-5 footer" style={{ background: "linear-gradient(135deg, #1b4965,rgb(89, 117, 40))", color: "#ffffff", marginTop: "5rem" }}>
+    <footer
+      className="pt-lg-8 pt-5 footer"
+      style={{
+        background: "linear-gradient(135deg, #3b82f6, #7c3aed)", // Yeni renk geçişi
+        color: "#ffffff",
+        marginTop: "5rem"
+      }}
+    >
       <div className="container mt-lg-2">
         <div className="row">
           <div className="col-lg-4 col-md-6 col-12 text-white">
             <div className="mb-4">
-              <h1 className="text-white">HDM</h1>
+              <h1 className="text-white">HBS</h1>
               <p className="mt-4 text-white">
-                HDM sistemi, hafız dinleme, ders planlama ve hataların takibini kolaylaştırmak için geliştirilmiş kapsamlı bir platformdur. Eğitmenler ve hafız adayları için etkili ve sade bir yönetim ortamı sunar.
+                HBS sistemi, hafız dinleme, ders planlama ve hataların takibini kolaylaştırmak için geliştirilmiş kapsamlı bir platformdur. Eğitmenler ve hafız adayları için etkili ve sade bir yönetim ortamı sunar.
               </p>
               <div className="fs-4 mt-4">
                 <a href="#" className="me-2 text-white" style={{ transition: "color 0.3s" }}>

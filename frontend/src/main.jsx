@@ -1,10 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import AppWrapper from "./AppWrapper"; // Bu kullanılmalı
+import App from './App'
 import './index.css'
+import ErrorBoundary from './layouts/ErrorBoundary'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AppWrapper />
+    <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
   </React.StrictMode>
 )

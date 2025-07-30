@@ -9,7 +9,8 @@ import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import { Link } from "react-router-dom";
 
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+// import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Swal from "sweetalert2";
 
 function AkademiCourseCreate() {
@@ -159,8 +160,8 @@ function AkademiCourseCreate() {
     formdata.append("price", course.price);
     formdata.append("level", course.level);
     formdata.append("language", course.language);
-    if (UserData()?.teacher_id) {
-      formdata.append("teacher", parseInt(UserData().teacher_id));
+    if (useUserData()?.teacher_id) {
+      formdata.append("teacher", parseInt(useUserData().teacher_id));
     }
 
     console.log(course.category);

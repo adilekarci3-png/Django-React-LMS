@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartContext, ProfileContext } from "./views/plugin/Context";
-import apiInstance from "./utils/axios";
 import useAxios from "./utils/useAxios";
-import CartId from "./views/plugin/CartId";
-import UserData from "./views/plugin/UserData";
+import { useAuthStore } from "./store/auth";
+import { setUser } from "./utils/auth";
+
+import useUserData from "./views/plugin/useUserData";
 
 import MainWrapper from "./layouts/MainWrapper";
-import PrivateRoute from "./layouts/PrivateRoute";
 
 // Auth Pages
 import Register from "./views/auth/Register";
@@ -61,7 +60,6 @@ import CourseDetail from "./views/instructor/CourseDetail";
 //EHAD Akademi Pages
 import AkademiIndex from "./views/base/AkademiIndex";
 import AkademiCourses from "./views/Akademi/Courses";
-import EHADAcademiDashboard from "./views/Akademi/EHADAcademiDashboard";
 
 //HDM Pages
 import HDMIndex from "./views/base/HDMIndex";
@@ -84,23 +82,29 @@ import DersSonuRaporuCreate from "./views/ESKEPstajer/DersSonuRaporuCreate";
 import ProjeCreate from "./views/ESKEPstajer/ProjeCreate";
 
 //Eskep Instructor Pages
+import ESKEPinstructorCourseCreate from "./views/ESKEPinstructor/EskepInstructorCourseCreate";
 import ESKEPinstructorDashboard from "./views/ESKEPinstructor/EskepInstructorDashboard";
-import ESKEPinstructorOdevs from "./views/ESKEPinstructor/Odevs";
-import ESKEPinstructorKitapTahlils from "./views/ESKEPinstructor/KitapTahlils";
-import ESKEPinstructorDersSonuRaporus from "./views/ESKEPinstructor/DersSonuRaporus";
+import ESKEPinstructorCourses from "./views/ESKEPinstructor/EskepInstructorCourses";
+import ESKEPinstructorOdevs from "./views/ESKEPinstructor/EskepInstructorOdevs";
+import ESKEPinstructorKitapTahlils from "./views/ESKEPinstructor/EskepInstructorKitapTahlils";
+import ESKEPinstructorDersSonuRaporus from "./views/ESKEPinstructor/EskepInstructorDersSonuRaporus";
 import ESKEPinstructorOdevDetail from "./views/ESKEPinstructor/OdevDetail";
 import ESKEPinstructorKitapTahliliDetail from "./views/ESKEPinstructor/KitapTahliliDetail";
 import ESKEPinstructorAssingCoordinator from "./views/ESKEPinstructor/AssignCoordinator";
 import EskepInstructorStudents from "./views/ESKEPinstructor/EskepInstructorStudents";
 import EskepInstructorProfile from "./views/ESKEPinstructor/EskepInstructorProfile";
 import EskepInstructorStudentStajerList from "./views/ESKEPinstructor/EskepInstructorStudentStajerList";
+import ESKEPChangePassword from "./views/ESKEPinstructor/ChangePassword";
 import StajerListesi from "./views/ESKEPinstructor/StajerListesi";
 import OgrenciListesi from "./views/ESKEPinstructor/OgrenciListesi";
 import StajerDetay from "./views/ESKEPinstructor/StajerDetay";
 import StajerDuzenle from "./views/ESKEPinstructor/StajerDuzenle";
+import EskepInstructorCourseDetail from "./views/ESKEPinstructor/EskepInstructorCourseDetail";
+import EskepInstructorAssingCourses from "./views/ESKEPinstructor/EskepInstructorAssingCourses";
+
 //Eskep Eğitmen Pages
-import ESKEPEgitmenDersSaatiEkle from "./views/ESKEPinstructor/ESKEPAddLesson";
-import ESKEPEgitmenCreate from "./views/ESKEPinstructor/InstructorCreate";
+import ESKEPEgitmenDersSaatiEkle from "./views/ESKEPEgitmen/ESKEPEgitmenAddLesson";
+import ESKEPEgitmenCreate from "./views/ESKEPinstructor/EskepInstructorTeacherCreate";
 import ESKEPEgitmenVideoCreate from "./views/ESKEPinstructor/InstructorVideoCreate";
 import ESKEPEgitmenVideoRecoder from "./views/ESKEPinstructor/WebCamVideoRecorder";
 import ESKEPEgitmenVideoLinkCreate from "./views/ESKEPinstructor/InstructorVideoLinkCreate";
@@ -123,356 +127,869 @@ import InstructorList from "./views/ESKEPinstructor/InstructorList";
 import OrganizationChart from "./views/admin/OrganizationChart";
 
 // Agent Pages
-import AgentHafizBilgiList from "./views/agent/AgentHafizBilgiList";
+import AgentHafizBilgiList from "./views/HBSTemsilci/AgentHafizBilgiList";
+import PrintExample from "./views/hafizbilgi/PrintExample";
 
-// Misc
+import PrivateRoute from "./layouts/PrivateRoute";
+import HBSTemsilciDashboard from "./views/HBSTemsilci/HBSTemsilciDashboard";
+import HBSKoordinatorDashboard from "./views/HBSKoordinator/HBSKoordinatorDashboard";
+import ESKEPEgitmenAddCanliDers from "./views/ESKEPEgitmen/ESKEPEgitmenAddCanliDers";
+import ESKEPEgitmenLiveDersListesi from "./views/ESKEPEgitmen/ESKEPEgitmenLiveDersListesi";
+import ESKEPEgitmenAddCanliDersPopup from "./views/ESKEPEgitmen/Popup/ESKEPEgitmenAddCanliDersPopup";
+import EskepInstructorProjes from "./views/ESKEPinstructor/EskepInstructorProjes";
+
 
 
 function App() {
-  const [cartCount, setCartCount] = useState(0);
   const [profile, setProfile] = useState(null);
-  const user = UserData(); // user_id vs içerir
+  const rehydrated = useAuthStore((state) => state.rehydrated);
+  const allUserData = useAuthStore((state) => state.allUserData);
+  const user = useUserData();
+  const setRehydrated = useAuthStore((state) => state.setRehydrated);
+  const user_id = useAuthStore((state) => state.allUserData?.user_id);
+  // const user_id = allUserData?.id || null;
+  console.log("rehydrated:", rehydrated);
+  console.log(allUserData);
+  console.log(user);
   const axiosJWT = useAxios();
 
   useEffect(() => {
-    // 🛒 Sepet sayısını getir (anonim de olabilir)
-    apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
-      setCartCount(res.data?.length || 0);
-    });
-
-    // 👤 Kullanıcı profili (eğer login ise)
-    if (user?.user_id) {
+    if (rehydrated && user_id) {
       axiosJWT
-        .get(`user/profile/${user.user_id}/`)
+        .get(`user/profile/${user_id}/`)
         .then((res) => setProfile(res.data))
         .catch((err) => console.warn("Profil alınamadı:", err));
     }
-  }, [user?.user_id]);
+  }, [rehydrated, user_id]);
+
+  useEffect(() => {
+    const init = async () => {
+      await setUser(); // Token varsa kullanıcıyı store'a yerleştir
+      setRehydrated(); // Zustand store yüklendi olarak işaretle
+    };
+    init();
+  }, []);
+
+  if (!rehydrated) return <Loading />;
 
   return (
-    <CartContext.Provider value={[cartCount, setCartCount]}>
+    <MainWrapper>
+      {/* <CartContext.Provider value={[cartCount, setCartCount]}> */}
       <ProfileContext.Provider value={[profile, setProfile]}>
         <BrowserRouter>
-          <MainWrapper>
-            <Routes>
-              {/* Auth */}
-              <Route path="/register/" element={<Register />} />
-              <Route path="/login/" element={<Login />} />
-              <Route path="/logout/" element={<Logout />} />
-              <Route path="/forgot-password/" element={<ForgotPassword />} />
-              <Route
-                path="/create-new-password/"
-                element={<CreateNewPassword />}
-              />
+          <Routes>
+            {/* 🔓 Açık Sayfalar */}
+            <Route path="/register/" element={<Register />} />
+            <Route path="/login/" element={<Login />} />
+            <Route path="/logout/" element={<Logout />} />
+            <Route path="/forgot-password/" element={<ForgotPassword />} />
+            <Route
+              path="/create-new-password/"
+              element={<CreateNewPassword />}
+            />
+            <Route path="/" element={<Index />} />
+            <Route
+              path="/hafizbilgi/create-hafizbilgi/"
+              element={<HafizBilgiCreate />}
+            />
+            <Route
+              path="/admin/organization-chart/"
+              element={<OrganizationChart />}
+            />
+            {/* <Route
+                path="*"
+                element={<Navigate to="/login/" />}
+              /> */}
+            {/* 🔐 Giriş Gerektiren Sayfalar */}
+            <Route
+              path="/cart/"
+              element={
+                <PrivateRoute>
+                  <Cart />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/checkout/:order_oid/"
+              element={
+                <PrivateRoute>
+                  <Checkout />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/payment-success/:order_oid/"
+              element={
+                <PrivateRoute>
+                  <Success />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/search/"
+              element={
+                <PrivateRoute>
+                  <Search />
+                </PrivateRoute>
+              }
+            />
 
-              {/* Base */}
-              <Route path="/" element={<Index />} />
-              {/* <Route path="/course-detail/:slug/" element={<CourseDetail />} /> */}
-              <Route path="/cart/" element={<Cart />} />
-              <Route path="/checkout/:order_oid/" element={<Checkout />} />
-              <Route
-                path="/payment-success/:order_oid/"
-                element={<Success />}
-              />
-              <Route path="/search/" element={<Search />} />
+            {/* Hafız Bilgi */}
+            <Route
+              path="/hafizbilgi/"
+              element={
+                <PrivateRoute>
+                  <HafizBilgiIndex />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hafizbilgi/dashboard"
+              element={
+                <PrivateRoute>
+                  <HafizBilgiDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hafizbilgi/list/"
+              element={
+                <PrivateRoute>
+                  <HafizBilgiList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hafizbilgi/HafizCountPage/"
+              element={
+                <PrivateRoute>
+                  <HafizCountPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hafizbilgi/KayitliOgrencilerPage/"
+              element={
+                <PrivateRoute>
+                  <KayitliOgrencilerPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hafizbilgi/UygulamaUzerindenHafizPage/"
+              element={
+                <PrivateRoute>
+                  <UygulamaUzerindenHafizPage />
+                </PrivateRoute>
+              }
+            />
 
-              {/* Hafız Bilgi */}
-              <Route path="/hafizbilgi/" element={<HafizBilgiIndex />} />
-              <Route
-                path="/hafizbilgi/dashboard"
-                element={<HafizBilgiDashboard />}
-              />
-              <Route path="/hafizbilgi/list/" element={<HafizBilgiList />} />
-              <Route
-                path="/hafizbilgi/create-hafizbilgi/"
-                element={<HafizBilgiCreate />}
-              />              
-              <Route
-                path="/hafizbilgi/HafizCountPage/"
-                element={<HafizCountPage />}
-              />
-              <Route
-                path="/hafizbilgi/KayitliOgrencilerPage/"
-                element={<KayitliOgrencilerPage />}
-              />
-              <Route
-                path="/hafizbilgi/UygulamaUzerindenHafizPage/"
-                element={<UygulamaUzerindenHafizPage />}
-              />
+            {/* Agent */}
+            <Route
+              path="/temsilci/hafizbilgi/list/"
+              element={
+                <PrivateRoute>
+                  <AgentHafizBilgiList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/temsilci/dashboard/"
+              element={
+                <PrivateRoute>
+                  <HBSTemsilciDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/koordinator/dashboard/"
+              element={
+                <PrivateRoute>
+                  <HBSKoordinatorDashboard />
+                </PrivateRoute>
+              }
+            />
 
-              Agent
-              <Route
-                path="/agent/hafizbilgi/list/"
-                element={<AgentHafizBilgiList />}
-              />
+            {/* Student */}
+            <Route
+              path="/student/dashboard/"
+              element={
+                <PrivateRoute>
+                  <StudentDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/student/courses/"
+              element={
+                <PrivateRoute>
+                  <StudentCourses />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/student/courses/:enrollment_id/"
+              element={
+                <PrivateRoute>
+                  <StudentCourseDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/student/wishlist/"
+              element={
+                <PrivateRoute>
+                  <Wishlist />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/student/profile/"
+              element={
+                <PrivateRoute>
+                  <StudentProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/student/change-password/"
+              element={
+                <PrivateRoute>
+                  <StudentChangePassword />
+                </PrivateRoute>
+              }
+            />
 
-              {/* Admin */}
-              <Route
-                path="/admin/organization-chart/"
-                element={<OrganizationChart />}
-              />
+            {/* Instructor */}
+            <Route
+              path="/instructor/dashboard/"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/courses/"
+              element={
+                <PrivateRoute>
+                  <Courses />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/reviews/"
+              element={
+                <PrivateRoute>
+                  <Review />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/students/"
+              element={
+                <PrivateRoute>
+                  <Students />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/earning/"
+              element={
+                <PrivateRoute>
+                  <Earning />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/orders/"
+              element={
+                <PrivateRoute>
+                  <Orders />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/coupon/"
+              element={
+                <PrivateRoute>
+                  <Coupon />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/notifications/"
+              element={
+                <PrivateRoute>
+                  <TeacherNotification />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/question-answer/"
+              element={
+                <PrivateRoute>
+                  <QA />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/change-password/"
+              element={
+                <PrivateRoute>
+                  <ChangePassword />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/profile/"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/create-course/"
+              element={
+                <PrivateRoute>
+                  <CourseCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/edit-course/:course_id/"
+              element={
+                <PrivateRoute>
+                  <CourseEdit />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/instructor/course-detay/:course_id"
+              element={
+                <PrivateRoute>
+                  <CourseDetail />
+                </PrivateRoute>
+              }
+            />
 
-              {/* Student */}
-              <Route
-                path="/student/dashboard/"
+            {/* EHAD Akademi */}
+            <Route
+              path="/akademi/"
+              element={
+                <PrivateRoute>
+                  <AkademiIndex />
+                </PrivateRoute>
+              }
+            />
+            {/* <Route
+                path="/akademi/dashboard"
                 element={
                   <PrivateRoute>
-                    <StudentDashboard />
+                    <EHADAcademiDashboard />
                   </PrivateRoute>
                 }
-              />
-              <Route path="/student/courses/" element={<StudentCourses />} />
-              <Route
-                path="/student/courses/:enrollment_id/"
-                element={<StudentCourseDetail />}
-              />
-              <Route path="/student/wishlist/" element={<Wishlist />} />
-              <Route path="/student/profile/" element={<StudentProfile />} />
-              <Route
-                path="/student/change-password/"
-                element={<StudentChangePassword />}
-              />
+              /> */}
+            <Route
+              path="/akademi/courses"
+              element={
+                <PrivateRoute>
+                  <AkademiCourses />
+                </PrivateRoute>
+              }
+            />
 
-              {/* Instructor */}
-              <Route path="/instructor/dashboard/" element={<Dashboard />} />
-              <Route path="/instructor/courses/" element={<Courses />} />
-              <Route path="/instructor/reviews/" element={<Review />} />
-              <Route path="/instructor/students/" element={<Students />} />
-              <Route path="/instructor/earning/" element={<Earning />} />
-              <Route path="/instructor/orders/" element={<Orders />} />
-              <Route path="/instructor/coupon/" element={<Coupon />} />
-              <Route
-                path="/instructor/notifications/"
-                element={<TeacherNotification />}
-              />
-              <Route path="/instructor/question-answer/" element={<QA />} />
-              <Route
-                path="/instructor/change-password/"
-                element={<ChangePassword />}
-              />
-              <Route path="/instructor/profile/" element={<Profile />} />
-              <Route
-                path="/instructor/create-course/"
-                element={<CourseCreate />}
-              />
-              <Route
-                path="/instructor/edit-course/:course_id/"
-                element={<CourseEdit />}
-              />
-              <Route
-                path="/instructor/course-detay/:course_id"
-                element={<CourseDetail />}
-              />
-              {/* EHAD AKADEMİ */}
-              <Route path="/akademi/" element={<AkademiIndex />} />
-              <Route
-                path="/akademi/dashboard"
-                element={<EHADAcademiDashboard />}
-              />
-              <Route path="/akademi/courses" element={<AkademiCourses />} />
+            {/* HDM */}
+            <Route
+              path="/hdm/"
+              element={
+                <PrivateRoute>
+                  <HDMIndex />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hdm/dashboard"
+              element={
+                <PrivateRoute>
+                  <HafizlikDinlemeDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hdm/kuranoku"
+              element={
+                <PrivateRoute>
+                  <KuranDinleme />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hdm/hafiztakip"
+              element={
+                <PrivateRoute>
+                  <HafizTakip />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hdm/hafizgeneltakvim"
+              element={
+                <PrivateRoute>
+                  <HafizGenelTakvim />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hdm/egitmendetay"
+              element={
+                <PrivateRoute>
+                  <EgitmenDetay />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hdm/hafizdetay"
+              element={
+                <PrivateRoute>
+                  <HafizDetay />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/hdm/egitmenhafizlistesi"
+              element={
+                <PrivateRoute>
+                  <EgitmenHafizListesi />
+                </PrivateRoute>
+              }
+            />
 
-              {/* HDM */}
-              <Route path="/hdm/" element={<HDMIndex />} />
-              <Route
-                path="/hdm/dashboard"
-                element={<HafizlikDinlemeDashboard />}
-              />
-              <Route path="/hdm/kuranoku" element={<KuranDinleme />} />
-              <Route path="/hdm/hafiztakip" element={<HafizTakip />} />
-              <Route path="/hdm/hafizgeneltakvim" element={<HafizGenelTakvim />} />
-              <Route path="/hdm/egitmendetay" element={<EgitmenDetay />} />
-              <Route path="/hdm/hafizdetay" element={<HafizDetay />} />
-              <Route path="/hdm/egitmenhafizlistesi" element={<EgitmenHafizListesi />} />
-              
+            {/* ESKEP Genel */}
+            <Route
+              path="/eskep/"
+              element={
+                <PrivateRoute>
+                  <ESKEPIndex />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/dashboard"
+              element={
+                <PrivateRoute>
+                  <ESKEPDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/ogrenci/"
+              element={
+                <PrivateRoute>
+                  <ESKEPStudent />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/ogrenci/dersanket"
+              element={
+                <PrivateRoute>
+                  <DersSonuAnketi />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/create-odev/"
+              element={
+                <PrivateRoute>
+                  <OdevCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/create-kitaptahlili/"
+              element={
+                <PrivateRoute>
+                  <KitapTahliliCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/create-derssonuraporu/"
+              element={
+                <PrivateRoute>
+                  <DersSonuRaporuCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/create-proje/"
+              element={
+                <PrivateRoute>
+                  <ProjeCreate />
+                </PrivateRoute>
+              }
+            />
 
-              {/* ESKEP */}
-              <Route path="/eskep/dashboard" element={<ESKEPDashboard />} />
-              <Route path="/eskep/" element={<ESKEPIndex />} />
-              <Route path="/eskep/ogrenci/" element={<ESKEPStudent />} />
-              <Route
-                path="/eskep/ogrenci/dersanket"
-                element={<DersSonuAnketi />}
-              />
-              <Route path="/eskep/create-odev/" element={<OdevCreate />} />
-              <Route
-                path="/eskep/create-kitaptahlili/"
-                element={<KitapTahliliCreate />}
-              />
-              <Route
-                path="/eskep/create-derssonuraporu/"
-                element={<DersSonuRaporuCreate />}
-              />
-              <Route path="/eskep/create-proje/" element={<ProjeCreate />} />
+            {/* ESKEP Instructor */}
+            <Route
+              path="/eskepinstructor/dashboard/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/course-create/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorCourseCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/courses/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorCourses />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/assingcourses/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorAssingCourses />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/courses/:enrollment_id/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorCourseDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/odevs/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorOdevs />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/odevs/:odev_id/:koordinator_id/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorOdevDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/dersSonuRaporus/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorDersSonuRaporus />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/dersSonuRaporus/:derssonuraporu_id/:koordinator_id/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorOdevDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/kitaptahlileris/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorKitapTahlils />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/kitaptahlileris/:kitaptahlili_id/:koordinator_id/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorKitapTahliliDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/projes/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorProjes />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/projes/:proje_id/:koordinator_id/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorOdevDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/koordinator-ata/"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorAssingCoordinator />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/ogrenciler/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorStudents />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/notifications/"
+              element={
+                <PrivateRoute>
+                  <TeacherNotification />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/question-answer/"
+              element={
+                <PrivateRoute>
+                  <QA />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/change-password/"
+              element={
+                <PrivateRoute>
+                  <ESKEPChangePassword />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/profile/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/ogrenci-stajer/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorStudentStajerList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/stajer-list/"
+              element={
+                <PrivateRoute>
+                  <StajerListesi />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/ogrenci-list/"
+              element={
+                <PrivateRoute>
+                  <OgrenciListesi />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/stajer/:id/detay"
+              element={
+                <PrivateRoute>
+                  <StajerDetay />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/stajer/:id/duzenle"
+              element={
+                <PrivateRoute>
+                  <StajerDuzenle />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/egitmen-ekle/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenCreate />
+                </PrivateRoute>
+              }
+            />
+            {/* ESKEP Stajer */}
+            <Route
+              path="/eskepstajer/odevs/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerOdevs />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepstajer/dersonuraporus/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerDersSonuRaporus />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepstajer/kitaptahlileris/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerKitapTahlilis />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepstajer/projes/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerProjes />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepstajer/dashboard/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerDashboard />
+                </PrivateRoute>
+              }
+            />
 
-              {/* ESKEP Instructor */}
-              <Route
-                path="/eskepinstructor/dashboard/"
-                element={<ESKEPinstructorDashboard />}
-              />
-              <Route
-                path="/eskepinstructor/odevs/"
-                element={<ESKEPinstructorOdevs />}
-              />
-              <Route
-                path="/eskepinstructor/odevs/:odev_id/:koordinator_id/"
-                element={<ESKEPinstructorOdevDetail />}
-              />
-              <Route
-                path="/eskepinstructor/dersSonuRaporus/"
-                element={<ESKEPinstructorDersSonuRaporus />}
-              />
-              <Route
-                path="/eskepinstructor/dersSonuRaporus/:derssonuraporu_id/:koordinator_id/"
-                element={<ESKEPinstructorOdevDetail />}
-              />
-              <Route
-                path="/eskepinstructor/kitaptahlileris/"
-                element={<ESKEPinstructorKitapTahlils />}
-              />
-              <Route
-                path="/eskepinstructor/kitaptahlileris/:kitaptahlili_id/:koordinator_id/"
-                element={<ESKEPinstructorKitapTahliliDetail />}
-              />
-              <Route
-                path="/eskepinstructor/projes/"
-                element={<ESKEPinstructorDersSonuRaporus />}
-              />
-              <Route
-                path="/eskepinstructor/projes/:proje_id/:koordinator_id/"
-                element={<ESKEPinstructorOdevDetail />}
-              />
-              <Route
-                path="/eskepinstructor/koordinator-ata/"
-                element={<ESKEPinstructorAssingCoordinator />}
-              />
-              <Route
-                path="/eskep/egitim-takvimi/"
-                element={<EducationSchedule />}
-              />
-              <Route path="/eskep/eğitmenler/" element={<InstructorList />} />
-              <Route
-                path="/eskepinstructor/ogrenciler/"
-                element={<EskepInstructorStudents />}
-              />
-              <Route
-                path="/eskepinstructor/notifications/"
-                element={<TeacherNotification />}
-              />
-              <Route
-                path="/eskepinstructor/question-answer/"
-                element={<QA />}
-              />
-              <Route
-                path="/eskepinstructor/change-password/"
-                element={<ChangePassword />}
-              />
-              <Route
-                path="/eskepinstructor/egitmen-ekle/"
-                element={<ESKEPEgitmenCreate />}
-              />
-              <Route
-                path="/eskepinstructor/profile/"
-                element={<EskepInstructorProfile />}
-              />
-              <Route
-                path="/eskepinstructor/ogrenci-stajer/"
-                element={<EskepInstructorStudentStajerList />}
-              />
-              <Route
-                path="/eskepinstructor/stajer-list/"
-                element={<StajerListesi />}
-              />
-              <Route
-                path="/eskepinstructor/ogrenci-list/"
-                element={<OgrenciListesi />}
-              />
-              <Route
-                path="/eskepinstructor/stajer/:id/detay"
-                element={<StajerDetay />}
-              />
-              <Route
-                path="/eskepinstructor/stajer/:id/duzenle"
-                element={<StajerDuzenle />}
-              />
+            {/* ESKEP Eğitmen */}
+            <Route
+              path="/eskepegitmen/ders-saat-ekle/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenDersSaatiEkle />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/canli-ders-ekle/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenAddCanliDers />
+                </PrivateRoute>
+              }
+            />
 
-              {/* ESKEP Stajer */}
-              <Route
-                path="/eskepstajer/odevs/"
-                element={<EskepStajerOdevs />}
-              />
-              <Route
-                path="/eskepstajer/dersonuraporus/"
-                element={<EskepStajerDersSonuRaporus />}
-              />
-              <Route
-                path="/eskepstajer/kitaptahlileris/"
-                element={<EskepStajerKitapTahlilis />}
-              />
-              <Route
-                path="/eskepstajer/projes/"
-                element={<EskepStajerProjes />}
-              />
-              <Route
-                path="/eskepstajer/dashboard/"
-                element={<EskepStajerDashboard />}
-              />
+            <Route
+              path="/eskepegitmen/profil/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenProfil />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/live-lessons/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenLiveDersListesi />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/live-lessons/edit/:id" element={<ESKEPEgitmenAddCanliDersPopup />} />
+            <Route
+              path="/eskepegitmen/ders-olustur/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenVideoCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/video-ekle/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenVideoLinkCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/video-olustur/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenVideoRecoder />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/video-list/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenVideoList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/youtube-canli/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenYoutubeCanli />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/takvim/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenSchedule />
+                </PrivateRoute>
+              }
+            />
+            {/* Eğitim Takvimi */}
+            <Route
+              path="/eskep/egitim-takvimi/"
+              element={
+                <PrivateRoute>
+                  <EducationSchedule />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/eğitmenler/"
+              element={
+                <PrivateRoute>
+                  <InstructorList />
+                </PrivateRoute>
+              }
+            />
 
-              {/* ESKEP Öğrenci */}
-              <Route
-                path="/eskepogrenci/odevs/"
-                element={<ESKEPinstructorOdevs />}
-              />
-              <Route
-                path="/eskepogrenci/derssonuraporus/"
-                element={<ESKEPinstructorOdevs />}
-              />
-              <Route
-                path="/eskepogrenci/kitaptahlileris/"
-                element={<ESKEPinstructorOdevs />}
-              />
-
-              {/* ESKEP Eğitmen */}
-              <Route
-                path="/eskepegitmen/ders-saat-ekle/"
-                element={<ESKEPEgitmenDersSaatiEkle />}
-              />
-              <Route
-                path="/eskepegitmen/egitmen-ekle/"
-                element={<ESKEPEgitmenCreate />}
-              />
-              <Route
-                path="/eskepegitmen/profil/"
-                element={<ESKEPEgitmenProfil />}
-              />
-              <Route
-                path="/eskepegitmen/ders-olustur/"
-                element={<ESKEPEgitmenVideoCreate />}
-              />
-              <Route
-                path="/eskepegitmen/video-ekle/"
-                element={<ESKEPEgitmenVideoLinkCreate />}
-              />
-              <Route
-                path="/eskepegitmen/video-olustur/"
-                element={<ESKEPEgitmenVideoRecoder />}
-              />
-              <Route
-                path="/eskepegitmen/video-list/"
-                element={<ESKEPEgitmenVideoList />}
-              />
-              <Route
-                path="/eskepegitmen/youtube-canli/"
-                element={<ESKEPEgitmenYoutubeCanli />}
-              />
-              <Route
-                path="/eskepegitmen/takvim/"
-                element={<ESKEPEgitmenSchedule />}
-              />
-            </Routes>
-          </MainWrapper>
+            {/* Yazdırma Testi */}
+            <Route
+              path="/print/"
+              element={
+                <PrivateRoute>
+                  <PrintExample />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
         </BrowserRouter>
       </ProfileContext.Provider>
-    </CartContext.Provider>
+      {/* </CartContext.Provider> */}
+    </MainWrapper>
   );
 }
 

@@ -7,16 +7,15 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 import useAxios from "../../utils/useAxios";
-import Useta from "../plugin/UserData";
 import { teacherId } from "../../utils/constants";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     useAxios()
-      .get(`teacher/course-order-list/${UserData()?.teacher_id}/`)
+      .get(`teacher/course-order-list/${useUserData()?.teacher_id}/`)
       .then((res) => {
         console.log(res.data);
         setOrders(res.data);

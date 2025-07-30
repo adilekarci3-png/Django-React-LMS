@@ -3,122 +3,118 @@ import axios from "./axios";
 import jwt_decode from "jwt-decode";
 import Swal from "sweetalert2";
 
-// Kullanıcı Giriş
 export const login = async (email, password) => {
   try {
-    const { data, status } = await axios.post(`user/token/`, {
-      email,
-      password,
-    });
-
-    if (status === 200) {
+    const { data } = await axios.post("user/token/", { email, password });
+    if (data.access && data.refresh) {
       setAuthUser(data.access, data.refresh);
+      return { data, error: null };
     }
-
-    return { data, error: null };
+    return { data: null, error: "Geçersiz yanıt" };
   } catch (error) {
     return {
       data: null,
-      error: error.response?.data?.detail || "Something went wrong",
+      error: error.response?.data?.detail || "Giriş sırasında hata oluştu",
     };
   }
 };
 
-// Kullanıcı Kayıt
+export const logout = () => {  
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  useAuthStore.getState().setUser(null);
+
+  // Eğer açık sayfadaysa, yönlendirme yapma!
+  if (!window.location.pathname.startsWith("/login")) {
+    // window.location.href = "/login"; // ❗ İstersen bu satırı kaldır
+  }
+};
+
+export const setUser = async () => { 
+  const access = localStorage.getItem("access_token");
+  const refresh = localStorage.getItem("refresh_token");
+  const setRehydrated = useAuthStore.getState().setRehydrated;
+console.log("TOKENS", { access, refresh });
+  if (!access || !refresh) {
+    setRehydrated();
+    return;
+  }
+
+  if (isAccessTokenExpired(access)) {
+    try {
+      const refreshed = await getRefreshedToken(refresh);
+      setAuthUser(refreshed.access, refreshed.refresh);
+    } catch {
+      logout();
+    }
+  } else {
+    setAuthUser(access, refresh);
+  }
+
+  setRehydrated();
+};
+
+export const setAuthUser = (access, refresh) => {
+  localStorage.setItem("access_token", access);
+  localStorage.setItem("refresh_token", refresh);
+
+  try {
+    const decoded = jwt_decode(access);
+    console.log(decoded);
+    if (decoded) {
+      useAuthStore.getState().setUser(decoded, access);
+      console.log("SET USER:", useAuthStore.getState().allUserData);
+    }
+  } catch (err) {
+    console.error("JWT çözümleme hatası:", err);
+  }
+};
+
+export const getRefreshedToken = async (refreshToken) => {
+  const response = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh: refreshToken }),
+  });
+
+  if (!response.ok) throw new Error("Token yenileme başarısız");
+  return await response.json();
+};
+
+export const isAccessTokenExpired = (token) => {
+  try {
+    const decoded = jwt_decode(token);
+    const now = Date.now() / 1000;
+    return decoded.exp < now;
+  } catch {
+    return true;
+  }
+};
+
 export const register = async (full_name, email, password, password2) => {
   try {
-    const { data } = await axios.post(`user/register/`, {
+    const response = await axios.post("user/register/", {
       full_name,
       email,
       password,
       password2,
     });
 
-    await login(email, password);
-    return { data, error: null };
+    // Kayıt başarılıysa otomatik login
+    const { data, error } = await login(email, password);
+    return { data: response.data, error };
   } catch (error) {
+    const errData = error.response?.data || {};
+    const errMsg =
+      errData.full_name ||
+      errData.email ||
+      errData.non_field_errors ||
+      errData.password ||
+      "Kayıt sırasında bir hata oluştu";
+
     return {
       data: null,
-      error:
-        `${error.response?.data?.full_name || ""} - ${error.response?.data?.email || ""}` ||
-        "Something went wrong",
+      error: Array.isArray(errMsg) ? errMsg.join(" ") : errMsg,
     };
-  }
-};
-
-// Çıkış
-export const logout = () => {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  useAuthStore.getState().setUser(null);
-};
-
-// Kullanıcıyı Ayarla
-export const setUser = async () => {
-  const access_token = localStorage.getItem("access_token");
-  const refresh_token = localStorage.getItem("refresh_token");
-
-  if (!access_token || !refresh_token) {
-    // Swal.fire("Uyarı", "Token bilgileri eksik.", "warning");
-    return;
-  }
-
-  if (isAccessTokenExpired()) {
-    try {
-      const response = await getRefreshedToken(refresh_token);
-      setAuthUser(response.access, response.refresh);
-    } catch (err) {
-      Swal.fire("Oturum Süresi Doldu", "Lütfen tekrar giriş yapınız", "error");
-      logout();
-    }
-  } else {
-    setAuthUser(access_token, refresh_token);
-  }
-};
-
-// Token'ları localStorage'a kaydet ve kullanıcıyı ayarla
-export const setAuthUser = (access_token, refresh_token) => {
-  localStorage.setItem("access_token", access_token);
-  localStorage.setItem("refresh_token", refresh_token);
-
-  try {
-    const user = jwt_decode(access_token);
-    if (user) {
-      useAuthStore.getState().setUser(user);
-    }
-  } catch (error) {
-    console.error("JWT decode hatası:", error);
-  }
-
-  useAuthStore.getState().setLoading(false);
-};
-
-// Token Yenileme
-export const getRefreshedToken = async (refresh_token) => {
-  const response = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh: refresh_token }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Token yenileme başarısız");
-  }
-
-  return await response.json(); // { access, refresh }
-};
-
-// Token süresi dolmuş mu kontrol et
-export const isAccessTokenExpired = () => {
-  const token = localStorage.getItem("access_token");
-  if (!token) return true;
-
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const exp = payload.exp;
-    const now = Math.floor(Date.now() / 1000);
-    return exp < now;
-  } catch (error) {
-    return true; // decode hatasında expired gibi davran
   }
 };

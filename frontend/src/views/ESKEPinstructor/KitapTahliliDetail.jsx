@@ -7,7 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
 import moment from "moment";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
@@ -33,7 +33,7 @@ function KitapTahliliDetail() {
 
   const param = useParams();
   const lastElementRef = useRef(null);
-  // Play Lecture Modal
+  // Play Ders Silindi Modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (variant_item) => {
@@ -64,7 +64,7 @@ function KitapTahliliDetail() {
       debugger;
       //const { kitaptahlili_id } = param.kitaptahlili_id; // URL parametresinden al
       const response = await useAxios().get(
-        `eskepinstructor/kitaptahlili-detail/${param.kitaptahlili_id}/${UserData()?.user_id}/`
+        `eskepinstructor/kitaptahlili-detail/${param.kitaptahlili_id}/${useUserData()?.user_id}/`
       );
 
       const data = response.data;
@@ -98,7 +98,7 @@ function KitapTahliliDetail() {
     });
 
     const formdata = new FormData();
-    formdata.append("user_id", UserData()?.user_id || 0);
+    formdata.append("user_id", useUserData()?.user_id || 0);
     formdata.append("kitaptahlili_id", kitapTahlili.kitapTahlili?.id);
     formdata.append("variant_item_id", variantItemId);
 
@@ -124,8 +124,8 @@ function KitapTahliliDetail() {
     e.preventDefault();
     const formdata = new FormData();
     debugger;
-    console.log(UserData());
-    formdata.append("koordinator_id", UserData()?.user_id);
+    console.log(useUserData());
+    formdata.append("koordinator_id", useUserData()?.user_id);
     formdata.append("kitaptahlili_id", param.kitaptahlili_id);
     formdata.append("title", createNote.title);
     formdata.append("note", createNote.note);
@@ -133,7 +133,7 @@ function KitapTahliliDetail() {
     try {
       await useAxios()
         .post(
-          `eskepinstructor/kitaptahlili-note/${param.kitaptahlili_id}/${UserData()?.user_id}/`,
+          `eskepinstructor/kitaptahlili-note/${param.kitaptahlili_id}/${useUserData()?.user_id}/`,
           formdata
         )
         .then((res) => {
@@ -153,14 +153,14 @@ function KitapTahliliDetail() {
     e.preventDefault();
     const formdata = new FormData();
 
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("user_id", useUserData()?.user_id);
     formdata.append("koordinator_id", param.koordinator_id);
     formdata.append("title", createNote.title || selectedNote?.title);
     formdata.append("note", createNote.note || selectedNote?.note);
 
     useAxios()
       .patch(
-        `eskepinstructor/kitaptahlili-note-detail/${param.kitaptahlili_id}/${UserData()?.user_id}/${noteId}/`,
+        `eskepinstructor/kitaptahlili-note-detail/${param.kitaptahlili_id}/${useUserData()?.user_id}/${noteId}/`,
         formdata
       )
       .then((res) => {
@@ -175,7 +175,7 @@ function KitapTahliliDetail() {
   const handleDeleteNote = (noteId) => {
     useAxios()
       .delete(
-        `eskepinstructor/kitaptahlili-note-detail/${param.kitapTahlili_id}/${UserData()?.user_id}/${noteId}/`
+        `eskepinstructor/kitaptahlili-note-detail/${param.kitapTahlili_id}/${useUserData()?.user_id}/${noteId}/`
       )
       .then((res) => {
         fetchKitapTahliliDetail();
@@ -198,8 +198,8 @@ function KitapTahliliDetail() {
     const formdata = new FormData();
 
     formdata.append("kitaptahlili_id", param.kitaptahlili_id);
-    formdata.append("gonderen_id", UserData()?.user_id);
-    //formdata.append("koordinator_id", UserData()?.user_id);
+    formdata.append("gonderen_id", useUserData()?.user_id);
+    //formdata.append("koordinator_id", useUserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
     debugger;
@@ -223,8 +223,8 @@ function KitapTahliliDetail() {
     e.preventDefault();
     const formdata = new FormData();
     formdata.append("kitaptahlili_id", param.kitaptahlili_id);
-    formdata.append("gonderen_id", UserData()?.user_id);
-    //formdata.append("koordinator_id", UserData()?.user_id);
+    formdata.append("gonderen_id", useUserData()?.user_id);
+    //formdata.append("koordinator_id", useUserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
     debugger;
@@ -266,7 +266,7 @@ function KitapTahliliDetail() {
 
     const formdata = new FormData();
     formdata.append("kitaptahlili_id", kitapTahlili.kitapTahlili?.id);
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("user_id", useUserData()?.user_id);
     formdata.append("rating", createReview.rating);
     formdata.append("review", createReview.review);
 
@@ -287,13 +287,13 @@ function KitapTahliliDetail() {
 
     const formdata = new FormData();
     formdata.append("kitapTahlili", kitapTahlili.kitapTahlili?.id);
-    formdata.append("user", UserData()?.user_id);
+    formdata.append("user", useUserData()?.user_id);
     formdata.append("rating", createReview.rating || studentReview?.rating);
     formdata.append("review", createReview.review || studentReview?.review);
 
     useAxios()
       .patch(
-        `stajer/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
+        `stajer/review-detail/${useUserData()?.user_id}/${studentReview?.id}/`,
         formdata
       )
       .then((res) => {
@@ -524,7 +524,7 @@ function KitapTahliliDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   <div className="d-sm-flex justify-content-between align-items-center">
                                     <h4 className="mb-0 p-3">Tüm Notlar</h4>
-                                    {/* Add Note Modal */}
+                                    {/* Not Ekle Modal */}
                                     <button
                                       type="button"
                                       className="btn btn-primary me-3"
@@ -895,7 +895,7 @@ function KitapTahliliDetail() {
         </div>
       </section>
 
-      {/* Lecture Modal */}
+      {/* Ders Silindi Modal */}
       <Modal show={show} size="lg" onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
@@ -1060,7 +1060,7 @@ function KitapTahliliDetail() {
         </Modal.Body>
       </Modal>
 
-      {/* Ask Question Modal */}
+      {/* Soru Sor Modal */}
       {/* Note Edit Modal */}
       <Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose}>
         <Modal.Header closeButton>

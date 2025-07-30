@@ -1,9 +1,20 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path'; // ← path modülünü ekledik
 
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    include: ['date-fns/locale/tr', 'date-fns/_lib/format/longFormatters'],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'), // ← alias tanımı
+    },
   },
-})
+  optimizeDeps: {
+      include: [
+      'date-fns/locale/tr',
+      'date-fns/_lib/format/longFormatters',
+      '@ckeditor/ckeditor5-react',
+      '@ckeditor/ckeditor5-build-classic'
+    ]
+  },
+});

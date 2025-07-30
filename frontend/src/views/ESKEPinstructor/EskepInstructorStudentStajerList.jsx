@@ -5,7 +5,7 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 
 function EskepInstructorStudentStajerList() {
   const [ogrenciler, setOgrenciler] = useState([]);
@@ -13,7 +13,7 @@ function EskepInstructorStudentStajerList() {
   const [search, setSearch] = useState("");
   const api = useAxios();
   const navigate = useNavigate();
-  const koordinatorId = UserData()?.user_id;
+  const koordinatorId = useUserData()?.user_id;
 
   const filteredOgrenciler = ogrenciler.filter(o => o.full_name.toLowerCase().includes(search.toLowerCase()));
   const filteredStajerler = stajerler.filter(s => s.full_name.toLowerCase().includes(search.toLowerCase()));

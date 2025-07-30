@@ -31,7 +31,7 @@ function CourseDetail() {
 
   const param = useParams();
   const lastElementRef = useRef();
-  // Play Lecture Modal
+  // Play Ders Silindi Modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (variant_item) => {
@@ -516,7 +516,7 @@ function CourseDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   <div className="d-sm-flex justify-content-between align-items-center">
                                     <h4 className="mb-0 p-3">Tüm Notlar</h4>
-                                    {/* Add Note Modal */}
+                                    {/* Not Ekle Modal */}
                                     <button
                                       type="button"
                                       className="btn btn-primary me-3"
@@ -886,7 +886,7 @@ function CourseDetail() {
         </div>
       </section>
 
-      {/* Lecture Modal */}
+      {/* Ders Silindi Modal */}
       <Modal show={show} size="lg" onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
@@ -1051,7 +1051,7 @@ function CourseDetail() {
         </Modal.Body>
       </Modal>
 
-      {/* Ask Question Modal */}
+      {/* Soru Sor Modal */}
       {/* Note Edit Modal */}
       <Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose}>
         <Modal.Header closeButton>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/UserData"; // ✅ useUserData hazır
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
 import { ProfileContext } from "../plugin/Context";
@@ -9,43 +9,34 @@ import { ProfileContext } from "../plugin/Context";
 function AkademiBaseHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const [roleData, setRoleData] = useState({ base_role: null, sub_roles: [] });
+  const [roleData, setRoleData] = useState({ base_roles: [], sub_roles: [] });
   const [profile, setProfile] = useContext(ProfileContext);
-
-  const [isLoggedIn, user] = useAuthStore((state) => [
-    state.isLoggedIn,
-    state.user,
-  ]);
 
   const api = useAxios();
 
-  const fetchProfile = () => {
-    api
-      .get(`user/profile/${UserData()?.user_id}/`)
-      .then((res) => {
-        setProfile(res.data);
-      })
-      .catch((err) => {
-        console.error("Profil alınamadı:", err);
-      });
-  };
+  // ✅ Zustand'dan direkt hook
+  const [isLoggedIn, rehydrated] = useAuthStore((state) => [
+    state.isLoggedIn,
+    state.rehydrated,
+  ]);
 
-  const fetchUserRole = async () => {
-    try {
-      const res = await api.get(`user-role-detail/`);
-      setRoleData(res.data);
-      console.log("Rol bilgisi:", res.data);
-    } catch (error) {
-      console.error("Rol alınamadı:", error);
-    }
-  };
-
+  const user = useUserData(); // ✅ user verisi (rehydrated sonrası hazır)
+debugger;
   useEffect(() => {
-    if (isLoggedIn()) {
-      fetchUserRole();
-      fetchProfile();
+    debugger;
+    if (rehydrated && isLoggedIn && user?.user_id) {
+      
+      api.get(`user/profile/${user.user_id}/`)
+        .then((res) => setProfile(res.data))
+        .catch((err) => console.error("Profil alınamadı:", err));
+
+      api.get(`user-role-detail/`)
+        .then((res) => setRoleData(res.data))
+        .catch((err) => console.error("Rol alınamadı:", err));
     }
-  }, [isLoggedIn]);
+  }, [rehydrated, isLoggedIn, user]);
+
+  if (!rehydrated) return null; // ✅ Zustand hazır değilse render etme
 
   const handleSearchSubmit = () => {
     navigate(`/search/?search=${searchQuery}`);
@@ -54,7 +45,7 @@ function AkademiBaseHeader() {
   const menuItemStyle = { color: "#000000" };
   const navLinkStyle = { color: "#ffffff" };
 
-  const { base_role, sub_roles } = roleData;
+  const { base_roles, sub_roles } = roleData;
 
   return (
     <nav
@@ -76,19 +67,16 @@ function AkademiBaseHeader() {
 
         <div className="collapse navbar-collapse" id="main-navbar">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-
             <li className="nav-item">
               <Link className="nav-link" to="/pages/contact-us/" style={navLinkStyle}>
                 <i className="fas fa-phone"></i> İletişim
               </Link>
             </li>
-
             <li className="nav-item">
               <Link className="nav-link" to="/pages/about-us/" style={navLinkStyle}>
                 <i className="fas fa-address-card"></i> Hakkımızda
               </Link>
             </li>
-
             <li className="nav-item">
               <Link className="nav-link" to="/admin/OrganizationChart/" style={navLinkStyle}>
                 <i className="fas fa-sitemap"></i> Organizasyon Şemaları
@@ -96,21 +84,17 @@ function AkademiBaseHeader() {
             </li>
 
             {/* === TEACHER === */}
-            {base_role === "Teacher" && (
+            {base_roles.includes("Teacher") && (
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style={navLinkStyle}>
                   <i className="fas fa-chalkboard-user"></i> Eğitmen
                 </a>
                 <ul className="dropdown-menu">
                   {sub_roles.includes("HDMEgitmen") && (
-                    <Link className="dropdown-item" to="/hdm/teacher/hafizlar" style={menuItemStyle}>
-                      HDM Hafızlar
-                    </Link>
+                    <Link className="dropdown-item" to="/hdm/teacher/hafizlar" style={menuItemStyle}>HDM Hafızlar</Link>
                   )}
                   {sub_roles.includes("HBSEgitmen") && (
-                    <Link className="dropdown-item" to="/hbs/teacher/hafizlar" style={menuItemStyle}>
-                      HBS Hafızlar
-                    </Link>
+                    <Link className="dropdown-item" to="/hbs/teacher/hafizlar" style={menuItemStyle}>HBS Hafızlar</Link>
                   )}
                   <Link className="dropdown-item" to="/instructor/dashboard/" style={menuItemStyle}>
                     <i className="bi bi-grid-fill"></i> Panel
@@ -123,66 +107,54 @@ function AkademiBaseHeader() {
             )}
 
             {/* === KOORDINATOR === */}
-            {base_role === "Koordinator" && (
+            {base_roles.includes("Koordinator") && (
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style={navLinkStyle}>
                   <i className="fas fa-user-cog"></i> Koordinatör
                 </a>
                 <ul className="dropdown-menu">
                   {sub_roles.includes("HDMKoordinator") && (
-                    <Link className="dropdown-item" to="/hdm/koordinator/egitmenler" style={menuItemStyle}>
-                      HDM Eğitmenler
-                    </Link>
+                    <Link className="dropdown-item" to="/hdm/koordinator/egitmenler" style={menuItemStyle}>HDM Eğitmenler</Link>
                   )}
                   {sub_roles.includes("HBSKoordinator") && (
-                    <Link className="dropdown-item" to="/hbs/koordinator/egitmenler" style={menuItemStyle}>
-                      HBS Eğitmenler
-                    </Link>
+                    <Link className="dropdown-item" to="/hbs/koordinator/egitmenler" style={menuItemStyle}>HBS Eğitmenler</Link>
                   )}
                 </ul>
               </li>
             )}
 
             {/* === STUDENT === */}
-            {base_role === "Ogrenci" && (
+            {base_roles.includes("Ogrenci") && (
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style={navLinkStyle}>
                   <i className="fas fa-user-graduate"></i> Öğrenci
                 </a>
                 <ul className="dropdown-menu">
-                  <Link className="dropdown-item" to="/student/dashboard/" style={menuItemStyle}>
-                    Panel
-                  </Link>
-                  <Link className="dropdown-item" to="/student/courses/" style={menuItemStyle}>
-                    Kurslarım
-                  </Link>
+                  <Link className="dropdown-item" to="/student/dashboard/" style={menuItemStyle}>Panel</Link>
+                  <Link className="dropdown-item" to="/student/courses/" style={menuItemStyle}>Kurslarım</Link>
                 </ul>
               </li>
             )}
 
             {/* === HAFIZ === */}
-            {base_role === "Hafiz" && (
+            {base_roles.includes("Hafiz") && (
               <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style={navLinkStyle}>
                   <i className="fas fa-book-reader"></i> Hafız
                 </a>
                 <ul className="dropdown-menu">
                   {sub_roles.includes("HDMHafiz") && (
-                    <Link className="dropdown-item" to="/hdm/hafiz/dersler" style={menuItemStyle}>
-                      HDM Dersler
-                    </Link>
+                    <Link className="dropdown-item" to="/hdm/hafiz/dersler" style={menuItemStyle}>HDM Dersler</Link>
                   )}
                   {sub_roles.includes("HBSHafiz") && (
-                    <Link className="dropdown-item" to="/hbs/hafiz/dersler" style={menuItemStyle}>
-                      HBS Dersler
-                    </Link>
+                    <Link className="dropdown-item" to="/hbs/hafiz/dersler" style={menuItemStyle}>HBS Dersler</Link>
                   )}
                 </ul>
               </li>
             )}
 
             {/* === STAJER === */}
-            {base_role === "Stajer" && (
+            {base_roles.includes("Stajer") && (
               <li className="nav-item">
                 <Link className="nav-link" to="/eskep/stajer/gorevler" style={navLinkStyle}>
                   <i className="fas fa-briefcase"></i> Stajyer Görevler
@@ -191,9 +163,9 @@ function AkademiBaseHeader() {
             )}
 
             {/* === AGENT === */}
-            {base_role === "Agent" && (
+            {base_roles.includes("Agent") && (
               <li className="nav-item">
-                <Link className="nav-link" to="/agent/hafizbilgi/list/" style={navLinkStyle}>
+                <Link className="nav-link" to="/temsilci/hafizbilgi/list/" style={navLinkStyle}>
                   <i className="fas fa-user-tie"></i> Temsilci
                 </Link>
               </li>

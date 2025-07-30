@@ -4,7 +4,6 @@ import Header from "./Partials/Header";
 import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
 import { ProfileContext } from "../plugin/Context";
 
 function Courses() {

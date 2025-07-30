@@ -96,6 +96,7 @@ function HafizBilgiEditModal({ item, onClose, onSuccess }) {
     active: item?.active || true,
     agent: item?.agent || "",
     country: item?.country || "",
+    roles:item?.roles||""
   };
 
   const validationSchema = Yup.object({
@@ -114,7 +115,7 @@ function HafizBilgiEditModal({ item, onClose, onSuccess }) {
 
   const handleSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      debugger;
+      
       
       // const currentUserId = UserData()?.user_id;
 
@@ -140,15 +141,17 @@ function HafizBilgiEditModal({ item, onClose, onSuccess }) {
         values[field] = Number(values[field]);
       }
     });
-
+debugger;
     // PUT veya POST işlemi
     const agentId = Number(values.agent);
     if (isEdit) {
+      debugger;
       await api.put(
         `http://localhost:8000/api/v1/agent/hafizbilgi-update/${agentId}/${item.id}/`,
         values
       );
     } else {
+      debugger;
       await api.post(
         "http://localhost:8000/api/v1/hafizbilgi/create/",
         values

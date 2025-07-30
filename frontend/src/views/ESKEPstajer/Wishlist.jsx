@@ -11,14 +11,14 @@ import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
 import UserData from "../plugin/UserData";
 import Toast from "../plugin/Toast";
-import CartId from "../plugin/CartId";
+// import CartId from "../plugin/CartId";
 import GetCurrentAddress from "../plugin/UserCountry";
 import { CartContext } from "../plugin/Context";
 
 function Wishlist() {
   const [wishlist, setWishlist] = useState([]);
   const [cartCount, setCartCount] = useContext(CartContext);
-
+// const cartId = CartId();
   const fetchWishlist = () => {
     useAxios()
       .get(`student/wishlist/${UserData()?.user_id}/`)
@@ -40,28 +40,29 @@ function Wishlist() {
     formdata.append("user_id", userId);
     formdata.append("price", price);
     formdata.append("country_name", country);
-    formdata.append("cart_id", cartId);
+    // formdata.append("cart_id", cartId);
 
-    try {
-      await useAxios()
-        .post(`course/cart/`, formdata)
-        .then((res) => {
-          console.log(res.data);
-          Toast().fire({
-            title: "Added To Cart",
-            icon: "success",
-          });
+    // try {
+    //   await useAxios()
+    //     .post(`course/cart/`, formdata)
+    //     .then((res) => {
+    //       console.log(res.data);
+    //       Toast().fire({
+    //         title: "Added To Cart",
+    //         icon: "success",
+    //       });
 
-          // Set cart count after adding to cart
-          useAxios()
-            .get(`course/cart-list/${CartId()}/`)
-            .then((res) => {
-              setCartCount(res.data?.length);
-            });
-        });
-    } catch (error) {
-      console.log(error);
-    }
+    //       // Set cart count after adding to cart
+    //       if (!cartId) return;
+    //       useAxios()
+    //         .get(`course/cart-list/${cartId}/`)
+    //         .then((res) => {
+    //           setCartCount(res.data?.length);
+    //         });
+    //     });
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   const addToWishlist = (courseId) => {
@@ -180,7 +181,7 @@ function Wishlist() {
                                       UserData()?.user_id,
                                       w.course.price,
                                       country,
-                                      CartId()
+                                      cartId
                                     )
                                   }
                                   className="text-inherit text-decoration-none btn btn-primary me-2"

@@ -149,7 +149,7 @@ function CourseEdit() {
         fetchCourseDetail();
         Toast().fire({
           icon: "success",
-          title: "Lecture deleted",
+          title: "Ders Silindi deleted",
         });
       });
   };

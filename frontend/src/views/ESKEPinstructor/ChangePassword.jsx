@@ -1,19 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import EskepBaseHeader from "../partials/ESKEPBaseHeader";
 import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
 
 function ChangePassword() {
+  const api = useAxios();
+  const user = useUserData(); // ✅ Hook en üstte çağrılır
+
   const [password, setPassword] = useState({
     old_password: "",
     new_password: "",
     confirm_new_password: "",
   });
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handlePasswordChange = (event) => {
     setPassword({
@@ -28,18 +35,18 @@ function ChangePassword() {
     if (password.confirm_new_password !== password.new_password) {
       Toast().fire({
         icon: "error",
-        title: "Şifreler Aynı Değil",
+        title: "Şifreler aynı değil.",
       });
-      return; // Prevent further execution
+      return;
     }
 
     const formdata = new FormData();
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("user_id", user?.user_id);
     formdata.append("old_password", password.old_password);
-    formdata.append("new_password", password.new_password); // Fixed typo here
+    formdata.append("new_password", password.new_password);
 
     try {
-      const response = await useAxios().post(`user/change-password/`, formdata);
+      const response = await api.post("user/change-password/", formdata);
       Toast().fire({
         icon: response.data.icon,
         title: response.data.message,
@@ -47,82 +54,86 @@ function ChangePassword() {
     } catch (error) {
       Toast().fire({
         icon: "error",
-        title: "Bir Sorun Oluştu, Tekrar Deneyiniz.",
+        title: "Bir hata oluştu, lütfen tekrar deneyin.",
       });
     }
   };
+
+  if (!user) return <div className="text-center mt-5">Yükleniyor...</div>;
 
   return (
     <>
       <EskepBaseHeader />
 
-      <section className="pt-5 pb-5">
+      <section className="py-5">
         <div className="container">
           <Header />
-          <div className="row mt-0 mt-md-4">
-            <Sidebar />
-            <div className="col-lg-9 col-md-8 col-12">
-              <div className="card">
+
+          <div className="row mt-4">
+            {/* SOL SİDEBAR */}
+            <div className="col-lg-3 col-md-4 mb-4 mb-md-0">
+              <Sidebar />
+            </div>
+
+            {/* SAĞ İÇERİK */}
+            <div className="col-lg-9 col-md-8">
+              <div className="card shadow-sm">
                 <div className="card-header">
                   <h3 className="mb-0">Şifre Değiştir</h3>
                 </div>
                 <div className="card-body">
-                  <form
-                    className="row gx-3 needs-validation"
-                    noValidate=""
-                    onSubmit={changePasswordSubmit}
-                  >
-                    <div className="mb-3 col-12 col-md-12">
-                      <label className="form-label" htmlFor="old_password">
+                  <form className="row g-3" onSubmit={changePasswordSubmit}>
+                    <div className="col-12">
+                      <label htmlFor="old_password" className="form-label">
                         Eski Şifre
                       </label>
                       <input
                         type="password"
-                        id="old_password"
                         className="form-control"
-                        placeholder="**************"
-                        required
+                        id="old_password"
                         name="old_password"
+                        placeholder="************"
+                        required
                         value={password.old_password}
                         onChange={handlePasswordChange}
                       />
                     </div>
 
-                    <div className="mb-3 col-12 col-md-12">
-                      <label className="form-label" htmlFor="new_password">
+                    <div className="col-12">
+                      <label htmlFor="new_password" className="form-label">
                         Yeni Şifre
                       </label>
                       <input
                         type="password"
-                        id="new_password"
                         className="form-control"
-                        placeholder="**************"
-                        required
+                        id="new_password"
                         name="new_password"
-                        value={password.new_password} // Fixed typo
+                        placeholder="************"
+                        required
+                        value={password.new_password}
                         onChange={handlePasswordChange}
                       />
                     </div>
 
-                    <div className="mb-3 col-12 col-md-12">
-                      <label className="form-label" htmlFor="confirm_new_password">
-                        Yeni Şifre Doğrula
+                    <div className="col-12">
+                      <label htmlFor="confirm_new_password" className="form-label">
+                        Yeni Şifre (Tekrar)
                       </label>
                       <input
                         type="password"
-                        id="confirm_new_password"
                         className="form-control"
-                        placeholder="**************"
-                        required
+                        id="confirm_new_password"
                         name="confirm_new_password"
+                        placeholder="************"
+                        required
                         value={password.confirm_new_password}
                         onChange={handlePasswordChange}
                       />
                     </div>
-                    
-                    <div className="col-12">
-                      <button className="btn btn-primary" type="submit">
-                        Yeni Şifreyi Kaydet <i className="fas fa-check-circle"></i>
+
+                    <div className="col-12 text-end">
+                      <button type="submit" className="btn btn-primary">
+                        Yeni Şifreyi Kaydet <i className="fas fa-check-circle ms-1"></i>
                       </button>
                     </div>
                   </form>

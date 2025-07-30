@@ -10,7 +10,7 @@ import EskepBaseHeader from "../partials/ESKEPBaseHeader";
 import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
 
 function Coupon() {
@@ -32,7 +32,7 @@ function Coupon() {
 
   const fetchCoupons = () => {
     useAxios()
-      .get(`teacher/coupon-list/${UserData()?.teacher_id}/`)
+      .get(`teacher/coupon-list/${useUserData()?.teacher_id}/`)
       .then((res) => {
         console.log(res.data);
         setCoupons(res.data);
@@ -55,12 +55,12 @@ function Coupon() {
 
     const formdata = new FormData();
 
-    formdata.append("teacher", UserData()?.teacher_id);
+    formdata.append("teacher", useUserData()?.teacher_id);
     formdata.append("code", createCoupon.code);
     formdata.append("discount", createCoupon.discount);
 
     useAxios()
-      .post(`teacher/coupon-list/${UserData()?.teacher_id}/`, formdata)
+      .post(`teacher/coupon-list/${useUserData()?.teacher_id}/`, formdata)
       .then((res) => {
         console.log(res.data);
         fetchCoupons();
@@ -74,7 +74,7 @@ function Coupon() {
 
   const handleDeleteCoupon = (couponId) => {
     useAxios()
-      .delete(`teacher/coupon-detail/${UserData()?.teacher_id}/${couponId}/`)
+      .delete(`teacher/coupon-detail/${useUserData()?.teacher_id}/${couponId}/`)
       .then((res) => {
         console.log(res.data);
         fetchCoupons();
@@ -90,13 +90,13 @@ function Coupon() {
 
     const formdata = new FormData();
 
-    formdata.append("teacher", UserData()?.teacher_id);
+    formdata.append("teacher", useUserData()?.teacher_id);
     formdata.append("code", createCoupon.code);
     formdata.append("discount", createCoupon.discount);
 
     useAxios()
       .patch(
-        `teacher/coupon-detail/${UserData()?.teacher_id}/${selectedCoupon.id}/`,
+        `teacher/coupon-detail/${useUserData()?.teacher_id}/${selectedCoupon.id}/`,
         formdata
       )
       .then((res) => {

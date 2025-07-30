@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
 
+
 class User(AbstractUser):
     username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(unique=True)
@@ -13,6 +14,46 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
+    @property
+    def base_roles(self):
+        from api.models import Hafiz        
+        roles = []
+        if hasattr(self, "teacher"):
+            roles.append("Teacher")
+        if hasattr(self, "koordinator"):
+            roles.append("Koordinator")
+        if hasattr(self, "ogrenci"):
+            roles.append("Ogrenci")
+        if hasattr(self, "stajer"):
+            roles.append("Stajer")
+        if Hafiz.objects.filter(email=self.email).exists():
+            roles.append("Hafiz")
+        if hasattr(self, "agent"):
+            roles.append("Agent")
+        return roles
+
+    @property
+    def sub_roles(self):
+        from api.models import Hafiz
+        roles = []
+        try:
+            if hasattr(self, "teacher"):
+                roles += list(self.teacher.roles.values_list("name", flat=True))
+            if hasattr(self, "koordinator"):
+                roles += list(self.koordinator.roles.values_list("name", flat=True))
+            if hasattr(self, "ogrenci"):
+                roles += list(self.ogrenci.roles.values_list("name", flat=True))
+            if hasattr(self, "stajer"):
+                roles += list(self.stajer.roles.values_list("name", flat=True))
+            hafiz = Hafiz.objects.filter(email=self.email).first()
+            if hafiz:
+                roles += list(hafiz.roles.values_list("name", flat=True))
+            if hasattr(self, "agent"):
+                roles += list(self.agent.roles.values_list("name", flat=True))
+        except:
+            pass
+        return list(set(roles))
+    
     def __str__(self):
         return self.email
 
@@ -22,8 +63,7 @@ class User(AbstractUser):
             self.full_name = email_username
         if not self.username:
             self.username = email_username
-        super(User, self).save(*args, **kwargs)
-    
+        super(User, self).save(*args, **kwargs)    
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

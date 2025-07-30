@@ -7,7 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
 import moment from "moment";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
@@ -31,7 +31,7 @@ function OdevDetail() {
 
   const param = useParams();
   const lastElementRef = useRef(null);
-  // Play Lecture Modal
+  // Play Ders Silindi Modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (variant_item) => {
@@ -61,7 +61,7 @@ function OdevDetail() {
     try {
       debugger;
       // const { koordinator_id } = param.koordinator_id; // URL parametresinden al
-      const user_id = UserData()?.user_id; // URL parametresinden al
+      const user_id = useUserData()?.user_id; // URL parametresinden al
       const response = await useAxios().get(
         `eskepinstructor/odev-detail/${param.odev_id}/${param.koordinator_id}/`
       );
@@ -97,7 +97,7 @@ function OdevDetail() {
     });
 
     const formdata = new FormData();
-    formdata.append("user_id", UserData()?.user_id || 0);
+    formdata.append("user_id", useUserData()?.user_id || 0);
     formdata.append("odev_id", odev.odev?.id);
     formdata.append("variant_item_id", variantItemId);
 
@@ -151,7 +151,7 @@ function OdevDetail() {
     e.preventDefault();
     const formdata = new FormData();
 
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("user_id", useUserData()?.user_id);
     formdata.append("koordinator_id", param.koordinator_id);
     formdata.append("title", createNote.title || selectedNote?.title);
     formdata.append("note", createNote.note || selectedNote?.note);
@@ -204,7 +204,7 @@ function OdevDetail() {
 
   const formdata = new FormData();
   formdata.append("odev_id", param.odev_id);
-  formdata.append("gonderen_id", UserData()?.user_id);
+  formdata.append("gonderen_id", useUserData()?.user_id);
   formdata.append("title", createMessage.title);
   formdata.append("message", createMessage.message);
 
@@ -234,8 +234,8 @@ function OdevDetail() {
     e.preventDefault();
     const formdata = new FormData();
     formdata.append("odev_id", param.odev_id);
-    formdata.append("gonderen_id", UserData()?.user_id);
-    //formdata.append("koordinator_id", UserData()?.user_id);
+    formdata.append("gonderen_id", useUserData()?.user_id);
+    //formdata.append("koordinator_id", useUserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
     debugger;
@@ -277,7 +277,7 @@ function OdevDetail() {
 
     const formdata = new FormData();
     formdata.append("odev_id", odev.odev?.id);
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("user_id", useUserData()?.user_id);
     formdata.append("rating", createReview.rating);
     formdata.append("review", createReview.review);
 
@@ -298,13 +298,13 @@ function OdevDetail() {
 
     const formdata = new FormData();
     formdata.append("odev", odev.odev?.id);
-    formdata.append("user", UserData()?.user_id);
+    formdata.append("user", useUserData()?.user_id);
     formdata.append("rating", createReview.rating || studentReview?.rating);
     formdata.append("review", createReview.review || studentReview?.review);
 
     useAxios()
       .patch(
-        `stajer/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
+        `stajer/review-detail/${useUserData()?.user_id}/${studentReview?.id}/`,
         formdata
       )
       .then((res) => {
@@ -457,7 +457,7 @@ function OdevDetail() {
                                 {/* Item */}
                                 {odev?.lectures?.map((c, index) => (
                                   <div key={index}>
-                                    <h3>{c.name}</h3> {/* Lecture Name */}
+                                    <h3>{c.name}</h3> {/* Ders Silindi Name */}
                                   </div>
                                 ))}
 
@@ -555,7 +555,7 @@ function OdevDetail() {
                                 <div className="card-header border-bottom p-0 pb-3">
                                   <div className="d-sm-flex justify-content-between align-items-center">
                                     <h4 className="mb-0 p-3">Tüm Notlar</h4>
-                                    {/* Add Note Modal */}
+                                    {/* Not Ekle Modal */}
                                     <Button
                                       className="btn btn-primary me-3"
                                       onClick={handleNoteShow}
@@ -924,7 +924,7 @@ function OdevDetail() {
         </div>
       </section>
 
-      {/* Lecture Modal */}
+      {/* Ders Silindi Modal */}
       <Modal show={show} size="lg" onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
@@ -1089,7 +1089,7 @@ function OdevDetail() {
         </Modal.Body>
       </Modal>
 
-      {/* Ask Question Modal */}
+      {/* Soru Sor Modal */}
       {/* Note Edit Modal */}
       <Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose}>
         <Modal.Header closeButton>

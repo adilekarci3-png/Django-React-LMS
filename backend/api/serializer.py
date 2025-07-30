@@ -13,13 +13,62 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
+        # Temel kullanıcı bilgileri
         token['full_name'] = user.full_name
         token['email'] = user.email
         token['username'] = user.username
+
+        base_roles = []
+        sub_roles = []
+
+        # Tüm roller kontrolü
         try:
-            token['teacher_id'] = user.teacher.id
+            if hasattr(user, "teacher"):
+                base_roles.append("Teacher")
+                sub_roles += list(user.teacher.roles.values_list("name", flat=True))
+                token['teacher_id'] = user.teacher.id
         except:
             token['teacher_id'] = 0
+
+        try:
+            if hasattr(user, "koordinator"):
+                base_roles.append("Koordinator")
+                sub_roles += list(user.koordinator.roles.values_list("name", flat=True))
+        except:
+            pass
+
+        try:
+            if hasattr(user, "ogrenci"):
+                base_roles.append("Ogrenci")
+                sub_roles += list(user.ogrenci.roles.values_list("name", flat=True))
+        except:
+            pass
+
+        try:
+            if hasattr(user, "stajer"):
+                base_roles.append("Stajer")
+                sub_roles += list(user.stajer.roles.values_list("name", flat=True))
+        except:
+            pass
+
+        try:
+            hafiz = api_models.Hafiz.objects.filter(email=user.email).first()
+            if hafiz:
+                base_roles.append("Hafiz")
+                sub_roles += list(hafiz.roles.values_list("name", flat=True))
+        except:
+            pass
+
+        try:
+            if hasattr(user, "agent"):
+                base_roles.append("Agent")
+                sub_roles += list(user.agent.roles.values_list("name", flat=True))
+        except:
+            pass
+
+        # Tekrarları temizle
+        token['base_roles'] = list(set(base_roles))
+        token['sub_roles'] = list(set(sub_roles))
 
         return token
 
@@ -163,10 +212,11 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     def get_courses(self, obj):
         courses = obj.courses()
-        return CourseSerializer(courses, many=True).data
+        return CourseSimpleSerializer(courses, many=True).data  # ✅ Basitleştirilmiş
 
     def get_hafizlar(self, obj):
         return HafizSimpleSerializer(obj.hafiz_ogrencileri.all(), many=True).data
+
 
 
 class AgentSerializer(serializers.ModelSerializer):
@@ -178,18 +228,38 @@ class AgentSerializer(serializers.ModelSerializer):
 class HafizBilgiSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
-        model = api_models.Hafiz 
-   
+        model = api_models.Hafiz
+        
+    def validate(self, data):
+        # Güncelleme yapıyorsak instance.id olur
+        current_id = self.instance.id if self.instance else None
+
+        # Cep telefonu kontrolü
+        ceptel_qs = api_models.Hafiz.objects.filter(ceptel=data["ceptel"])
+        if current_id:
+            ceptel_qs = ceptel_qs.exclude(id=current_id)
+        if ceptel_qs.exists():
+            raise serializers.ValidationError({"ceptel": "Bu cep telefonu zaten kayıtlı."})
+
+        # Eposta kontrolü
+        if data.get("email"):
+            email_qs = api_models.Hafiz.objects.filter(email=data["email"])
+            if current_id:
+                email_qs = email_qs.exclude(id=current_id)
+            if email_qs.exists():
+                raise serializers.ValidationError({"email": "Bu e-posta zaten kayıtlı."})
+
+        return data
             
 class JobSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = '__all__'
-        model = api_models.Job  
+        model = api_models.Job
+        fields = ["id", "name"] 
               
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
-        fields = '__all__'
-        model = api_models.City  
+        model = api_models.City
+        fields = ["id", "name"] 
 
 class ProjeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -445,27 +515,29 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 class CartOrderItemSerializer(serializers.ModelSerializer):
-
     class Meta:
-        fields = '__all__'
         model = api_models.CartOrderItem
+        fields = '__all__'
+        depth = 1  # default olarak 1 derinlik kullanabilirsiniz
 
     def __init__(self, *args, **kwargs):
-        super(CartOrderItemSerializer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         request = self.context.get("request")
         if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
+            # Derinliği azaltmak için nested serializer alanlarını kaldır
+            for field_name, field in list(self.fields.items()):
+                if hasattr(field, 'depth'):
+                    self.fields[field_name] = serializers.PrimaryKeyRelatedField(
+                        queryset=field.queryset if hasattr(field, 'queryset') else None
+                    )
 
 
 class CartOrderSerializer(serializers.ModelSerializer):
-    order_items = CartOrderItemSerializer(many=True)
-    
+    order_items = CartOrderItemSerializer(many=True)  
+      
     class Meta:
         fields = '__all__'
         model = api_models.CartOrder
-
 
     def __init__(self, *args, **kwargs):
         super(CartOrderSerializer, self).__init__(*args, **kwargs)
@@ -476,15 +548,12 @@ class CartOrderSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 class CertificateSerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = '__all__'
         model = api_models.Certificate
 
 
-
 class CompletedLessonSerializer(serializers.ModelSerializer):
-
     class Meta:
         fields = '__all__'
         model = api_models.CompletedLesson
@@ -646,13 +715,10 @@ class CountrySerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.Country
 
-
-
-
 class EnrolledCourseSerializer(serializers.ModelSerializer):
     lectures = VariantItemSerializer(many=True, read_only=True)
-    completed_lesson = CompletedLessonSerializer(many=True, read_only=True)
-    curriculum =  VariantSerializer(many=True, read_only=True)
+    completed_lesson = serializers.SerializerMethodField()
+    curriculum = VariantSerializer(many=True, read_only=True)
     note = NoteSerializer(many=True, read_only=True)
     question_answer = Question_AnswerSerializer(many=True, read_only=True)
     review = ReviewSerializer(many=False, read_only=True)
@@ -661,13 +727,16 @@ class EnrolledCourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.EnrolledCourse
 
-    def __init__(self, *args, **kwargs):
-        super(EnrolledCourseSerializer, self).__init__(*args, **kwargs)
+    def get_completed_lesson(self, obj):
         request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
+        if not request or not request.user.is_authenticated:
+            return []
+
+        completed = api_models.CompletedLesson.objects.filter(
+            course=obj.course,  # EnrolledCourse içindeki course alanı
+            user=request.user
+        )
+        return CompletedLessonSerializer(completed, many=True).data
             
 class EnrolledOdevSerializer(serializers.ModelSerializer):
     lectures = VariantItemOdevSerializer(many=True, read_only=True)
@@ -790,7 +859,7 @@ class CourseSerializer(serializers.ModelSerializer):
     lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
     reviews = ReviewSerializer(many=True, read_only=True, required=False)
     class Meta:
-        fields = ["id", "category", "teacher", "file", "image", "title", "description", "language", "level", "platform_status", "teacher_course_status", "featured", "course_id", "slug", "date", "students", "curriculum", "lectures", "average_rating", "rating_count", "reviews",]
+        fields = ["id", "category", "teacher", "file", "image", "title", "description", "language", "level", "platform_status", "teacher_course_status", "featured", "course_id", "slug", "date", "students", "curriculum", "lectures", "average_rating", "rating_count", "reviews","price"]
         model = api_models.Course
 
     def __init__(self, *args, **kwargs):
@@ -905,10 +974,10 @@ class AgentSummarySerializer(serializers.Serializer):
     total_hafizs = serializers.IntegerField(default=0)
 
 class TeacherSummarySerializer(serializers.Serializer):
-    total_courses = serializers.IntegerField(default=0)
-    total_students = serializers.IntegerField(default=0)
-    total_revenue = serializers.IntegerField(default=0)
-    monthly_revenue = serializers.IntegerField(default=0)
+    total_courses = serializers.IntegerField()
+    total_revenue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    monthly_revenue = serializers.DecimalField(max_digits=10, decimal_places=2)
+    total_students = serializers.IntegerField()
     
 class ESKEPEventSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1021,3 +1090,27 @@ class QuranPageSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.QuranPage
         fields = ['page_number', 'image']
+        
+class LiveLessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.LiveLesson
+        fields = '__all__'
+        
+class CombinedEventSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    date = serializers.DateTimeField(source="datetime", required=False)
+    background_color = serializers.CharField(default="#007bff")  # varsayılan renk
+    border_color = serializers.CharField(default="#0056b3")      # varsayılan renk
+    type = serializers.CharField()  # event ya da live_lesson
+    
+class CourseSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.Course
+        fields = ["id", "title", "slug", "image"]
+        
+class TeacherSimpleSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source="user.full_name", read_only=True)
+    class Meta:
+        model = api_models.Teacher
+        fields = ["id", "full_name", "image"]
