@@ -43,9 +43,7 @@ function AkademiCourseCreate() {
       .then((res) => {
         setCategory(res.data);
       });
-  }, []);
-
-  console.log(category);
+  }, []); 
 
   const handleCourseInputChange = (event) => {
     setCourse({
@@ -60,12 +58,12 @@ function AkademiCourseCreate() {
   const handleCkEditorChange = (event, editor) => {
     const data = editor.getData();
     setCKEditorData(data);
-    console.log(ckEdtitorData);
+    
   };
 
   const handleCourseImageChange = (event) => {
     const file = event.target.files[0];
-    console.log(file);
+   
 
     if (file) {
       const reader = new FileReader();
@@ -94,8 +92,6 @@ function AkademiCourseCreate() {
     updatedVariants[index][propertyName] = value;
     setVariants(updatedVariants);
 
-    console.log(`Name: ${propertyName} - value: ${value} - Index: ${index}`);
-    console.log(variants);
   };
 
   const handleItemChange = (
@@ -109,9 +105,6 @@ function AkademiCourseCreate() {
     updatedVariants[variantIndex].items[itemIndex][propertyName] = value;
     setVariants(updatedVariants);
 
-    console.log(
-      `Name: ${propertyName} - value: ${value} - Index: ${variantIndex} ItemIndex: ${itemIndex} - type: ${type}`
-    );
   };
 
   const addVariant = () => {
@@ -164,14 +157,13 @@ function AkademiCourseCreate() {
       formdata.append("teacher", parseInt(useUserData().teacher_id));
     }
 
-    console.log(course.category);
     if (course.file) {
       formdata.append("file", course.file);
     }
 
     variants.forEach((variant, variantIndex) => {
       Object.entries(variant).forEach(([key, value]) => {
-        console.log(`Key: ${key} = value: ${value}`);
+        
         formdata.append(
           `variants[${variantIndex}][variant_${key}]`,
           String(value)
@@ -196,7 +188,7 @@ function AkademiCourseCreate() {
     });
 
     const response = await useAxios().post(`teacher/course-create/`, formdata);
-    console.log(response.data);
+   
     Swal.fire({
       icon: "success",
       title: "Kurs Başarılı Bir Şekilde Oluşturuldu",

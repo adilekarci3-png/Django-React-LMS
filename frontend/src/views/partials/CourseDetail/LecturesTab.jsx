@@ -1,13 +1,13 @@
 import React from "react";
 
 function LecturesTab({ course, handleShow, handleMarkLessonAsCompleted }) {
-    const completionPercentage = ((course.completed_lesson?.length || 0) / (course.lectures?.length || 1)) * 100;
+    // const completionPercentage = ((course.completed_lesson?.length || 0) / (course.lectures?.length || 1)) * 100;
 
     return (
         <div className="tab-pane fade show active" id="course-pills-1" role="tabpanel" aria-labelledby="course-pills-tab-1">
             <div className="accordion accordion-icon accordion-border" id="accordionExample2">
                 <div className="progress mb-3">
-                    <div
+                    {/* <div
                         className="progress-bar"
                         role="progressbar"
                         style={{ width: `${completionPercentage.toFixed(0)}%` }}
@@ -16,7 +16,7 @@ function LecturesTab({ course, handleShow, handleMarkLessonAsCompleted }) {
                         aria-valuemax={100}
                     >
                         {completionPercentage.toFixed(0)}%
-                    </div>
+                    </div> */}
                 </div>
                 {course?.curriculum?.map((c) => (
                     <div className="accordion-item mb-3 p-3 bg-light" key={c.variant_id}>

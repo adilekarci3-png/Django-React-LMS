@@ -154,13 +154,13 @@ debugger;
             )}
 
             {/* === STAJER === */}
-            {base_roles.includes("Stajer") && (
+            {/* {base_roles.includes("Stajer") && (
               <li className="nav-item">
                 <Link className="nav-link" to="/eskep/stajer/gorevler" style={navLinkStyle}>
                   <i className="fas fa-briefcase"></i> Stajyer Görevler
                 </Link>
               </li>
-            )}
+            )} */}
 
             {/* === AGENT === */}
             {base_roles.includes("Agent") && (

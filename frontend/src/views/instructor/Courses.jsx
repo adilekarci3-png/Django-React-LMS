@@ -115,7 +115,7 @@ function Courses() {
                     onChange={(e) => handleFilter("level", e.target.value)}
                   >
                     <option value="">Seviye</option>
-                    <option value="Başlangic">Başlangıç</option>
+                    <option value="Baslangic">Başlangıç</option>
                     <option value="Orta">Orta</option>
                     <option value="Ileri Seviye">İleri Seviye</option>
                   </select>

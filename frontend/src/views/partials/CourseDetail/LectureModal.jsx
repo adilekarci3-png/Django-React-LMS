@@ -2,9 +2,9 @@ import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import ReactPlayer from "react-player";
 
-function LectureModal({ show, handleClose, variantItem }) {
+function LectureModal({ show, onClose, variantItem }) {
   return (
-    <Modal show={show} size="lg" onHide={handleClose}>
+    <Modal show={show} size="lg" onHide={onClose}>
       <Modal.Header closeButton>
         <Modal.Title>Lesson: {variantItem?.title}</Modal.Title>
       </Modal.Header>
@@ -12,7 +12,7 @@ function LectureModal({ show, handleClose, variantItem }) {
         <ReactPlayer url={variantItem?.file} controls width="100%" height="100%" />
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button variant="secondary" onClick={onClose}>
           Close
         </Button>
       </Modal.Footer>

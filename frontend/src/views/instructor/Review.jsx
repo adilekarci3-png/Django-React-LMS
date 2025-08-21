@@ -168,7 +168,7 @@ function Review() {
                           <div className="ms-3 mt-2">
                             <div className="d-flex align-items-center justify-content-between">
                               <div>
-                                <h4 className="mb-0">{r.profile.full_name}</h4>
+                                <h4 className="mb-0">{r.profile?.full_name}</h4>
                                 <span>
                                   {moment(r.date).format("DD MMM, YYYY")}
                                 </span>

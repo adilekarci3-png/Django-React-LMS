@@ -59,7 +59,7 @@ function DiscussionTab({ questions, handleSearchQuestion, handleQuestionShow, ha
                   className="btn btn-primary btn-sm mb-3 mt-3"
                   onClick={() => handleConversationShow(q)}
                 >
-                  Join Conversation <i className="fas fa-arrow-right"></i>
+                  Konuşmaya Katıl <i class="fa-solid fa-thought-bubble"></i>
                 </button>
               </div>
             ))}

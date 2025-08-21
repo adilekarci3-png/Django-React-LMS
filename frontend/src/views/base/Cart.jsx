@@ -23,16 +23,14 @@ function Cart() {
     try {
       // if (!cartId) return;
       // await apiInstance.get(`course/cart-list/${cartId}/`).then((res) => {
-      //   console.log(res.data);
+      //   
       //   setCart(res.data);
       // });
 
-      await apiInstance.get(`cart/stats/${cartId}/`).then((res) => {
-        console.log(res.data);
+      await apiInstance.get(`cart/stats/${cartId}/`).then((res) => {        
         setCartStats(res.data);
       });
-    } catch (error) {
-      console.log(error);
+    } catch (error) {      
     }
   };
 
@@ -45,8 +43,7 @@ function Cart() {
   const cartItemDelete = async (itemId) => {
     await apiInstance
       .delete(`course/cart-item-delete/${cartId}/${itemId}/`)
-      .then((res) => {
-        console.log(res.data);
+      .then((res) => {       
         fetchCartItem();
         Toast().fire({
           icon: "success",
@@ -77,12 +74,10 @@ function Cart() {
     formdata.append("user_id", userId);
 
     try {
-      await apiInstance.post(`order/create-order/`, formdata).then((res) => {
-        console.log(res.data);
+      await apiInstance.post(`order/create-order/`, formdata).then((res) => {        
         navigate(`/checkout/${res.data.order_oid}/`);
       });
-    } catch (error) {
-      console.log(error);
+    } catch (error) {      
     }
   };
 

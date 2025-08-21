@@ -8,6 +8,7 @@ import StajerMenu from "../partials/menus/StajerMenu";
 import OgrenciMenu from "../partials/menus/OgrenciMenu";
 import EgitmenMenu from "../partials/menus/EgitmenMenu";
 import HafizMenu from "../partials/menus/HafizMenu";
+import HDMMenu from "./menus/HDMMenu";
 
 function HDMBaseHeader() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,8 +82,9 @@ function HDMBaseHeader() {
                 <Link className="nav-link text-white" to="/pages/about-us/">
                   <i className="fas fa-address-card"></i> Hakkımızda
                 </Link>
-              </li>
 
+              </li>
+              <HDMMenu />
               {baseRoles.includes("Koordinator") && subRoles.includes("HDMKoordinator") && (
                 <KoordinatorMenu />
               )}

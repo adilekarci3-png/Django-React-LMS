@@ -28,13 +28,11 @@ function Courses() {
     setSelectedCourse(null);
   };
 
-  const handleJoin = () => {
-    console.log("Kursa katıl:", selectedCourse.slug);
+  const handleJoin = () => {    
     handleCloseModal();
   };
 
-  const handlePurchase = () => {
-    console.log("Satın alınan kurs ID:", selectedCourse.id);
+  const handlePurchase = () => {    
     handleCloseModal();
   };
 
@@ -386,7 +384,7 @@ function Courses() {
                   />
                   <div>
                     <strong>
-                      {profile.full_name || "Misafir Kullanıcı"}
+                      {profile?.full_name || "Misafir Kullanıcı"}
                     </strong>
                     <p className="mb-0 text-muted small">{profile.email}</p>
                   </div>

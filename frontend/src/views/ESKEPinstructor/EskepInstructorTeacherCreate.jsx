@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Swal from "sweetalert2";
-
 import {
   InputLabel,
   TextField,
@@ -19,37 +17,44 @@ import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
-import MdEditor from 'react-markdown-editor-lite';
-import 'react-markdown-editor-lite/lib/index.css';
-import MarkdownIt from 'markdown-it';
+import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
+
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
+import MarkdownIt from "markdown-it";
 
 const mdParser = new MarkdownIt();
 
 function EskepInstructorTeacherCreate() {
   const [formData, setFormData] = useState({
-    fullName: "",
+    full_name: "",
     phone: "",
     email: "",
     gender: "",
     city: "",
     district: "",
     branch: "",
-    educationLevel: "",
+    education_level: "",
     description: "",
   });
 
   const [cities, setCities] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [branches, setBranches] = useState([]);
+  const [educationLevels, setEducationLevels] = useState([]);
+  const api = useAxios();
+  const userData = useUserData(); // örneğin sadece user_id lazımsa buradan alınabilir
 
   useEffect(() => {
     fetchCities();
     fetchBranches();
+    fetchEducationLevels();
   }, []);
 
   const fetchCities = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/city/list/");
+      const res = await api.get("/city/list/");
       setCities(res.data);
     } catch (error) {
       console.error("Şehir verisi alınamadı", error);
@@ -58,7 +63,7 @@ function EskepInstructorTeacherCreate() {
 
   const fetchDistricts = async (cityId) => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/district/list/");
+      const res = await api.get("/district/list/");
       const filtered = res.data.filter((d) => d.city?.id === cityId);
       setDistricts(filtered);
     } catch (error) {
@@ -68,10 +73,19 @@ function EskepInstructorTeacherCreate() {
 
   const fetchBranches = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/branch/list/");
+      const res = await api.get("/branch/list/");
       setBranches(res.data);
     } catch (error) {
       console.error("Branşlar alınamadı", error);
+    }
+  };
+
+  const fetchEducationLevels = async () => {
+    try {
+      const res = await api.get("/education-level/list/");
+      setEducationLevels(res.data);
+    } catch (error) {
+      console.error("Eğitim seviyeleri alınamadı", error);
     }
   };
 
@@ -89,7 +103,7 @@ function EskepInstructorTeacherCreate() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://127.0.0.1:8000/api/v1/instructor/create/", formData);
+      await api.post("/eskepinstructor/create-educator/", formData);
       Swal.fire({ icon: "success", title: "Eğitmen başarıyla oluşturuldu" });
     } catch (error) {
       Swal.fire({ icon: "error", title: "Kayıt sırasında hata oluştu." });
@@ -103,11 +117,11 @@ function EskepInstructorTeacherCreate() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <div className="col-lg-2 col-md-4 col-12">
+            <div className="col-lg-3 col-md-4 col-12">
               <Sidebar />
             </div>
 
-            <div className="col-lg-10 col-md-8 col-12">
+            <div className="col-lg-9 col-md-8 col-12">
               <form onSubmit={handleSubmit}>
                 <Box className="card shadow-sm p-4" style={{ borderRadius: "16px" }}>
                   <Typography
@@ -121,8 +135,8 @@ function EskepInstructorTeacherCreate() {
                     <Grid item xs={12} md={6}>
                       <TextField
                         label="Ad Soyad"
-                        value={formData.fullName}
-                        onChange={handleChange("fullName")}
+                        value={formData.full_name}
+                        onChange={handleChange("full_name")}
                         fullWidth
                         size="small"
                       />
@@ -192,18 +206,24 @@ function EskepInstructorTeacherCreate() {
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <TextField
-                        label="Eğitim Seviyesi"
-                        value={formData.educationLevel}
-                        onChange={handleChange("educationLevel")}
-                        fullWidth
-                        size="small"
-                      />
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Eğitim Seviyesi</InputLabel>
+                        <Select
+                          value={formData.education_level}
+                          onChange={handleChange("education_level")}
+                        >
+                          {educationLevels.map((level) => (
+                            <MenuItem key={level.id} value={level.id}>
+                              {level.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                       <InputLabel className="mb-2 text-dark fw-semibold">Açıklama</InputLabel>
                       <MdEditor
-                        style={{ height: "300px", borderRadius: "8px" }}
+                        style={{ height: "200px", borderRadius: "8px" }}
                         renderHTML={(text) => mdParser.render(text)}
                         value={formData.description}
                         onChange={handleEditorChange}

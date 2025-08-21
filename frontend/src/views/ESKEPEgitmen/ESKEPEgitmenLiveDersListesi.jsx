@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import useAxios from "../../utils/useAxios";
-import { Link } from "react-router-dom";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Header from "./Partials/Header";
 import Sidebar from "./Partials/Sidebar";
 import Swal from "sweetalert2";
 import Modal from "react-modal";
-import ESKEPEgitmenAddCanliDers from "./ESKEPEgitmenAddCanliDers";
 import ESKEPEgitmenAddCanliDersPopup from "./Popup/ESKEPEgitmenAddCanliDersPopup";
 
 Modal.setAppElement("#root");

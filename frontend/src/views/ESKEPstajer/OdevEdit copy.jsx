@@ -1,586 +1,240 @@
-import { useState, useEffect } from "react";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import moment from "moment";
+import Modal from "react-modal";
+import { FiFileText, FiExternalLink, FiDownload, FiX } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
+import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-import { Link, useParams } from "react-router-dom";
+import "./css/ModalStyle.css"
 
-import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
-import Swal from "sweetalert2";
-import Toast from "../plugin/Toast";
+function EskepStajerDersSonuRaporus() {
+  const [derssonuraporus, setDersSonuRaporus] = useState([]);
+  const [fetching, setFetching] = useState(true);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const user = useUserData();
+  const headingId = "assignment-modal-title";
+  const onClose = () => setModalIsOpen(false)
+  const safeUrl = (f) => (typeof f === "string" ? f : f?.url ?? "#");
+  const fileTitle = (f, i) => (f?.title ? f.title : `Bölüm ${i + 1}`);
+  const fileName = (f) => f?.filename || undefined;
 
-function CourseEdit() {
-  const [course, setCourse] = useState({
-    category: 0,
-    file: "",
-    image: "",
-    title: "",
-    description: "",
-    price: "",
-    level: "",
-    language: "",
-    teacher_course_status: "",
-  });
-
-  const [category, setCategory] = useState([]);
-  const [progress, setProgress] = useState(0);
-  const [ckEdtitorData, setCKEditorData] = useState("");
-  const param = useParams();
-  const [variants, setVariants] = useState([
-    {
-      title: "",
-      items: [{ title: "", description: "", file: "", preview: false }],
-    },
-  ]);
-
-  const fetchCourseDetail = () => {
+  const fetchData = () => {
+    setFetching(true);
     useAxios()
-      .get(`course/category/`)
+      .get(`eskepstajer/derssonuraporu-list/${user?.user_id}/`)
       .then((res) => {
-        setCategory(res.data);
-      });
-
-    useAxios()
-      .get(`teacher/course-detail/${param.course_id}/`)
-      .then((res) => {
-        setCourse(res.data);
-        setVariants(res.data.curriculum);
-        setCKEditorData(res.data.description);
+        setDersSonuRaporus(res.data);
+        console.log(res.data);
+        setFetching(false);
       });
   };
 
   useEffect(() => {
-    fetchCourseDetail();
+    fetchData();
   }, []);
-  console.log(course);
 
-  const handleCourseInputChange = (event) => {
-    setCourse({
-      ...course,
-      [event.target.name]:
-        event.target.type === "checkbox"
-          ? event.target.checked
-          : event.target.value,
-    });
-  };
-
-  const handleCkEditorChange = (event, editor) => {
-    const data = editor.getData();
-    setCKEditorData(data);
-    console.log(ckEdtitorData);
-  };
-
-  const handleCourseImageChange = (event) => {
-    const file = event.target.files[0];
-    console.log(file);
-
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCourse({
-          ...course,
-          image: {
-            file: event.target.files[0],
-            preview: reader.result,
-          },
-        });
-      };
-      reader.readAsDataURL(file);
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    if (query === "") {
+      fetchData();
+    } else {
+      const filtered = derssonuraporus.filter((c) =>
+        c.title.toLowerCase().includes(query)
+      );
+      setDersSonuRaporus(filtered);
     }
   };
 
-  const handleCourseIntroVideoChange = (event) => {
-    setCourse({
-      ...course,
-      [event.target.name]: event.target.files[0],
-    });
+  const openModal = (files) => {
+    setSelectedFiles(files);
+    console.log(files);
+    setModalIsOpen(true);
   };
 
-  const handleVariantChange = (index, propertyName, value) => {
-    const updatedVariants = [...variants];
-    updatedVariants[index][propertyName] = value;
-    setVariants(updatedVariants);
-
-    console.log(`Name: ${propertyName} - value: ${value} - Index: ${index}`);
-    console.log(variants);
-  };
-
-  const handleItemChange = (
-    variantIndex,
-    itemIndex,
-    propertyName,
-    value,
-    type
-  ) => {
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex].items[itemIndex][propertyName] = value;
-    setVariants(updatedVariants);
-
-    console.log(
-      `Name: ${propertyName} - value: ${value} - Index: ${variantIndex} ItemIndex: ${itemIndex} - type: ${type}`
-    );
-  };
-
-  const addVariant = () => {
-    setVariants([
-      ...variants,
-      {
-        title: "",
-        items: [{ title: "", description: "", file: "", preview: false }],
-      },
-    ]);
-  };
-
-  const removeVariant = (index, variantId) => {
-    const updatedVariants = [...variants];
-    updatedVariants.splice(index, 1);
-    setVariants(updatedVariants);
-
-    useAxios()
-      .delete(
-        `teacher/course/variant-delete/${variantId}/${UserData()?.teacher_id}/${param.course_id}/`
-      )
-      .then((res) => {
-        console.log(res.data);
-        fetchCourseDetail();
-        Toast().fire({
-          icon: "success",
-          title: "Ders Silindi deleted",
-        });
-      });
-  };
-
-  const addItem = (variantIndex) => {
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex].items.push({
-      title: "",
-      description: "",
-      file: "",
-      preview: false,
-    });
-
-    setVariants(updatedVariants);
-  };
-
-  const removeItem = (variantIndex, itemIndex, variantId, itemId) => {
-    const updatedVariants = [...variants];
-    updatedVariants[variantIndex].items.splice(itemIndex, 1);
-    setVariants(updatedVariants);
-
-    useAxios()
-      .delete(
-        `teacher/course/variant-item-delete/${variantId}/${itemId}/${UserData()?.teacher_id}/${param.course_id}/`
-      )
-      .then((res) => {
-        console.log(res.data);
-        fetchCourseDetail();
-        Toast().fire({
-          icon: "success",
-          title: "Lesson Item deleted",
-        });
-      });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formdata = new FormData();
-    formdata.append("title", course.title);
-    formdata.append("description", ckEdtitorData);
-    formdata.append("category", course.category);
-    formdata.append("price", course.price);
-    formdata.append("level", course.level);
-    formdata.append("language", course.language);
-    formdata.append("teacher", parseInt(UserData()?.teacher_id));
-    console.log(course.category);
-
-    if (course.file !== null || course.file !== "") {
-      formdata.append("file", course.file || "");
-    }
-
-    if (course.image.file) {
-      formdata.append("image", course.image.file);
-    }
-
-    variants.forEach((variant, variantIndex) => {
-      Object.entries(variant).forEach(([key, value]) => {
-        console.log(`Key: ${key} = value: ${value}`);
-        formdata.append(
-          `variants[${variantIndex}][variant_${key}]`,
-          String(value)
-        );
-      });
-
-      variant.items.forEach((item, itemIndex) => {
-        Object.entries(item).forEach(([itemKey, itemValue]) => {
-          formdata.append(
-            `variants[${variantIndex}][items][${itemIndex}][${itemKey}]`,
-            itemValue
-          );
-        });
-      });
-    });
-
-    const response = await useAxios().patch(
-      `teacher/course-update/${UserData()?.teacher_id}/${param.course_id}/`,
-      formdata
-    );
-    console.log(response.data);
-    Swal.fire({
-      icon: "success",
-      title: "Kurs Başarılı Bir Şekilde Güncellendi",
-    });
-  };
   return (
     <>
       <ESKEPBaseHeader />
-
       <section className="pt-5 pb-5">
         <div className="container">
-          {/* Header Here */}
           <Header />
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
             <Sidebar />
-            <form className="col-lg-9 col-md-8 col-12" onSubmit={handleSubmit}>
-              <>
-                <section className="py-4 py-lg-6 bg-primary rounded-3">
-                  <div className="container">
-                    <div className="row">
-                      <div className="offset-lg-1 col-lg-10 col-md-12 col-12">
-                        <div className="d-lg-flex align-items-center justify-content-between">
-                          {/* Content */}
-                          <div className="mb-4 mb-lg-0">
-                            <h1 className="text-white mb-1">Ödev Düzenle</h1>
-                            <p className="mb-0 text-white lead">
-                              Form verilerini doldurun ve ödevinizi editleyin.
-                            </p>
-                          </div>
-                          <div>
-                            <Link
-                              to="/instructor/courses/"
-                              className="btn"
-                              style={{ backgroundColor: "white" }}
-                            >
-                              {" "}
-                              <i className="fas fa-arrow-left"></i> Ödev Sayfasına Dön
-                            </Link>
-                            <a
-                              href="instructor-courses.html"
-                              className="btn btn-dark ms-2"
-                            >
-                              Kaydet <i className="fas fa-check-circle"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            <div className="col-lg-10 col-md-8 col-12">
+              <h4 className="mb-0 mb-4">
+                <i className="fas fa-chalkboard-user"></i> Ders Sonu Raporlarım
+              </h4>
+
+              {fetching && <p className="mt-3 p-3">Yükleniyor...</p>}
+
+              {!fetching && (
+                <div className="card mb-4">
+                  <div className="card-header">
+                    <h3 className="mb-0">Ders Sonu Raporlarım</h3>
+                    <span>Panel sayfanızdan ödevlerinizi incelemeye hemen başlayın.</span>
                   </div>
-                </section>
-                <section className="pb-8 mt-5">
-                  <div className="card mb-3">
-                    {/* Basic Info Section */}
-                    <div className="card-header border-bottom px-4 py-3">
-                      <h4 className="mb-0">Temel Bilgiler</h4>
-                    </div>
-                    <div className="card-body">
-                      <label htmlFor="courseTHumbnail" className="form-label">
-                        Küçük Resim Önizleme
-                      </label>
-                      <img
-                        style={{
-                          width: "100%",
-                          height: "330px",
-                          objectFit: "cover",
-                          borderRadius: "10px",
-                        }}
-                        className="mb-4"
-                        src={
-                          course.image.preview ||
-                          course.image ||
-                          "https://www.eclosio.ong/wp-content/uploads/2018/08/default.png"
-                        }
-                        alt=""
-                      />
-                      <div className="mb-3">
-                        <label htmlFor="courseTHumbnail" className="form-label">
-                          Ödev Küçük Resim
-                        </label>
-                        <input
-                          id="courseTHumbnail"
-                          className="form-control"
-                          type="file"
-                          name="image"
-                          onChange={handleCourseImageChange}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="courseTitle" className="form-label">
-                          Tanıtım Videosu
-                        </label>
-                        <input
-                          id="introvideo"
-                          className="form-control"
-                          type="file"
-                          name="file"
-                          onChange={handleCourseIntroVideoChange}
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label htmlFor="courseTitle" className="form-label">
-                          Başlık
-                        </label>
-                        <input
-                          id="courseTitle"
-                          className="form-control"
-                          type="text"
-                          placeholder=""
-                          name="title"
-                          defaultValue={course.title}
-                          onChange={handleCourseInputChange}
-                        />
-                        <small>En fazla 60 karakter olacak şekilde ödev başlığınızı yazın</small>
-                      </div>
-                      <div className="mb-3">
-                        <label className="form-label">Ödev Kategori</label>
-                        <select
-                          className="form-select"
-                          name="category"
-                          onChange={handleCourseInputChange}
-                          value={course.category.id}
-                        >
-                          <option value="">-------------</option>
-                          {category?.map((c, index) => (
-                            <option key={index} value={c.id}>
-                              {c.title}
-                            </option>
-                          ))}
-                        </select>
-                        <small>
-                        Kategorileri seçerek insanların ödevlerinizin bulmasına yardımcı olun
-                        </small>
-                      </div>
-                      <div className="mb-3">
-                        <select
-                          className="form-select"
-                          onChange={handleCourseInputChange}
-                          name="level"
-                          value={course.level}
-                        >
-                         <option value="">Seviye Seçin</option>
-                          <option value="Başlangıç">Başlangıç</option>
-                          <option value="Orta">Orta</option>
-                          <option value="İleri Seviye">İleri Seviye</option>
-                        </select>
-                      </div>
-
-                      <div className="mb-3">
-                        <select
-                          className="form-select"
-                          onChange={handleCourseInputChange}
-                          name="language"
-                          value={course.language}
-                        >
-                        <option value="">Dil Seçin</option>
-                          <option value="Türkçe">Türkçe</option>
-                          <option value="İngilizce">İngilizce</option>
-                          <option value="Arapça">Arapça</option>
-                        </select>
-                      </div>
-                      <div className="mb-3">
-                        <label className="form-label">Ödev Açıklaması</label>
-                        <CKEditor
-                          editor={ClassicEditor}
-                          data={ckEdtitorData}
-                          onChange={handleCkEditorChange}
-                          style={{ height: "400px" }}
-                          name="description"
-                          value={course.description || ""}
-                        />
-                        <small>Ödevlerinizin kısa bir özeti.</small>
-                      </div>
-                      {/* <label htmlFor="courseTitle" className="form-label">
-                        Price
-                      </label>
-                      <input
-                        id="courseTitle"
-                        className="form-control"
-                        type="number"
-                        onChange={handleCourseInputChange}
-                        name="price"
-                        placeholder="$20.99"
-                      /> */}
-                    </div>
-
-                    {/* Curriculum Section */}
-                    <div className="card-header border-bottom px-4 py-3">
-                      <h4 className="mb-0">Bölümler</h4>
-                    </div>
-                    <div className="card-body ">
-                      {variants?.map((variant, variantIndex) => (
-                        <div
-                          className="border p-2 rounded-3 mb-3"
-                          style={{ backgroundColor: "#ededed" }}
-                        >
-                          <div className="d-flex mb-4">
-                            <input
-                              type="text"
-                              placeholder="Böüm Adı"
-                              required
-                              value={variant.title}
-                              className="form-control"
-                              onChange={(e) =>
-                                handleVariantChange(
-                                  variantIndex,
-                                  "title",
-                                  e.target.value
-                                )
-                              }
-                            />
-                            <button
-                              className="btn btn-danger ms-2"
-                              type="button"
-                              onClick={() =>
-                                removeVariant(variantIndex, variant.id)
-                              }
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>
-                          </div>
-                          {variant?.items?.map((item, itemIndex) => (
-                            <div
-                              className=" mb-2 mt-2 shadow p-2 rounded-3 "
-                              style={{ border: "1px #bdbdbd solid" }}
-                            >
-                              <input
-                                type="text"
-                                placeholder="Bölüm Başlığı"
-                                className="form-control me-1 mt-2"
-                                name="title"
-                                value={item.title}
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    variantIndex,
-                                    itemIndex,
-                                    "title",
-                                    e.target.value,
-                                    e.target.type
-                                  )
-                                }
-                              />
-                              <textarea
-                                name="description"
-                                id=""
-                                value={item.description}
-                                cols="30"
-                                className="form-control mt-2"
-                                placeholder="Ders Tanımı"
-                                rows="4"
-                                onChange={(e) =>
-                                  handleItemChange(
-                                    variantIndex,
-                                    itemIndex,
-                                    "description",
-                                    e.target.value,
-                                    e.target.type
-                                  )
-                                }
-                              ></textarea>
-                              <div className="row d-flex align-items-center">
-                                <div className="col-lg-8">
-                                  <input
-                                    type="file"
-                                    placeholder="Item Price"
-                                    className="form-control me-1 mt-2"
-                                    name="file"
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        variantIndex,
-                                        itemIndex,
-                                        "file",
-                                        e.target.files[0],
-                                        e.target.type
-                                      )
-                                    }
-                                  />
-                                </div>
-                                <div className="col-lg-4">
-                                  <label htmlFor={`checkbox${1}`}>
-                                    Önizleme
-                                  </label>
-                                  <input
-                                    type="checkbox"
-                                    className="form-check-input ms-2"
-                                    name=""
-                                    checked={item.preview}
-                                    id={`checkbox${1}`}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        variantIndex,
-                                        itemIndex,
-                                        "preview",
-                                        e.target.checked,
-                                        e.target.type
-                                      )
-                                    }
-                                  />
+                  <div className="card-body">
+                    <input
+                      type="search"
+                      className="form-control"
+                      placeholder="Ders Sonu Raporlarında Ara"
+                      onChange={handleSearch}
+                    />
+                  </div>
+                  <div className="table-responsive overflow-y-hidden">
+                    <table className="table mb-0 text-nowrap table-hover table-centered">
+                      <thead className="table-light">
+                        <tr>
+                          <th>Dersler</th>
+                          <th>Kayıt Tarihi</th>
+                          <th>Bölümler</th>
+                          <th>Ders Sonu Raporu Durumu</th>
+                          <th>Hazırlayan</th>
+                          <th>İşlemler</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {derssonuraporus?.map((c) => (
+                          <tr key={c.id}>
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <img
+                                  src={c.image}
+                                  alt="derssonuraporu"
+                                  className="rounded"
+                                  style={{ width: "100px", height: "70px", borderRadius: "50%", objectFit: "cover" }}
+                                />
+                                <div className="ms-3">
+                                  <h5>{c.title}</h5>
+                                  <p>{c.language} - {c.level}</p>
                                 </div>
                               </div>
+                            </td>
+                            <td>{moment(c.date).format("D MMM, YYYY")}</td>
+                            <td>{c.curriculum?.length || "-"}</td>
+                            <td>{c.derssonuraporu_status}</td>
+                            <td>{c.koordinator?.full_name}</td>
+                            <td>
+                              <Link to={`/eskep/edit-derssonuraporu/${c.id}`} className="btn btn-warning btn-sm">Düzenle</Link>
                               <button
-                                className="btn btn-sm btn-outline-danger me-2 mt-2"
-                                type="button"
-                                onClick={() =>
-                                  removeItem(
-                                    variantIndex,
-                                    itemIndex,
-                                    variant.variant_id,
-                                    item.variant_item_id
-                                  )
-                                }
-                              >
-                                Bölüm Sil <i className="fas fa-trash"></i>
-                              </button>
-                            </div>
-                          ))}
-
-                          <button
-                            className="btn btn-sm btn-primary mt-2"
-                            type="button"
-                            onClick={() => addItem(variantIndex)}
-                          >
-                            + Bölüm Ekle
-                          </button>
-                        </div>
-                      ))}
-
-                      <button
-                        className="btn btn-sm btn-secondary w-100 mt-2"
-                        type="button"
-                        onClick={addVariant}
-                      >
-                        + Yeni Bölüm
-                      </button>
-                    </div>
+                                className="btn btn-danger btn-sm ms-2"
+                                onClick={() => {
+                                  if (window.confirm("Bu ödevi silmek istediğinize emin misiniz?")) {
+                                    useAxios().delete(`/eskepstajer/derssonuraporu/${c.id}/`).then(() => fetchData());
+                                  }
+                                }}
+                              >Sil</button>
+                              {c.curriculum?.length > 0 && (
+                                <button
+                                  className="btn btn-info btn-sm ms-2"
+                                  onClick={() => {
+                                    const files = c.curriculum.flatMap(item => item?.variant_items.map(i => i));
+                                    openModal(files);
+                                  }}
+                                >Bölümleri Görüntüle</button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {derssonuraporus?.length < 1 && <tr><td colSpan="5" className="text-center">Ders Sonu Raporu Bulunamadı</td></tr>}
+                      </tbody>
+                    </table>
                   </div>
-                  <button
-                    className="btn btn-lg btn-success w-100 mt-2"
-                    type="submit"
-                  >
-                    Ödev Oluştur <i className="fas fa-check-circle"></i>
-                  </button>
-                </section>
-              </>
-            </form>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
-
       <ESKEPBaseFooter />
+
+
+<Modal
+      isOpen={modalIsOpen} 
+  onRequestClose={() => setModalIsOpen(false)}
+      overlayClassName="modalOverlay"
+      className="modalContent"
+      shouldCloseOnOverlayClick
+      aria={{
+        labelledby: headingId,
+      }}
+    >
+      {selectedFiles.map((file, index) => (
+        <>
+        <div className="modalHeader">
+        <h3 id={headingId} className="modalTitle">
+          {file.title}
+        </h3>
+        <button
+          className="iconBtn"
+          aria-label="Kapat"
+          onClick={() => setModalIsOpen(false)} 
+          title="Kapat"
+        >
+          <FiX />
+        </button>
+      </div>
+
+      <div className="modalBody">
+        {selectedFiles?.length ? (
+          <ul className="fileList" role="list">
+            {selectedFiles.map((file, idx) => (
+              <li key={idx} className="fileItem">
+                <div className="fileMain">
+                  <span className="fileIcon" aria-hidden>
+                    <FiFileText />
+                  </span>
+                  <div className="fileTexts">
+                    <div className="fileTitle">{fileTitle(file.variant, idx)}</div>                    
+                    {fileName(file.file) && (
+                      <div className="fileMeta">{fileName(file.file)}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="fileActions">
+                  <a
+                    className="btn ghost"
+                    href={safeUrl(file.file)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Yeni sekmede aç"
+                  >
+                    <FiExternalLink className="btnIcon" />
+                    Önizle
+                  </a>
+                  <a
+                    className="btn primary"
+                    href={safeUrl(file.file)}
+                    download={fileName(file.file)}
+                    title="İndir"
+                  >
+                    <FiDownload className="btnIcon" />
+                    İndir
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="emptyState">
+            Henüz eklenmiş bölüm yok.
+          </div>
+        )}
+      </div>
+      </>
+      ))}
+      <div className="modalFooter">
+        <button className="btn outline" onClick={onClose}>
+          Kapat
+        </button>
+      </div>
+    </Modal>  
     </>
   );
 }
 
-export default CourseEdit;
+export default EskepStajerDersSonuRaporus;

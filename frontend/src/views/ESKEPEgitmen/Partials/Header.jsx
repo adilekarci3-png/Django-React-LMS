@@ -26,8 +26,8 @@ function Header() {
                 />
               </div>
               <div className="lh-1">
-                <h2 className="mb-0">{profile.full_name || "Bilinmeyen Kullanıcı"}</h2>
-                <p className="mb-0 d-block">{profile.about || "Profil bilgisi yok"}</p>
+                <h2 className="mb-0">{profile?.full_name || "Bilinmeyen Kullanıcı"}</h2>
+                <p className="mb-0 d-block">{profile?.about || "Profil bilgisi yok"}</p>
               </div>
             </div>
             <div>

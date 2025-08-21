@@ -78,7 +78,9 @@ import ESKEPStudent from "./views/ESKEPstudent/Dashboard";
 import DersSonuAnketi from "./views/ESKEPstudent/DersSonuAnketi";
 import OdevCreate from "./views/ESKEPstajer/OdevCreate";
 import KitapTahliliCreate from "./views/ESKEPstajer/KitapTahliliCreate";
+import KitapTahliliEdit from "./views/ESKEPstajer/KitapTahliliEdit";
 import DersSonuRaporuCreate from "./views/ESKEPstajer/DersSonuRaporuCreate";
+import DersSonuRaporuEdit from "./views/ESKEPstajer/DersSonuRaporuEdit";
 import ProjeCreate from "./views/ESKEPstajer/ProjeCreate";
 
 //Eskep Instructor Pages
@@ -107,7 +109,7 @@ import ESKEPEgitmenDersSaatiEkle from "./views/ESKEPEgitmen/ESKEPEgitmenAddLesso
 import ESKEPEgitmenCreate from "./views/ESKEPinstructor/EskepInstructorTeacherCreate";
 import ESKEPEgitmenVideoCreate from "./views/ESKEPinstructor/InstructorVideoCreate";
 import ESKEPEgitmenVideoRecoder from "./views/ESKEPinstructor/WebCamVideoRecorder";
-import ESKEPEgitmenVideoLinkCreate from "./views/ESKEPinstructor/InstructorVideoLinkCreate";
+import ESKEPEgitmenVideoLinkCreate from "./views/ESKEPEgitmen/EducatorVideoLinkCreate";
 import ESKEPEgitmenProfil from "./views/ESKEPinstructor/EskepInstructorProfile";
 import ESKEPEgitmenVideoList from "./views/ESKEPinstructor/InstructorVideoList";
 import ESKEPEgitmenYoutubeCanli from "./views/ESKEPinstructor/YouTubeLivePage";
@@ -137,8 +139,14 @@ import ESKEPEgitmenAddCanliDers from "./views/ESKEPEgitmen/ESKEPEgitmenAddCanliD
 import ESKEPEgitmenLiveDersListesi from "./views/ESKEPEgitmen/ESKEPEgitmenLiveDersListesi";
 import ESKEPEgitmenAddCanliDersPopup from "./views/ESKEPEgitmen/Popup/ESKEPEgitmenAddCanliDersPopup";
 import EskepInstructorProjes from "./views/ESKEPinstructor/EskepInstructorProjes";
+import EducatorList from "./views/ESKEPinstructor/EducatorList";
+import EducatorEditForm from "./views/ESKEPinstructor/EducatorEditForm";
+import OdevDetail from "./views/ESKEPstajer/OdevDetail";
+import EskepStajerOdevEdit from "./views/ESKEPstajer/EskepStajerOdevEdit";
+import OdevEdit from "./views/ESKEPstajer/OdevEdit";
+import DersSonuRaporuDetail from "./views/ESKEPstajer/DersSonuRaporuDetail";
 
-
+const BASENAME = import.meta.env.VITE_BASENAME || "/test.akademi.ehad.org.tr";
 
 function App() {
   const [profile, setProfile] = useState(null);
@@ -147,10 +155,6 @@ function App() {
   const user = useUserData();
   const setRehydrated = useAuthStore((state) => state.setRehydrated);
   const user_id = useAuthStore((state) => state.allUserData?.user_id);
-  // const user_id = allUserData?.id || null;
-  console.log("rehydrated:", rehydrated);
-  console.log(allUserData);
-  console.log(user);
   const axiosJWT = useAxios();
 
   useEffect(() => {
@@ -176,6 +180,7 @@ function App() {
     <MainWrapper>
       {/* <CartContext.Provider value={[cartCount, setCartCount]}> */}
       <ProfileContext.Provider value={[profile, setProfile]}>
+        {/* <BrowserRouter basename={BASENAME}> */}
         <BrowserRouter>
           <Routes>
             {/* 🔓 Açık Sayfalar */}
@@ -607,6 +612,14 @@ function App() {
                 </PrivateRoute>
               }
             />
+             <Route
+              path="/eskep/edit-odev/:id"
+              element={
+                <PrivateRoute>
+                  <OdevEdit />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/eskep/create-kitaptahlili/"
               element={
@@ -615,11 +628,27 @@ function App() {
                 </PrivateRoute>
               }
             />
+             <Route
+              path="/eskep/edit-kitaptahlili/:id"
+              element={
+                <PrivateRoute>
+                  <KitapTahliliEdit />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/eskep/create-derssonuraporu/"
               element={
                 <PrivateRoute>
                   <DersSonuRaporuCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/edit-derssonuraporu/:id"
+              element={
+                <PrivateRoute>
+                  <DersSonuRaporuEdit />
                 </PrivateRoute>
               }
             />
@@ -682,7 +711,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/odevs/:odev_id/:koordinator_id/"
+              path="/eskepinstructor/odevs/:koordinator_id/:odev_id/"
               element={
                 <PrivateRoute>
                   <ESKEPinstructorOdevDetail />
@@ -698,10 +727,10 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/dersSonuRaporus/:derssonuraporu_id/:koordinator_id/"
+              path="/eskepinstructor/dersSonuRaporus/:koordinator_id/:derssonuraporu_id/"
               element={
                 <PrivateRoute>
-                  <ESKEPinstructorOdevDetail />
+                  <DersSonuRaporuDetail />
                 </PrivateRoute>
               }
             />
@@ -714,7 +743,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/kitaptahlileris/:kitaptahlili_id/:koordinator_id/"
+              path="/eskepinstructor/kitaptahlileris/:koordinator_id/:kitaptahlili_id/"
               element={
                 <PrivateRoute>
                   <ESKEPinstructorKitapTahliliDetail />
@@ -730,7 +759,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/projes/:proje_id/:koordinator_id/"
+              path="/eskepinstructor/projes/:koordinator_id/:proje_id/"
               element={
                 <PrivateRoute>
                   <ESKEPinstructorOdevDetail />
@@ -842,8 +871,17 @@ function App() {
                 </PrivateRoute>
               }
             />
+             <Route
+              path="/eskepstajer/odevs/:id"
+              element={
+                <PrivateRoute>
+                  <OdevDetail />
+                </PrivateRoute>
+              }
+            />
+           
             <Route
-              path="/eskepstajer/dersonuraporus/"
+              path="/eskepstajer/derssonuraporus/"
               element={
                 <PrivateRoute>
                   <EskepStajerDersSonuRaporus />
@@ -851,6 +889,14 @@ function App() {
               }
             />
             <Route
+              path="/eskepstajer/kitaptahlileris/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerKitapTahlilis />
+                </PrivateRoute>
+              }
+            />
+             <Route
               path="/eskepstajer/kitaptahlileris/"
               element={
                 <PrivateRoute>
@@ -909,7 +955,10 @@ function App() {
                 </PrivateRoute>
               }
             />
-            <Route path="/live-lessons/edit/:id" element={<ESKEPEgitmenAddCanliDersPopup />} />
+            <Route
+              path="/live-lessons/edit/:id"
+              element={<ESKEPEgitmenAddCanliDersPopup />}
+            />
             <Route
               path="/eskepegitmen/ders-olustur/"
               element={
@@ -920,6 +969,14 @@ function App() {
             />
             <Route
               path="/eskepegitmen/video-ekle/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenVideoLinkCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/video-ekle/:id"
               element={
                 <PrivateRoute>
                   <ESKEPEgitmenVideoLinkCreate />
@@ -958,6 +1015,11 @@ function App() {
                 </PrivateRoute>
               }
             />
+            
+{/* <Route path="/eskepegitmen/ders-saat-ekle/:id" element={<EducatorLessonTimeCreate />} />
+<Route path="/eskepegitmen/video-olustur/:id" element={<EducatorVideoCreate />} />
+<Route path="/eskepegitmen/video-list/:id" element={<EducatorVideoList />} />
+<Route path="/eskepegitmen/youtube-canli/:id" element={<EducatorYoutubeLive />} /> */}
             {/* Eğitim Takvimi */}
             <Route
               path="/eskep/egitim-takvimi/"
@@ -971,7 +1033,15 @@ function App() {
               path="/eskep/eğitmenler/"
               element={
                 <PrivateRoute>
-                  <InstructorList />
+                  <EducatorList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/educator/:id"
+              element={
+                <PrivateRoute>
+                  <EducatorEditForm />
                 </PrivateRoute>
               }
             />

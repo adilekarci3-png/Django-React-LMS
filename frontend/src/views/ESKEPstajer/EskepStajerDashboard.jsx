@@ -8,6 +8,9 @@ import UserData from "../plugin/UserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
+import { FaTasks, FaBook, FaProjectDiagram, FaMedal } from "react-icons/fa";
+import { BsJournalText } from "react-icons/bs"; // BiJournalCheck yerine
+
 function EskepStajerDashboard() {
   const [stats, setStats] = useState({});
   const [homeworks, setHomeworks] = useState([]);
@@ -31,13 +34,9 @@ function EskepStajerDashboard() {
       ]);
       setStats(summary.data[0]);
       setHomeworks(hw.data);
-      console.log(hw.data);
       setLessonReports(reports.data);
-      console.log(reports.data);
       setBookReviews(books.data);
-      console.log(books.data);
       setProjects(proj.data);
-      console.log(proj.data);
     } catch (error) {
       console.error("Veri çekme hatası:", error);
     } finally {
@@ -88,10 +87,10 @@ function EskepStajerDashboard() {
                   <i className="bi bi-grid-fill"></i> Öğrenci Paneli
                 </h4>
 
-                {/* Sertifika, rapor, ödev vb. istatistik kutuları */}
+                {/* İstatistik kutuları */}
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-success bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-medal display-6 text-success me-3" />
+                    <FaMedal className="display-6 text-success me-3" />
                     <div>
                       <h5 className="fw-bold mb-0">{stats.achieved_certificates}</h5>
                       <p className="mb-0">Kazanılan Sertifikalar</p>
@@ -101,7 +100,7 @@ function EskepStajerDashboard() {
 
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-primary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="bi bi-journal-check display-6 text-primary me-3" />
+                    <BsJournalText className="display-6 text-primary me-3" />
                     <div>
                       <h5 className="fw-bold mb-0">{stats.lesson_reports_completed}</h5>
                       <p className="mb-0">Ders Sonu Raporları</p>
@@ -111,7 +110,7 @@ function EskepStajerDashboard() {
 
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-info bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-tasks display-6 text-info me-3" />
+                    <FaTasks className="display-6 text-info me-3" />
                     <div>
                       <h5 className="fw-bold mb-0">{stats.homework_count}</h5>
                       <p className="mb-0">Tamamlanan Ödev</p>
@@ -121,7 +120,7 @@ function EskepStajerDashboard() {
 
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-secondary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-book display-6 text-secondary me-3" />
+                    <FaBook className="display-6 text-secondary me-3" />
                     <div>
                       <h5 className="fw-bold mb-0">{stats.book_reviews}</h5>
                       <p className="mb-0">Kitap Tahlilleri</p>
@@ -131,7 +130,7 @@ function EskepStajerDashboard() {
 
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-dark bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <i className="fas fa-project-diagram display-6 text-dark me-3" />
+                    <FaProjectDiagram className="display-6 text-dark me-3" />
                     <div>
                       <h5 className="fw-bold mb-0">{stats.projects}</h5>
                       <p className="mb-0">Projeler</p>
@@ -144,7 +143,7 @@ function EskepStajerDashboard() {
                 <p className="p-3">Yükleniyor...</p>
               ) : (
                 <>
-                  {renderList("Ödevler", homeworks, "/student/homework-detail")}
+                  {renderList("Ödevler", homeworks, "/eskepstajer/odevs")}
                   {renderList("Ders Sonu Raporları", lessonReports, "/student/lesson-report-detail")}
                   {renderList("Kitap Tahlilleri", bookReviews, "/student/book-review-detail")}
                   {renderList("Projeler", projects, "/student/project-detail")}

@@ -98,7 +98,7 @@ function EskepInstructorProjes() {
                               <td>{c.lectures?.length || 0}</td>
                               <td>{c.level}</td>
                               <td>{c.koordinator?.full_name || "Bilinmiyor"}</td>
-                              <td>{c.hazirlayan?.full_name || "Bilinmiyor"}</td>
+                              <td>{c.inserteduser?.full_name || "Bilinmiyor"}</td>
                               <td>
                                 <Link
                                   to={`/eskepinstructor/dersSonuProjes/${c.id}/${c.koordinator?.id}/`}

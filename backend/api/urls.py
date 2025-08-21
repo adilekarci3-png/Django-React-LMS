@@ -3,14 +3,13 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from api import views as api_views
 from .views import (
-    AnnotationViewSet, DersAtamasiViewSet, HBSKoordinatorDashboardViewSet, HafizViewSet, HataNotuViewSet, KoordinatorByRoleAPIView, peer_id_view
+    DersAtamasiAPIView, DersAtamasiDetailAPIView, EskepStajerOdevDetailAPIView, HBSKoordinatorDashboardViewSet, HafizAPIView, HafizAgentListAPIView, HafizDetailAPIView, HafizsListAPIView, HataNotuViewSet, KoordinatorByRoleAPIView,peer_id_view
 )
 
 # ViewSet'ler için router
 router = DefaultRouter()
 router.register(r"egitmenler", api_views.TeacherViewSet,basename="egitmen")
-router.register(r"hafizlar", HafizViewSet, basename="hafiz")
-router.register(r"ders-atamalari", DersAtamasiViewSet, basename="ders-atamalari")
+# router.register(r"hafizlar", HafizViewSet, basename="hafiz")
 router.register(r"hatalar", HataNotuViewSet, basename="hatalar")
 router.register(r"dersler", api_views.DersViewSet)
 router.register(r"cizimler", api_views.AnnotationViewSet)
@@ -66,8 +65,9 @@ urlpatterns = [
     path("country/list/", api_views.CountryListAPIView.as_view(), name="country-list"),
     path("district/list/", api_views.DistrictListAPIView.as_view(), name="district-list"),
     path("proje/list/", api_views.ProjeListAPIView.as_view(), name="proje-list"),
-    path("agent/list/", api_views.AgentListAPIView.as_view(), name="agent-list"),
-
+    path("agent/list/", api_views.AgentListAPIView.as_view(), name="agent-list"),   
+    path("branch/list/", api_views.BranchListAPIView.as_view(), name="branch-list"),
+    path("education-level/list/", api_views.EducationLevelListAPIView.as_view(), name="education-level-list"),
     # Organizasyon Şeması
     path("admin/organizationchart/", api_views.OrganizationMemberViewSetAPIVIew.as_view(), name="organization-chart"),
 
@@ -111,12 +111,13 @@ urlpatterns = [
     path("student/review-detail/<user_id>/<review_id>/", api_views.StudentRateCourseUpdateAPIView.as_view()),
     path("student/wishlist/<user_id>/", api_views.StudentWishListListCreateAPIView.as_view()),
     path("student/question-answer-list-create/<course_id>/", api_views.QuestionAnswerListCreateAPIView.as_view()),
-    path("student/question-answer-message-create/", api_views.QuestionAnswerMessageSendAPIView.as_view()),
+    path("student/question-answer-message-create/", api_views.QuestionAnswerMessageCreateAPIView.as_view()),
+    path("akademistudent/question-answer-message-create/", api_views.CourseQuestionAnswerMessageCreateAPIView.as_view()),
 
     # HBS Temsilci
     path("agent/summary/<agent_id>/", api_views.AgentSummaryAPIView.as_view()),
     path("agent/course-list/<user_id>/", api_views.StudentCourseListAPIView.as_view()),
-    path("agent/hafiz-list/<agent_id>/", api_views.HafizListViewSetAPIVIew.as_view({'get': 'list'})),
+    path("agent/hafiz-list/<int:agent_id>/", HafizAgentListAPIView.as_view(), name="agent-hafiz-list"),
     path("agent/<user_id>/", api_views.IsAgent),
     path("agent/hafizbilgi-update/<agent_id>/<hafizbilgi_id>/", api_views.HafizBilgiUpdateAPIView.as_view()),
     path("agent/hafizbilgi-create/", api_views.HafizBilgiCreateAPIView.as_view()),
@@ -144,29 +145,45 @@ urlpatterns = [
 
     # Eskep Stajer
     path("eskepstajer/odev-create/", api_views.EskepOdevCreateAPIView.as_view()),
+    path("eskepstajer/odev-edit/<int:id>/", api_views.EskepOdevUpdateAPIView.as_view()),
+    path("eskepstajer/odev-delete/<int:id>/", api_views.EskepOdevDeleteAPIView.as_view()),
     path("eskepstajer/odev-list/<stajer_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
-    path("eskepstajer/odev-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
+    path("eskepstajer/odev-detail/<int:user_id>/<int:id>/", EskepStajerOdevDetailAPIView.as_view(), name="stajer-odev-detail"),
     path("eskepstajer/kitaptahlili-create/", api_views.EskepKitapTahliliCreateAPIView.as_view()),
+    path("eskepstajer/kitaptahlili-edit/<int:id>/", api_views.EskepKitapTahliliUpdateAPIView.as_view()),
+    path("eskepstajer/kitaptahlili-delete/<int:id>/", api_views.EskepKitapTahliliDeleteAPIView.as_view()),
     path("eskepstajer/kitaptahlili-list/<stajer_id>/", api_views.EskepStajerKitapTahliliListAPIView.as_view()),
-    path("stajer/kitaptahlili-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
+    path("eskepstajer/kitaptahlili-detail/<user_id>/<int:id>/", api_views.EskepStajerKitapTahliliDetailAPIView.as_view()),
     path("eskepstajer/derssonuraporu-create/", api_views.EskepDersSonuRaporuCreateAPIView.as_view()),
+    path("eskepstajer/derssonuraporu-edit/<int:id>/", api_views.EskepDersSonuRaporuUpdateAPIView.as_view()),
+    path("eskepstajer/derssonuraporu-delete/<int:id>/", api_views.EskepDersSonuRaporuDeleteAPIView.as_view()),
     path("eskepstajer/derssonuraporu-list/<stajer_id>/", api_views.EskepStajerDersSonuRaporuListAPIView.as_view()),
-    path("eskepstajer/derssonuraporu-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
+    path("eskepstajer/derssonuraporu-detail/<user_id>/<int:id>/", api_views.EskepStajerDersSonuRaporuDetailAPIView.as_view()),
     path("eskepstajer/proje-create/", api_views.EskepProjeCreateAPIView.as_view()),
+    path("eskepstajer/proje-edit/<int:id>/", api_views.EskepProjeUpdateAPIView.as_view()),
+    path("eskepstajer/proje-delete/<int:id>/", api_views.EskepProjeDeleteAPIView.as_view()),
     path("eskepstajer/proje-list/<stajer_id>/", api_views.EskepStajerProjeListAPIView.as_view()),
-    path("eskepstajer/proje-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
-
+    path("eskepstajer/proje-detail/<user_id>/<int:id>/", api_views.EskepStajerProjeDetailAPIView.as_view()),
+    path("eskepstajer/question-answer-message-create/", api_views.QuestionAnswerMessageCreateAPIView.as_view(), name="question-answer-message-create"),
+    path("eskepstajer/question-answer-list-create/<odev_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
+    path("eskepstajer/odev-note/<int:koordinator_id>/<int:id>/", api_views.OdevCreateOrUpdateNoteAPIView.as_view()),
+    path("eskepstajer/derssonuraporu-note/<int:koordinator_id>/<int:id>/", api_views.DersSonuRaporuCreateOrUpdateNoteAPIView.as_view()),
+    path("eskepstajer/kitaptahlili-note/<int:koordinator_id>/<int:id>/", api_views.KitapTahliliCreateOrUpdateNoteAPIView.as_view()),
+    path("eskepstajer/proje-note/<int:koordinator_id>/<int:id>/", api_views.EskepProjeCreateOrUpdateNoteAPIView.as_view()),
+    path("eskepstajer/odev-note-detail/<int:koordinator_id>/<int:odev_id>/<int:id>/", api_views.OdevCreateOrUpdateNoteAPIView.as_view()),
+    
     # Eskep Student
     path("eskepstudent/odev-create/", api_views.EskepOdevCreateAPIView.as_view()),
     path("eskepstudent/odev-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
-    path("eskepstudent/odev-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
+    path("eskepstudent/odev-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
     path("eskepstudent/kitaptahlili-create/", api_views.EskepKitapTahliliCreateAPIView.as_view()),
     path("eskepstudent/kitaptahlili-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
-    path("eskepstudent/kitaptahlili-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
+    path("eskepstudent/kitaptahlili-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
     path("eskepstudent/derssonuraporu-create/", api_views.EskepDersSonuRaporuCreateAPIView.as_view()),
     path("eskepstudent/derssonuraporu-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
-    path("eskepstudent/derssonuraporu-detail/<user_id>/<enrollment_id>/", api_views.StajerOdevDetailAPIView.as_view()),
-
+    path("eskepstudent/derssonuraporu-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
+    path("eskepstudent/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
+    
     # Eskep Koordinator
     path("eskepinstructor/odev-list/<user_id>/", api_views.EskepInstructorOdevListAPIView.as_view()),
     path("eskepinstructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
@@ -188,10 +205,12 @@ urlpatterns = [
     path("eskepinstructor/derssonuraporu-list/<user_id>/", api_views.EskepInstructorDersSonuRaporuListAPIView.as_view()),
     path("eskepinstructor/derssonuraporu-detail/<user_id>/<koordinator_id>/", api_views.EskepInstructorDersSonuRaporuDetailAPIView.as_view()), 
     path("eskep/assign-role/", api_views.CoordinatorYetkiAtaAPIView.as_view()),
+    path("eskepinstructor/create-educator/", api_views.EducatorCreateAPIView.as_view()),
     path("eskepinstructor/student-lists/<user_id>/", api_views.EskepInstructorStudentsStajersListAPIView.as_view({'get': 'list'})),
     path('eskepinstructor/<int:user_id>/kisisel-liste/', api_views.koordinator_students_stajers, name='koordinator-student-stajer-list'),
     path("eskepinstructor/koordinatorler/by-role/", KoordinatorByRoleAPIView.as_view()),
     path("eskepinstructor/course-list/<user_id>/", api_views.MyCourseListAPIView.as_view()),
+    
     
     # Eğitmen
     path("instructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
@@ -205,11 +224,13 @@ urlpatterns = [
     
 
     # Eskep Eğitmen
-    path("eskepEgitmen/list/", api_views.EskepEgitmenListAPIView.as_view(), name="job-list"),
+    path("educator/list/", api_views.EskepEgitmenListAPIView.as_view(), name="job-list"),
+    path('educator/<int:pk>/', api_views.EducatorUpdateAPIView.as_view(), name="educator-update"),
     path('events/create/', api_views.ESKEPEventCreateAPIView.as_view(), name='instructor-event-create'),
     path('events/teacher_schedule/<int:user_id>/', api_views.CombinedEventListAPIView.as_view(), name='teacher-schedule'),
     path('events/student/', api_views.StudentEventListAPIView.as_view(), name='student-events'),
     path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),
+    path('educator/video/link/', api_views.EducatorVideoLinkCreateAPIView.as_view(), name='educator-video-link-create'),
     
     # Eskep Listeler
     path("eskep/coordinators/", api_views.CoordinatorListAPIView.as_view()),
@@ -228,4 +249,10 @@ urlpatterns = [
     path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),
     path("egitmen/<int:egitmen_id>/detay/", api_views.egitmen_detay),
     path("hafiz/<int:hafiz_id>/detay/", api_views.hafiz_detay),
+    
+    # HDM
+    path("ders-atamalari/", DersAtamasiAPIView.as_view(), name="ders-atamalari"),
+    path("ders-atamalari/<int:pk>/", DersAtamasiDetailAPIView.as_view()),
+    path("hafizlar/", HafizsListAPIView.as_view(), name="hafiz-list-create"),
+    path("hafizlar/<int:pk>/", HafizDetailAPIView.as_view(), name="hafiz-detail-update-delete"),
 ]

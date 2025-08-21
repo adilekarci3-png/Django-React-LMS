@@ -15,30 +15,21 @@ function Success() {
   const sessionId = urlParam.get("session_id");
   const paypalOrderId = urlParam.get("paypal_order_id");
 
-  console.log(sessionId);
-  console.log(paypalOrderId);
-  console.log(param);
-
   useEffect(() => {
     const formdata = new FormData();
 
     formdata.append("order_oid", param.order_oid);
     formdata.append("session_id", sessionId);
     formdata.append("paypal_order_id", paypalOrderId);
-
     setOrderMessage("Processing Payment");
-
     try {
-      apiInstance.post(`payment/payment-sucess/`, formdata).then((res) => {
-        console.log(res.data);
+      apiInstance.post(`payment/payment-sucess/`, formdata).then((res) => {        
         setOrderMessage(res.data.message);
       });
     } catch (error) {
-      console.log(error);
+      
     }
-  }, []);
-
-  console.log(orderMessage);
+  }, []); 
 
   return (
     <>

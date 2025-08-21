@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import Swal from "sweetalert2";
 
 import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-import UserData from "../plugin/UserData";
+
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
+import MarkdownIt from "markdown-it";
+const mdParser = new MarkdownIt();
 
 function DersSonuRaporuCreate() {
-  const [derssonuraporu, setDersSonuRaporu] = useState({
+  const [dersonuraporu, setDersSonuRaporu] = useState({
     category: "",
     image: "",
     title: "",
@@ -24,7 +26,7 @@ function DersSonuRaporuCreate() {
   const [category, setCategory] = useState([]);
   const [ckEdtitorData, setCKEditorData] = useState("");
   const [variants, setVariants] = useState([{ title: "", pdf: "" }]);
-
+  const user = useUserData();
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -34,15 +36,10 @@ function DersSonuRaporuCreate() {
   }, []);
 
   const handleDersSonuRaporuInputChange = (event) => {
-    setDerSonuRaporu({
+    setDersSonuRaporu({
       ...dersonuraporu,
       [event.target.name]: event.target.value,
     });
-  };
-
-  const handleCkEditorChange = (event, editor) => {
-    const data = editor.getData();
-    setCKEditorData(data);
   };
 
   const handleDersSonuRaporuImageChange = (event) => {
@@ -98,7 +95,7 @@ function DersSonuRaporuCreate() {
     const newErrors = {};
 
     if (!dersonuraporu.title) newErrors.title = "Ders Sonu Raporu başlığı zorunludur.";
-    if (!ckEdtitorData) newErrors.description = "Ders Sonu Raporu açıklaması zorunludur.";
+    if (!ckEdtitorData) newErrors.description = "Açıklama zorunludur.";
     if (!dersonuraporu.image.file) newErrors.image = "Kapak resmi yükleyiniz.";
     if (!dersonuraporu.category) newErrors.category = "Kategori seçiniz.";
 
@@ -112,12 +109,12 @@ function DersSonuRaporuCreate() {
   };
 
   const handleSubmit = async (e) => {
-    debugger;
     e.preventDefault();
     if (!validateForm()) return;
 
     const formdata = new FormData();
     formdata.append("title", dersonuraporu.title);
+    formdata.append("inserteduser", parseInt(user?.user_id));
     formdata.append("image", dersonuraporu.image.file);
     formdata.append("description", ckEdtitorData);
     formdata.append("category", dersonuraporu.category);
@@ -151,16 +148,24 @@ function DersSonuRaporuCreate() {
                 <input type="text" className="form-control" name="title" onChange={handleDersSonuRaporuInputChange} />
                 {errors.title && <span className="text-danger">{errors.title}</span>}
               </div>
+
               <div className="mb-3">
-                <label className="form-label">Ders Sonu Raporu Açıklaması</label>
-                <CKEditor editor={ClassicEditor} data={ckEdtitorData} onChange={handleCkEditorChange} />
+                <label className="form-label">Açıklama</label>
+                <MdEditor
+                  style={{ height: "300px" }}
+                  renderHTML={(text) => mdParser.render(text)}
+                  onChange={({ text }) => setCKEditorData(text)}
+                  value={ckEdtitorData}
+                />
                 {errors.description && <span className="text-danger">{errors.description}</span>}
               </div>
+
               <div className="mb-3">
                 <label className="form-label">Kapak Resmi</label>
                 <input type="file" className="form-control" onChange={handleDersSonuRaporuImageChange} />
                 {errors.image && <span className="text-danger">{errors.image}</span>}
               </div>
+
               <div className="mb-3">
                 <label className="form-label">Kategori</label>
                 <select className="form-select" name="category" onChange={handleDersSonuRaporuInputChange}>
@@ -171,6 +176,7 @@ function DersSonuRaporuCreate() {
                 </select>
                 {errors.category && <span className="text-danger">{errors.category}</span>}
               </div>
+
               <div className="mb-3">
                 <h4>Bölümler</h4>
                 {variants.map((variant, index) => (
@@ -203,6 +209,7 @@ function DersSonuRaporuCreate() {
                 ))}
                 <button className="btn btn-secondary w-100" type="button" onClick={addVariant}>+ Yeni Bölüm</button>
               </div>
+
               <button className="btn btn-success w-100" type="submit">Ders Sonu Raporu Oluştur</button>
             </form>
           </div>

@@ -7,11 +7,12 @@ import Modal from "react-bootstrap/Modal";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import useUserData from "../plugin/useUserData";
+
 import Toast from "../plugin/Toast";
 import moment from "moment";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import useUserData from "../plugin/useUserData";
 
 function OdevDetail() {
   const [odev, setOdev] = useState([]);
@@ -28,7 +29,7 @@ function OdevDetail() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [createReview, setCreateReview] = useState({ rating: 1, review: "" });
   const [studentReview, setStudentReview] = useState([]);
-
+const userData = useUserData();
   const param = useParams();
   const lastElementRef = useRef(null);
   // Play Ders Silindi Modal
@@ -61,7 +62,7 @@ function OdevDetail() {
     try {
       debugger;
       // const { koordinator_id } = param.koordinator_id; // URL parametresinden al
-      const user_id = useUserData()?.user_id; // URL parametresinden al
+      const user_id = userData?.user_id; // URL parametresinden al
       const response = await useAxios().get(
         `eskepinstructor/odev-detail/${param.odev_id}/${param.koordinator_id}/`
       );
@@ -97,7 +98,7 @@ function OdevDetail() {
     });
 
     const formdata = new FormData();
-    formdata.append("user_id", useUserData()?.user_id || 0);
+    formdata.append("user_id", userData?.user_id || 0);
     formdata.append("odev_id", odev.odev?.id);
     formdata.append("variant_item_id", variantItemId);
 
@@ -151,7 +152,7 @@ function OdevDetail() {
     e.preventDefault();
     const formdata = new FormData();
 
-    formdata.append("user_id", useUserData()?.user_id);
+    formdata.append("user_id", userData?.user_id);
     formdata.append("koordinator_id", param.koordinator_id);
     formdata.append("title", createNote.title || selectedNote?.title);
     formdata.append("note", createNote.note || selectedNote?.note);
@@ -204,7 +205,7 @@ function OdevDetail() {
 
   const formdata = new FormData();
   formdata.append("odev_id", param.odev_id);
-  formdata.append("gonderen_id", useUserData()?.user_id);
+  formdata.append("gonderen_id", userData?.user_id);
   formdata.append("title", createMessage.title);
   formdata.append("message", createMessage.message);
 
@@ -234,7 +235,7 @@ function OdevDetail() {
     e.preventDefault();
     const formdata = new FormData();
     formdata.append("odev_id", param.odev_id);
-    formdata.append("gonderen_id", useUserData()?.user_id);
+    formdata.append("gonderen_id", userData?.user_id);
     //formdata.append("koordinator_id", useUserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
@@ -277,7 +278,7 @@ function OdevDetail() {
 
     const formdata = new FormData();
     formdata.append("odev_id", odev.odev?.id);
-    formdata.append("user_id", useUserData()?.user_id);
+    formdata.append("user_id", userData?.user_id);
     formdata.append("rating", createReview.rating);
     formdata.append("review", createReview.review);
 
@@ -298,13 +299,13 @@ function OdevDetail() {
 
     const formdata = new FormData();
     formdata.append("odev", odev.odev?.id);
-    formdata.append("user", useUserData()?.user_id);
+    formdata.append("user", userData?.user_id);
     formdata.append("rating", createReview.rating || studentReview?.rating);
     formdata.append("review", createReview.review || studentReview?.review);
 
     useAxios()
       .patch(
-        `stajer/review-detail/${useUserData()?.user_id}/${studentReview?.id}/`,
+        `stajer/review-detail/${userData?.user_id}/${studentReview?.id}/`,
         formdata
       )
       .then((res) => {
@@ -327,8 +328,10 @@ function OdevDetail() {
           <Header />
           <div className="row mt-0 mt-md-4">
             {/* Sidebar Here */}
-            <Sidebar />
-            <div className="col-lg-10 col-md-8 col-12">
+             <div className="col-lg-3 col-md-4 col-12">
+              <Sidebar />
+            </div>
+            <div className="col-lg-9 col-md-8 col-12">
               {/* <section className="bg-blue py-7">
                 <div className="container">
                   <ReactPlayer url='https://www.youtube.com/watch?v=LXb3EKWsInQ' width={"100%"} height={600} />

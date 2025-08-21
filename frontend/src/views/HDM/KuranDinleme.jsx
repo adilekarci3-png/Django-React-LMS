@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Modal from "react-modal";
 import Peer from "peerjs";
-import UserData from "../plugin/UserData";
+import UserData from "../plugin/useUserData";
 import useAxios from "../../utils/useAxios";
 import HDMBaseHeader from "../partials/HDMBaseHeader";
 
@@ -12,7 +12,7 @@ export default function KuranDinleme() {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const api = useAxios();
-
+const user = UserData();
   const [tool, setTool] = useState("pen");
   const [shapeType] = useState("circle");
   const [isDrawing, setIsDrawing] = useState(false);
@@ -50,7 +50,7 @@ export default function KuranDinleme() {
   }, []);
 
   useEffect(() => {
-    api.get(`peer-id/?user_id=${UserData()?.user_id}`).then((res) => {
+    api.get(`peer-id/?user_id=${user?.user_id}`).then((res) => {
       setRemoteId(res.data.peer_id);
     });
   }, []);
@@ -131,7 +131,7 @@ export default function KuranDinleme() {
             shape_type: updated.shape_type,
             coordinates: updated.coordinates,
             hata_turu: updated.hata_turu,
-            created_by: UserData()?.user_id,
+            created_by: user?.user_id,
           });
           updated.id = res.data.id;
           setAnnotations((prev) =>

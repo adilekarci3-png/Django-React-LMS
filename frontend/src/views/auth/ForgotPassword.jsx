@@ -13,12 +13,12 @@ function ForgotPassword() {
     setIsLoading(true);
     try {
       await apiInstance.get(`user/password-reset/${email}/`).then((res) => {
-        console.log(res.data);
+        
         setIsLoading(false);
         alert("Şifre Değiştirme Emaili Gönderildi");
       });
     } catch (error) {
-      console.log("error: ", error);
+     
       setIsLoading(false);
     }
   };

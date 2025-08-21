@@ -30,7 +30,7 @@ function KitapTahliliDetail() {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [createReview, setCreateReview] = useState({ rating: 1, review: "" });
   const [studentReview, setStudentReview] = useState([]);
-
+const userData = useUserData();
   const param = useParams();
   const lastElementRef = useRef(null);
   // Play Ders Silindi Modal
@@ -64,7 +64,7 @@ function KitapTahliliDetail() {
       debugger;
       //const { kitaptahlili_id } = param.kitaptahlili_id; // URL parametresinden al
       const response = await useAxios().get(
-        `eskepinstructor/kitaptahlili-detail/${param.kitaptahlili_id}/${useUserData()?.user_id}/`
+        `eskepinstructor/kitaptahlili-detail/${param.kitaptahlili_id}/${userData?.user_id}/`
       );
 
       const data = response.data;
@@ -98,7 +98,7 @@ function KitapTahliliDetail() {
     });
 
     const formdata = new FormData();
-    formdata.append("user_id", useUserData()?.user_id || 0);
+    formdata.append("user_id", userData?.user_id || 0);
     formdata.append("kitaptahlili_id", kitapTahlili.kitapTahlili?.id);
     formdata.append("variant_item_id", variantItemId);
 
@@ -125,7 +125,7 @@ function KitapTahliliDetail() {
     const formdata = new FormData();
     debugger;
     console.log(useUserData());
-    formdata.append("koordinator_id", useUserData()?.user_id);
+    formdata.append("koordinator_id", userData?.user_id);
     formdata.append("kitaptahlili_id", param.kitaptahlili_id);
     formdata.append("title", createNote.title);
     formdata.append("note", createNote.note);
@@ -133,7 +133,7 @@ function KitapTahliliDetail() {
     try {
       await useAxios()
         .post(
-          `eskepinstructor/kitaptahlili-note/${param.kitaptahlili_id}/${useUserData()?.user_id}/`,
+          `eskepinstructor/kitaptahlili-note/${param.kitaptahlili_id}/${userData?.user_id}/`,
           formdata
         )
         .then((res) => {
@@ -153,14 +153,14 @@ function KitapTahliliDetail() {
     e.preventDefault();
     const formdata = new FormData();
 
-    formdata.append("user_id", useUserData()?.user_id);
+    formdata.append("user_id", userData?.user_id);
     formdata.append("koordinator_id", param.koordinator_id);
     formdata.append("title", createNote.title || selectedNote?.title);
     formdata.append("note", createNote.note || selectedNote?.note);
 
     useAxios()
       .patch(
-        `eskepinstructor/kitaptahlili-note-detail/${param.kitaptahlili_id}/${useUserData()?.user_id}/${noteId}/`,
+        `eskepinstructor/kitaptahlili-note-detail/${param.kitaptahlili_id}/${userData?.user_id}/${noteId}/`,
         formdata
       )
       .then((res) => {
@@ -175,7 +175,7 @@ function KitapTahliliDetail() {
   const handleDeleteNote = (noteId) => {
     useAxios()
       .delete(
-        `eskepinstructor/kitaptahlili-note-detail/${param.kitapTahlili_id}/${useUserData()?.user_id}/${noteId}/`
+        `eskepinstructor/kitaptahlili-note-detail/${param.kitapTahlili_id}/${userData?.user_id}/${noteId}/`
       )
       .then((res) => {
         fetchKitapTahliliDetail();
@@ -198,7 +198,7 @@ function KitapTahliliDetail() {
     const formdata = new FormData();
 
     formdata.append("kitaptahlili_id", param.kitaptahlili_id);
-    formdata.append("gonderen_id", useUserData()?.user_id);
+    formdata.append("gonderen_id", userData?.user_id);
     //formdata.append("koordinator_id", useUserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
@@ -223,7 +223,7 @@ function KitapTahliliDetail() {
     e.preventDefault();
     const formdata = new FormData();
     formdata.append("kitaptahlili_id", param.kitaptahlili_id);
-    formdata.append("gonderen_id", useUserData()?.user_id);
+    formdata.append("gonderen_id", userData?.user_id);
     //formdata.append("koordinator_id", useUserData()?.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
@@ -266,7 +266,7 @@ function KitapTahliliDetail() {
 
     const formdata = new FormData();
     formdata.append("kitaptahlili_id", kitapTahlili.kitapTahlili?.id);
-    formdata.append("user_id", useUserData()?.user_id);
+    formdata.append("user_id", userData?.user_id);
     formdata.append("rating", createReview.rating);
     formdata.append("review", createReview.review);
 
@@ -287,13 +287,13 @@ function KitapTahliliDetail() {
 
     const formdata = new FormData();
     formdata.append("kitapTahlili", kitapTahlili.kitapTahlili?.id);
-    formdata.append("user", useUserData()?.user_id);
+    formdata.append("user", userData?.user_id);
     formdata.append("rating", createReview.rating || studentReview?.rating);
     formdata.append("review", createReview.review || studentReview?.review);
 
     useAxios()
       .patch(
-        `stajer/review-detail/${useUserData()?.user_id}/${studentReview?.id}/`,
+        `stajer/review-detail/${userData?.user_id}/${studentReview?.id}/`,
         formdata
       )
       .then((res) => {
@@ -316,8 +316,10 @@ function KitapTahliliDetail() {
           <Header />
           <div className="row mt-0 mt-md-4">
             {/* Sidebar Here */}
-            <Sidebar />
-            <div className="col-lg-10 col-md-8 col-12">
+            <div className="col-lg-3 col-md-4 col-12">
+              <Sidebar />
+            </div>
+            <div className="col-lg-9 col-md-8 col-12">
               {/* <section className="bg-blue py-7">
                 <div className="container">
                   <ReactPlayer url='https://www.youtube.com/watch?v=LXb3EKWsInQ' width={"100%"} height={600} />

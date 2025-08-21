@@ -2,24 +2,31 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Modal from "react-modal";
-
+import { FiFileText, FiExternalLink, FiDownload, FiX } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import "./css/ModalStyle.css"
 
 function EskepStajerOdevs() {
   const [odevs, setOdevs] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const user = useUserData();
+  const headingId = "assignment-modal-title";
+  const onClose = () => setModalIsOpen(false)
+  const safeUrl = (f) => (typeof f === "string" ? f : f?.url ?? "#");
+  const fileTitle = (f, i) => (f?.title ? f.title : `Bölüm ${i + 1}`);
+  const fileName = (f) => f?.filename || undefined;
 
   const fetchData = () => {
     setFetching(true);
     useAxios()
-      .get(`eskepstajer/odev-list/${UserData()?.user_id}/`)
+      .get(`eskepstajer/odev-list/${user?.user_id}/`)
       .then((res) => {
         setOdevs(res.data);
         console.log(res.data);
@@ -112,7 +119,7 @@ function EskepStajerOdevs() {
                             <td>{c.odev_status}</td>
                             <td>{c.koordinator?.full_name}</td>
                             <td>
-                              <Link to={`/odev/duzenle/${c.id}`} className="btn btn-warning btn-sm">Düzenle</Link>
+                              <Link to={`/eskep/edit-odev/${c.id}`} className="btn btn-warning btn-sm">Düzenle</Link>
                               <button
                                 className="btn btn-danger btn-sm ms-2"
                                 onClick={() => {
@@ -125,7 +132,7 @@ function EskepStajerOdevs() {
                                 <button
                                   className="btn btn-info btn-sm ms-2"
                                   onClick={() => {
-                                    const files = c.curriculum.flatMap(item => item.items.map(i => i.file));
+                                    const files = c.curriculum.flatMap(item => item?.variant_items.map(i => i));
                                     openModal(files);
                                   }}
                                 >Bölümleri Görüntüle</button>
@@ -145,64 +152,87 @@ function EskepStajerOdevs() {
       </section>
       <ESKEPBaseFooter />
 
-      <Modal 
-  isOpen={modalIsOpen} 
-  onRequestClose={() => setModalIsOpen(false)}
-  style={{
-    overlay: {
-      backgroundColor: "rgba(0, 0, 0, 0.5)", // Arka plana opaklık efekti
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    },
-    content: {
-      width: "400px",
-      maxHeight: "300px",
-      margin: "auto",
-      padding: "20px",
-      borderRadius: "12px",
-      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      textAlign: "center",
-      backgroundColor: "#fff"
-    }
-  }}
->
-  <h3 style={{ marginBottom: "10px" }}>Ödev Bölümleri</h3>
-  <ul style={{ listStyle: "none", padding: 0, maxHeight: "150px", overflowY: "auto" }}>
-    {selectedFiles.map((file, index) => (
-      
-      <li key={index} style={{ marginBottom: "5px" }}>
-        {file.title}
-        <a 
-          href={file} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          style={{ textDecoration: "none", color: "#007bff", fontWeight: "bold" }}
-        >
-          Bölüm {index + 1}
-        </a>
-      </li>
-    ))}
-  </ul>
-  <button 
-    onClick={() => setModalIsOpen(false)} 
-    style={{
-      marginTop: "15px",
-      padding: "8px 16px",
-      backgroundColor: "#007bff",
-      color: "#fff",
-      border: "none",
-      borderRadius: "8px",
-      cursor: "pointer"
-    }}
-  >
-    Kapat
-  </button>
-</Modal>
 
+<Modal
+      isOpen={modalIsOpen} 
+  onRequestClose={() => setModalIsOpen(false)}
+      overlayClassName="modalOverlay"
+      className="modalContent"
+      shouldCloseOnOverlayClick
+      aria={{
+        labelledby: headingId,
+      }}
+    >
+      {selectedFiles.map((file, index) => (
+        <>
+        <div className="modalHeader">
+        <h3 id={headingId} className="modalTitle">
+          {file.title}
+        </h3>
+        <button
+          className="iconBtn"
+          aria-label="Kapat"
+          onClick={() => setModalIsOpen(false)} 
+          title="Kapat"
+        >
+          <FiX />
+        </button>
+      </div>
+
+      <div className="modalBody">
+        {selectedFiles?.length ? (
+          <ul className="fileList" role="list">
+            {selectedFiles.map((file, idx) => (
+              <li key={idx} className="fileItem">
+                <div className="fileMain">
+                  <span className="fileIcon" aria-hidden>
+                    <FiFileText />
+                  </span>
+                  <div className="fileTexts">
+                    <div className="fileTitle">{fileTitle(file.variant, idx)}</div>                    
+                    {fileName(file.file) && (
+                      <div className="fileMeta">{fileName(file.file)}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="fileActions">
+                  <a
+                    className="btn ghost"
+                    href={safeUrl(file.file)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Yeni sekmede aç"
+                  >
+                    <FiExternalLink className="btnIcon" />
+                    Önizle
+                  </a>
+                  <a
+                    className="btn primary"
+                    href={safeUrl(file.file)}
+                    download={fileName(file.file)}
+                    title="İndir"
+                  >
+                    <FiDownload className="btnIcon" />
+                    İndir
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="emptyState">
+            Henüz eklenmiş bölüm yok.
+          </div>
+        )}
+      </div>
+      </>
+      ))}
+      <div className="modalFooter">
+        <button className="btn outline" onClick={onClose}>
+          Kapat
+        </button>
+      </div>
+    </Modal>  
     </>
   );
 }

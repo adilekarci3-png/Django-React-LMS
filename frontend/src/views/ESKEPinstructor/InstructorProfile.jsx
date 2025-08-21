@@ -56,7 +56,7 @@ function InstructorProfile() {
                 <TextField
                   label="Ad Soyad"
                   name="full_name"
-                  value={profile.full_name}
+                  value={profile?.full_name}
                   onChange={handleChange}
                   fullWidth
                   size="small"

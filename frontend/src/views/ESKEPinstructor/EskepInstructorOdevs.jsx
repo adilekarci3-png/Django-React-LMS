@@ -25,6 +25,7 @@ function EskepInstructorOdevs() {
       .get(`eskepinstructor/odev-list/${userId}/`)
       .then((res) => {
         setOdevs(res.data);
+        console.log(res.data);
         setFetching(false);
       })
       .catch(() => setFetching(false));
@@ -105,7 +106,7 @@ function EskepInstructorOdevs() {
                               <td>{c.lectures?.length || 0}</td>
                               <td>{c.level}</td>
                               <td>{c.koordinator?.full_name || "Bilinmiyor"}</td>
-                              <td>{c.hazirlayan?.full_name || "Bilinmiyor"}</td>
+                              <td>{c.inserteduser?.full_name || "Bilinmiyor"}</td>
                               <td>
                                 <Link
                                   to={`/eskepinstructor/odevs/${c.id}/${c.koordinator?.id}/`}

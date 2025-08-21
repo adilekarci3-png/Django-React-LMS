@@ -2,26 +2,34 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Modal from "react-modal";
-
+import { FiFileText, FiExternalLink, FiDownload, FiX } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import "./css/ModalStyle.css"
 
 function EskepStajerKitapTahlilis() {
-  const [kitaplar, setKitaplar] = useState([]);
+  const [kitaptahlilis, setKitapTahlilis] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const user = useUserData();
+  const headingId = "assignment-modal-title";
+  const onClose = () => setModalIsOpen(false)
+  const safeUrl = (f) => (typeof f === "string" ? f : f?.url ?? "#");
+  const fileTitle = (f, i) => (f?.title ? f.title : `Bölüm ${i + 1}`);
+  const fileName = (f) => f?.filename || undefined;
 
   const fetchData = () => {
     setFetching(true);
     useAxios()
-      .get(`eskepstajer/kitaptahlili-list/${UserData()?.user_id}/`)
+      .get(`eskepstajer/kitaptahlili-list/${user?.user_id}/`)
       .then((res) => {
-        setKitaplar(res.data);
+        setKitapTahlilis(res.data);
+        console.log(res.data);
         setFetching(false);
       });
   };
@@ -35,15 +43,16 @@ function EskepStajerKitapTahlilis() {
     if (query === "") {
       fetchData();
     } else {
-      const filtered = kitaplar.filter((k) =>
-        k.title.toLowerCase().includes(query)
+      const filtered = kitaptahlilis.filter((c) =>
+        c.title.toLowerCase().includes(query)
       );
-      setKitaplar(filtered);
+      setKitapTahlilis(filtered);
     }
   };
 
   const openModal = (files) => {
     setSelectedFiles(files);
+    console.log(files);
     setModalIsOpen(true);
   };
 
@@ -57,7 +66,7 @@ function EskepStajerKitapTahlilis() {
             <Sidebar />
             <div className="col-lg-10 col-md-8 col-12">
               <h4 className="mb-0 mb-4">
-                <i className="fas fa-book-reader"></i> Kitap Tahlillerim
+                <i className="fas fa-chalkboard-user"></i> Kitap Tahlillerim
               </h4>
 
               {fetching && <p className="mt-3 p-3">Yükleniyor...</p>}
@@ -66,13 +75,13 @@ function EskepStajerKitapTahlilis() {
                 <div className="card mb-4">
                   <div className="card-header">
                     <h3 className="mb-0">Kitap Tahlilleri</h3>
-                    <span>Panelden kitap tahlillerinizi gözden geçirebilir, düzenleyebilir ya da kısımlarını inceleyebilirsiniz.</span>
+                    <span>Panel sayfanızdan ödevlerinizi incelemeye hemen başlayın.</span>
                   </div>
                   <div className="card-body">
                     <input
                       type="search"
                       className="form-control"
-                      placeholder="Kitaplarda Ara"
+                      placeholder="Kitap Tahlillerinde Ara"
                       onChange={handleSearch}
                     />
                   </div>
@@ -80,62 +89,58 @@ function EskepStajerKitapTahlilis() {
                     <table className="table mb-0 text-nowrap table-hover table-centered">
                       <thead className="table-light">
                         <tr>
-                          <th>Kitap</th>
+                          <th>Dersler</th>
                           <th>Kayıt Tarihi</th>
-                          <th>Kısımlar</th>
-                          <th>Durum</th>
+                          <th>Bölümler</th>
+                          <th>Kitap Tahlil Durumu</th>
                           <th>Hazırlayan</th>
                           <th>İşlemler</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {kitaplar?.map((k) => (
-                          <tr key={k.id}>
+                        {kitaptahlilis?.map((c) => (
+                          <tr key={c.id}>
                             <td>
                               <div className="d-flex align-items-center">
                                 <img
-                                  src={k.image}
-                                  alt="kitap"
+                                  src={c.image}
+                                  alt="kitaptahlili"
                                   className="rounded"
                                   style={{ width: "100px", height: "70px", borderRadius: "50%", objectFit: "cover" }}
                                 />
                                 <div className="ms-3">
-                                  <h5>{k.title}</h5>
-                                  <p>{k.language} - {k.level}</p>
+                                  <h5>{c.title}</h5>
+                                  <p>{c.language} - {c.level}</p>
                                 </div>
                               </div>
                             </td>
-                            <td>{moment(k.date).format("D MMM, YYYY")}</td>
-                            <td>{k.curriculum?.length || "-"}</td>
-                            <td>{k.kitaptahlili_status}</td>
-                            <td>{k.koordinator?.full_name || "-"}</td>
+                            <td>{moment(c.date).format("D MMM, YYYY")}</td>
+                            <td>{c.curriculum?.length || "-"}</td>
+                            <td>{c.kitaptahlili_status}</td>
+                            <td>{c.koordinator?.full_name}</td>
                             <td>
-                              <Link to={`/kitaptahlili/duzenle/${k.id}`} className="btn btn-warning btn-sm">Düzenle</Link>
+                              <Link to={`/eskep/edit-kitaptahlili/${c.id}`} className="btn btn-warning btn-sm">Düzenle</Link>
                               <button
                                 className="btn btn-danger btn-sm ms-2"
                                 onClick={() => {
-                                  if (window.confirm("Bu kitap tahlilini silmek istediğinize emin misiniz?")) {
-                                    useAxios().delete(`/eskepstajer/kitaptahlili/${k.id}/`).then(() => fetchData());
+                                  if (window.confirm("Bu ödevi silmek istediğinize emin misiniz?")) {
+                                    useAxios().delete(`/eskepstajer/kitaptahlili/${c.id}/`).then(() => fetchData());
                                   }
                                 }}
                               >Sil</button>
-                              {k.curriculum?.length > 0 && (
+                              {c.curriculum?.length > 0 && (
                                 <button
                                   className="btn btn-info btn-sm ms-2"
                                   onClick={() => {
-                                    const files = k.curriculum.flatMap(item => item.items.map(i => i.file));
+                                    const files = c.curriculum.flatMap(item => item?.variant_items.map(i => i));
                                     openModal(files);
                                   }}
-                                >Kısımları Gör</button>
+                                >Bölümleri Görüntüle</button>
                               )}
                             </td>
                           </tr>
                         ))}
-                        {kitaplar?.length < 1 && (
-                          <tr>
-                            <td colSpan="6" className="text-center">Kitap tahlili bulunamadı</td>
-                          </tr>
-                        )}
+                        {kitaptahlilis?.length < 1 && <tr><td colSpan="5" className="text-center">Kitap Tahlili Bulunamadı</td></tr>}
                       </tbody>
                     </table>
                   </div>
@@ -147,61 +152,87 @@ function EskepStajerKitapTahlilis() {
       </section>
       <ESKEPBaseFooter />
 
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          },
-          content: {
-            width: "400px",
-            maxHeight: "300px",
-            margin: "auto",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            backgroundColor: "#fff"
-          }
-        }}
-      >
-        <h3 style={{ marginBottom: "10px" }}>İnceleme Kısımları</h3>
-        <ul style={{ listStyle: "none", padding: 0, maxHeight: "150px", overflowY: "auto" }}>
-          {selectedFiles.map((file, index) => (
-            <li key={index} style={{ marginBottom: "5px" }}>
-              <a 
-                href={file}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: "none", color: "#007bff", fontWeight: "bold" }}
-              >
-                Kısım {index + 1}
-              </a>
-            </li>
-          ))}
-        </ul>
+
+<Modal
+      isOpen={modalIsOpen} 
+  onRequestClose={() => setModalIsOpen(false)}
+      overlayClassName="modalOverlay"
+      className="modalContent"
+      shouldCloseOnOverlayClick
+      aria={{
+        labelledby: headingId,
+      }}
+    >
+      {selectedFiles.map((file, index) => (
+        <>
+        <div className="modalHeader">
+        <h3 id={headingId} className="modalTitle">
+          {file.title}
+        </h3>
         <button
-          onClick={() => setModalIsOpen(false)}
-          style={{
-            marginTop: "15px",
-            padding: "8px 16px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer"
-          }}
+          className="iconBtn"
+          aria-label="Kapat"
+          onClick={() => setModalIsOpen(false)} 
+          title="Kapat"
         >
+          <FiX />
+        </button>
+      </div>
+
+      <div className="modalBody">
+        {selectedFiles?.length ? (
+          <ul className="fileList" role="list">
+            {selectedFiles.map((file, idx) => (
+              <li key={idx} className="fileItem">
+                <div className="fileMain">
+                  <span className="fileIcon" aria-hidden>
+                    <FiFileText />
+                  </span>
+                  <div className="fileTexts">
+                    <div className="fileTitle">{fileTitle(file.variant, idx)}</div>                    
+                    {fileName(file.file) && (
+                      <div className="fileMeta">{fileName(file.file)}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="fileActions">
+                  <a
+                    className="btn ghost"
+                    href={safeUrl(file.file)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Yeni sekmede aç"
+                  >
+                    <FiExternalLink className="btnIcon" />
+                    Önizle
+                  </a>
+                  <a
+                    className="btn primary"
+                    href={safeUrl(file.file)}
+                    download={fileName(file.file)}
+                    title="İndir"
+                  >
+                    <FiDownload className="btnIcon" />
+                    İndir
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="emptyState">
+            Henüz eklenmiş bölüm yok.
+          </div>
+        )}
+      </div>
+      </>
+      ))}
+      <div className="modalFooter">
+        <button className="btn outline" onClick={onClose}>
           Kapat
         </button>
-      </Modal>
+      </div>
+    </Modal>  
     </>
   );
 }

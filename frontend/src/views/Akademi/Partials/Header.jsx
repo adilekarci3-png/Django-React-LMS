@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import "react-loading-skeleton/dist/skeleton.css";
 
 function Header() {
-  const [profile] = useContext(ProfileContext); // setProfile kullanılmıyor, kaldırdım
+  const [profile] = useContext(ProfileContext); // setProfilimageprofilee kullanılmıyor, kaldırdım
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = (e) => {
@@ -62,7 +62,7 @@ function Header() {
                   <img
                     src={imageSrc}
                     className="avatar-xl rounded-circle border border-4 border-white"
-                    alt={profile.full_name || "Kullanıcı avatarı"}
+                    alt={profile?.full_name || "Kullanıcı avatarı"}
                     style={{
                       width: "70px",
                       height: "70px",
@@ -78,8 +78,8 @@ function Header() {
                 )}
               </div>
               <div className="lh-1">
-                <h2 className="mb-0">{profile.full_name}</h2>
-                <p className="mb-0 text-muted">{profile.about || "Hakkında bilgi girilmemiş"}</p>
+                <h2 className="mb-0">{profile?.full_name}</h2>
+                <p className="mb-0 text-muted">{profile?.about || "Hakkında bilgi girilmemiş"}</p>
               </div>
             </div>
             <div>

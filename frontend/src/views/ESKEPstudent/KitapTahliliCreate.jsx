@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import Swal from "sweetalert2";
 
 import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-import UserData from "../plugin/UserData";
+
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
+import MarkdownIt from "markdown-it";
+const mdParser = new MarkdownIt();
 
 function KitapTahliliCreate() {
   const [kitaptahlili, setKitapTahlili] = useState({
@@ -19,13 +21,13 @@ function KitapTahliliCreate() {
     description: "",
     level: "",
     language: "",
-    hazirlayan:"",
+    inserteduser:"",
   });
 
   const [category, setCategory] = useState([]);
   const [ckEdtitorData, setCKEditorData] = useState("");
   const [variants, setVariants] = useState([{ title: "", pdf: "" }]);
-
+const user = useUserData();
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -119,7 +121,7 @@ function KitapTahliliCreate() {
 
     const formdata = new FormData();
     formdata.append("title", kitaptahlili.title);
-    formdata.append("hazirlayan", parseInt(UserData()?.user_id));
+    formdata.append("inserteduser", parseInt(user?.user_id));
     formdata.append("kitaptahlili_status", kitaptahlili.kitaptahlili_status);
     formdata.append("image", kitaptahlili.image.file);
     formdata.append("description", ckEdtitorData);
@@ -171,10 +173,15 @@ function KitapTahliliCreate() {
                 </select>
               </div>
               <div className="mb-3">
-                <label className="form-label">Kitap Tahlili Açıklaması</label>
-                <CKEditor editor={ClassicEditor} data={ckEdtitorData} onChange={handleCkEditorChange} />
-                {errors.description && <span className="text-danger">{errors.description}</span>}
-              </div>
+  <label className="form-label">Kitap Tahlili Açıklaması</label>
+  <MdEditor
+    style={{ height: "300px" }}
+    renderHTML={(text) => mdParser.render(text)}
+    onChange={({ text }) => setCKEditorData(text)}
+    value={ckEdtitorData}
+  />
+  {errors.description && <span className="text-danger">{errors.description}</span>}
+</div>
               <div className="mb-3">
                 <label className="form-label">Kapak Resmi</label>
                 <input type="file" className="form-control" onChange={handleKitapTahliliImageChange} />

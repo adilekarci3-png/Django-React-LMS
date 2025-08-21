@@ -23,7 +23,7 @@ function Checkout() {
         setOrder(res.data);
       });
     } catch (error) {
-      console.log(error);
+      
     }
   };
 
@@ -36,7 +36,7 @@ function Checkout() {
 
     try {
       await apiInstance.post(`order/coupon/`, formdata).then((res) => {
-        console.log(res.data);
+        
         fetchOrder();
         Toast().fire({
           icon: res.data.icon,

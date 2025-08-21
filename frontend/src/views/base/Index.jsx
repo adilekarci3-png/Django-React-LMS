@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useContext, useMemo } from "react";
 import { Link } from "react-router-dom";
-import AkademiBaseHeader from "../partials/AkademiBaseHeader";
-import AkademiBaseFooter from "../partials/AkademiBaseFooter";
+
 import GetCurrentAddress from "../plugin/UserCountry";
 import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
-import { CartContext } from "../plugin/Context";
 import apiInstance from "../../utils/axios";
 import "./css/Index.css";
 import { useAuthStore } from "../../store/auth";
+import HomeHeader from "../partials/HomeHeader";
+import HomeFooter from "../partials/HomeFooter";
 
 function Index() {
   const [projelist, setProjeList] = useState([]);
@@ -85,7 +85,7 @@ function Index() {
 
   return (
     <>
-      <AkademiBaseHeader />
+      <HomeHeader />
       <div className="index-container">
         <div className="index-heading">
           <h2 className="main-title">İZEM – Hafızların Dijital Kapısı</h2>
@@ -120,7 +120,7 @@ function Index() {
           })}
         </div>
       </div>
-      <AkademiBaseFooter />
+      <HomeFooter />
     </>
   );
 }

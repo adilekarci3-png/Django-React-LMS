@@ -33,8 +33,7 @@ function Coupon() {
   const fetchCoupons = () => {
     useAxios()
       .get(`teacher/coupon-list/${useUserData()?.teacher_id}/`)
-      .then((res) => {
-        console.log(res.data);
+      .then((res) => {        
         setCoupons(res.data);
       });
   };

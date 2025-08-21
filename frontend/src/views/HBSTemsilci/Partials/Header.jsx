@@ -12,7 +12,7 @@ function Header() {
             <div className="d-flex align-items-center">
               <div className="me-2 position-relative d-flex justify-content-end align-items-end mt-n5">
                 <img
-                  src={profile.image}
+                  src={profile?.image}
                   className="avatar-xl rounded-circle border border-4 border-white"
                   alt="avatar"
                   style={{
@@ -24,8 +24,8 @@ function Header() {
                 />
               </div>
               <div className="lh-1">
-                <h2 className="mb-0"> {profile.full_name}</h2>
-                <p className="mb-0 d-block">{profile.about}</p>
+                <h2 className="mb-0"> {profile?.full_name}</h2>
+                <p className="mb-0 d-block">{profile?.about}</p>
               </div>
             </div>
             <div>

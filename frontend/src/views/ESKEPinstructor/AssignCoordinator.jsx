@@ -73,9 +73,6 @@ function AssignCoordinator() {
   const filteredCoordinators = coordinators.filter((c) =>
     c.roles?.some((r) => r.name === matchedRoleName)
   );
-
-  console.log(filteredCoordinators);
-
   const fetchData = async () => {
     try {
       const [coordinatorsRes, studentsRes, internsRes] = await Promise.all([
@@ -105,7 +102,7 @@ function AssignCoordinator() {
   }, []);
 
   const onSubmit = async (data) => {
-    console.log("Form verisi:", data); 
+    
     debugger;
     const endpoint = data.role === "Ogrenci" ? "ogrenci/" : "stajer/";
     try {

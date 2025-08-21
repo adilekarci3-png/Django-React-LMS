@@ -2,7 +2,7 @@
 
 const UseOrganizationChart = (members) => {
 
-console.log(members);
+
 ej.base.enableRipple(true);
 /**
  * OverView
@@ -72,11 +72,7 @@ var diagram = new ej.diagrams.Diagram({
         id: 'Id', parentId: 'ReportingPerson', dataManager: new ej.data.DataManager(members)
     },
     //Sets the default values of connectors.
-    getConnectorDefaults: function (connector, diagram) {
-               
-        console.log(members);
-        // console.log(overviewData);
-        
+    getConnectorDefaults: function (connector, diagram) {   
         connector.targetDecorator.shape = 'None';
         connector.type = 'Orthogonal';
         connector.style.strokeColor = 'gray';

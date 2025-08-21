@@ -34,7 +34,7 @@ export const setUser = async () => {
   const access = localStorage.getItem("access_token");
   const refresh = localStorage.getItem("refresh_token");
   const setRehydrated = useAuthStore.getState().setRehydrated;
-console.log("TOKENS", { access, refresh });
+
   if (!access || !refresh) {
     setRehydrated();
     return;
@@ -59,11 +59,9 @@ export const setAuthUser = (access, refresh) => {
   localStorage.setItem("refresh_token", refresh);
 
   try {
-    const decoded = jwt_decode(access);
-    console.log(decoded);
+    const decoded = jwt_decode(access);   
     if (decoded) {
-      useAuthStore.getState().setUser(decoded, access);
-      console.log("SET USER:", useAuthStore.getState().allUserData);
+      useAuthStore.getState().setUser(decoded, access);      
     }
   } catch (err) {
     console.error("JWT çözümleme hatası:", err);

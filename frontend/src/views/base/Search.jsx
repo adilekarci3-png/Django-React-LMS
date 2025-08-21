@@ -32,7 +32,7 @@ function Search() {
           setIsLoading(false);
         });
     } catch (error) {
-      console.log(error);
+      
     }
   };
 
@@ -66,13 +66,12 @@ function Search() {
           // });
         });
     } catch (error) {
-      console.log(error);
+      
     }
   };
 
   // Search Feature
-  const [searchQuery, setSearchQuery] = useState("");
-  console.log(searchQuery);
+  const [searchQuery, setSearchQuery] = useState(""); 
 
   const handleSeach = (e) => {
     const query = e.target.value.toLowerCase();

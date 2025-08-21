@@ -37,7 +37,7 @@ function Header() {
                 />
               </div>
               <div>
-                <h2 className="mb-1">{profile.full_name}</h2>
+                <h2 className="mb-1">{profile?.full_name}</h2>
                 <p className="mb-0 text-muted">
                   {profile.about || "Hakkında bilgi eklenmemiş"}
                 </p>

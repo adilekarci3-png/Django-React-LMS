@@ -174,7 +174,7 @@ function EskepInstructorCourseCreate() {
                           <label>Seviye</label>
                           <Field as="select" name="level" className="form-select">
                             <option value="">Seçiniz</option>
-                            <option value="Başlangic">Başlangıç</option>
+                            <option value="Baslangic">Başlangıç</option>
                             <option value="Orta">Orta</option>
                             <option value="Ileri Seviye">İleri Seviye</option>
                           </Field>

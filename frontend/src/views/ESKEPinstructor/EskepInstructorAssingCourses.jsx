@@ -389,8 +389,8 @@ function EskepInstructorAssingCourses() {
                     }}
                   />
                   <div>
-                    <strong>{profile.full_name || "Misafir Kullanıcı"}</strong>
-                    <p className="mb-0 text-muted small">{profile.email}</p>
+                    <strong>{profile?.full_name || "Misafir Kullanıcı"}</strong>
+                    <p className="mb-0 text-muted small">{profile?.email}</p>
                   </div>
                 </div>
               </div>

@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import Swal from "sweetalert2";
 
 import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-import UserData from "../plugin/UserData";
+
+
+// ✅ Markdown Editor
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
+import MarkdownIt from "markdown-it";
+const mdParser = new MarkdownIt();
 
 function OdevCreate() {
   const [odev, setOdev] = useState({
@@ -19,21 +23,19 @@ function OdevCreate() {
     description: "",
     level: "",
     language: "",
-    hazirlayan:"",
+    inserteduser: "",
+    odev_status: "",
   });
 
   const [category, setCategory] = useState([]);
-  const [ckEdtitorData, setCKEditorData] = useState("");
   const [variants, setVariants] = useState([{ title: "", pdf: "" }]);
-
   const [errors, setErrors] = useState({});
+  const user = useUserData();
 
   useEffect(() => {
-    useAxios()
-      .get(`course/category/`)
-      .then((res) => {
-        setCategory(res.data);
-      });
+    useAxios().get(`course/category/`).then((res) => {
+      setCategory(res.data);
+    });
   }, []);
 
   const handleOdevInputChange = (event) => {
@@ -43,23 +45,25 @@ function OdevCreate() {
     });
   };
 
-  const handleCkEditorChange = (event, editor) => {
-    const data = editor.getData();
-    setCKEditorData(data);
+  const handleEditorChange = ({ text }) => {
+    setOdev({
+      ...odev,
+      description: text,
+    });
   };
 
   const handleOdevImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
       if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-        setErrors({ ...errors, image: "Yalnızca pdf dosyaları kabul edilir." });
+        setErrors({ ...errors, image: "Yalnızca resim dosyaları kabul edilir." });
       } else {
         const reader = new FileReader();
         reader.onloadend = () => {
           setOdev({
             ...odev,
             image: {
-              file: event.target.files[0],
+              file: file,
               preview: reader.result,
             },
           });
@@ -104,8 +108,8 @@ function OdevCreate() {
     const newErrors = {};
 
     if (!odev.title) newErrors.title = "Ödev başlığı zorunludur.";
-    if (!ckEdtitorData) newErrors.description = "Ödev açıklaması zorunludur.";
-    if (!odev.image.file) newErrors.image = "Kapak resmi yükleyiniz.";
+    if (!odev.description) newErrors.description = "Ödev açıklaması zorunludur.";
+    if (!odev.image?.file) newErrors.image = "Kapak resmi yükleyiniz.";
     if (!odev.category) newErrors.category = "Kategori seçiniz.";
 
     variants.forEach((variant, index) => {
@@ -120,20 +124,19 @@ function OdevCreate() {
   };
 
   const handleSubmit = async (e) => {
-    debugger;
     e.preventDefault();
     if (!validateForm()) return;
 
     const formdata = new FormData();
-    debugger;
     formdata.append("title", odev.title);
-    formdata.append("hazirlayan", parseInt(UserData()?.user_id));
+    formdata.append("inserteduser", parseInt(user?.user_id));
     formdata.append("odev_status", odev.odev_status);
     formdata.append("image", odev.image.file);
-    formdata.append("description", ckEdtitorData);
+    formdata.append("description", odev.description);
     formdata.append("category", odev.category);
     formdata.append("level", odev.level);
-    formdata.append("language", odev.language);   
+    formdata.append("language", odev.language);
+
     variants.forEach((variant, index) => {
       formdata.append(`variants[${index}][title]`, variant.title);
       formdata.append(`variants[${index}][pdf]`, variant.pdf);
@@ -163,10 +166,9 @@ function OdevCreate() {
                   name="title"
                   onChange={handleOdevInputChange}
                 />
-                {errors.title && (
-                  <span className="text-danger">{errors.title}</span>
-                )}
+                {errors.title && <span className="text-danger">{errors.title}</span>}
               </div>
+
               <div className="mb-3">
                 <label className="form-label">Ödev Durumu</label>
                 <select
@@ -179,31 +181,29 @@ function OdevCreate() {
                   <option value="Pasif">Pasif</option>
                   <option value="Reddedilmiş">Reddedilmiş</option>
                   <option value="Taslak">Taslak</option>
-                  <option value="Teslim Edildi">Teslim Edildi</option>                 
+                  <option value="Teslim Edildi">Teslim Edildi</option>
                 </select>
               </div>
+
               <div className="mb-3">
                 <label className="form-label">Ödev Açıklaması</label>
-                <CKEditor
-                  editor={ClassicEditor}
-                  data={ckEdtitorData}
-                  onChange={handleCkEditorChange}
+                <MdEditor
+                  value={odev.description}
+                  style={{ height: "300px" }}
+                  renderHTML={(text) => mdParser.render(text)}
+                  onChange={handleEditorChange}
                 />
                 {errors.description && (
                   <span className="text-danger">{errors.description}</span>
                 )}
               </div>
+
               <div className="mb-3">
                 <label className="form-label">Kapak Resmi</label>
-                <input
-                  type="file"
-                  className="form-control"
-                  onChange={handleOdevImageChange}
-                />
-                {errors.image && (
-                  <span className="text-danger">{errors.image}</span>
-                )}
+                <input type="file" className="form-control" onChange={handleOdevImageChange} />
+                {errors.image && <span className="text-danger">{errors.image}</span>}
               </div>
+
               <div className="mb-3">
                 <label className="form-label">Kategori</label>
                 <select
@@ -218,25 +218,19 @@ function OdevCreate() {
                     </option>
                   ))}
                 </select>
-                {errors.category && (
-                  <span className="text-danger">{errors.category}</span>
-                )}
+                {errors.category && <span className="text-danger">{errors.category}</span>}
               </div>
+
               <div className="mb-3">
                 <h4>Bölümler</h4>
                 {variants.map((variant, index) => (
-                  <div
-                    key={index}
-                    className="border p-2 rounded-3 mb-3 bg-light"
-                  >
+                  <div key={index} className="border p-2 rounded-3 mb-3 bg-light">
                     <input
                       type="text"
                       placeholder="Bölüm Adı"
                       className="form-control mb-2"
                       value={variant.title}
-                      onChange={(e) =>
-                        handleVariantChange(index, e.target.value)
-                      }
+                      onChange={(e) => handleVariantChange(index, e.target.value)}
                     />
                     {errors[`variant_title_${index}`] && (
                       <span className="text-danger">
@@ -248,9 +242,7 @@ function OdevCreate() {
                       type="file"
                       className="form-control"
                       accept="application/pdf"
-                      onChange={(e) =>
-                        handlePDFChange(index, e.target.files[0])
-                      }
+                      onChange={(e) => handlePDFChange(index, e.target.files[0])}
                     />
                     {errors[`variant_pdf_${index}`] && (
                       <span className="text-danger">
@@ -267,14 +259,11 @@ function OdevCreate() {
                     </button>
                   </div>
                 ))}
-                <button
-                  className="btn btn-secondary w-100"
-                  type="button"
-                  onClick={addVariant}
-                >
+                <button className="btn btn-secondary w-100" type="button" onClick={addVariant}>
                   + Yeni Bölüm
                 </button>
               </div>
+
               <button className="btn btn-success w-100" type="submit">
                 Ödev Oluştur
               </button>

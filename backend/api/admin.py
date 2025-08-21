@@ -45,8 +45,10 @@ admin.site.register(models.TeacherRole)
 admin.site.register(models.StajerRole)
 admin.site.register(models.OgrenciRole)
 admin.site.register(models.HafizRole)
-
-
+admin.site.register(models.Branch)
+admin.site.register(models.Educator)
+admin.site.register(models.EducationLevel)
+admin.site.register(models.EducatorVideoLink)
 
 class StajerForm(forms.ModelForm):
     class Meta:
@@ -56,7 +58,7 @@ class StajerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(StajerForm, self).__init__(*args, **kwargs)
         # Sadece "Danışman" rolüne sahip olanları getir
-        self.fields['instructor'].queryset = models.Koordinator.objects.filter(role='Stajer')
+        self.fields['instructor'].queryset = models.Koordinator.objects.filter(roles__name='ESKEPStajerKoordinator')
 
 class OgrenciForm(forms.ModelForm):
     class Meta:
@@ -66,7 +68,7 @@ class OgrenciForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(OgrenciForm, self).__init__(*args, **kwargs)
         # Sadece "Danışman" rolüne sahip olanları getir
-        self.fields['instructor'].queryset = models.Koordinator.objects.filter(role='Ogrenci')
+        self.fields['instructor'].queryset = models.Koordinator.objects.filter(roles__name='ESKEPOgrenciKoordinator')
 
 class CountryAdmin(admin.ModelAdmin):        
     list_display = ('name','active')

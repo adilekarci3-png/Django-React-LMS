@@ -26,6 +26,7 @@ function EskepInstructorKitapTahlils() {
     api
       .get(`eskepinstructor/kitaptahlili-list/${userId}/`)
       .then((res) => {
+        console.log(res.data);
         setKitapTahlils(res.data);
         setFiltered(res.data);
         setFetching(false);
@@ -148,7 +149,7 @@ function EskepInstructorKitapTahlils() {
                               <td>{c.lectures?.length || 0}</td>
                               <td>{c.level}</td>
                               <td>{c.koordinator?.full_name || "Bilinmiyor"}</td>
-                              <td>{c.hazirlayan?.full_name || "Bilinmiyor"}</td>
+                              <td>{c.inserteduser?.full_name || "Bilinmiyor"}</td>
                               <td>
                                 {c.koordinator?.id ? (
                                   <Link

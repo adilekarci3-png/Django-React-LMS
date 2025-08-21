@@ -2,6 +2,7 @@ from datetime import datetime
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
+from decimal import Decimal
 
 from userauths.models import User, Profile
 from shortuuid.django_fields import ShortUUIDField
@@ -39,12 +40,10 @@ OS_CHOICES =[
     ('windows','Windows')        
 ]
 LEVEL = (
-    ("Başlangic", "Başlangıç"),
+    ("Baslangic", "Başlangıç"),
     ("Orta", "Orta"),
     ("Ileri Seviye", "İleri Seviye"),
 )
-
-
 TEACHER_STATUS = (
     ("Taslak", "Taslak"),
     ("Pasif", "Pasif"),
@@ -104,6 +103,32 @@ NOTI_TYPE = (
     ("Course Enrollment Completed", "Course Enrollment Completed"),
 )
 
+class Branch(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Educator(models.Model):
+    GENDER_CHOICES = (
+        ("Erkek", "Erkek"),
+        ("Kadın", "Kadın"),
+    )
+
+    full_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
+    image = models.FileField(upload_to="educator-Photo", blank=True, null=True, default="default.jpg")
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
+    city = models.ForeignKey("City", on_delete=models.SET_NULL, null=True, blank=True)
+    district = models.ForeignKey("District", on_delete=models.SET_NULL, null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    education_level = models.ForeignKey("EducationLevel", on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.TextField(blank=True)
+    active = models.BooleanField(default=True)
+    def __str__(self):
+        return self.full_name
+   
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.FileField(upload_to="course-file", blank=True, null=True, default="default.jpg")
@@ -115,6 +140,9 @@ class Teacher(models.Model):
     linkedin = models.URLField(null=True, blank=True)
     about = models.TextField(null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    education_level = models.CharField(max_length=100, blank=True, null=True)
+    description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
     
     def __str__(self):
@@ -466,7 +494,7 @@ class VariantOdevItem(models.Model):
     preview = models.BooleanField(default=False)
     variant_item_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.variant.title} - {self.title}"
     
@@ -492,19 +520,16 @@ class VariantOdevItem(models.Model):
 class DersSonuRaporu(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL,null=True, blank=True)
-    hazirlayan = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
+    inserteduser = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
     file = models.FileField(upload_to="course-file", blank=True, null=True)
     image = models.FileField(upload_to="course-file", blank=True, null=True)
     title = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-    # price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    description = models.TextField(null=True, blank=True)    
     language = models.CharField(choices=LANGUAGE, default="Turkce", max_length=100)
     level = models.CharField(choices=LEVEL, default="Baslangic", max_length=100)
     derssonuraporu_status = models.CharField(choices=STATUS, default="Taslak", max_length=100)
     koordinator_derssonuraporu_status = models.CharField(choices=KOORDINATOR_STATUS, max_length=100,blank=True, null=True)
-    # featured = models.BooleanField(default=False)
-    # course_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
-    # slug = models.SlugField(unique=True, null=True, blank=True)
+    active = models.BooleanField(default=False) 
     date = models.DateTimeField(default=timezone.now)
 
 
@@ -543,7 +568,7 @@ DersSonuRaporu._meta.get_field('category').verbose_name = "Kategori"
 DersSonuRaporu._meta.get_field('koordinator').verbose_name = "Ders Sonu Raporu Koordinatörü"
 DersSonuRaporu._meta.get_field('image').verbose_name = "Ders Sonu Raporu Resmi"
 DersSonuRaporu._meta.get_field('file').verbose_name = "Ders Sonu Raporu Dosyası"
-DersSonuRaporu._meta.get_field('hazirlayan').verbose_name = "Ders Sonunu Hazırlayan"
+DersSonuRaporu._meta.get_field('inserteduser').verbose_name = "Ders Sonunu Hazırlayan"
 DersSonuRaporu._meta.get_field('title').verbose_name = "Ders Sonu Raporu Başlığı" 
 DersSonuRaporu._meta.get_field('language').verbose_name = "Ders Sonu Raporu Dili"
 DersSonuRaporu._meta.get_field('description').verbose_name = "Ders Sonu Raporu Açıklaması"
@@ -559,7 +584,7 @@ class VariantDersSonuRaporu(models.Model):
     title = models.CharField(max_length=1000)
     variant_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return self.title
     
@@ -587,7 +612,7 @@ class VariantDersSonuRaporuItem(models.Model):
     preview = models.BooleanField(default=False)
     variant_item_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.variant.title} - {self.title}"
     
@@ -612,21 +637,18 @@ class VariantDersSonuRaporuItem(models.Model):
 
 class KitapTahlili(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
-    hazirlayan = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    inserteduser = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True, related_name='koordinated_kitaplar')
     file = models.FileField(upload_to="course-file", blank=True, null=True)
     image = models.FileField(upload_to="course-file", blank=True, null=True)
     title = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-    # price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    description = models.TextField(null=True, blank=True)    
     language = models.CharField(choices=LANGUAGE, default="Turkce", max_length=100)
     level = models.CharField(choices=LEVEL, default="Baslangic", max_length=100)
     kitaptahlili_status = models.CharField(choices=STATUS, default="Taslak", max_length=100)
-    koordinator_kitaptahlili_status = models.CharField(choices=KOORDINATOR_STATUS, max_length=100,blank=True, null=True)
-    # featured = models.BooleanField(default=False)
-    # course_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
-    # slug = models.SlugField(unique=True, null=True, blank=True)
+    koordinator_kitaptahlili_status = models.CharField(choices=KOORDINATOR_STATUS, max_length=100,blank=True, null=True) 
     date = models.DateTimeField(default=timezone.now)
+    active = models.BooleanField(default=False)
 
 
     def __str__(self):
@@ -664,7 +686,7 @@ KitapTahlili._meta.get_field('category').verbose_name = "Kategori"
 KitapTahlili._meta.get_field('koordinator').verbose_name = "Kitap Tahlili Koordinator"
 KitapTahlili._meta.get_field('image').verbose_name = "Kitap Tahlili Kapak Resmi"
 KitapTahlili._meta.get_field('file').verbose_name = "Kitap Tahlili Dosyası"
-KitapTahlili._meta.get_field('hazirlayan').verbose_name = "Kitap Tahlilini Hazırlayan"
+KitapTahlili._meta.get_field('inserteduser').verbose_name = "Kitap Tahlilini Hazırlayan"
 KitapTahlili._meta.get_field('title').verbose_name = "Kitap Tahlili Başlığı" 
 KitapTahlili._meta.get_field('language').verbose_name = "Kitap Tahlili Dili"
 KitapTahlili._meta.get_field('description').verbose_name = "Kitap Tahlili Açıklaması"
@@ -680,7 +702,7 @@ class VariantKitapTahlili(models.Model):
     title = models.CharField(max_length=1000)
     variant_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return self.title
     
@@ -709,7 +731,7 @@ class VariantKitapTahliliItem(models.Model):
     preview = models.BooleanField(default=False)
     variant_item_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.variant.title} - {self.title}"
     
@@ -735,19 +757,16 @@ class VariantKitapTahliliItem(models.Model):
 class EskepProje(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL,null=True, blank=True)
-    hazirlayan = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
+    inserteduser = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
     file = models.FileField(upload_to="course-file", blank=True, null=True)
     image = models.FileField(upload_to="course-file", blank=True, null=True)
     title = models.CharField(max_length=200)
-    description = models.TextField(null=True, blank=True)
-    # price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    description = models.TextField(null=True, blank=True)   
     language = models.CharField(choices=LANGUAGE, default="Turkce", max_length=100)
     level = models.CharField(choices=LEVEL, default="Baslangic", max_length=100)
     eskepProje_status = models.CharField(choices=STATUS, default="Taslak", max_length=100)
     koordinator_eskepProje_status = models.CharField(choices=KOORDINATOR_STATUS, max_length=100,blank=True, null=True)
-    # featured = models.BooleanField(default=False)
-    # course_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
-    # slug = models.SlugField(unique=True, null=True, blank=True)
+    active = models.BooleanField(default=False)
     date = models.DateTimeField(default=timezone.now)
 
 
@@ -786,7 +805,7 @@ EskepProje._meta.get_field('category').verbose_name = "Kategori"
 EskepProje._meta.get_field('koordinator').verbose_name = "Proje Koordinatörü"
 EskepProje._meta.get_field('image').verbose_name = "Proje Kapak Resmi"
 EskepProje._meta.get_field('file').verbose_name = "Proje Dosyası"
-EskepProje._meta.get_field('hazirlayan').verbose_name = "Projeyi Hazırlayan"
+EskepProje._meta.get_field('inserteduser').verbose_name = "Projeyi Hazırlayan"
 EskepProje._meta.get_field('title').verbose_name = "Proje Başlığı" 
 EskepProje._meta.get_field('language').verbose_name = "Proje Dili"
 EskepProje._meta.get_field('description').verbose_name = "Proje Açıklaması"
@@ -951,8 +970,8 @@ Question_Answer._meta.get_field('date').verbose_name = "Soru Sorulan Tarih"
 
 class Question_AnswerOdev(models.Model):
     odev = models.ForeignKey(Odev, related_name="question_answers", on_delete=models.CASCADE)
-    mesajiAlan = models.ForeignKey(User, related_name="qao_mesajiAlan", on_delete=models.SET_NULL, null=True, blank=True)
-    mesajiGonderen = models.ForeignKey(User, related_name="qao_mesajiGonderen", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_odev", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_odev", on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=1000, null=True, blank=True)
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
@@ -981,8 +1000,8 @@ class Question_AnswerOdev(models.Model):
 class Question_Answer_MessageOdev(models.Model):
     odev = models.ForeignKey(Odev, on_delete=models.CASCADE)
     question = models.ForeignKey(Question_AnswerOdev, on_delete=models.CASCADE)
-    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan", on_delete=models.SET_NULL, null=True, blank=True)
-    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_mesaj_odev", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_mesaj_odev", on_delete=models.SET_NULL, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     qam_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -1009,9 +1028,9 @@ class Question_Answer_MessageOdev(models.Model):
 
 
 class Question_AnswerDersSonuRaporu(models.Model):
-    derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
-    ogrenciStajer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True) 
+    derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)    
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_derssonuraporu", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_derssonuraporu", on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=1000, null=True, blank=True)
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
@@ -1034,16 +1053,16 @@ class Question_AnswerDersSonuRaporu(models.Model):
         
 Question_AnswerDersSonuRaporu._meta.get_field('derssonuraporu').verbose_name = "Ders Sonu Raporu" 
 Question_AnswerDersSonuRaporu._meta.get_field('title').verbose_name = "Soru Başlığı"
-Question_AnswerDersSonuRaporu._meta.get_field('ogrenciStajer').verbose_name = "Öğrenci/Stajer"
-Question_AnswerDersSonuRaporu._meta.get_field('koordinator').verbose_name = "Koordinator"
+Question_AnswerDersSonuRaporu._meta.get_field('mesajiAlan').verbose_name = "Mesajı Alan"
+Question_AnswerDersSonuRaporu._meta.get_field('mesajiGonderen').verbose_name = "Mesajı Gönderen"
 Question_AnswerDersSonuRaporu._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
 Question_AnswerDersSonuRaporu._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
 class Question_Answer_MessageDersSonuRaporu(models.Model):
     derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
     question = models.ForeignKey(Question_AnswerDersSonuRaporu, on_delete=models.CASCADE)
-    ogrenciStajer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True) 
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_mesaj_derssonuraporu", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_mesaj_derssonuraporu", on_delete=models.SET_NULL, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     qam_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -1064,16 +1083,16 @@ class Question_Answer_MessageDersSonuRaporu(models.Model):
         
 Question_Answer_MessageDersSonuRaporu._meta.get_field('derssonuraporu').verbose_name = "Ders Sonu Raporu" 
 Question_Answer_MessageDersSonuRaporu._meta.get_field('question').verbose_name = "Soru Başlığı"
-Question_Answer_MessageDersSonuRaporu._meta.get_field('ogrenciStajer').verbose_name = "Öğrenci/Stajer"
-Question_Answer_MessageDersSonuRaporu._meta.get_field('koordinator').verbose_name = "Koordinator"
+Question_Answer_MessageDersSonuRaporu._meta.get_field('mesajiAlan').verbose_name = "Mesajı Alan"
+Question_Answer_MessageDersSonuRaporu._meta.get_field('mesajiGonderen').verbose_name = "Mesajı Gönderen"
 Question_Answer_MessageDersSonuRaporu._meta.get_field('qam_id').verbose_name = "Soru Cevap Numarası"  
 Question_Answer_MessageDersSonuRaporu._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
 Question_Answer_MessageDersSonuRaporu._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
 class Question_AnswerKitapTahlili(models.Model):
     kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
-    ogrenciStajer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True) 
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_kitap", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_kitap", on_delete=models.SET_NULL, null=True, blank=True) 
     title = models.CharField(max_length=1000, null=True, blank=True)
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
@@ -1096,16 +1115,16 @@ class Question_AnswerKitapTahlili(models.Model):
         
 Question_AnswerKitapTahlili._meta.get_field('kitaptahlili').verbose_name = "Kitap Tahlili" 
 Question_AnswerKitapTahlili._meta.get_field('title').verbose_name = "Soru Başlığı"
-Question_AnswerKitapTahlili._meta.get_field('ogrenciStajer').verbose_name = "Öğrenci/Stajer"
-Question_AnswerKitapTahlili._meta.get_field('koordinator').verbose_name = "Koordinator"
+Question_AnswerKitapTahlili._meta.get_field('mesajiAlan').verbose_name = "Mesajı Alan"
+Question_AnswerKitapTahlili._meta.get_field('mesajiGonderen').verbose_name = "Mesajı Gönderen"
 Question_AnswerKitapTahlili._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
 Question_AnswerKitapTahlili._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
 class Question_Answer_MessageKitapTahlili(models.Model):
     kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question_AnswerKitapTahlili, on_delete=models.CASCADE)
-    ogrenciStajer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True) 
+    question = models.ForeignKey(Question_AnswerDersSonuRaporu, on_delete=models.CASCADE)
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_mesaj_kitap", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_mesaj_kitap", on_delete=models.SET_NULL, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     qam_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -1126,16 +1145,16 @@ class Question_Answer_MessageKitapTahlili(models.Model):
         
 Question_Answer_MessageKitapTahlili._meta.get_field('kitaptahlili').verbose_name = "Kitap Tahlili" 
 Question_Answer_MessageKitapTahlili._meta.get_field('question').verbose_name = "Soru Başlığı"
-Question_Answer_MessageKitapTahlili._meta.get_field('ogrenciStajer').verbose_name = "Öğrenci/Stajer"
-Question_Answer_MessageKitapTahlili._meta.get_field('koordinator').verbose_name = "Koordinator"
+Question_Answer_MessageKitapTahlili._meta.get_field('mesajiAlan').verbose_name = "Mesajı Alan"
+Question_Answer_MessageKitapTahlili._meta.get_field('mesajiGonderen').verbose_name = "Mesajı Gönderen"
 Question_Answer_MessageKitapTahlili._meta.get_field('qam_id').verbose_name = "Soru Cevap Numarası"  
 Question_Answer_MessageKitapTahlili._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
 Question_Answer_MessageKitapTahlili._meta.get_field('date').verbose_name = "Soru Sorulan Tarih"
 
 class Question_AnswerEskepProje(models.Model):
     eskepproje = models.ForeignKey(EskepProje, on_delete=models.CASCADE)
-    ogrenciStajer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True) 
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_proje", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_proje", on_delete=models.SET_NULL, null=True, blank=True) 
     title = models.CharField(max_length=1000, null=True, blank=True)
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     date = models.DateTimeField(default=timezone.now)
@@ -1158,16 +1177,16 @@ class Question_AnswerEskepProje(models.Model):
         
 Question_AnswerEskepProje._meta.get_field('eskepproje').verbose_name = "Eskep Proje" 
 Question_AnswerEskepProje._meta.get_field('title').verbose_name = "Soru Başlığı"
-Question_AnswerEskepProje._meta.get_field('ogrenciStajer').verbose_name = "Öğrenci/Stajer"
-Question_AnswerEskepProje._meta.get_field('koordinator').verbose_name = "Koordinator"
+Question_AnswerEskepProje._meta.get_field('mesajiAlan').verbose_name = "Mesajı Alan"
+Question_AnswerEskepProje._meta.get_field('mesajiGonderen').verbose_name = "Mesajı Gönderen"
 Question_AnswerEskepProje._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
 Question_AnswerEskepProje._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
 class Question_Answer_MessageEskepProje(models.Model):
     eskepproje = models.ForeignKey(EskepProje, on_delete=models.CASCADE)
     question = models.ForeignKey(Question_AnswerDersSonuRaporu, on_delete=models.CASCADE)
-    ogrenciStajer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True) 
+    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_mesaj_proje", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_mesaj_proje", on_delete=models.SET_NULL, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     qam_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -1188,8 +1207,8 @@ class Question_Answer_MessageEskepProje(models.Model):
         
 Question_Answer_MessageEskepProje._meta.get_field('eskepproje').verbose_name = "Eskep Proje" 
 Question_Answer_MessageEskepProje._meta.get_field('question').verbose_name = "Soru Başlığı"
-Question_Answer_MessageEskepProje._meta.get_field('ogrenciStajer').verbose_name = "Öğrenci/Stajer"
-Question_Answer_MessageEskepProje._meta.get_field('koordinator').verbose_name = "Koordinator"
+Question_Answer_MessageEskepProje._meta.get_field('mesajiAlan').verbose_name = "Mesajı Alan"
+Question_Answer_MessageEskepProje._meta.get_field('mesajiGonderen').verbose_name = "Mesajı Gönderen"
 Question_Answer_MessageEskepProje._meta.get_field('qam_id').verbose_name = "Soru Cevap Numarası"  
 Question_Answer_MessageEskepProje._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
 Question_Answer_MessageEskepProje._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
@@ -1287,14 +1306,17 @@ CartOrder._meta.get_field('oid').verbose_name = "Talep Numarası"
 CartOrder._meta.get_field('date').verbose_name = "Talep Tarihi" 
    
 class CartOrderItem(models.Model):
-    order = models.ForeignKey(CartOrder, on_delete=models.CASCADE, related_name="orderitem")
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="order_item")
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    # price = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    # tax_fee = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    # total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    # initial_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
-    # saved = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
+    order = models.ForeignKey('api.CartOrder', on_delete=models.CASCADE, related_name="orderitem")
+    course = models.ForeignKey('api.Course', on_delete=models.CASCADE, related_name="order_item")
+    teacher = models.ForeignKey('api.Teacher', on_delete=models.CASCADE)
+
+    # Satın alma anındaki fiyat bilgilerini SAKLAYALIM (snapshot)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    tax_fee = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    initial_total = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+    saved = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+
     coupons = models.ManyToManyField("api.Coupon", blank=True)
     applied_coupon = models.BooleanField(default=False)
     oid = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -1302,19 +1324,19 @@ class CartOrderItem(models.Model):
 
     class Meta:
         ordering = ['-date']
-    
-    def order_id(self):
-        return f"Order ID #{self.order.oid}"
-    
-    def payment_status(self):
-        return f"{self.order.payment_status}"
-    
-    def __str__(self):
-        return self.oid
-    
-    class Meta:
         verbose_name = "Talep İstek Seçenek"
         verbose_name_plural = "Talep İstek Seçenekleri"
+
+    @property
+    def order_id(self):
+        return f"Order ID #{str(self.order.oid)}"
+
+    @property
+    def payment_status(self):
+        return str(self.order.payment_status)
+
+    def __str__(self):
+        return str(self.oid)
         
 CartOrderItem._meta.get_field('order').verbose_name = "Talep Numarası"     
 CartOrderItem._meta.get_field('course').verbose_name = "Talep Edilen Kurs Numarası" 
@@ -1438,7 +1460,7 @@ EnrolledCourse._meta.get_field('date').verbose_name = "Kurs Kayıt Tarihi"
 
 class EnrolledOdev(models.Model):
     odev = models.ForeignKey(Odev, on_delete=models.CASCADE)
-    hazirlayan = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    inserteduser = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     egitmen = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True)
     # order_item = models.ForeignKey(CartOrderItem, on_delete=models.CASCADE)
@@ -1471,7 +1493,7 @@ class EnrolledOdev(models.Model):
         verbose_name_plural = "Eğitmene Gönderilen Ödevler" 
         
 EnrolledOdev._meta.get_field('odev').verbose_name = "Ödev"     
-EnrolledOdev._meta.get_field('hazirlayan').verbose_name = "Ödevi Hazırlayan" 
+EnrolledOdev._meta.get_field('inserteduser').verbose_name = "Ödevi Hazırlayan" 
 EnrolledOdev._meta.get_field('egitmen').verbose_name = "Eğitmeni" 
 EnrolledOdev._meta.get_field('koordinator').verbose_name = "Koordinator" 
 # EnrolledOdev._meta.get_field('order_item').verbose_name = "Kayıt Olunan Ders"     
@@ -1480,7 +1502,7 @@ EnrolledOdev._meta.get_field('date').verbose_name = "Ödev Kayıt Tarihi"
 
 class EnrolledKitapTahlili(models.Model):
     kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
-    hazirlayan = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    inserteduser = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     egitmen = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True)
     # order_item = models.ForeignKey(CartOrderItem, on_delete=models.CASCADE)
@@ -1513,7 +1535,7 @@ class EnrolledKitapTahlili(models.Model):
         verbose_name_plural = "Eğitmene Gönderilen Kitap Tahlilleri" 
         
 EnrolledKitapTahlili._meta.get_field('kitaptahlili').verbose_name = "Kitap Tahlili"     
-EnrolledKitapTahlili._meta.get_field('hazirlayan').verbose_name = "Kitap Tahlilini Hazırlayan" 
+EnrolledKitapTahlili._meta.get_field('inserteduser').verbose_name = "Kitap Tahlilini Hazırlayan" 
 EnrolledKitapTahlili._meta.get_field('egitmen').verbose_name = "Eğitmeni" 
 EnrolledKitapTahlili._meta.get_field('koordinator').verbose_name = "Koordinatörü" 
 # EnrolledKitapTahlili._meta.get_field('order_item').verbose_name = "Kayıt Olunan Ders"     
@@ -1522,7 +1544,7 @@ EnrolledKitapTahlili._meta.get_field('date').verbose_name = "Kitap Tahlili Kayı
 
 class EnrolledDersSonuRaporu(models.Model):
     derssonuraporu = models.ForeignKey(DersSonuRaporu, on_delete=models.CASCADE)
-    hazirlayan = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    inserteduser = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     egitmen = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True)
     # order_item = models.ForeignKey(CartOrderItem, on_delete=models.CASCADE)
@@ -1555,7 +1577,7 @@ class EnrolledDersSonuRaporu(models.Model):
         verbose_name_plural = "Eğitmene Gönderilen Ders Sonu Raporları" 
         
 EnrolledDersSonuRaporu._meta.get_field('derssonuraporu').verbose_name = "Ders Sonu Raporu"     
-EnrolledDersSonuRaporu._meta.get_field('hazirlayan').verbose_name = "Ders Sonu Raporunu Hazırlayan" 
+EnrolledDersSonuRaporu._meta.get_field('inserteduser').verbose_name = "Ders Sonu Raporunu Hazırlayan" 
 EnrolledDersSonuRaporu._meta.get_field('egitmen').verbose_name = "Eğitmeni" 
 EnrolledDersSonuRaporu._meta.get_field('koordinator').verbose_name = "Koordinator"     
 EnrolledDersSonuRaporu._meta.get_field('enrollment_id').verbose_name = "Ders Sonu Raporu Numarası" 
@@ -1563,7 +1585,7 @@ EnrolledDersSonuRaporu._meta.get_field('date').verbose_name = "Ders Sonu Raporu 
 
 class EnrolledEskepProje(models.Model):
     eskepproje = models.ForeignKey(EskepProje, on_delete=models.CASCADE)
-    hazirlayan = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    inserteduser = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     egitmen = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True)
     # order_item = models.ForeignKey(CartOrderItem, on_delete=models.CASCADE)
@@ -1596,7 +1618,7 @@ class EnrolledEskepProje(models.Model):
         verbose_name_plural = "Koordinatore Gönderilen Projeler" 
         
 EnrolledEskepProje._meta.get_field('eskepproje').verbose_name = "Ders Sonu Raporu"     
-EnrolledEskepProje._meta.get_field('hazirlayan').verbose_name = "Ders Sonu Raporunu Hazırlayan" 
+EnrolledEskepProje._meta.get_field('inserteduser').verbose_name = "Ders Sonu Raporunu Hazırlayan" 
 EnrolledEskepProje._meta.get_field('egitmen').verbose_name = "Eğitmeni" 
 EnrolledEskepProje._meta.get_field('koordinator').verbose_name = "Koordinator"     
 EnrolledEskepProje._meta.get_field('enrollment_id').verbose_name = "Ders Sonu Raporu Numarası" 
@@ -1819,8 +1841,7 @@ class Coupon(models.Model):
     code = models.CharField(max_length=50)
     discount = models.IntegerField(default=1)
     active = models.BooleanField(default=False)
-    date = models.DateTimeField(default=timezone.now)   
-    active = models.BooleanField(default=True)
+    date = models.DateTimeField(default=timezone.now)    
     
     def __str__(self):
         return self.code
@@ -2194,7 +2215,7 @@ class ESKEPEvent(models.Model):
     border_color = models.CharField(max_length=20, default="#0056b3")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="events")
     created_at = models.DateTimeField(default=timezone.now)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.title} ({self.date})"
     
@@ -2225,7 +2246,7 @@ class DersAtamasi(models.Model):
     time = models.TimeField(default=timezone.now)  # yeni eklenen alan
     aciklama = models.TextField(blank=True, null=True)
     topic = models.CharField(max_length=255)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.hafiz.full_name} - {self.date.date()} {self.time}"
     
@@ -2237,7 +2258,7 @@ class Ders(models.Model):
     end_time = models.DateTimeField()
     description = models.TextField(blank=True)
     topic = models.CharField(max_length=255,default="")
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.hafiz.full_name} - {self.date}"
     
@@ -2252,16 +2273,16 @@ class HataNotu(models.Model):
     hata_turu = models.CharField(max_length=50,null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True,null=True, blank=True)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
-        return f"{self.hafiz.full_name} - Sayfa {self.page_number}"
+        return f"{self.hafiz.full_name}"
     
 
 
 class PeerID(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     peer_id = models.CharField(max_length=100)
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.user.username} - {self.peer_id}"
 
@@ -2269,7 +2290,7 @@ class PeerID(models.Model):
 class QuranPage(models.Model):
     page_number = models.PositiveIntegerField(unique=True)
     image = models.ImageField(upload_to='quran_pages/')
-
+    active = models.BooleanField(default=False)
     def __str__(self):
         return f"Page {self.page_number}"
 
@@ -2293,6 +2314,22 @@ class LiveLesson(models.Model):
     datetime = models.DateTimeField()
     platform = models.CharField(max_length=50, choices=PLATFORM_CHOICES)
     platform_url = models.URLField()
+
+    def __str__(self):
+        return self.title
+    
+class EducationLevel(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+    
+class EducatorVideoLink(models.Model):
+    instructor = models.ForeignKey(Educator, on_delete=models.CASCADE, related_name="video_links")
+    title = models.CharField(max_length=200)
+    videoUrl = models.URLField()
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title

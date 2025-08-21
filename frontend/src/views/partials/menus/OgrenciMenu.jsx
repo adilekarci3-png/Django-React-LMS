@@ -1,96 +1,100 @@
-import { Link } from "react-router-dom"; // Link bileşenini import ettik
+import { Link } from "react-router-dom";
 
 const OgrenciMenu = () => {
   return (
-    <div>
-      <li className="nav-item dropdown">
-        <a
-          className="nav-link dropdown-toggle"
-          href="#"
-          role="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          <i className="fa-solid fa-user-plus"></i> Öğrenci
-        </a>
-        <ul className="dropdown-menu">
-          <li>
-            <Link className="dropdown-item" to={`/student/dashboard/`}>
-              <i className="fa-solid fa-table-columns"></i> Panel
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/student/courses/`}>
-              <i className="fa-solid fa-chalkboard-user"></i> Kurslarım
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/stajer/odevs/`}>
-              <i className="fa-solid fa-pencil"></i> Ödevlerim
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/stajer/kitaptahlils/`}>
-              <i className="fa-solid fa-book-open-reader"></i> Kitap Tahlillerim
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/stajer/dersonuraporus/`}>
-              <i className="fa-solid fa-file-lines"></i> Ders Sonu Raporlarım
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/eskep/create-odev/`}>
-              <i className="fa-solid fa-plus"></i> Ödev Oluştur
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/eskep/create-kitaptahlili/`}>
-              <i className="fa-solid fa-book"></i> Kitap Tahlili Oluştur
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="dropdown-item"
-              to={`/eskep/create-derssonuraporu/`}
-            >
-              <i className="fa-solid fa-chart-line"></i> Ders Sonu Raporu
-              Oluştur
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/eskep/egitim-takvimi/`}>
-              <i className="fa-solid fa-calendar"></i> Takvimim
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/student/dashboard/`}>
-              <i className="fa-solid fa-table-columns"></i> Panel
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/temsilci/hafizbilgi/list/`}>
-              <i className="fa-solid fa-user-graduate"></i> Hafız Bilgileri
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/student/wishlist/`}>
-              <i className="fa-solid fa-heart"></i> İstek Listesi
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/student/question-answer/`}>
-              <i className="fa-solid fa-envelope"></i> Soru/Cevap
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to={`/student/profile/`}>
-              <i className="fa-solid fa-user-gear"></i> Profil & Ayarlar
-            </Link>
-          </li>
-        </ul>
-      </li>
-    </div>
+    <li className="nav-item dropdown">
+      <a
+        className="nav-link dropdown-toggle"
+        href="#"
+        role="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <i className="fa-solid fa-user-plus"></i> Öğrenci
+      </a>
+      <ul className="dropdown-menu dropdown-menu-end shadow-lg p-2" style={{ minWidth: "250px" }}>
+        {/* Panel */}
+        <li>
+          <Link className="dropdown-item" to={`/student/dashboard/`}>
+            <i className="fa-solid fa-table-columns me-2"></i> Panel
+          </Link>
+        </li>
+        <li><hr className="dropdown-divider" /></li>
+
+        {/* Eğitim */}
+        <li className="dropdown-header text-muted fw-bold">📚 Eğitim</li>
+        <li>
+          <Link className="dropdown-item" to={`/student/courses/`}>
+            <i className="fa-solid fa-chalkboard-user me-2"></i> Kurslarım
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/stajer/odevs/`}>
+            <i className="fa-solid fa-pencil me-2"></i> Ödevlerim
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/stajer/kitaptahlils/`}>
+            <i className="fa-solid fa-book-open-reader me-2"></i> Kitap Tahlillerim
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/stajer/dersonuraporus/`}>
+            <i className="fa-solid fa-file-lines me-2"></i> Raporlarım
+          </Link>
+        </li>
+
+        <li><hr className="dropdown-divider" /></li>
+
+        {/* Oluştur */}
+        <li className="dropdown-header text-muted fw-bold">✏️ Oluştur</li>
+        <li>
+          <Link className="dropdown-item" to={`/eskep/create-odev/`}>
+            <i className="fa-solid fa-plus me-2"></i> Ödev Oluştur
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/eskep/create-kitaptahlili/`}>
+            <i className="fa-solid fa-book me-2"></i> Kitap Tahlili Oluştur
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/eskep/create-derssonuraporu/`}>
+            <i className="fa-solid fa-chart-line me-2"></i> Rapor Oluştur
+          </Link>
+        </li>
+
+        <li><hr className="dropdown-divider" /></li>
+
+        {/* Diğer */}
+        <li className="dropdown-header text-muted fw-bold">⚙️ Diğer</li>
+        <li>
+          <Link className="dropdown-item" to={`/eskep/egitim-takvimi/`}>
+            <i className="fa-solid fa-calendar me-2"></i> Takvimim
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/temsilci/hafizbilgi/list/`}>
+            <i className="fa-solid fa-user-graduate me-2"></i> Hafız Bilgileri
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/student/wishlist/`}>
+            <i className="fa-solid fa-heart me-2"></i> İstek Listesi
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/student/question-answer/`}>
+            <i className="fa-solid fa-envelope me-2"></i> Soru / Cevap
+          </Link>
+        </li>
+        <li>
+          <Link className="dropdown-item" to={`/student/profile/`}>
+            <i className="fa-solid fa-user-gear me-2"></i> Profil & Ayarlar
+          </Link>
+        </li>
+      </ul>
+    </li>
   );
 };
 

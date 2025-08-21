@@ -1,17 +1,23 @@
 import { useState, useEffect } from "react";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import Swal from "sweetalert2";
 
 import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import UserData from "../plugin/UserData";
 
+// ✅ Markdown Editor
+import MdEditor from "react-markdown-editor-lite";
+import "react-markdown-editor-lite/lib/index.css";
+import MarkdownIt from "markdown-it";
+const mdParser = new MarkdownIt();
+
 function OdevCreate() {
+  
+  const user = UserData(); 
   const [odev, setOdev] = useState({
     category: "",
     image: "",
@@ -19,21 +25,18 @@ function OdevCreate() {
     description: "",
     level: "",
     language: "",
-    hazirlayan: "",
+    inserteduser:parseInt(user?.user_id),
     odev_status: "",
   });
 
   const [category, setCategory] = useState([]);
-  const [ckEdtitorData, setCKEditorData] = useState("");
   const [variants, setVariants] = useState([{ title: "", pdf: "" }]);
   const [errors, setErrors] = useState({});
-
+  
   useEffect(() => {
-    useAxios()
-      .get(`course/category/`)
-      .then((res) => {
-        setCategory(res.data);
-      });
+    useAxios().get(`course/category/`).then((res) => {
+      setCategory(res.data);
+    });
   }, []);
 
   const handleOdevInputChange = (event) => {
@@ -43,9 +46,11 @@ function OdevCreate() {
     });
   };
 
-  const handleCkEditorChange = (event, editor) => {
-    const data = editor.getData();
-    setCKEditorData(data);
+  const handleEditorChange = ({ text }) => {
+    setOdev({
+      ...odev,
+      description: text,
+    });
   };
 
   const handleOdevImageChange = (event) => {
@@ -104,8 +109,8 @@ function OdevCreate() {
     const newErrors = {};
 
     if (!odev.title) newErrors.title = "Ödev başlığı zorunludur.";
-    if (!ckEdtitorData) newErrors.description = "Ödev açıklaması zorunludur.";
-    if (!odev.image.file) newErrors.image = "Kapak resmi yükleyiniz.";
+    if (!odev.description) newErrors.description = "Ödev açıklaması zorunludur.";
+    if (!odev.image?.file) newErrors.image = "Kapak resmi yükleyiniz.";
     if (!odev.category) newErrors.category = "Kategori seçiniz.";
 
     variants.forEach((variant, index) => {
@@ -125,10 +130,10 @@ function OdevCreate() {
 
     const formdata = new FormData();
     formdata.append("title", odev.title);
-    formdata.append("hazirlayan", parseInt(UserData()?.user_id));
+    formdata.append("inserteduser", parseInt(user?.user_id));
     formdata.append("odev_status", odev.odev_status);
     formdata.append("image", odev.image.file);
-    formdata.append("description", ckEdtitorData);
+    formdata.append("description", odev.description);
     formdata.append("category", odev.category);
     formdata.append("level", odev.level);
     formdata.append("language", odev.language);
@@ -187,10 +192,11 @@ function OdevCreate() {
 
               <div className="mb-3">
                 <label className="form-label">Ödev Açıklaması</label>
-                <CKEditor
-                  editor={ClassicEditor}
-                  data={ckEdtitorData}
-                  onChange={handleCkEditorChange}
+                <MdEditor
+                  value={odev.description}
+                  style={{ height: "200px" }}
+                  renderHTML={(text) => mdParser.render(text)}
+                  onChange={handleEditorChange}
                 />
                 {errors.description && (
                   <span className="text-danger">{errors.description}</span>
@@ -199,14 +205,8 @@ function OdevCreate() {
 
               <div className="mb-3">
                 <label className="form-label">Kapak Resmi</label>
-                <input
-                  type="file"
-                  className="form-control"
-                  onChange={handleOdevImageChange}
-                />
-                {errors.image && (
-                  <span className="text-danger">{errors.image}</span>
-                )}
+                <input type="file" className="form-control" onChange={handleOdevImageChange} />
+                {errors.image && <span className="text-danger">{errors.image}</span>}
               </div>
 
               <div className="mb-3">
@@ -214,7 +214,6 @@ function OdevCreate() {
                 <select
                   className="form-select"
                   name="category"
-                  value={odev.category}
                   onChange={handleOdevInputChange}
                 >
                   <option value="">-------------</option>
@@ -224,15 +223,13 @@ function OdevCreate() {
                     </option>
                   ))}
                 </select>
-                {errors.category && (
-                  <span className="text-danger">{errors.category}</span>
-                )}
+                {errors.category && <span className="text-danger">{errors.category}</span>}
               </div>
 
               <div className="mb-3">
                 <h4>Bölümler</h4>
                 {variants.map((variant, index) => (
-                  <div key={index} className="border p-3 mb-3 rounded bg-light">
+                  <div key={index} className="border p-2 rounded-3 mb-3 bg-light">
                     <input
                       type="text"
                       placeholder="Bölüm Adı"
@@ -241,7 +238,9 @@ function OdevCreate() {
                       onChange={(e) => handleVariantChange(index, e.target.value)}
                     />
                     {errors[`variant_title_${index}`] && (
-                      <span className="text-danger">{errors[`variant_title_${index}`]}</span>
+                      <span className="text-danger">
+                        {errors[`variant_title_${index}`]}
+                      </span>
                     )}
 
                     <input
@@ -251,7 +250,9 @@ function OdevCreate() {
                       onChange={(e) => handlePDFChange(index, e.target.files[0])}
                     />
                     {errors[`variant_pdf_${index}`] && (
-                      <span className="text-danger">{errors[`variant_pdf_${index}`]}</span>
+                      <span className="text-danger">
+                        {errors[`variant_pdf_${index}`]}
+                      </span>
                     )}
 
                     <button
@@ -263,11 +264,7 @@ function OdevCreate() {
                     </button>
                   </div>
                 ))}
-                <button
-                  className="btn btn-secondary w-100"
-                  type="button"
-                  onClick={addVariant}
-                >
+                <button className="btn btn-secondary w-100" type="button" onClick={addVariant}>
                   + Yeni Bölüm
                 </button>
               </div>

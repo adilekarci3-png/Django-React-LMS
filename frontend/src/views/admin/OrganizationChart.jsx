@@ -20,8 +20,7 @@ function OrganizationChart() {
                     res.data.forEach(MemberSort);
                     UseOrganizationChart(members_sort);
                 });
-        } catch (error) {
-            console.log(error);
+        } catch (error) {            
         }
     }
 

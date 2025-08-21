@@ -207,7 +207,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         model = api_models.Teacher
         fields = [
             "id", "user", "image", "full_name", "bio", "facebook", "twitter",
-            "linkedin", "about", "country", "students", "courses", "review", "roles", "hafizlar"
+            "linkedin", "about", "country", "courses", "review", "roles", "hafizlar"
         ]
 
     def get_courses(self, obj):
@@ -216,7 +216,10 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     def get_hafizlar(self, obj):
         return HafizSimpleSerializer(obj.hafiz_ogrencileri.all(), many=True).data
-
+    
+    # def get_students(self, obj):
+    #         students_qs = obj.students()
+    #         return CartOrderItemSerializer(students_qs, many=True).data
 
 
 class AgentSerializer(serializers.ModelSerializer):
@@ -484,12 +487,18 @@ class Question_AnswerKitapTahliliSerializer(serializers.ModelSerializer):
         model = api_models.Question_AnswerKitapTahlili
 
 class Question_AnswerDersSonuRaporuSerializer(serializers.ModelSerializer):
-    messages = Question_Answer_MessageDersSonuRaporuSerializer(many=True)
-    profile = ProfileSerializer(many=False)
-    
+    messages = serializers.SerializerMethodField()
+    profile = serializers.SerializerMethodField()
+
     class Meta:
-        fields = '__all__'
         model = api_models.Question_AnswerDersSonuRaporu
+        fields = '__all__'
+
+    def get_messages(self, obj):
+        return Question_Answer_MessageDersSonuRaporuSerializer(obj.messages(), many=True).data
+
+    def get_profile(self, obj):
+        return ProfileSerializer(obj.profile()).data
 
 class Question_AnswerEskepProjeSerializer(serializers.ModelSerializer):
     messages = Question_Answer_MessageEskepProjeSerializer(many=True)
@@ -500,52 +509,30 @@ class Question_AnswerEskepProjeSerializer(serializers.ModelSerializer):
         model = api_models.Question_AnswerEskepProje
 
 class CartSerializer(serializers.ModelSerializer):
-
     class Meta:
-        fields = '__all__'
         model = api_models.Cart
-
-    def __init__(self, *args, **kwargs):
-        super(CartSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
+        fields = '__all__'
 
 
 class CartOrderItemSerializer(serializers.ModelSerializer):
+    course = serializers.PrimaryKeyRelatedField(read_only=True)
+    teacher = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = api_models.CartOrderItem
         fields = '__all__'
-        depth = 1  # default olarak 1 derinlik kullanabilirsiniz
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            # Derinliği azaltmak için nested serializer alanlarını kaldır
-            for field_name, field in list(self.fields.items()):
-                if hasattr(field, 'depth'):
-                    self.fields[field_name] = serializers.PrimaryKeyRelatedField(
-                        queryset=field.queryset if hasattr(field, 'queryset') else None
-                    )
 
 
 class CartOrderSerializer(serializers.ModelSerializer):
-    order_items = CartOrderItemSerializer(many=True)  
-      
-    class Meta:
-        fields = '__all__'
-        model = api_models.CartOrder
+    order_items = serializers.SerializerMethodField()
 
-    def __init__(self, *args, **kwargs):
-        super(CartOrderSerializer, self).__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and request.method == "POST":
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
+    class Meta:
+        model = api_models.CartOrder
+        fields = '__all__'
+
+    def get_order_items(self, obj):
+        order_items = api_models.CartOrderItem.objects.filter(order=obj)
+        return CartOrderItemSerializer(order_items, many=True, context=self.context).data
 
 class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -890,7 +877,7 @@ class OdevSerializer(serializers.ModelSerializer):
     notes = NoteOdevSerializer(many=True, read_only=True)
     question_answers = Question_AnswerOdevSerializer(many=True, read_only=True)
     class Meta:       
-        fields = ["id","category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "odev_status", "koordinator_odev_status", "date","curriculum", "lectures","notes","question_answers"]
+        fields = ["id","category", "koordinator","inserteduser", "file", "image", "title", "description", "language", "level", "odev_status", "koordinator_odev_status", "date","curriculum", "lectures","notes","question_answers"]
         model = api_models.Odev
 
     def __init__(self, *args, **kwargs):
@@ -902,13 +889,18 @@ class OdevSerializer(serializers.ModelSerializer):
             self.Meta.depth = 3
 
 class DersSonuRaporuSerializer(serializers.ModelSerializer):
-    # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
-    curriculum = VariantSerializer(many=True, required=False, read_only=True,)
-    lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
-    # reviews = ReviewSerializer(many=True, read_only=True, required=False)
+    curriculum = VariantSerializer(many=True, required=False, read_only=True)
+    lectures = VariantItemSerializer(many=True, required=False, read_only=True)
+    question_answers = serializers.SerializerMethodField()
+
     class Meta:
-        fields = ["category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "derssonuraporu_status", "koordinator_derssonuraporu_status", "date","curriculum", "lectures"]        
         model = api_models.DersSonuRaporu
+        fields = [
+            "id","category","koordinator","inserteduser","file","image","title",
+            "description","language","level","derssonuraporu_status",
+            "koordinator_derssonuraporu_status","date",
+            "curriculum","lectures","question_answers"
+        ]
 
     def __init__(self, *args, **kwargs):
         super(DersSonuRaporuSerializer, self).__init__(*args, **kwargs)
@@ -916,7 +908,11 @@ class DersSonuRaporuSerializer(serializers.ModelSerializer):
         if request and request.method == "POST":
             self.Meta.depth = 0
         else:
-            self.Meta.depth = 3           
+            self.Meta.depth = 3   
+
+    def get_question_answers(self, obj):
+        qas = api_models.Question_AnswerDersSonuRaporu.objects.filter(derssonuraporu=obj)
+        return Question_AnswerDersSonuRaporuSerializer(qas, many=True).data        
 
 class KitapTahliliSerializer(serializers.ModelSerializer):
     # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
@@ -929,7 +925,7 @@ class KitapTahliliSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.KitapTahlili
         fields = [
-            "id", "category", "koordinator", "hazirlayan", "file", "image",
+            "id", "category", "koordinator", "inserteduser", "file", "image",
             "title", "description", "language", "level",
             "kitaptahlili_status", "koordinator_kitaptahlili_status", "date",
             "curriculum", "lectures", "notes", "question_answers"
@@ -946,7 +942,7 @@ class EskepProjeSerializer(serializers.ModelSerializer):
     lectures = VariantItemSerializer(many=True, required=False, read_only=True,)
     # reviews = ReviewSerializer(many=True, read_only=True, required=False)
     class Meta:
-        fields = ["category", "koordinator","hazirlayan", "file", "image", "title", "description", "language", "level", "eskepProje_status", "koordinator_eskepProje_status", "date","curriculum", "lectures"]        
+        fields = ["id","category", "koordinator","inserteduser", "file", "image", "title", "description", "language", "level", "eskepProje_status", "koordinator_eskepProje_status", "date","curriculum", "lectures"]        
         model = api_models.EskepProje
 
     def __init__(self, *args, **kwargs):
@@ -993,50 +989,57 @@ class ESKEPEventSerializer(serializers.ModelSerializer):
 #         fields = ["id", "user", "full_name", "photo"]
 
 
-class DersAtamasiSerializer(serializers.ModelSerializer):
+class DersSerializer(serializers.ModelSerializer):
+    # POST/PUT için ID’ler:
     hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.Hafiz.objects.all(), write_only=True)
     instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.Teacher.objects.all(), write_only=True)
 
-    hafiz_detail = api_serializer.HafizSimpleSerializer(source="hafiz", read_only=True)
-    instructor_detail = api_serializer.TeacherSerializer(source="instructor", read_only=True)
-
-    class Meta:
-        model = api_models.DersAtamasi
-        fields = [
-            "id",
-            "hafiz",               # sadece POST/PUT için (id)
-            "instructor",          # sadece POST/PUT için (id)
-            "hafiz_detail",        # sadece GET için
-            "instructor_detail",   # sadece GET için
-            "start_time",
-            "end_time",
-            "aciklama",
-            "topic"
-        ]
-
-
-class DersSerializer(serializers.ModelSerializer):   
-    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.Hafiz.objects.all(), write_only=True)
-    instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.Teacher.objects.all(), write_only=True)
-
-    hafiz_detail = api_serializer.HafizSimpleSerializer(source="hafiz", read_only=True)
-    instructor_detail = api_serializer.TeacherSerializer(source="instructor", read_only=True)
+    # GET için detay + id:
+    hafiz_detail = HafizSimpleSerializer(source="hafiz", read_only=True)
+    instructor_detail = TeacherSerializer(source="instructor", read_only=True)
+    hafiz_id = serializers.IntegerField(source="hafiz.id", read_only=True)
+    instructor_id = serializers.IntegerField(source="instructor.id", read_only=True)
 
     class Meta:
         model = api_models.Ders
         fields = [
             "id",
-            "hafiz",               # sadece POST/PUT için (id)
-            "instructor",          # sadece POST/PUT için (id)
-            "hafiz_detail",        # sadece GET için
-            "instructor_detail",   # sadece GET için
-            "start_time",
-            "end_time",
+            "hafiz", "instructor",          # write-only
+            "hafiz_id", "instructor_id",    # read-only (GET)
+            "hafiz_detail", "instructor_detail",
+            "start_time", "end_time",
             "description",
             "topic",
-            "date"
+            "date",
         ]
 
+
+# --- Ders Ataması ---
+class DersAtamasiSerializer(serializers.ModelSerializer):
+    # POST/PUT için ID’ler:
+    hafiz = serializers.PrimaryKeyRelatedField(queryset=api_models.Hafiz.objects.all(), write_only=True)
+    instructor = serializers.PrimaryKeyRelatedField(queryset=api_models.Teacher.objects.all(), write_only=True)
+
+    # GET için detay + id:
+    hafiz_detail = HafizSimpleSerializer(source="hafiz", read_only=True)
+    instructor_detail = TeacherSerializer(source="instructor", read_only=True)
+    hafiz_id = serializers.IntegerField(source="hafiz.id", read_only=True)
+    instructor_id = serializers.IntegerField(source="instructor.id", read_only=True)
+
+    class Meta:
+        model = api_models.DersAtamasi
+        fields = [
+            "id",
+            "hafiz", "instructor",           # write-only
+            "hafiz_id", "instructor_id",     # read-only (GET)
+            "hafiz_detail", "instructor_detail",
+            "start_time", "end_time",
+            "aciklama",
+            "topic",
+        ]
+
+
+# --- Hafiz (öğrenci) ---
 class HafizSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     hdm_egitmen = TeacherSerializer(read_only=True)
@@ -1045,22 +1048,31 @@ class HafizSerializer(serializers.ModelSerializer):
         source='hdm_egitmen',
         write_only=True
     )
+    dersler = serializers.SerializerMethodField()
 
     class Meta:
         model = api_models.Hafiz
-        fields = ["id", "full_name", "hdm_egitmen",'hdm_egitmen_id', "dersler","user","ceptel"]
+        fields = [
+            "id", "full_name",
+            "hdm_egitmen", "hdm_egitmen_id",
+            "dersler",
+            "user",
+            "ceptel",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        try:
-            role = api_models.TeacherRole.objects.get(name="HDMEgitmen")
-            self.fields["hdm_egitmen_id"].queryset = api_models.Teacher.objects.filter(roles=role)
-        except api_models.TeacherRole.DoesNotExist:
+        role_qs = api_models.TeacherRole.objects.filter(name="HDMEgitmen")
+        if role_qs.exists():
+            self.fields["hdm_egitmen_id"].queryset = api_models.Teacher.objects.filter(roles=role_qs.first())
+        else:
             self.fields["hdm_egitmen_id"].queryset = api_models.Teacher.objects.none()
 
-    def get_dersler(self, obj):        
-        dersler = obj.dersler.all()
-        return DersSerializer(dersler, many=True).data
+    def get_dersler(self, obj):
+        # NOT: asla QuerySet/model döndürme; daima serializer.data döndür
+        dersler_qs = obj.dersler.all().select_related("hafiz", "instructor")
+        return DersSerializer(dersler_qs, many=True).data
+
     
 class HataNotuSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1114,3 +1126,30 @@ class TeacherSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.Teacher
         fields = ["id", "full_name", "image"]
+        
+class EducatorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.Educator
+        fields = '__all__'
+        
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.Branch
+        fields = '__all__'
+        
+class EducationLevelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.EducationLevel
+        fields = '__all__'
+        
+class EducatorVideoLinkSerializer(serializers.ModelSerializer):
+    instructor_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = api_models.EducatorVideoLink
+        fields = ['id', 'title', 'videoUrl', 'description', 'created_at', 'instructor_id']
+
+    def create(self, validated_data):
+        instructor_id = validated_data.pop('instructor_id')
+        instructor = api_models.Educator.objects.get(id=instructor_id)
+        return api_models.EducatorVideoLink.objects.create(instructor=instructor, **validated_data)
