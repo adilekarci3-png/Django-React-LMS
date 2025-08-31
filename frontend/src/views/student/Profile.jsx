@@ -5,11 +5,15 @@ import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
-import Toast from "../plugin/Toast";
+import { useAuthStore } from "../../store/auth";
 import { ProfileContext } from "../plugin/Context";
 
+// SweetAlert2
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+
 function Profile() {
+  const api = useAxios();
   const [profile, setProfile] = useContext(ProfileContext);
   const [profileData, setProfileData] = useState({
     image: "",
@@ -19,71 +23,83 @@ function Profile() {
   });
   const [imagePreview, setImagePreview] = useState("");
 
-  const fetchProfile = () => {
-    useAxios()
-      .get(`user/profile/${UserData()?.user_id}/`)
-      .then((res) => {
-        console.log(res.data);
-        setProfile(res.data);
-        setProfileData(res.data);
-        setImagePreview(res.data.image);
-      });
-  };
+  const user_id = useAuthStore((s) => s.allUserData?.user_id);
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (!user_id) return;
 
-  const handleProfileChange = (event) => {
-    setProfileData({
-      ...profileData,
-      [event.target.name]: event.target.value,
-    });
-  };
-
-  const handleFileChange = (event) => {
-    const selectedFile = event.target.files[0];
-    setProfileData({
-      ...profileData,
-      [event.target.name]: selectedFile,
+    let cancelled = false;
+    api.get(`user/profile/${user_id}/`).then((res) => {
+      if (cancelled) return;
+      setProfile(res.data);
+      setProfileData({
+        image: "",
+        full_name: res.data.full_name ?? "",
+        about: res.data.about ?? "",
+        country: res.data.country ?? "",
+      });
+      setImagePreview(res.data.image || "");
     });
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
+    return () => {
+      cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user_id]); // sadece user_id değişince çek
 
-    if (selectedFile) {
-      reader.readAsDataURL(selectedFile);
+  const handleProfileChange = (e) =>
+    setProfileData((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  const handleFileChange = (e) => {
+    const f = e.target.files?.[0] || "";
+    setProfileData((p) => ({ ...p, image: f }));
+    if (f) {
+      const url = URL.createObjectURL(f);
+      setImagePreview(url);
     }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (!user_id) return;
 
-    const res = await useAxios().get(`user/profile/${UserData()?.user_id}/`);
-    const formdata = new FormData();
-    if (profileData.image && profileData.image !== res.data.image) {
-      formdata.append("image", profileData.image);
-    }
+    try {
+      const current = await api.get(`user/profile/${user_id}/`);
+      const form = new FormData();
 
-    formdata.append("full_name", profileData.full_name);
-    formdata.append("about", profileData.about);
-    formdata.append("country", profileData.country);
+      if (profileData.image && profileData.image !== current.data.image) {
+        form.append("image", profileData.image);
+      }
+      form.append("full_name", profileData.full_name || "");
+      form.append("about", profileData.about || "");
+      form.append("country", profileData.country || "");
 
-    await useAxios()
-      .patch(`user/profile/${UserData()?.user_id}/`, formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((res) => {
-        console.log(res.data);
-        setProfile(res.data);
+      const updated = await api.patch(`user/profile/${user_id}/`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-  };
 
-  console.log(imagePreview);
+      setProfile(updated.data);
+      setImagePreview(updated.data.image || imagePreview);
+
+      // ✅ Başarılı bildirim
+      Swal.fire({
+        title: "Başarılı",
+        text: "Profil başarıyla güncellendi.",
+        icon: "success",
+        confirmButtonText: "Tamam",
+      });
+    } catch (err) {
+      // ❌ Hata bildirimi
+      Swal.fire({
+        title: "Hata",
+        text:
+          err?.response?.data?.detail ||
+          "Profil güncellenirken bir hata oluştu.",
+        icon: "error",
+        confirmButtonText: "Tamam",
+      });
+    }
+  };
 
   return (
     <>
@@ -91,33 +107,35 @@ function Profile() {
 
       <section className="pt-5 pb-5">
         <div className="container">
-          {/* Header Here */}
           <Header />
+
           <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
-            <Sidebar />
+            {/* SOL SÜTUN: Sidebar */}
+            <div className="col-lg-2 col-md-4 col-12 mb-4 mb-md-0">
+              <Sidebar />
+            </div>
+
+            {/* SAĞ SÜTUN: İçerik */}
             <div className="col-lg-10 col-md-8 col-12">
-              {/* Card */}
               <div className="card">
-                {/* Card header */}
                 <div className="card-header">
                   <h3 className="mb-0">Profil Detayları</h3>
                   <p className="mb-0">
-                  Kendi hesap ayarınızı yönetmek için tam kontrole sahipsiniz.
+                    Kendi hesap ayarınızı yönetmek için tam kontrole sahipsiniz.
                   </p>
                 </div>
-                {/* Card body */}
+
                 <form className="card-body" onSubmit={handleFormSubmit}>
                   <div className="d-lg-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center mb-4 mb-lg-0">
                       <img
-                        src={imagePreview}
+                        src={imagePreview || "/img/default-avatar.png"}
                         id="img-uploaded"
-                        className="avatar-xl rounded-circle"
                         alt="avatar"
+                        className="avatar-xl rounded-circle"
                         style={{
-                          width: "100px",
-                          height: "100px",
+                          width: 100,
+                          height: 100,
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
@@ -125,28 +143,29 @@ function Profile() {
                       <div className="ms-3">
                         <h4 className="mb-0">Profil Resminiz</h4>
                         <p className="mb-0">
-                        PNG veya JPG, 800 pikselden geniş ve uzun olamaz.
+                          PNG veya JPG, 800 pikselden geniş ve uzun olamaz.
                         </p>
                         <input
                           type="file"
                           className="form-control mt-3"
                           name="image"
+                          accept="image/png,image/jpeg"
                           onChange={handleFileChange}
-                          id=""
                         />
                       </div>
                     </div>
                   </div>
+
                   <hr className="my-5" />
+
                   <div>
                     <h4 className="mb-0">Kişisel Detaylar</h4>
                     <p className="mb-4">
-                    Kişisel bilgilerinizi ve adresinizi düzenleyin.
+                      Kişisel bilgilerinizi ve adresinizi düzenleyin.
                     </p>
-                    {/* Form */}
+
                     <div className="row gx-3">
-                      {/* First name */}
-                      <div className="mb-3 col-12 col-md-12">
+                      <div className="mb-3 col-12">
                         <label className="form-label" htmlFor="fname">
                           Adınız Soyadınız
                         </label>
@@ -155,37 +174,31 @@ function Profile() {
                           id="fname"
                           className="form-control"
                           placeholder="Adınız"
-                          required=""
+                          required
                           value={profileData.full_name}
                           onChange={handleProfileChange}
                           name="full_name"
                         />
-                        <div className="invalid-feedback">
-                          Adınızı Giriniz
-                        </div>
+                        <div className="invalid-feedback">Adınızı Giriniz</div>
                       </div>
-                      {/* Last name */}
-                      <div className="mb-3 col-12 col-md-12">
-                        <label className="form-label" htmlFor="lname">
+
+                      <div className="mb-3 col-12">
+                        <label className="form-label" htmlFor="about">
                           Hakkımda
                         </label>
                         <textarea
                           onChange={handleProfileChange}
                           name="about"
-                          id=""
+                          id="about"
                           cols="30"
                           rows="5"
                           className="form-control"
                           value={profileData.about}
-                        ></textarea>
-                        <div className="invalid-feedback">
-                          Soyadınızı Giriniz.
-                        </div>
+                        />
                       </div>
 
-                      {/* Country */}
-                      <div className="mb-3 col-12 col-md-12">
-                        <label className="form-label" htmlFor="editCountry">
+                      <div className="mb-3 col-12">
+                        <label className="form-label" htmlFor="country">
                           Ülke
                         </label>
                         <input
@@ -193,7 +206,7 @@ function Profile() {
                           id="country"
                           className="form-control"
                           placeholder="Ülke"
-                          required=""
+                          required
                           value={profileData.country}
                           onChange={handleProfileChange}
                           name="country"
@@ -202,8 +215,8 @@ function Profile() {
                           Lütfen Ülke Seçiniz
                         </div>
                       </div>
+
                       <div className="col-12">
-                        {/* Button */}
                         <button className="btn btn-primary" type="submit">
                           Profili Güncelle <i className="fas fa-check-circle"></i>
                         </button>
@@ -211,6 +224,7 @@ function Profile() {
                     </div>
                   </div>
                 </form>
+
               </div>
             </div>
           </div>

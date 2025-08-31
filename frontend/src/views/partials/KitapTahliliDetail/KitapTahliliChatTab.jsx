@@ -1,102 +1,120 @@
+// EskepProjeChatTab.jsx
 import React, { useState, useEffect, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import moment from "moment";
 import useAxios from "../../../utils/useAxios";
 import useUserData from "../../plugin/useUserData";
-
 import Swal from "sweetalert2";
 
-function KitapTahliliChatTab({ kitaptahlili, fetchKitapTahliliDetail }) {
+function EskepProjeChatTab({ eskepproje, fetchEskepProjeDetail }) {
+  const user = useUserData();
+
+  // --- GÜVENLİ BAŞLANGIÇ ---
+  const qaList = Array.isArray(eskepproje?.question_answers)
+    ? eskepproje.question_answers
+    : [];
+
   const [createMessage, setCreateMessage] = useState({ title: "", message: "" });
-  const [filteredQuestions, setFilteredQuestions] = useState(kitaptahlili.question_answers || []);
+  const [filteredQuestions, setFilteredQuestions] = useState(qaList);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [addQuestionShow, setAddQuestionShow] = useState(false);
   const [conversationShow, setConversationShow] = useState(false);
   const lastElementRef = useRef(null);
-  const user = useUserData();
+
+  // eskepproje geldiğinde listeyi yenile
   useEffect(() => {
-    setFilteredQuestions(kitaptahlili.question_answers || []);
-  }, [kitaptahlili]);
+    setFilteredQuestions(
+      Array.isArray(eskepproje?.question_answers) ? eskepproje.question_answers : []
+    );
+  }, [eskepproje]);
+
+  // --- ESKEPPROJE HENÜZ YOKSA ERKEN DÖN ---
+  if (!eskepproje) {
+    return <div>Yükleniyor…</div>;
+  }
 
   const handleSearchQuestion = (e) => {
     const query = e.target.value.toLowerCase();
-    if (!query) {
-      setFilteredQuestions(kitaptahlili.question_answers || []);
-    } else {
-      const filtered = kitaptahlili.question_answers?.filter((q) =>
-        q.title.toLowerCase().includes(query)
-      );
-      setFilteredQuestions(filtered);
-    }
+    const all = Array.isArray(eskepproje?.question_answers)
+      ? eskepproje.question_answers
+      : [];
+    if (!query) return setFilteredQuestions(all);
+    setFilteredQuestions(all.filter((q) => (q?.title || "").toLowerCase().includes(query)));
   };
 
   const handleShowConversation = (question) => {
     setSelectedConversation(question);
     setConversationShow(true);
+    setTimeout(() => lastElementRef.current?.scrollIntoView({ behavior: "smooth" }), 0);
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("kitaptahlili_id", kitaptahlili?.id);
-    formData.append("user_id", user?.user_id);
-    formData.append("message", createMessage.message);
-    formData.append("qa_id", selectedConversation?.qa_id);
+    const text = (createMessage.message || "").trim();
+
+    if (!selectedConversation?.qa_id) {
+      Swal.fire({ icon: "warning", title: "Konuşma seçiniz" });
+      return;
+    }
+    if (!text) return;
 
     try {
-      const res = await useAxios().post(`eskepstajer/question-answer-message-create/`, formData);
-      setSelectedConversation(res.data.question);
-      setCreateMessage({ ...createMessage, message: "" });
-      Swal.fire({
-        icon: "success",
-        title: "Başarılı!",
-        text: "Konuşma Başlatıldı.",
-        confirmButtonText: "Tamam",
-      });
+      const formData = new FormData();
+      formData.append("eskepproje_id", eskepproje?.id ?? "");
+      formData.append("user_id", user?.user_id ?? "");
+      formData.append("message", text);
+      formData.append("qa_id", selectedConversation.qa_id);
+
+      const res = await useAxios().post(
+        `eskepstajer/question-answer-message-create/`,
+        formData
+      );
+
+      const updated = res?.data?.question || selectedConversation;
+      setSelectedConversation(updated);
+      setCreateMessage((s) => ({ ...s, message: "" }));
+      fetchEskepProjeDetail?.();
+
+      setTimeout(() => lastElementRef.current?.scrollIntoView({ behavior: "smooth" }), 0);
     } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Hata!",
-        text: "Konuşma Başlatılırken Bir Hata Oluştu.",
-        confirmButtonText: "Tamam",
-      });
+      Swal.fire({ icon: "error", title: "Hata!", text: "Mesaj gönderilemedi." });
     }
   };
 
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("kitaptahlili_id", kitaptahlili?.id);
-    formData.append("user_id", user?.user_id);
-    formData.append("title", createMessage.title);
-    formData.append("message", createMessage.message);
+    const title = (createMessage.title || "").trim();
+    const message = (createMessage.message || "").trim();
+    if (!title || !message) {
+      Swal.fire({ icon: "warning", title: "Başlık ve mesaj zorunludur" });
+      return;
+    }
 
     try {
+      const formData = new FormData();
+      formData.append("eskepproje_id", eskepproje?.id ?? "");
+      formData.append("user_id", user?.user_id ?? "");
+      formData.append("title", title);
+      formData.append("message", message);
+
       await useAxios().post(
-        `eskepstajer/question-answer-list-create/${kitaptahlili?.id}/`,
+        `eskepstajer/question-answer-list-create/${eskepproje?.id}/`,
         formData
       );
-      Toast().fire({ icon: "success", title: "Soru gönderildi" });
-      fetchKitapTahliliDetail();
+
+      Swal.fire({ icon: "success", title: "Soru gönderildi" });
       setAddQuestionShow(false);
       setCreateMessage({ title: "", message: "" });
-
+      fetchEskepProjeDetail?.();
     } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Hata!",
-        text: "Mesaj Gönderilirken Bir Hata Oluştu.",
-        confirmButtonText: "Tamam",
-      });
+      Swal.fire({ icon: "error", title: "Hata!", text: "Soru gönderilemedi." });
     }
   };
 
   useEffect(() => {
-    if (lastElementRef.current) {
-      lastElementRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [selectedConversation]);
+    lastElementRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [selectedConversation?.messages?.length]);
 
   return (
     <>
@@ -115,29 +133,31 @@ function KitapTahliliChatTab({ kitaptahlili, fetchKitapTahliliDetail }) {
           <div key={q.qa_id} className="card p-3 shadow-sm">
             <div className="d-flex align-items-center mb-2">
               <img
-                src={q.profile?.image}
+                src={q?.profile?.image}
                 className="rounded-circle"
-                style={{ width: "50px", height: "50px", objectFit: "cover", marginRight: "1rem" }}
+                style={{ width: 50, height: 50, objectFit: "cover", marginRight: "1rem" }}
                 alt="Profil"
               />
               <div>
-                <h6 className="mb-0">{q.profile?.full_name}</h6>
-                <small className="text-muted">{moment(q.date).format("DD MMM YYYY")}</small>
+                <h6 className="mb-0">{q?.profile?.full_name}</h6>
+                <small className="text-muted">
+                  {q?.date ? moment(q.date).format("DD MMM YYYY") : ""}
+                </small>
               </div>
             </div>
-            <h5 className="mt-2">{q.title}</h5>
+            <h5 className="mt-2">{q?.title}</h5>
             <Button
-  variant="outline-primary"
-  size="sm"
-  className="mt-2"
-  style={{ width: "100px", height: "32px", padding: "0" }}
-  onClick={() => handleShowConversation(q)}
->
-  <i className="fas fa-comments me-1"></i> Katıl
-</Button>
+              variant="outline-primary"
+              size="sm"
+              className="mt-2"
+              style={{ width: 100, height: 32, padding: 0 }}
+              onClick={() => handleShowConversation(q)}
+            >
+              <i className="fas fa-comments me-1"></i> Katıl
+            </Button>
           </div>
         ))}
-        {filteredQuestions?.length === 0 && <p>Hiç soru bulunamadı.</p>}
+        {!filteredQuestions?.length && <p>Hiç soru bulunamadı.</p>}
       </div>
 
       {/* Soru Ekle Modal */}
@@ -184,24 +204,27 @@ function KitapTahliliChatTab({ kitaptahlili, fetchKitapTahliliDetail }) {
           <Modal.Title>{selectedConversation?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+          <div style={{ maxHeight: 500, overflowY: "auto" }}>
             {selectedConversation?.messages?.map((m) => (
               <div key={m.id} className="mb-3">
                 <div className="d-flex align-items-center mb-1">
                   <img
-                    src={m.profile?.image}
+                    src={m?.profile?.image}
                     className="rounded-circle"
-                    style={{ width: "40px", height: "40px", marginRight: "0.75rem", objectFit: "cover" }}
+                    style={{ width: 40, height: 40, marginRight: "0.75rem", objectFit: "cover" }}
                     alt="Avatar"
                   />
-                  <strong>{m.profile?.full_name}</strong>
+                  <strong>{m?.profile?.full_name}</strong>
                 </div>
-                <p className="bg-light p-2 rounded">{m.message}</p>
-                <small className="text-muted">{moment(m.date).format("DD MMM YYYY HH:mm")}</small>
+                <p className="bg-light p-2 rounded">{m?.message}</p>
+                <small className="text-muted">
+                  {m?.date ? moment(m.date).format("DD MMM YYYY HH:mm") : ""}
+                </small>
               </div>
             ))}
-            <div ref={lastElementRef}></div>
+            <div ref={lastElementRef} />
           </div>
+
           <form className="mt-3 d-flex" onSubmit={handleSendMessage}>
             <textarea
               className="form-control me-2"
@@ -221,4 +244,4 @@ function KitapTahliliChatTab({ kitaptahlili, fetchKitapTahliliDetail }) {
   );
 }
 
-export default KitapTahliliChatTab;
+export default EskepProjeChatTab;

@@ -5,9 +5,11 @@ import useAxios from "../../utils/useAxios";
 import { ProfileContext } from "../plugin/Context";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import useUserData from "../plugin/useUserData";
 
 function EskepInstructorAssingCourses() {
   const api = useAxios();
+  const user = useUserData();
   const [allCourses, setAllCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -16,6 +18,7 @@ function EskepInstructorAssingCourses() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [profile, setProfile] = useContext(ProfileContext);
+  console.log(profile);
   const itemsPerPage = 3;
 
   const handleOpenModal = (course) => {
@@ -43,12 +46,13 @@ function EskepInstructorAssingCourses() {
 
  const fetchCourseData = () => {
   debugger;
-  if (!profile?.user) return; // Kullanıcı yoksa çağırma
+  if (!user) return; // Kullanıcı yoksa çağırma
 
   setLoading(true);
   api
-    .get(`eskepinstructor/course-list/${profile?.user}/`)
+    .get(`eskepinstructor/course-list/${user?.user_id}/`)
     .then((res) => {
+      debugger;
       setAllCourses(res.data);
 
       const initialPages = {};
@@ -67,7 +71,7 @@ function EskepInstructorAssingCourses() {
 
  useEffect(() => {
   fetchCourseData();
-}, [profile]);
+}, [user]);
 
   const handleCategoryPageChange = (categoryName, newPage) => {
     setCategoryPages((prev) => ({ ...prev, [categoryName]: newPage }));
@@ -265,10 +269,10 @@ function EskepInstructorAssingCourses() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <div className="col-lg-3 col-md-4 mb-4">
+            <div className="col-lg-3 col-md-3 mb-4">
               <Sidebar />
             </div>
-            <div className="col-lg-9 col-md-8">
+            <div className="col-lg-9 col-md-9">
               <div className="card shadow-sm p-4">
                 <h4 className="mb-4">
                   <i className="bi bi-grid-fill"></i> Kurslar
@@ -379,7 +383,7 @@ function EskepInstructorAssingCourses() {
                 <hr />
                 <div className="d-flex align-items-center">
                   <img
-                    src={profile.image || "/avatar.jpg"}
+                    src={user.image || "/avatar.jpg"}
                     alt="Profil"
                     className="rounded-circle me-3"
                     style={{
@@ -389,8 +393,8 @@ function EskepInstructorAssingCourses() {
                     }}
                   />
                   <div>
-                    <strong>{profile?.full_name || "Misafir Kullanıcı"}</strong>
-                    <p className="mb-0 text-muted small">{profile?.email}</p>
+                    <strong>{user?.full_name || "Misafir Kullanıcı"}</strong>
+                    <p className="mb-0 text-muted small">{user?.email}</p>
                   </div>
                 </div>
               </div>

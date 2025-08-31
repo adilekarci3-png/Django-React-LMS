@@ -41,7 +41,7 @@ function EskepInstructorCourseCreate() {
 
   useEffect(() => {
     api.get("course/category/").then((res) => setCategory(res.data));
-    api.get("eskepEgitmen/list/").then((res) => setInstructors(res.data));
+    api.get("/egitmen/list/").then((res) => setInstructors(res.data));
   }, []);
 
   const handleSubmit = async (values, { setSubmitting }) => {

@@ -63,7 +63,9 @@ function EskepStajerOdevs() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <Sidebar />
+            <div className="col-lg-2 col-md-4 col-12 mb-4 mb-md-0">
+              <Sidebar />
+            </div>
             <div className="col-lg-10 col-md-8 col-12">
               <h4 className="mb-0 mb-4">
                 <i className="fas fa-chalkboard-user"></i> Ödevlerim
@@ -153,86 +155,86 @@ function EskepStajerOdevs() {
       <ESKEPBaseFooter />
 
 
-<Modal
-      isOpen={modalIsOpen} 
-  onRequestClose={() => setModalIsOpen(false)}
-      overlayClassName="modalOverlay"
-      className="modalContent"
-      shouldCloseOnOverlayClick
-      aria={{
-        labelledby: headingId,
-      }}
-    >
-      {selectedFiles.map((file, index) => (
-        <>
-        <div className="modalHeader">
-        <h3 id={headingId} className="modalTitle">
-          {file.title}
-        </h3>
-        <button
-          className="iconBtn"
-          aria-label="Kapat"
-          onClick={() => setModalIsOpen(false)} 
-          title="Kapat"
-        >
-          <FiX />
-        </button>
-      </div>
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        overlayClassName="modalOverlay"
+        className="modalContent"
+        shouldCloseOnOverlayClick
+        aria={{
+          labelledby: headingId,
+        }}
+      >
+        {selectedFiles.map((file, index) => (
+          <>
+            <div className="modalHeader">
+              <h3 id={headingId} className="modalTitle">
+                {file.title}
+              </h3>
+              <button
+                className="iconBtn"
+                aria-label="Kapat"
+                onClick={() => setModalIsOpen(false)}
+                title="Kapat"
+              >
+                <FiX />
+              </button>
+            </div>
 
-      <div className="modalBody">
-        {selectedFiles?.length ? (
-          <ul className="fileList" role="list">
-            {selectedFiles.map((file, idx) => (
-              <li key={idx} className="fileItem">
-                <div className="fileMain">
-                  <span className="fileIcon" aria-hidden>
-                    <FiFileText />
-                  </span>
-                  <div className="fileTexts">
-                    <div className="fileTitle">{fileTitle(file.variant, idx)}</div>                    
-                    {fileName(file.file) && (
-                      <div className="fileMeta">{fileName(file.file)}</div>
-                    )}
-                  </div>
+            <div className="modalBody">
+              {selectedFiles?.length ? (
+                <ul className="fileList" role="list">
+                  {selectedFiles.map((file, idx) => (
+                    <li key={idx} className="fileItem">
+                      <div className="fileMain">
+                        <span className="fileIcon" aria-hidden>
+                          <FiFileText />
+                        </span>
+                        <div className="fileTexts">
+                          <div className="fileTitle">{fileTitle(file.variant, idx)}</div>
+                          {fileName(file.file) && (
+                            <div className="fileMeta">{fileName(file.file)}</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="fileActions">
+                        <a
+                          className="btn ghost"
+                          href={safeUrl(file.file)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Yeni sekmede aç"
+                        >
+                          <FiExternalLink className="btnIcon" />
+                          Önizle
+                        </a>
+                        <a
+                          className="btn primary"
+                          href={safeUrl(file.file)}
+                          download={fileName(file.file)}
+                          title="İndir"
+                        >
+                          <FiDownload className="btnIcon" />
+                          İndir
+                        </a>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="emptyState">
+                  Henüz eklenmiş bölüm yok.
                 </div>
-                <div className="fileActions">
-                  <a
-                    className="btn ghost"
-                    href={safeUrl(file.file)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Yeni sekmede aç"
-                  >
-                    <FiExternalLink className="btnIcon" />
-                    Önizle
-                  </a>
-                  <a
-                    className="btn primary"
-                    href={safeUrl(file.file)}
-                    download={fileName(file.file)}
-                    title="İndir"
-                  >
-                    <FiDownload className="btnIcon" />
-                    İndir
-                  </a>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="emptyState">
-            Henüz eklenmiş bölüm yok.
-          </div>
-        )}
-      </div>
-      </>
-      ))}
-      <div className="modalFooter">
-        <button className="btn outline" onClick={onClose}>
-          Kapat
-        </button>
-      </div>
-    </Modal>  
+              )}
+            </div>
+          </>
+        ))}
+        <div className="modalFooter">
+          <button className="btn outline" onClick={onClose}>
+            Kapat
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }

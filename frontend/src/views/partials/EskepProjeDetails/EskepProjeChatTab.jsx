@@ -1,103 +1,116 @@
+// EskepProjeChatTab.jsx
 import React, { useState, useEffect, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import moment from "moment";
 import useAxios from "../../../utils/useAxios";
 import useUserData from "../../plugin/useUserData";
-
 import Swal from "sweetalert2";
 
-function EskepProjeChatTab({ eskepproje, fetchEskepProjeDetail }) {
+function EskepProjeChatTab({ eskepproje, fetchEskepProjeDetail, fetchDetail }) {
+  const user = useUserData();
+  const refresh = fetchEskepProjeDetail || fetchDetail;
+
+  // --- HOOK’LAR: her zaman, en üstte ve sabit sırada çağrılır ---
   const [createMessage, setCreateMessage] = useState({ title: "", message: "" });
-  const [filteredQuestions, setFilteredQuestions] = useState(eskepproje.question_answers || []);
+  const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [addQuestionShow, setAddQuestionShow] = useState(false);
   const [conversationShow, setConversationShow] = useState(false);
   const lastElementRef = useRef(null);
-  const user = useUserData();
-  useEffect(() => {
-    setFilteredQuestions(eskepproje.question_answers || []);
-  }, [eskepproje]);
 
+  // Prop değiştiğinde listeyi senkronize et (güvenli okuma)
+  useEffect(() => {
+    const list = Array.isArray(eskepproje?.question_answers)
+      ? eskepproje.question_answers
+      : [];
+    setFilteredQuestions(list);
+  }, [eskepproje?.question_answers]); // sadece ihtiyaç duyulan alan
+
+  // Konuşma uzadıkça sona kaydır
+  useEffect(() => {
+    lastElementRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [selectedConversation?.messages?.length]);
+
+  // --- Handlers ---
   const handleSearchQuestion = (e) => {
-    const query = e.target.value.toLowerCase();
-    if (!query) {
-      setFilteredQuestions(eskepproje.question_answers || []);
-    } else {
-      const filtered = eskepproje.question_answers?.filter((q) =>
-        q.title.toLowerCase().includes(query)
-      );
-      setFilteredQuestions(filtered);
-    }
+    const q = (e.target.value || "").toLowerCase();
+    const all = Array.isArray(eskepproje?.question_answers)
+      ? eskepproje.question_answers
+      : [];
+    if (!q) return setFilteredQuestions(all);
+    setFilteredQuestions(all.filter((x) => (x?.title || "").toLowerCase().includes(q)));
   };
 
   const handleShowConversation = (question) => {
     setSelectedConversation(question);
     setConversationShow(true);
+    setTimeout(() => lastElementRef.current?.scrollIntoView({ behavior: "smooth" }), 0);
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("eskepproje_id", eskepproje?.id);
-    formData.append("user_id", user?.user_id);
-    formData.append("message", createMessage.message);
-    formData.append("qa_id", selectedConversation?.qa_id);
+    const text = (createMessage.message || "").trim();
+    if (!selectedConversation?.qa_id) {
+      Swal.fire({ icon: "warning", title: "Konuşma seçiniz" });
+      return;
+    }
+    if (!text) return;
 
     try {
-      const res = await useAxios().post(`eskepstajer/question-answer-message-create/`, formData);
-      setSelectedConversation(res.data.question);
-      setCreateMessage({ ...createMessage, message: "" });
-      Swal.fire({
-        icon: "success",
-        title: "Başarılı!",
-        text: "Konuşma Başlatıldı.",
-        confirmButtonText: "Tamam",
-      });
-    } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Hata!",
-        text: "Konuşma Başlatılırken Bir Hata Oluştu.",
-        confirmButtonText: "Tamam",
-      });
+      const fd = new FormData();
+      fd.append("eskepproje_id", eskepproje?.id ?? "");
+      fd.append("user_id", user?.user_id ?? "");
+      fd.append("message", text);
+      fd.append("qa_id", selectedConversation.qa_id);
+
+      const res = await useAxios().post(
+        `eskepstajer/question-answer-message-create/`,
+        fd
+      );
+
+      const updated = res?.data?.question || selectedConversation;
+      setSelectedConversation(updated);
+      setCreateMessage((s) => ({ ...s, message: "" }));
+      refresh?.();
+      setTimeout(() => lastElementRef.current?.scrollIntoView({ behavior: "smooth" }), 0);
+    } catch {
+      Swal.fire({ icon: "error", title: "Hata!", text: "Mesaj gönderilemedi." });
     }
   };
 
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("eskepproje_id", eskepproje?.id);
-    formData.append("user_id", user?.user_id);
-    formData.append("title", createMessage.title);
-    formData.append("message", createMessage.message);
+    const title = (createMessage.title || "").trim();
+    const message = (createMessage.message || "").trim();
+    if (!title || !message) {
+      Swal.fire({ icon: "warning", title: "Başlık ve mesaj zorunludur" });
+      return;
+    }
 
     try {
+      const fd = new FormData();
+      fd.append("eskepproje_id", eskepproje?.id ?? "");
+      fd.append("user_id", user?.user_id ?? "");
+      fd.append("title", title);
+      fd.append("message", message);
+
       await useAxios().post(
         `eskepstajer/question-answer-list-create/${eskepproje?.id}/`,
-        formData
+        fd
       );
-      Toast().fire({ icon: "success", title: "Soru gönderildi" });
-      fetchEskepProjeDetail();
+
+      Swal.fire({ icon: "success", title: "Soru gönderildi" });
       setAddQuestionShow(false);
       setCreateMessage({ title: "", message: "" });
-
-    } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Hata!",
-        text: "Mesaj Gönderilirken Bir Hata Oluştu.",
-        confirmButtonText: "Tamam",
-      });
+      refresh?.();
+    } catch {
+      Swal.fire({ icon: "error", title: "Hata!", text: "Soru gönderilemedi." });
     }
   };
 
-  useEffect(() => {
-    if (lastElementRef.current) {
-      lastElementRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [selectedConversation]);
-
+  // --- Render (hook’lardan sonra) ---
+  const hasData = !!eskepproje;
   return (
     <>
       <div className="d-flex justify-content-between mb-3">
@@ -106,39 +119,48 @@ function EskepProjeChatTab({ eskepproje, fetchEskepProjeDetail }) {
           className="form-control me-2"
           placeholder="Sorularda ara..."
           onChange={handleSearchQuestion}
+          disabled={!hasData}
         />
-        <Button onClick={() => setAddQuestionShow(true)}>Soru Sor</Button>
+        <Button onClick={() => setAddQuestionShow(true)} disabled={!hasData}>
+          Soru Sor
+        </Button>
       </div>
 
-      <div className="vstack gap-3">
-        {filteredQuestions?.map((q) => (
-          <div key={q.qa_id} className="card p-3 shadow-sm">
-            <div className="d-flex align-items-center mb-2">
-              <img
-                src={q.profile?.image}
-                className="rounded-circle"
-                style={{ width: "50px", height: "50px", objectFit: "cover", marginRight: "1rem" }}
-                alt="Profil"
-              />
-              <div>
-                <h6 className="mb-0">{q.profile?.full_name}</h6>
-                <small className="text-muted">{moment(q.date).format("DD MMM YYYY")}</small>
+      {!hasData && <div className="text-muted">Yükleniyor…</div>}
+
+      {hasData && (
+        <div className="vstack gap-3">
+          {filteredQuestions?.map((q) => (
+            <div key={q.qa_id} className="card p-3 shadow-sm">
+              <div className="d-flex align-items-center mb-2">
+                <img
+                  src={q?.profile?.image}
+                  className="rounded-circle"
+                  style={{ width: 50, height: 50, objectFit: "cover", marginRight: "1rem" }}
+                  alt="Profil"
+                />
+                <div>
+                  <h6 className="mb-0">{q?.profile?.full_name}</h6>
+                  <small className="text-muted">
+                    {q?.date ? moment(q.date).format("DD MMM YYYY") : ""}
+                  </small>
+                </div>
               </div>
+              <h5 className="mt-2">{q?.title}</h5>
+              <Button
+                variant="outline-primary"
+                size="sm"
+                className="mt-2"
+                style={{ width: 100, height: 32, padding: 0 }}
+                onClick={() => handleShowConversation(q)}
+              >
+                <i className="fas fa-comments me-1"></i> Katıl
+              </Button>
             </div>
-            <h5 className="mt-2">{q.title}</h5>
-            <Button
-  variant="outline-primary"
-  size="sm"
-  className="mt-2"
-  style={{ width: "100px", height: "32px", padding: "0" }}
-  onClick={() => handleShowConversation(q)}
->
-  <i className="fas fa-comments me-1"></i> Katıl
-</Button>
-          </div>
-        ))}
-        {filteredQuestions?.length === 0 && <p>Hiç soru bulunamadı.</p>}
-      </div>
+          ))}
+          {!filteredQuestions?.length && <p>Hiç soru bulunamadı.</p>}
+        </div>
+      )}
 
       {/* Soru Ekle Modal */}
       <Modal show={addQuestionShow} onHide={() => setAddQuestionShow(false)} size="lg">
@@ -184,24 +206,27 @@ function EskepProjeChatTab({ eskepproje, fetchEskepProjeDetail }) {
           <Modal.Title>{selectedConversation?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div style={{ maxHeight: "500px", overflowY: "auto" }}>
+          <div style={{ maxHeight: 500, overflowY: "auto" }}>
             {selectedConversation?.messages?.map((m) => (
               <div key={m.id} className="mb-3">
                 <div className="d-flex align-items-center mb-1">
                   <img
-                    src={m.profile?.image}
+                    src={m?.profile?.image}
                     className="rounded-circle"
-                    style={{ width: "40px", height: "40px", marginRight: "0.75rem", objectFit: "cover" }}
+                    style={{ width: 40, height: 40, marginRight: "0.75rem", objectFit: "cover" }}
                     alt="Avatar"
                   />
-                  <strong>{m.profile?.full_name}</strong>
+                  <strong>{m?.profile?.full_name}</strong>
                 </div>
-                <p className="bg-light p-2 rounded">{m.message}</p>
-                <small className="text-muted">{moment(m.date).format("DD MMM YYYY HH:mm")}</small>
+                <p className="bg-light p-2 rounded">{m?.message}</p>
+                <small className="text-muted">
+                  {m?.date ? moment(m.date).format("DD MMM YYYY HH:mm") : ""}
+                </small>
               </div>
             ))}
-            <div ref={lastElementRef}></div>
+            <div ref={lastElementRef} />
           </div>
+
           <form className="mt-3 d-flex" onSubmit={handleSendMessage}>
             <textarea
               className="form-control me-2"

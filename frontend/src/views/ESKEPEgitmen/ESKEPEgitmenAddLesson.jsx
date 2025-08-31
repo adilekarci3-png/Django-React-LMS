@@ -5,8 +5,9 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import useAxios from "../../utils/useAxios";
 import useUserData from "../plugin/useUserData"; // Token'dan kullanıcı bilgisi al
-import Sidebar from "../ESKEPinstructor/Partials/Sidebar";
-import Header from "../ESKEPinstructor/Partials/Header";
+import Sidebar from "./Partials/Sidebar";
+import Header from "./Partials/Header";
+
 
 function ESKEPEgitmenAddLesson() {
   const today = new Date().toISOString().split("T")[0];
@@ -62,11 +63,11 @@ function ESKEPEgitmenAddLesson() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <div className="col-lg-2">
+           <div className="col-lg-3 mb-4 mb-lg-0">
               <Sidebar />
             </div>
-            <div className="col-lg-10 mx-auto bg-white p-5 rounded shadow">
-              <h3 className="text-primary fw-bold mb-4">📘 Yeni Eğitim Ekle</h3>
+            <div className="col-lg-9 mx-auto bg-white p-5 rounded shadow">
+              <h3 className="text-primary fw-bold mb-4">📘 Ders Saati Ekle</h3>
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label className="form-label">Ders Başlığı</label>

@@ -1,19 +1,21 @@
 // CourseDetail.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import useUserData from "../plugin/useUserData";
 import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
 import LectureList from "../partials/CourseDetail/LectureList";
 import NoteSection from "../partials/CourseDetail/NoteSection";
-import QuestionSection from "../partials/CourseDetail/QuestionSection";
 import ReviewForm from "../partials/CourseDetail/ReviewForm";
 import LecturePlayerModal from "../partials/CourseDetail/LecturePlayerModal";
 import ConversationModal from "../partials/CourseDetail/ConversationModal";
-
+import QuestionSection from "../partials/CourseDetail/QuestionSection";
+import AskQuestionModal from "../partials/CourseDetail/AskQuestionModal";
+import NoteModal from "../partials/CourseDetail/NoteModal";
+import "./css/Sidebar.css";
 
 function CourseDetail() {
   const [course, setCourse] = useState([]);
@@ -21,29 +23,82 @@ function CourseDetail() {
   const [variantItem, setVariantItem] = useState(null);
   const [showLecture, setShowLecture] = useState(false);
   const [noteModal, setNoteModal] = useState({ show: false, selected: null });
-  const [conversationModal, setConversationModal] = useState({ show: false, selected: null });
+  const [showConversation, setShowConversation] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [questionModal, setQuestionModal] = useState(false);
-
+  const [qaId, setQaId] = useState(null);
   const api = useAxios();
   const param = useParams();
+  const user = useUserData();             // ✅ hook en üstte
+  const userId = user?.user_id;           // fetch'te kullanacağız
+  const enrollmentId = useParams()?.enrollment_id;
 
   const fetchCourseDetail = async () => {
+    debugger;
     try {
       const res = await api.get(
-        `student/course-detail/${UserData()?.user_id}/${param.enrollment_id}/`
+        `student/course-detail/${userId}/${param.enrollment_id}/`
       );
       setCourse(res.data);
       const percentage =
         (res.data.completed_lesson?.length / res.data.lectures?.length) * 100;
       setCompletionPercentage(percentage?.toFixed(0));
+      console.error("Kurs detayı :", res.data);
     } catch (error) {
       console.error("Kurs detayı alınamadı:", error);
     }
   };
 
-  useEffect(() => {
+ // Mevcut sohbete mesaj gönder
+ const handleSendConversationMessage = async (text) => {
+   const msg = (text || "").trim();
+   if (!msg || !selectedQuestion) return;
+   try {
+     const payload = {
+       course_id: course?.id,
+       qa_id: selectedQuestion?.qa_id || selectedQuestion?.id, // thread anahtarı
+       message: msg,
+     };
+     await api.post("student/course-qa/", payload);
+
+     // Gönderimden sonra thread'i tazele ve seçili konuşmayı yeniden eşle
+     const res = await api.get(`student/course-detail/${userId}/${param.enrollment_id}/`);
+     setCourse(res.data);
+     const key = selectedQuestion?.qa_id || selectedQuestion?.id;
+     const updated = res.data?.question_answer?.find(
+       (q) => (q.qa_id || q.id) === key
+     );
+     setSelectedQuestion(updated || selectedQuestion);
+   } catch (e) {
+     console.error("Mesaj gönderilemedi:", e);
+   }
+ };
+
+  const handleSaveQuestion = async ({ title, message }) => {
+    try {
+      const payload = {
+        course_id: course?.id,     // zorunlu
+        message,                   // zorunlu
+        title: title || null,      // opsiyonel
+      };
+      if (qaId) payload.qa_id = qaId;  // sadece mevcut thread varsa ekle
+
+      const { data } = await api.post("student/course-qa/", payload);
+      // backend yanıtında qa_id döndürüyoruz (view tarafını buna göre yazmıştık)
+      if (!qaId && data?.qa_id) setQaId(data.qa_id);
+
+      setQuestionModal(false);
+      fetchCourseDetail();
+    } catch (e) {
+      console.error("Soru/Mesaj gönderilemedi:", e);
+    }
+  };
+
+ +useEffect(() => {
+  if (userId && param?.enrollment_id) {
     fetchCourseDetail();
-  }, []);
+  }
+  }, [userId, param?.enrollment_id]);
 
   return (
     <>
@@ -105,7 +160,7 @@ function CourseDetail() {
                       <div className="tab-pane fade" id="tab-3">
                         <QuestionSection
                           course={course}
-                          setModal={setConversationModal}
+                          onOpenConversation={(q) => { setSelectedQuestion(q); setShowConversation(true); }}
                           openAskModal={() => setQuestionModal(true)}
                           refresh={fetchCourseDetail}
                         />
@@ -132,14 +187,26 @@ function CourseDetail() {
       />
 
       <ConversationModal
-        modal={conversationModal}
-        setModal={setConversationModal}
+
+        show={showConversation}
+        question={selectedQuestion}
+        onClose={() => setShowConversation(false)}
         refresh={fetchCourseDetail}
       />
 
-      {/* Add question modal */}
-      {/* Note edit modal */}
-      {/* Bunlar da ayrı bileşen olarak eklenebilir */}
+      <AskQuestionModal
+        show={questionModal}
+        handleClose={() => setQuestionModal(false)}
+        handleSaveQuestion={handleSaveQuestion}
+      />
+
+      <NoteModal
+        modal={noteModal}
+        setModal={setNoteModal}
+        course={course}
+        enrollmentId={enrollmentId}
+        refresh={fetchCourseDetail}
+      />
 
       <AkademiBaseFooter />
     </>

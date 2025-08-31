@@ -24,7 +24,7 @@ const StajerMenu = () => {
         {/* Eğitim */}
         <li className="dropdown-header text-muted fw-bold">📚 Eğitim</li>
         <li>
-          <Link className="dropdown-item" to={`/student/courses/`}>
+          <Link className="dropdown-item" to={`/eskepstajer/courses/`}>
             <i className="fa-solid fa-chalkboard-user me-2"></i> Kurslarım
           </Link>
         </li>

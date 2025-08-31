@@ -246,11 +246,11 @@ console.log(reports.data);
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-2">
-            <div className="col-lg-2 col-md-3 col-12">
+            <div className="col-lg-3 col-md-3 col-12">
               <Sidebar />
             </div>
 
-            <div className="col-lg-10 col-md-9 col-12">
+            <div className="col-lg-9 col-md-9 col-12">
               <h4 className="mb-4 d-flex align-items-center">
                 <i className="bi bi-speedometer2 me-2 text-primary"></i>
                 Koordinatör Paneli

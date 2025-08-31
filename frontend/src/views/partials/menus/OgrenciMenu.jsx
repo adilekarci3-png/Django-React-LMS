@@ -29,17 +29,17 @@ const OgrenciMenu = () => {
           </Link>
         </li>
         <li>
-          <Link className="dropdown-item" to={`/stajer/odevs/`}>
+          <Link className="dropdown-item" to={`/eskepogrenci/odevs/`}>
             <i className="fa-solid fa-pencil me-2"></i> Ödevlerim
           </Link>
         </li>
         <li>
-          <Link className="dropdown-item" to={`/stajer/kitaptahlils/`}>
+          <Link className="dropdown-item" to={`/eskepogrenci/kitaptahlilis/`}>
             <i className="fa-solid fa-book-open-reader me-2"></i> Kitap Tahlillerim
           </Link>
         </li>
         <li>
-          <Link className="dropdown-item" to={`/stajer/dersonuraporus/`}>
+          <Link className="dropdown-item" to={`/eskepogrenci/derssonuraporus/`}>
             <i className="fa-solid fa-file-lines me-2"></i> Raporlarım
           </Link>
         </li>

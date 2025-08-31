@@ -6,9 +6,10 @@ import { FiFileText, FiExternalLink, FiDownload, FiX } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import useUserData from "../plugin/useUserData";
+
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import useUserData from "../plugin/useUserData";
 import "./css/ModalStyle.css"
 
 function EskepStajerKitapTahlilis() {
@@ -63,7 +64,9 @@ function EskepStajerKitapTahlilis() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <Sidebar />
+            <div className="col-lg-2 col-md-4 col-12 mb-4 mb-md-0">
+                          <Sidebar />
+                        </div>
             <div className="col-lg-10 col-md-8 col-12">
               <h4 className="mb-0 mb-4">
                 <i className="fas fa-chalkboard-user"></i> Kitap Tahlillerim

@@ -7,6 +7,7 @@ import {
   logout,
 } from "./auth";
 import { API_BASE_URL } from "./constants";
+import { API_BASE_TEST_URL } from "./constants";
 
 // Oturum zaman aşımı (ms cinsinden)
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
@@ -36,7 +37,7 @@ const redirectToLogin = () => {
 
 const useAxios = () => {
   const axiosInstance = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL: API_BASE_TEST_URL,
   });
 
   // Arka planda oturum zaman aşımı kontrolü

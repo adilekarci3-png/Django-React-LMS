@@ -6,7 +6,7 @@ import useUserData from "../../plugin/useUserData";
 
 import Swal from "sweetalert2";
 
-function EskepProjeNotesTab({ proje, fetchEskepProjeDetail, id }) {
+function EskepProjeNotesTab({ eskepproje, fetchEskepProjeDetail, id }) {
     const [createNote, setCreateNote] = useState({ title: "", note: "" });
     const [selectedNote, setSelectedNote] = useState(null);
 
@@ -110,8 +110,8 @@ function EskepProjeNotesTab({ proje, fetchEskepProjeDetail, id }) {
                 </Button>
             </div>
 
-            {proje?.notes?.length > 0 ? (
-                proje.notes.map((note) => (
+            {eskepproje?.notes?.length > 0 ? (
+                eskepproje.notes.map((note) => (
                     <div key={note.id} className="card mb-3 shadow-sm p-3">
                         <h6>{note.title}</h6>
                         <p>{note.note}</p>

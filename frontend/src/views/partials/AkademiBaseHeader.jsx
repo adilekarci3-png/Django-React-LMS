@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import useUserData from "../plugin/UserData"; // ✅ useUserData hazır
+import useUserData from "../plugin/UserData";
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
 import { ProfileContext } from "../plugin/Context";
@@ -14,45 +14,43 @@ function AkademiBaseHeader() {
 
   const api = useAxios();
 
-  // ✅ Zustand'dan direkt hook
+  // ✅ Selector: isLoggedIn boolean olarak geliyor
   const [isLoggedIn, rehydrated] = useAuthStore((state) => [
-    state.isLoggedIn,
+    state.isLoggedIn(),
     state.rehydrated,
   ]);
 
-  const user = useUserData(); // ✅ user verisi (rehydrated sonrası hazır)
-debugger;
+  const user = useUserData(); // rehydrated sonrası hazır
+  const fetchedRef = React.useRef(false);
+
   useEffect(() => {
-    debugger;
-    if (rehydrated && isLoggedIn && user?.user_id) {
-      
-      api.get(`user/profile/${user.user_id}/`)
-        .then((res) => setProfile(res.data))
-        .catch((err) => console.error("Profil alınamadı:", err));
+    if (!rehydrated || !isLoggedIn || !user?.user_id || fetchedRef.current) return;
+    fetchedRef.current = true;
 
-      api.get(`user-role-detail/`)
-        .then((res) => setRoleData(res.data))
-        .catch((err) => console.error("Rol alınamadı:", err));
-    }
-  }, [rehydrated, isLoggedIn, user]);
+    api.get(`user/profile/${user.user_id}/`)
+      .then((r) => setProfile(r.data))
+      .catch((e) => console.error("Profil alınamadı:", e));
 
-  if (!rehydrated) return null; // ✅ Zustand hazır değilse render etme
+    api.get(`user-role-detail/`)
+      .then((r) => setRoleData(r.data))
+      .catch((e) => console.error("Rol alınamadı:", e));
+  }, [rehydrated, isLoggedIn, user?.user_id, api, setProfile]);
+
+  if (!rehydrated) return null; // Zustand hazır değilse render etme
 
   const handleSearchSubmit = () => {
-    navigate(`/search/?search=${searchQuery}`);
+    navigate(`/search/?search=${encodeURIComponent(searchQuery)}`);
   };
 
   const menuItemStyle = { color: "#000000" };
   const navLinkStyle = { color: "#ffffff" };
 
-  const { base_roles, sub_roles } = roleData;
+  const { base_roles = [], sub_roles = [] } = roleData;
 
   return (
     <nav
       className="navbar navbar-expand-lg"
-      style={{
-        background: "linear-gradient(to right, #023e8a, #03045e, #0077b6)",
-      }}
+      style={{ background: "linear-gradient(to right, #023e8a, #03045e, #0077b6)" }}
     >
       <div className="container">
         <Link className="navbar-brand text-white" to="/">EHAD</Link>
@@ -86,21 +84,71 @@ debugger;
             {/* === TEACHER === */}
             {base_roles.includes("Teacher") && (
               <li className="nav-item dropdown">
-                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" style={navLinkStyle}>
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  style={navLinkStyle}
+                >
                   <i className="fas fa-chalkboard-user"></i> Eğitmen
                 </a>
                 <ul className="dropdown-menu">
-                  {sub_roles.includes("HDMEgitmen") && (
-                    <Link className="dropdown-item" to="/hdm/teacher/hafizlar" style={menuItemStyle}>HDM Hafızlar</Link>
-                  )}
-                  {sub_roles.includes("HBSEgitmen") && (
-                    <Link className="dropdown-item" to="/hbs/teacher/hafizlar" style={menuItemStyle}>HBS Hafızlar</Link>
-                  )}
-                  <Link className="dropdown-item" to="/instructor/dashboard/" style={menuItemStyle}>
+                  {/* Panel / Takvim */}
+                  <Link className="dropdown-item" to="/educator/dashboard" style={menuItemStyle}>
                     <i className="bi bi-grid-fill"></i> Panel
                   </Link>
-                  <Link className="dropdown-item" to="/instructor/courses/" style={menuItemStyle}>
-                    <i className="fas fa-book"></i> Kurslarım
+                  <Link className="dropdown-item" to="/educator/schedule" style={menuItemStyle}>
+                    <i className="fa-regular fa-calendar"></i> Programım
+                  </Link>
+
+                  <li><hr className="dropdown-divider" /></li>
+
+                  {/* Canlı Dersler */}
+                  <Link className="dropdown-item" to="/educator/live-ders-listesi" style={menuItemStyle}>
+                    <i className="fa-solid fa-video text-danger"></i> Canlı Derslerim
+                  </Link>
+                  <Link className="dropdown-item" to="/educator/add-canli-ders" style={menuItemStyle}>
+                    <i className="fa-solid fa-video text-danger"></i> Canlı Ders Ekle
+                  </Link>
+
+                  {/* Ders Saati */}
+                  <Link className="dropdown-item" to="/educator/add-lesson" style={menuItemStyle}>
+                    <i className="fa-regular fa-clock text-success"></i> Ders Saati Ekle
+                  </Link>
+
+                  <li><hr className="dropdown-divider" /></li>
+
+                  {/* Video İşlemleri */}
+                  <Link className="dropdown-item" to="/educator/video-create" style={menuItemStyle}>
+                    <i className="fa-solid fa-film text-warning"></i> Video Oluştur
+                  </Link>
+                  <Link className="dropdown-item" to="/educator/webcam-record" style={menuItemStyle}>
+                    <i className="fa-solid fa-upload text-info"></i> Video Ekle (Webcam)
+                  </Link>
+                  <Link className="dropdown-item" to="/educator/video-link-create" style={menuItemStyle}>
+                    <i className="fa-brands fa-youtube text-danger"></i> YouTube Video Ekle
+                  </Link>
+
+                  {/* Video Listeleri */}
+                  <Link className="dropdown-item" to="/educator/video-list" style={menuItemStyle}>
+                    <i className="fa-solid fa-photo-film text-info"></i> Videolarım
+                  </Link>
+                  <Link className="dropdown-item" to="/educator/created-videos" style={menuItemStyle}>
+                    <i className="fa-solid fa-clapperboard text-warning"></i> Oluşturduğum Videolar
+                  </Link>
+                  <Link className="dropdown-item" to="/educator/youtube-video-list" style={menuItemStyle}>
+                    <i className="fa-brands fa-youtube text-danger"></i> YouTube Videolarım
+                  </Link>
+
+                  <li><hr className="dropdown-divider" /></li>
+
+                  {/* Dokümanlar */}
+                  <Link className="dropdown-item" to="/educator/documents" style={menuItemStyle}>
+                    <i className="fa-regular fa-file-lines text-secondary"></i> Dökümanlarım
+                  </Link>
+                  <Link className="dropdown-item" to="/educator/documents/create" style={menuItemStyle}>
+                    <i className="fa-solid fa-file-arrow-up text-secondary"></i> Döküman Ekle
                   </Link>
                 </ul>
               </li>
@@ -135,7 +183,26 @@ debugger;
                 </ul>
               </li>
             )}
-
+            {/* === AKADEMİ === */}
+            <li className="nav-item dropdown">
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                style={navLinkStyle}
+              >
+                <i className="fas fa-graduation-cap"></i> Akademi
+              </a>
+              <ul className="dropdown-menu">
+                <Link className="dropdown-item" to="/akademi/courses" style={menuItemStyle}>
+                  <i className="fa-solid fa-book"></i> Kurslar
+                </Link>
+                <Link className="dropdown-item" to="/akademi/videos" style={menuItemStyle}>
+                  <i className="fa-solid fa-video"></i> Videolar
+                </Link>
+              </ul>
+            </li>
             {/* === HAFIZ === */}
             {base_roles.includes("Hafiz") && (
               <li className="nav-item dropdown">
@@ -152,15 +219,6 @@ debugger;
                 </ul>
               </li>
             )}
-
-            {/* === STAJER === */}
-            {/* {base_roles.includes("Stajer") && (
-              <li className="nav-item">
-                <Link className="nav-link" to="/eskep/stajer/gorevler" style={navLinkStyle}>
-                  <i className="fas fa-briefcase"></i> Stajyer Görevler
-                </Link>
-              </li>
-            )} */}
 
             {/* === AGENT === */}
             {base_roles.includes("Agent") && (
@@ -183,7 +241,8 @@ debugger;
               <i className="fas fa-search"></i>
             </button>
 
-            {isLoggedIn() ? (
+            {/* 🔧 BURADA boolean kullanıyoruz */}
+            {isLoggedIn ? (
               <Link to="/logout/" className="btn btn-danger ms-2">
                 <i className="fas fa-sign-out-alt"></i> Çıkış
               </Link>

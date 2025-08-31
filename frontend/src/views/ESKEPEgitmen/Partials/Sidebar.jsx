@@ -21,57 +21,104 @@ function Sidebar() {
       >
         <span className="bi bi-grid" />
       </button>
+
       <div className="collapse navbar-collapse p-3" id="sidenav">
         <div className="navbar-nav flex-column">
+
+          {/* --- Ana (Eğitmen) --- */}
           <ul className="list-unstyled ms-n2 mb-4">
             <li className="nav-item">
-              <Link className="nav-link" to={`/student/dashboard/`}>
-                {" "}
-                <i className="bi bi-grid-fill"></i>Panel
+              <Link className="nav-link" to={`/eskepegitmen/dashboard/`}>
+                <i className="fa-solid fa-gauge text-primary me-2"></i> Panel
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link className="nav-link" to={`/student/courses/`}>
-                {" "}
-                <i className="fas fa-chalkboard-user"></i>Görevlerim
+              <Link className="nav-link" to={`/eskepegitmen/live-lessons/`}>
+                <i className="fa-solid fa-video text-danger me-2"></i> Canlı Derslerim
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link className="nav-link" to={`/student/courses/`}>
-                {" "}
-                <i className="fas fa-chalkboard-user"></i>Görevlerim
+              <Link className="nav-link" to={`/eskepegitmen/youtube-video-list/`}>
+                <i className="fa-brands fa-youtube text-danger me-2"></i> YouTube Videolarım
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link className="nav-link" to={`/student/wishlist/`}>
-                {" "}
-                <i className="fas fa-heart"></i> İstekler{" "}
+              <Link className="nav-link" to={`/eskepegitmen/video-list/`}>
+                <i className="fa-solid fa-photo-film text-info me-2"></i> Videolarım
+              </Link>
+            </li>
+
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/created-videos/`}>
+                <i className="fa-solid fa-clapperboard text-warning me-2"></i> Oluşturduğum Videolar
+              </Link>
+            </li>
+
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/documents/`}>
+                <i className="fa-regular fa-file-lines text-secondary me-2"></i> Dökümanlarım
               </Link>
             </li>
           </ul>
 
-          {/* Navbar header */}
+          {/* --- İçerik Ekle (Eğitmen) --- */}
+          <span className="navbar-header mb-2">İçerik Ekle</span>
+          <ul className="list-unstyled ms-n2 mb-4">
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/canli-ders-ekle/`}>
+                <i className="fa-solid fa-video text-danger me-2"></i> Canlı Ders Ekle
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/youtube-video-ekle/`}>
+                <i className="fa-brands fa-youtube text-danger me-2"></i> YouTube Video Ekle
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/ders-olustur/`}>
+                <i className="fa-regular fa-clock text-success me-2"></i> Ders Saati Ekle
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/video-olustur/`}>
+                <i className="fa-solid fa-film text-warning me-2"></i> Video Oluştur
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/video-ekle/`}>
+                <i className="fa-solid fa-upload text-info me-2"></i> Video Ekle
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to={`/eskepegitmen/dokuman-ekle/`}>
+                <i className="fa-solid fa-file-arrow-up text-secondary me-2"></i> Döküman Ekle
+              </Link>
+            </li>
+          </ul>
+
+          {/* --- Hesap (genel yolların sende nasıl olduğuna göre güncelle) --- */}
           <span className="navbar-header mb-3">Hesap Ayarları</span>
           <ul className="list-unstyled ms-n2 mb-0">
             <li className="nav-item">
               <Link className="nav-link" to={`/student/profile/`}>
-                {" "}
-                <i className="fas fa-edit"></i> Profil Düzenle
+                <i className="fas fa-edit text-primary me-2"></i> Profil Düzenle
               </Link>
             </li>
-            <li className="nav-item ">
+            <li className="nav-item">
               <Link className="nav-link" to={`/student/change-password/`}>
-                {" "}
-                <i className="fas fa-lock"></i> Şifre Değiştir
+                <i className="fas fa-lock text-warning me-2"></i> Şifre Değiştir
               </Link>
             </li>
             <li className="nav-item">
               <Link className="nav-link" to={`/login/`}>
-                {" "}
-                <i className="fas fa-sign-out-alt"></i> Çıkış Yap
+                <i className="fas fa-sign-out-alt text-danger me-2"></i> Çıkış Yap
               </Link>
             </li>
           </ul>
+
         </div>
       </div>
     </nav>

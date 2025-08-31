@@ -28,8 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-j5hd*3qqzx$#_!5^tzkaxk-5v2_mr7&$5drl&a=z(_ea_qd52c'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = False
+DEBUG = True
+# DEBUG = False
 # ALLOWED_HOSTS = ["test.akademi.ehad.org.tr", "185.8.129.89","http://127.0.0.1:8000/"]
 # CSRF_TRUSTED_ORIGINS = ["https://test.akademi.ehad.org.tr","http://localhost:5173/"]
 
@@ -38,11 +38,18 @@ ALLOWED_HOSTS = [
     "localhost",
     "test.akademi.ehad.org.tr",
     "185.8.129.89",
+    "izem.ehad.org.tr",
+    "api.ehad.org.tr",
+    "api.akademi.ehad.org.tr"
 ]
 
 # Django 4+ için şema zorunlu, sondaki '/' olmamalı
 CSRF_TRUSTED_ORIGINS = [
     "https://test.akademi.ehad.org.tr",
+    "https://api.akademi.ehad.org.tr",
+    "https://api.ehad.org.tr",
+    "https://izem.ehad.org.tr",
+    "http://185.8.129.89/",
     "http://localhost:5173",   # Vite/React local
     "http://127.0.0.1:5173",
     "http://localhost:8000",   # (gerekli değil ama sorun çıkarmaz)
@@ -89,7 +96,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+SWAGGER_SETTINGS = {
+    "USE_SESSION_AUTH": False,     # login butonunu kaldırır
+    "LOGIN_URL": "admin:login",
+    "LOGOUT_URL": "admin:logout",
+}
 ROOT_URLCONF = 'backend.urls'
 
 REST_FRAMEWORK = {

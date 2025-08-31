@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 
-function EskepProjeLecturesTab({ proje }) {
+function EskepProjeLecturesTab({ eskepproje }) {
   useEffect(() => {
-    if (proje?.proje_status) {
-      console.log("POJE_STATUS:", proje);
+    if (eskepproje?.proje_status) {
+      console.log("POJE_STATUS:", eskepproje);
     }
-  }, [proje]);
+  }, [eskepproje]);
 
   const renderStatusAlert = () => {
-    switch (proje?.proje_status) {
+    switch (eskepproje?.proje_status) {
       case "Teslim Edildi":
         return (
           <div className="alert alert-success" role="alert">

@@ -3,7 +3,7 @@ import useAxios from "../../../utils/useAxios";
 import UserData from "../../plugin/UserData";
 import Toast from "../../plugin/Toast";
 
-function EskepProjeReviewTab({ proje, studentReview, fetchEskepProjeDetail }) {
+function EskepProjeReviewTab({ eskepproje, studentReview, fetchEskepProjeDetail }) {
   const [createReview, setCreateReview] = useState({
     rating: 1,
     review: "",
@@ -29,7 +29,7 @@ function EskepProjeReviewTab({ proje, studentReview, fetchEskepProjeDetail }) {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append("proje_id", proje.proje?.id);
+    formData.append("proje_id", eskepproje.eskepproje?.id);
     formData.append("user_id", UserData()?.user_id);
     formData.append("rating", createReview.rating);
     formData.append("review", createReview.review);
@@ -50,7 +50,7 @@ function EskepProjeReviewTab({ proje, studentReview, fetchEskepProjeDetail }) {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append("proje", proje.proje?.id);
+    formData.append("proje", eskepproje.eskepproje?.id);
     formData.append("user", UserData()?.user_id);
     formData.append("rating", createReview.rating);
     formData.append("review", createReview.review);

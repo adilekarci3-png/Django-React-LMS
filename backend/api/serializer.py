@@ -5,6 +5,7 @@ from api import serializer as api_serializer
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from utils.permissions import get_teacher_for_user
 from userauths.models import Profile, User
 from django.utils.crypto import get_random_string
 
@@ -709,7 +710,7 @@ class EnrolledCourseSerializer(serializers.ModelSerializer):
     note = NoteSerializer(many=True, read_only=True)
     question_answer = Question_AnswerSerializer(many=True, read_only=True)
     review = ReviewSerializer(many=False, read_only=True)
-
+    
     class Meta:
         fields = '__all__'
         model = api_models.EnrolledCourse
@@ -1143,13 +1144,82 @@ class EducationLevelSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class EducatorVideoLinkSerializer(serializers.ModelSerializer):
-    instructor_id = serializers.IntegerField(write_only=True)
+    # Koordinatör isterse başka eğitmen ID'si verebilir
+    instructor_id = serializers.PrimaryKeyRelatedField(
+        queryset=api_models.Educator.objects.all(),
+        source="instructor",
+        write_only=True,
+        required=False,
+    )
+
+    # Alternatif anahtar adı da destekle (video_url -> videoUrl)
+    video_url = serializers.CharField(write_only=True, required=False, allow_blank=True, source="videoUrl")
 
     class Meta:
         model = api_models.EducatorVideoLink
-        fields = ['id', 'title', 'videoUrl', 'description', 'created_at', 'instructor_id']
+        fields = [
+            "id",
+            "title",
+            "description",
+            "videoUrl",      # model alanı (camelCase)
+            "video_url",     # alternatif giriş (write-only)
+            "instructor_id", # başka eğitmene açmak için (write-only)
+            "instructor",    # read-only output
+            "created_at",
+        ]
+        read_only_fields = ["id", "instructor", "created_at"]
+
+    def validate(self, attrs):
+        # videoUrl, video_url ile de gelse Meta.source sayesinde videoUrl'e yazıldı
+        url = attrs.get("videoUrl")
+        if not url or not str(url).strip():
+            raise serializers.ValidationError({"videoUrl": "Video bağlantısı zorunludur."})
+        return attrs
+    
+class SavedVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.SavedVideo
+        fields = ["id", "video", "created_at"]
+        read_only_fields = ["id", "created_at"]
 
     def create(self, validated_data):
-        instructor_id = validated_data.pop('instructor_id')
-        instructor = api_models.Educator.objects.get(id=instructor_id)
-        return api_models.EducatorVideoLink.objects.create(instructor=instructor, **validated_data)
+        # user'ı request'ten al
+        request = self.context.get("request")
+        validated_data["user"] = request.user
+        return super().create(validated_data)
+    
+class EducatorVideoSerializer(serializers.ModelSerializer):
+    # Koordinatör isterse başka öğretmen adına kayıt açabilsin
+    instructor_id = serializers.IntegerField(write_only=True, required=False)
+
+    # Frontend’te farklı isimlerle gelebilecek alanları kabul et:
+    # (video_file | videoFile | file) -> modeldeki "file" alanına yazılır
+    video_file = serializers.FileField(write_only=True, required=False, allow_null=True, source="file")
+    videoFile   = serializers.FileField(write_only=True, required=False, allow_null=True, source="file")
+
+    class Meta:
+        model = api_models.EducatorVideo
+        fields = [
+            "id",
+            "title",
+            "description",
+            "file",         # model alanı
+            "video_file",   # alias
+            "videoFile",    # alias
+            "instructor",   # read-only
+            "instructor_id",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "instructor", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        # alias'lar source="file" ile normalize edildi, burada 'file' olarak bulunur
+        if not attrs.get("file"):
+            raise serializers.ValidationError({"file": "Video dosyası zorunludur."})
+        return attrs
+
+    def create(self, validated_data):
+        # Modelde olmayan alanı (instructor_id) at
+        validated_data.pop("instructor_id", None)
+        return super().create(validated_data)

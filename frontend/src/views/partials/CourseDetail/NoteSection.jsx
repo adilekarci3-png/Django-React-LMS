@@ -1,12 +1,14 @@
 // NoteSection.jsx
 import React, { useState } from "react";
 import Swal from "sweetalert2";
-import UserData from "../../plugin/UserData";
 import useAxios from "../../../utils/useAxios";
+import useUserData from "../../plugin/useUserData";
 
 function NoteSection({ course, modal, setModal, refresh }) {
   const [createNote, setCreateNote] = useState({ title: "", note: "" });
   const api = useAxios();
+  const user = useUserData();             // ✅ hook en üstte
+  const userId = user?.user_id;           // fetch'te kullanacağız
 
   const handleNoteChange = (e) => {
     setCreateNote({ ...createNote, [e.target.name]: e.target.value });
@@ -15,17 +17,17 @@ function NoteSection({ course, modal, setModal, refresh }) {
   const handleCreateNote = async (e) => {
     e.preventDefault();
     const form = new FormData();
-    form.append("user_id", UserData()?.user_id);
+    form.append("user_id", userId);
     form.append("enrollment_id", course.enrollment_id);
     form.append("title", createNote.title);
     form.append("note", createNote.note);
-    await api.post(`student/course-note/${UserData()?.user_id}/${course.enrollment_id}/`, form);
+    await api.post(`student/course-note/${userId}/${course.enrollment_id}/`, form);
     Swal.fire({ icon: "success", title: "Not eklendi" });
     refresh();
   };
 
   const handleDeleteNote = async (noteId) => {
-    await api.delete(`student/course-note-detail/${UserData()?.user_id}/${course.enrollment_id}/${noteId}/`);
+    await api.delete(`student/course-note-detail/${userId}/${course.enrollment_id}/${noteId}/`);
     Swal.fire({ icon: "success", title: "Not silindi" });
     refresh();
   };

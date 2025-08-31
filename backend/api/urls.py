@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-from api import views as api_views
+from . import views as api_views
 from .views import (
-    DersAtamasiAPIView, DersAtamasiDetailAPIView, EskepStajerOdevDetailAPIView, HBSKoordinatorDashboardViewSet, HafizAPIView, HafizAgentListAPIView, HafizDetailAPIView, HafizsListAPIView, HataNotuViewSet, KoordinatorByRoleAPIView,peer_id_view
+    CourseQuestionAnswerMessageCreateAPIView, DersAtamasiAPIView, DersAtamasiDetailAPIView, EducatorVideoCreateAPIView, EducatorVideoDeleteAPIView, EducatorVideoLinkCreateAPIView, EducatorVideoLinkDeleteAPIView, EducatorVideoLinkListAPIView, EducatorVideoLinkUpdateAPIView, EducatorVideoListAPIView, EducatorVideoUpdateAPIView, EskepStajerOdevDetailAPIView, HBSKoordinatorDashboardViewSet, HafizAPIView, HafizAgentListAPIView, HafizDetailAPIView, HafizsListAPIView, HataNotuViewSet, KoordinatorByRoleAPIView,peer_id_view
 )
 
 # ViewSet'ler için router
@@ -111,8 +111,17 @@ urlpatterns = [
     path("student/review-detail/<user_id>/<review_id>/", api_views.StudentRateCourseUpdateAPIView.as_view()),
     path("student/wishlist/<user_id>/", api_views.StudentWishListListCreateAPIView.as_view()),
     path("student/question-answer-list-create/<course_id>/", api_views.QuestionAnswerListCreateAPIView.as_view()),
-    path("student/question-answer-message-create/", api_views.QuestionAnswerMessageCreateAPIView.as_view()),
-    path("akademistudent/question-answer-message-create/", api_views.CourseQuestionAnswerMessageCreateAPIView.as_view()),
+    path(
+        "student/course-qa/messages/",
+        CourseQuestionAnswerMessageCreateAPIView.as_view(),
+        name="course-qa-messages-create",
+    ),
+    # İSTERSEN aynısını kısayol olarak da aç:
+    path(
+        "student/course-qa/",
+        CourseQuestionAnswerMessageCreateAPIView.as_view(),
+        name="course-qa-create-alias",
+    ),
 
     # HBS Temsilci
     path("agent/summary/<agent_id>/", api_views.AgentSummaryAPIView.as_view()),
@@ -174,13 +183,13 @@ urlpatterns = [
     
     # Eskep Student
     path("eskepstudent/odev-create/", api_views.EskepOdevCreateAPIView.as_view()),
-    path("eskepstudent/odev-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
+    path("eskepogrenci/odev-list/<ogrenci_id>/", api_views.EskepOgrenciOdevListAPIView.as_view()),
     path("eskepstudent/odev-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
     path("eskepstudent/kitaptahlili-create/", api_views.EskepKitapTahliliCreateAPIView.as_view()),
-    path("eskepstudent/kitaptahlili-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
-    path("eskepstudent/kitaptahlili-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
+    path("eskepogrenci/kitaptahlili-list/<ogrenci_id>/", api_views.EskepOgrenciKitapTahliliListAPIView.as_view()),
+    path("eskepogrenci/kitaptahlili-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
     path("eskepstudent/derssonuraporu-create/", api_views.EskepDersSonuRaporuCreateAPIView.as_view()),
-    path("eskepstudent/derssonuraporu-list/<ogrenci_id>/", api_views.EskepStajerOdevListAPIView.as_view()),
+    path("eskepogrenci/derssonuraporu-list/<ogrenci_id>/", api_views.EskepOgrenciDersSonuRaporuListAPIView.as_view()),
     path("eskepstudent/derssonuraporu-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
     path("eskepstudent/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
     
@@ -220,17 +229,24 @@ urlpatterns = [
     path("instructor/review-detail/<user_id>/<review_id>/", api_views.InstructorRateCourseUpdateAPIView.as_view()),
     path("instructor/wishlist/<user_id>/", api_views.InstructorWishListListCreateAPIView.as_view()),
     path("instructor/question-answer-list-create/<odev_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
-    path("instructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
-    
+    path("instructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),    
 
     # Eskep Eğitmen
     path("educator/list/", api_views.EskepEgitmenListAPIView.as_view(), name="job-list"),
     path('educator/<int:pk>/', api_views.EducatorUpdateAPIView.as_view(), name="educator-update"),
     path('events/create/', api_views.ESKEPEventCreateAPIView.as_view(), name='instructor-event-create'),
+    path('document/create/', api_views.ESKEPEventCreateAPIView.as_view(), name='instructor-event-create'),
     path('events/teacher_schedule/<int:user_id>/', api_views.CombinedEventListAPIView.as_view(), name='teacher-schedule'),
     path('events/student/', api_views.StudentEventListAPIView.as_view(), name='student-events'),
-    path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),
-    path('educator/video/link/', api_views.EducatorVideoLinkCreateAPIView.as_view(), name='educator-video-link-create'),
+    path('events/all/', api_views.GeneralEventListAPIView.as_view(), name='general-events'),    
+    path("educator/video/link/", EducatorVideoLinkListAPIView.as_view(), name="educator-video-link-list"),
+    path("educator/video/link/create/", EducatorVideoLinkCreateAPIView.as_view(), name="educator-video-link-create"),   
+    path("educator/video/link/<int:pk>/update/", EducatorVideoLinkUpdateAPIView.as_view(), name="educator-video-link-update"),
+    path("educator/video/link/<int:pk>/delete/", EducatorVideoLinkDeleteAPIView.as_view(), name="educator-video-link-delete"),
+    path("educator/video/create/", EducatorVideoCreateAPIView.as_view(), name="educator-video-create"),
+    path("educator/video/", EducatorVideoListAPIView.as_view(), name="educator-video-list"),
+    path("educator/video/<int:pk>/update/", EducatorVideoUpdateAPIView.as_view(), name="educator-video-update"),
+    path("educator/video/<int:pk>/delete/", EducatorVideoDeleteAPIView.as_view(), name="educator-video-delete"),
     
     # Eskep Listeler
     path("eskep/coordinators/", api_views.CoordinatorListAPIView.as_view()),
@@ -255,4 +271,6 @@ urlpatterns = [
     path("ders-atamalari/<int:pk>/", DersAtamasiDetailAPIView.as_view()),
     path("hafizlar/", HafizsListAPIView.as_view(), name="hafiz-list-create"),
     path("hafizlar/<int:pk>/", HafizDetailAPIView.as_view(), name="hafiz-detail-update-delete"),
+    # path("me/saved-videos/", api_views.SavedVideoListCreateAPIView.as_view(), name="saved-video-list-create"),
+    # path("me/saved-videos/<int:pk>/delete/", api_views.SavedVideoDeleteAPIView.as_view(), name="saved-video-delete"),
 ]

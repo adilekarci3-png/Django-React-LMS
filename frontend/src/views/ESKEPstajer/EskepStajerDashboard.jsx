@@ -4,7 +4,7 @@ import moment from "moment";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
@@ -19,7 +19,7 @@ function EskepStajerDashboard() {
   const [projects, setProjects] = useState([]);
   const [fetching, setFetching] = useState(true);
 
-  const userId = UserData()?.user_id;
+  const userId = useUserData()?.user_id;
   const api = useAxios();
 
   const fetchData = async () => {
@@ -80,8 +80,10 @@ function EskepStajerDashboard() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <Sidebar />
-            <div className="col-lg-10 col-md-8 col-12">
+            <div className="col-lg-2 col-md-2 col-12 mb-4 mb-md-0">
+              <Sidebar />
+            </div>
+            <div className="col-lg-10 col-md-10 col-12">
               <div className="row mb-4">
                 <h4 className="mb-0 mb-4">
                   <i className="bi bi-grid-fill"></i> Öğrenci Paneli
@@ -144,9 +146,9 @@ function EskepStajerDashboard() {
               ) : (
                 <>
                   {renderList("Ödevler", homeworks, "/eskepstajer/odevs")}
-                  {renderList("Ders Sonu Raporları", lessonReports, "/student/lesson-report-detail")}
-                  {renderList("Kitap Tahlilleri", bookReviews, "/student/book-review-detail")}
-                  {renderList("Projeler", projects, "/student/project-detail")}
+                  {renderList("Ders Sonu Raporları", lessonReports, "/eskepstajer/derssonuraporus")}
+                  {renderList("Kitap Tahlilleri", bookReviews, "/eskepstajer/kitaptahlileris")}
+                  {renderList("Projeler", projects, "/eskepstajer/projes")}
                 </>
               )}
             </div>

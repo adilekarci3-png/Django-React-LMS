@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Modal from "react-modal";
+import { FiFileText, FiExternalLink, FiDownload, FiX } from "react-icons/fi";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
+
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+
+import "./css/ModalStyle.css";
 
 function EskepStajerProjes() {
   const [projeler, setProjeler] = useState([]);
@@ -16,35 +20,52 @@ function EskepStajerProjes() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
+  const user = useUserData();
+  const headingId = "assignment-modal-title";
+  const onClose = () => setModalIsOpen(false);
+
+  const safeUrl = (f) => (typeof f === "string" ? f : f?.url ?? f?.file ?? "#");
+  const fileTitle = (f, i) =>
+    f?.title ? f.title : f?.variant?.title ? f.variant.title : `Bölüm ${i + 1}`;
+  const fileName = (f) =>
+    (typeof f === "object" && (f?.filename || f?.name)) || undefined;
+
   const fetchData = () => {
+    if (!user?.user_id) return;
     setFetching(true);
     useAxios()
-      .get(`eskepstajer/proje-list/${UserData()?.user_id}/`)
+      .get(`eskepstajer/proje-list/${user.user_id}/`)
       .then((res) => {
-        setProjeler(res.data);
-        console.log(res.data);
-        setFetching(false);
-      });
+        setProjeler(res.data || []);
+      })
+      .finally(() => setFetching(false));
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.user_id]);
 
   const handleSearch = (event) => {
-    const query = event.target.value.toLowerCase();
-    if (query === "") {
-      fetchData();
-    } else {
-      const filtered = projeler.filter((p) =>
-        p.title.toLowerCase().includes(query)
-      );
-      setProjeler(filtered);
-    }
+    const query = event.target.value.toLowerCase().trim();
+    if (!query) return fetchData();
+    setProjeler((prev) =>
+      (prev || []).filter((p) => (p.title || "").toLowerCase().includes(query))
+    );
   };
 
-  const openModal = (files) => {
-    setSelectedFiles(files);
+  const openModal = (proje) => {
+    // curriculum.variant_items (tercih edilen) + varsa tepe seviyedeki lectures
+    const fromCurriculum =
+      Array.isArray(proje?.curriculum)
+        ? proje.curriculum.flatMap((sec) =>
+            Array.isArray(sec?.variant_items) ? sec.variant_items : []
+          )
+        : [];
+
+    const fromTopLectures = Array.isArray(proje?.lectures) ? proje.lectures : [];
+
+    setSelectedFiles([...fromCurriculum, ...fromTopLectures]);
     setModalIsOpen(true);
   };
 
@@ -55,7 +76,10 @@ function EskepStajerProjes() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <Sidebar />
+            <div className="col-lg-2 col-md-4 col-12 mb-4 mb-md-0">
+              <Sidebar />
+            </div>
+
             <div className="col-lg-10 col-md-8 col-12">
               <h4 className="mb-0 mb-4">
                 <i className="fas fa-project-diagram"></i> Projelerim
@@ -67,8 +91,11 @@ function EskepStajerProjes() {
                 <div className="card mb-4">
                   <div className="card-header">
                     <h3 className="mb-0">Proje Listesi</h3>
-                    <span>Staj sürecindeki proje çalışmalarınızı buradan takip edebilirsiniz.</span>
+                    <span>
+                      Staj sürecindeki proje çalışmalarınızı buradan takip edebilirsiniz.
+                    </span>
                   </div>
+
                   <div className="card-body">
                     <input
                       type="search"
@@ -77,16 +104,17 @@ function EskepStajerProjes() {
                       onChange={handleSearch}
                     />
                   </div>
+
                   <div className="table-responsive overflow-y-hidden">
                     <table className="table mb-0 text-nowrap table-hover table-centered">
                       <thead className="table-light">
                         <tr>
                           <th>Proje</th>
                           <th>Kayıt Tarihi</th>
-                          <th>Dosyalar</th>
+                          <th>Bölümler</th>
                           <th>Durum</th>
-                          <th>Koordinator</th>
-                          <th>Koordinatordaki Durumu</th>
+                          <th>Koordinatör</th>
+                          <th>Koordinatördeki Durumu</th>
                           <th>İşlemler</th>
                         </tr>
                       </thead>
@@ -103,23 +131,37 @@ function EskepStajerProjes() {
                                     width: "100px",
                                     height: "70px",
                                     borderRadius: "50%",
-                                    objectFit: "cover"
+                                    objectFit: "cover",
                                   }}
                                 />
                                 <div className="ms-3">
                                   <h5>{p.title}</h5>
-                                  <p>{p.language} - {p.level}</p>
+                                  <p>
+                                    {p.language} - {p.level}
+                                  </p>
                                 </div>
                               </div>
                             </td>
-                            <td>{moment(p.date).format("D MMM, YYYY")}</td>
-                            <td>{p.curriculum?.length || "-"}</td>
-                            <td>{p.eskepProje_status}</td>
+
+                            <td>
+                              {p.date ? moment(p.date).format("D MMM, YYYY") : "-"}
+                            </td>
+
+                            <td>
+                              {Array.isArray(p?.curriculum)
+                                ? p.curriculum.length
+                                : Array.isArray(p?.lectures)
+                                ? p.lectures.length
+                                : "-"}
+                            </td>
+
+                            <td>{p.eskepProje_status || "-"}</td>
                             <td>{p.koordinator?.full_name || "-"}</td>
-                            <td>{p.koordinator_eskepProje_status}</td>
+                            <td>{p.koordinator_eskepProje_status || "-"}</td>
+
                             <td>
                               <Link
-                                to={`/proje/duzenle/${p.id}`}
+                                to={`/eskep/edit-proje/${p.id}`}
                                 className="btn btn-warning btn-sm"
                               >
                                 Düzenle
@@ -127,7 +169,11 @@ function EskepStajerProjes() {
                               <button
                                 className="btn btn-danger btn-sm ms-2"
                                 onClick={() => {
-                                  if (window.confirm("Bu projeyi silmek istediğinize emin misiniz?")) {
+                                  if (
+                                    window.confirm(
+                                      "Bu projeyi silmek istediğinize emin misiniz?"
+                                    )
+                                  ) {
                                     useAxios()
                                       .delete(`/eskepstajer/proje/${p.id}/`)
                                       .then(() => fetchData());
@@ -136,17 +182,14 @@ function EskepStajerProjes() {
                               >
                                 Sil
                               </button>
-                              {p.curriculum?.length > 0 && (
+
+                              {(Array.isArray(p?.curriculum) ||
+                                Array.isArray(p?.lectures)) && (
                                 <button
                                   className="btn btn-info btn-sm ms-2"
-                                  onClick={() => {
-                                    const files = p.curriculum.flatMap(item =>
-                                      item.items.map(i => i.file)
-                                    );
-                                    openModal(files);
-                                  }}
+                                  onClick={() => openModal(p)}
                                 >
-                                  Dosyaları Gör
+                                  Bölümleri Görüntüle
                                 </button>
                               )}
                             </td>
@@ -170,64 +213,79 @@ function EskepStajerProjes() {
       </section>
       <ESKEPBaseFooter />
 
+      {/* Modal (Kitap Tahlilleri sayfasındaki ile aynı stil) */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
-        style={{
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          },
-          content: {
-            width: "400px",
-            maxHeight: "300px",
-            margin: "auto",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            backgroundColor: "#fff"
-          }
-        }}
+        overlayClassName="modalOverlay"
+        className="modalContent"
+        shouldCloseOnOverlayClick
+        aria={{ labelledby: headingId }}
       >
-        <h3 style={{ marginBottom: "10px" }}>Proje Dosyaları</h3>
-        <ul style={{ listStyle: "none", padding: 0, maxHeight: "150px", overflowY: "auto" }}>
-          {selectedFiles.map((file, index) => (
-            <li key={index} style={{ marginBottom: "5px" }}>
-              <a
-                href={file}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  textDecoration: "none",
-                  color: "#007bff",
-                  fontWeight: "bold"
-                }}
-              >
-                Dosya {index + 1}
-              </a>
-            </li>
-          ))}
-        </ul>
-        <button
-          onClick={() => setModalIsOpen(false)}
-          style={{
-            marginTop: "15px",
-            padding: "8px 16px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer"
-          }}
-        >
-          Kapat
-        </button>
+        <div className="modalHeader">
+          <h3 id={headingId} className="modalTitle">
+            Bölüm Dosyaları
+          </h3>
+          <button
+            className="iconBtn"
+            aria-label="Kapat"
+            onClick={() => setModalIsOpen(false)}
+            title="Kapat"
+          >
+            <FiX />
+          </button>
+        </div>
+
+        <div className="modalBody">
+          {selectedFiles?.length ? (
+            <ul className="fileList" role="list">
+              {selectedFiles.map((file, idx) => (
+                <li key={idx} className="fileItem">
+                  <div className="fileMain">
+                    <span className="fileIcon" aria-hidden>
+                      <FiFileText />
+                    </span>
+                    <div className="fileTexts">
+                      <div className="fileTitle">{fileTitle(file, idx)}</div>
+                      {fileName(file) && (
+                        <div className="fileMeta">{fileName(file)}</div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="fileActions">
+                    <a
+                      className="btn ghost"
+                      href={safeUrl(file)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Yeni sekmede aç"
+                    >
+                      <FiExternalLink className="btnIcon" />
+                      Önizle
+                    </a>
+                    <a
+                      className="btn primary"
+                      href={safeUrl(file)}
+                      download={fileName(file)}
+                      title="İndir"
+                    >
+                      <FiDownload className="btnIcon" />
+                      İndir
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="emptyState">Henüz eklenmiş bölüm yok.</div>
+          )}
+        </div>
+
+        <div className="modalFooter">
+          <button className="btn outline" onClick={onClose}>
+            Kapat
+          </button>
+        </div>
       </Modal>
     </>
   );

@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Modal } from "react-bootstrap";
 
-function AskQuestionModal({ show, handleClose, handleMessageChange, handleSaveQuestion }) {
+function AskQuestionModal({
+  show,
+  handleClose = () => {},            // no-op default
+  handleMessageChange = () => {},     // no-op default
+  handleSaveQuestion = () => {},      // no-op default
+}) {
   const [localMessage, setLocalMessage] = useState({ title: "", message: "" });
 
   useEffect(() => {
@@ -11,17 +16,21 @@ function AskQuestionModal({ show, handleClose, handleMessageChange, handleSaveQu
   const onChange = (e) => {
     const updated = { ...localMessage, [e.target.name]: e.target.value };
     setLocalMessage(updated);
-    handleMessageChange(e); // parent'a bildir
+    handleMessageChange(updated);     // parent'a güncel obje gönder
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (!localMessage.title.trim() || !localMessage.message.trim()) return;
-    handleSaveQuestion(e); // formData ile işlem parent'ta yapılır
+    const t = localMessage.title?.trim();
+    const m = localMessage.message?.trim();
+    if (!t || !m) return;
+
+    // parent'a payload gönder
+    handleSaveQuestion({ title: t, message: m });
   };
 
   return (
-    <Modal show={show} size="lg" onHide={handleClose}>
+    <Modal show={show} size="lg" onHide={handleClose} backdrop="static" centered>
       <Modal.Header closeButton>
         <Modal.Title>Yeni Soru Sor</Modal.Title>
       </Modal.Header>
@@ -51,10 +60,10 @@ function AskQuestionModal({ show, handleClose, handleMessageChange, handleSaveQu
           </div>
           <div className="text-end">
             <button type="button" className="btn btn-secondary me-2" onClick={handleClose}>
-              <i className="fas fa-arrow-left"></i> Kapat
+              <i className="fas fa-arrow-left" /> Kapat
             </button>
             <button type="submit" className="btn btn-primary">
-              Gönder <i className="fas fa-check-circle"></i>
+              Gönder <i className="fas fa-check-circle" />
             </button>
           </div>
         </form>

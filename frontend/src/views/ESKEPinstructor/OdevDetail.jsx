@@ -64,7 +64,7 @@ const userData = useUserData();
       // const { koordinator_id } = param.koordinator_id; // URL parametresinden al
       const user_id = userData?.user_id; // URL parametresinden al
       const response = await useAxios().get(
-        `eskepinstructor/odev-detail/${param.odev_id}/${param.koordinator_id}/`
+        `eskepinstructor/odev-detail/${param.odev_id}/${user_id}/`
       );
 
       const data = response.data;

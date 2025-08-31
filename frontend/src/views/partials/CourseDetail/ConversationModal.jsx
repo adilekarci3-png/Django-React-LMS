@@ -1,64 +1,133 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Modal } from "react-bootstrap";
+// src/views/partials/CourseDetail/ConversationModal.jsx
+import React, { useEffect, useRef, useState } from "react";
 import moment from "moment";
+import "moment/locale/tr";
 
-function ConversationModal({ show, handleClose, selectedConversation, handleMessageChange, sendNewMessage }) {
-  const lastElementRef = useRef();
-  const [localMessage, setLocalMessage] = useState("");
+export default function ConversationModal({
+  show,
+  question,          // seçili konuşma (title, messages[])
+  currentUserId,     // kendi userId'n
+  onClose,
+  onSendMessage,     // (text: string) => Promise<void>
+}) {
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
-    if (lastElementRef.current) {
-      lastElementRef.current.scrollIntoView({ behavior: "smooth" });
+    if (show && scrollRef.current) {
+      // açılınca en alta kaydır
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [selectedConversation]);
+  }, [show, question]);
 
-  const onSubmit = (e) => {
+  if (!show) return null;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!localMessage.trim()) return;
-    handleMessageChange({ target: { name: "message", value: localMessage } });
-    sendNewMessage(e);
-    setLocalMessage(""); // mesaj kutusunu temizle
+    if (!text.trim()) return;
+    try {
+      setSending(true);
+      await onSendMessage(text.trim());
+      setText("");
+      // gönderimden sonra otomatik alta kay
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      });
+    } finally {
+      setSending(false);
+    }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  const msgs = question?.messages || [];
+
   return (
-    <Modal show={show} onHide={handleClose} backdrop="static" keyboard={true}>
-      <Modal.Header closeButton>
-        <Modal.Title>{selectedConversation?.title || "Müzakere"}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div className="border p-2 p-sm-4 rounded-3">
-          <ul className="list-unstyled mb-0" style={{ overflowY: "auto", height: "500px" }}>
-            {selectedConversation?.messages?.map((m) => (
-              <li key={m.id} className="comment-item mb-3">
-                <div className="d-flex">
-                  <div className="ms-2 w-100">
-                    <div className="bg-light p-3 rounded">
-                      <h6 className="mb-1 fw-bold">{m.profile.full_name}</h6>
-                      <small className="text-muted">{moment(m.date).format("DD MMM YYYY HH:mm")}</small>
-                      <p className="mt-2 mb-0">{m.message}</p>
+    <div
+      className="modal d-block"
+      style={{ backgroundColor: "rgba(0,0,0,.5)", zIndex: 1050 }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="modal-dialog modal-lg modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">{question?.title || "Konuşma"}</h5>
+            <button type="button" className="btn-close" onClick={onClose} />
+          </div>
+
+          <div className="modal-body p-0 d-flex flex-column" style={{ height: 520 }}>
+            {/* Mesajlar */}
+            <div
+              ref={scrollRef}
+              className="flex-grow-1 p-3"
+              style={{ overflowY: "auto", background: "#f8f9fa" }}
+            >
+              {msgs.length ? (
+                msgs.map((m) => {
+                  const mine = m?.user === currentUserId;
+                  return (
+                    <div
+                      key={m.id}
+                      className={`d-flex mb-3 ${mine ? "justify-content-end" : "justify-content-start"}`}
+                    >
+                      {!mine && (
+                        <img
+                          src={m.profile?.image}
+                          alt={m.profile?.full_name}
+                          style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover", marginRight: 8 }}
+                        />
+                      )}
+                      <div
+                        className="p-2 rounded"
+                        style={{
+                          maxWidth: "75%",
+                          background: mine ? "#e7f1ff" : "#fff",
+                          border: "1px solid #e5e7eb",
+                        }}
+                      >
+                        <div className="small text-muted mb-1">
+                          {!mine ? m.profile?.full_name : "Ben"} · {moment(m.date).format("DD MMM YYYY HH:mm")}
+                        </div>
+                        <div>{m.message}</div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </li>
-            ))}
-            <div ref={lastElementRef}></div>
-          </ul>
-          <form className="mt-3 w-100 d-flex" onSubmit={onSubmit}>
-            <textarea
-              className="form-control pe-4 bg-light w-75"
-              rows="2"
-              placeholder="Yeni mesaj yazın..."
-              value={localMessage}
-              onChange={(e) => setLocalMessage(e.target.value)}
-            />
-            <button className="btn btn-primary ms-2 w-25" type="submit">
-              Gönder <i className="fas fa-paper-plane"></i>
-            </button>
-          </form>
+                  );
+                })
+              ) : (
+                <p className="text-muted">Henüz mesaj yok.</p>
+              )}
+            </div>
+
+            {/* Composer */}
+            <form onSubmit={handleSubmit} className="border-top p-3">
+              <div className="d-flex align-items-end gap-2">
+                <textarea
+                  className="form-control"
+                  rows={2}
+                  placeholder="Mesajınızı yazın... (Göndermek için Enter, satır atlamak için Shift+Enter)"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={sending}
+                />
+                <button className="btn btn-primary" type="submit" disabled={sending || !text.trim()}>
+                  {sending ? "Gönderiliyor..." : "Gönder"}
+                </button>
+              </div>
+            </form>
+          </div>
+
         </div>
-      </Modal.Body>
-    </Modal>
+      </div>
+    </div>
   );
 }
-
-export default ConversationModal;

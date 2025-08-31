@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from django.utils import timezone
 from decimal import Decimal
 
+from django.conf import settings
 from userauths.models import User, Profile
 from shortuuid.django_fields import ShortUUIDField
 from moviepy.editor import VideoFileClip
@@ -2325,7 +2326,7 @@ class EducationLevel(models.Model):
         return self.name
     
 class EducatorVideoLink(models.Model):
-    instructor = models.ForeignKey(Educator, on_delete=models.CASCADE, related_name="video_links")
+    instructor = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name="video_links")
     title = models.CharField(max_length=200)
     videoUrl = models.URLField()
     description = models.TextField(blank=True)
@@ -2333,3 +2334,36 @@ class EducatorVideoLink(models.Model):
 
     def __str__(self):
         return self.title
+    
+class SavedVideo(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_videos")
+    video = models.ForeignKey(EducatorVideoLink, on_delete=models.CASCADE, related_name="saved_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "video")
+
+    def __str__(self):
+        return f"{self.user} -> {self.video_id}"
+    
+class EducatorVideo(models.Model):
+    instructor = models.ForeignKey(
+        Teacher,
+        on_delete=models.CASCADE,
+        related_name="uploaded_videos",
+        help_text="Videoyu yükleyen eğitmen (Teacher).",
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
+    # İSTEDİĞİN GİBİ:
+    file = models.FileField(upload_to="akademi-video-file", blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} (Teacher#{self.instructor_id})"

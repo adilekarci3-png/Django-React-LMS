@@ -1,0 +1,33 @@
+/* Sidebar görünümü ve aktif link stili */
+.sidenav .navbar-nav {
+  justify-content: flex-start !important;
+}
+
+.sidenav .nav-link {
+  padding: .6rem .8rem;
+  border-radius: .5rem;
+  color: #212529;
+}
+.sidenav .nav-link:hover {
+  background: var(--bs-light);
+}
+.sidenav .nav-link.active {
+  background: var(--bs-light);
+  font-weight: 600;
+}
+
+/* Başlık ile menü arasında nefes alanı */
+.sidenav .navbar-header {
+  display: block;
+  font-size: .85rem;
+  color: #6c757d;
+  padding: .25rem .25rem .5rem .25rem;
+}
+
+/* Mobilde sticky kapansın, md ve üstünde sticky kalsın */
+@media (max-width: 767.98px) {
+  .sidenav {
+    position: static !important;
+    min-height: auto !important;
+  }
+}

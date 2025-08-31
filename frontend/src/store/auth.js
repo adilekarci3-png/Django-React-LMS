@@ -1,65 +1,89 @@
-import { create } from "zustand";
+// src/store/auth.js
+import { createWithEqualityFn } from "zustand/traditional";
 import { persist } from "zustand/middleware";
 
-export const useAuthStore = create(
+const initialState = {
+  allUserData: null,     // { user_id, username, email, full_name, base_roles, sub_roles, ... }
+  access_token: null,
+  rehydrated: false,
+};
+
+export const useAuthStore = createWithEqualityFn(
   persist(
     (set, get) => ({
-      allUserData: null,
-      access_token: null,
-      rehydrated: false,
+      ...initialState,
 
-      user: () => ({
-        user_id: get().allUserData?.user_id || null,
-        username: get().allUserData?.username || null,
-        email: get().allUserData?.email || null,
-        full_name: get().allUserData?.full_name || null,
-      }),
+      // Türetilmiş kullanıcı bilgisi (okuma kolaylığı için)
+      user: () => {
+        const u = get().allUserData || {};
+        return {
+          user_id: u.user_id ?? null,
+          username: u.username ?? null,
+          email: u.email ?? null,
+          full_name: u.full_name ?? null,
+        };
+      },
 
+      // Kullanıcı ve/veya token set et
       setUser: (user, token = null) => {
-        const update = { allUserData: user };
-        if (token) update.access_token = token;
+        const update = { allUserData: user ?? null };
+        if (token !== null) update.access_token = token;
         set(update);
       },
 
+      // Basit login durumu (fonksiyon → her yerde isLoggedIn() diye çağır)
       isLoggedIn: () => get().allUserData !== null,
+
+      // Çıkış
       logout: () => set({ allUserData: null, access_token: null }),
 
+      // Rehydrate tamam
       setRehydrated: () => set({ rehydrated: true }),
 
-      // 🆕 Role kontrol fonksiyonları
+      // ---- Rol yardımcıları ----
       hasBaseRole: (role) => {
-        return get().allUserData?.base_roles?.includes(role) || false;
+        const roles = get().allUserData?.base_roles || [];
+        return roles.includes(role);
       },
       hasSubRole: (role) => {
-        return get().allUserData?.sub_roles?.includes(role) || false;
+        const roles = get().allUserData?.sub_roles || [];
+        return roles.includes(role);
       },
       hasAnySubRole: (roles) => {
         const subRoles = get().allUserData?.sub_roles || [];
-        return roles.some((r) => subRoles.includes(r));
+        return roles?.some((r) => subRoles.includes(r)) || false;
       },
 
-      // 🆕 setRoleData metodu
+      // Role bilgilerini güncelle (mevcut user üstüne yazar)
       setRoleData: (roleData) => {
         const current = get().allUserData || {};
         set({
           allUserData: {
             ...current,
-            base_roles: roleData.base_roles || [],
-            sub_roles: roleData.sub_roles || [],
+            base_roles: roleData?.base_roles || [],
+            sub_roles: roleData?.sub_roles || [],
           },
         });
       },
+
+      // (Opsiyonel) Tam sıfırlama
+      reset: () => set({ ...initialState, rehydrated: true }),
     }),
     {
       name: "auth-storage",
       partialize: (state) => ({
         allUserData: state.allUserData,
         access_token: state.access_token,
+        // rehydrated bilinçli olarak persist edilmiyor
       }),
       onRehydrateStorage: () => (state, error) => {
-        if (error) console.warn("Zustand rehydrate hatası:", error);
-        else state.setRehydrated?.();
+        if (error) {
+          console.warn("Zustand rehydrate hatası:", error);
+          return;
+        }
+        state?.setRehydrated?.();
       },
+      version: 1,
     }
   )
 );
