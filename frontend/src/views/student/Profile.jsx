@@ -1,127 +1,148 @@
-import React, { useState, useEffect, useContext } from "react";
-import AkademiBaseHeader from "../partials/AkademiBaseHeader";
-import AkademiBaseFooter from "../partials/AkademiBaseFooter";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import EskepBaseHeader from "../partials/ESKEPBaseHeader";
+import EskepBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
-
 import useAxios from "../../utils/useAxios";
-import { useAuthStore } from "../../store/auth";
+import useUserData from "../plugin/useUserData";
 import { ProfileContext } from "../plugin/Context";
-
-// SweetAlert2
-import Swal from "sweetalert2";
-import "sweetalert2/dist/sweetalert2.min.css";
+import AkademiBaseFooter from "../partials/AkademiBaseFooter";
+import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 
 function Profile() {
-  const api = useAxios();
   const [profile, setProfile] = useContext(ProfileContext);
+
+  // ❗ Hook'lar en üstte
+  const api = useAxios();
+  const user = useUserData();
+
+  const [submitting, setSubmitting] = useState(false);
   const [profileData, setProfileData] = useState({
-    image: "",
+    image: "",        // string (URL) veya File olabilir
     full_name: "",
     about: "",
     country: "",
+    education: "",
+    expertise: "",
   });
-  const [imagePreview, setImagePreview] = useState("");
 
-  const user_id = useAuthStore((s) => s.allUserData?.user_id);
+  const [imagePreview, setImagePreview] = useState(""); // blob URL veya string URL
+  const prevBlobUrlRef = useRef(null);
+
+  const revokePrevBlobUrl = () => {
+    if (prevBlobUrlRef.current) {
+      URL.revokeObjectURL(prevBlobUrlRef.current);
+      prevBlobUrlRef.current = null;
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const userId = user?.user_id;
+      if (!userId) return;
+      const { data } = await api.get(`user/profile/${userId}/`);
+      setProfile(data);
+      setProfileData({
+        image: data.image || "",
+        full_name: data.full_name || "",
+        about: data.about || "",
+        country: data.country || "",
+        education: data.education || "",
+        expertise: data.expertise || "",
+      });
+      revokePrevBlobUrl();
+      setImagePreview(data.image || "");
+    } catch (err) {
+      console.error("Profil çekilirken hata:", err);
+    }
+  };
 
   useEffect(() => {
-    if (!user_id) return;
-
-    let cancelled = false;
-    api.get(`user/profile/${user_id}/`).then((res) => {
-      if (cancelled) return;
-      setProfile(res.data);
-      setProfileData({
-        image: "",
-        full_name: res.data.full_name ?? "",
-        about: res.data.about ?? "",
-        country: res.data.country ?? "",
-      });
-      setImagePreview(res.data.image || "");
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    fetchProfile();
+    return () => revokePrevBlobUrl(); // unmount'ta temizle
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user_id]); // sadece user_id değişince çek
+  }, [user?.user_id]);
 
-  const handleProfileChange = (e) =>
-    setProfileData((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData((p) => ({ ...p, [name]: value }));
+  };
 
   const handleFileChange = (e) => {
-    const f = e.target.files?.[0] || "";
-    setProfileData((p) => ({ ...p, image: f }));
-    if (f) {
-      const url = URL.createObjectURL(f);
-      setImagePreview(url);
-    }
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    // State'e File olarak yaz
+    setProfileData((p) => ({ ...p, image: selectedFile }));
+
+    // Önceki blob URL'yi serbest bırak
+    revokePrevBlobUrl();
+    const blobUrl = URL.createObjectURL(selectedFile);
+    prevBlobUrlRef.current = blobUrl;
+    setImagePreview(blobUrl);
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (!user_id) return;
-
     try {
-      const current = await api.get(`user/profile/${user_id}/`);
-      const form = new FormData();
+      setSubmitting(true);
 
-      if (profileData.image && profileData.image !== current.data.image) {
-        form.append("image", profileData.image);
+      const formdata = new FormData();
+
+      // image alanı File ise ekle (URL/string ise ekleme)
+      if (profileData.image && profileData.image instanceof File) {
+        formdata.append("image", profileData.image);
       }
-      form.append("full_name", profileData.full_name || "");
-      form.append("about", profileData.about || "");
-      form.append("country", profileData.country || "");
 
-      const updated = await api.patch(`user/profile/${user_id}/`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      formdata.append("full_name", profileData.full_name || "");
+      formdata.append("about", profileData.about || "");
+      formdata.append("country", profileData.country || "");
+      formdata.append("education", profileData.education || "");
+      formdata.append("expertise", profileData.expertise || "");
 
-      setProfile(updated.data);
-      setImagePreview(updated.data.image || imagePreview);
+      const userId = user?.user_id;
+      const { data } = await api.patch(`user/profile/${userId}/`, formdata /* headers yok */);
 
-      // ✅ Başarılı bildirim
-      Swal.fire({
-        title: "Başarılı",
-        text: "Profil başarıyla güncellendi.",
-        icon: "success",
-        confirmButtonText: "Tamam",
-      });
+      setProfile(data);
+      // API’den dönen güncel değerlerle state’i yenile
+      setProfileData((p) => ({
+        ...p,
+        image: data.image || p.image,
+        full_name: data.full_name ?? p.full_name,
+        about: data.about ?? p.about,
+        country: data.country ?? p.country,
+        education: data.education ?? p.education,
+        expertise: data.expertise ?? p.expertise,
+      }));
+
+      // Eğer sunucu yeni bir resim URL'si verdiyse, blob önizlemeyi bırakıp URL'yi göster
+      if (data.image) {
+        revokePrevBlobUrl();
+        setImagePreview(data.image);
+      }
+
     } catch (err) {
-      // ❌ Hata bildirimi
-      Swal.fire({
-        title: "Hata",
-        text:
-          err?.response?.data?.detail ||
-          "Profil güncellenirken bir hata oluştu.",
-        icon: "error",
-        confirmButtonText: "Tamam",
-      });
+      console.error("Profil güncellenirken hata:", err);
+      // Burada istersen Toast ya da alert kullanılabilir
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <>
       <AkademiBaseHeader />
-
       <section className="pt-5 pb-5">
         <div className="container">
           <Header />
-
           <div className="row mt-0 mt-md-4">
-            {/* SOL SÜTUN: Sidebar */}
-            <div className="col-lg-2 col-md-4 col-12 mb-4 mb-md-0">
-              <Sidebar />
-            </div>
-
-            {/* SAĞ SÜTUN: İçerik */}
-            <div className="col-lg-10 col-md-8 col-12">
+            <Sidebar />
+            <div className="col-lg-9 col-md-8 col-12">
               <div className="card">
                 <div className="card-header">
                   <h3 className="mb-0">Profil Detayları</h3>
                   <p className="mb-0">
-                    Kendi hesap ayarınızı yönetmek için tam kontrole sahipsiniz.
+                    Kendi hesap ayarlarınızı yönetmek için tam kontrole sahipsiniz.
                   </p>
                 </div>
 
@@ -129,13 +150,13 @@ function Profile() {
                   <div className="d-lg-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center mb-4 mb-lg-0">
                       <img
-                        src={imagePreview || "/img/default-avatar.png"}
+                        src={imagePreview || "/img/placeholder-avatar.png"}
                         id="img-uploaded"
-                        alt="avatar"
                         className="avatar-xl rounded-circle"
+                        alt="avatar"
                         style={{
-                          width: 100,
-                          height: 100,
+                          width: "100px",
+                          height: "100px",
                           borderRadius: "50%",
                           objectFit: "cover",
                         }}
@@ -143,7 +164,7 @@ function Profile() {
                       <div className="ms-3">
                         <h4 className="mb-0">Profil Resminiz</h4>
                         <p className="mb-0">
-                          PNG veya JPG, 800 pikselden geniş ve uzun olamaz.
+                          PNG veya JPG, genişliği ve yüksekliği 800 pikselden büyük olmamalıdır.
                         </p>
                         <input
                           type="file"
@@ -159,19 +180,18 @@ function Profile() {
                   <hr className="my-5" />
 
                   <div>
-                    <h4 className="mb-0">Kişisel Detaylar</h4>
-                    <p className="mb-4">
-                      Kişisel bilgilerinizi ve adresinizi düzenleyin.
-                    </p>
+                    <h4 className="mb-0">Profil Detayları</h4>
+                    <p className="mb-4">Kişisel bilgilerinizi ve adresinizi düzenleyin.</p>
 
                     <div className="row gx-3">
-                      <div className="mb-3 col-12">
-                        <label className="form-label" htmlFor="fname">
+                      {/* Full name */}
+                      <div className="mb-3 col-12 col-md-12">
+                        <label className="form-label" htmlFor="full_name">
                           Adınız Soyadınız
                         </label>
                         <input
                           type="text"
-                          id="fname"
+                          id="full_name"
                           className="form-control"
                           placeholder="Adınız"
                           required
@@ -179,25 +199,26 @@ function Profile() {
                           onChange={handleProfileChange}
                           name="full_name"
                         />
-                        <div className="invalid-feedback">Adınızı Giriniz</div>
+                        <div className="invalid-feedback">Lütfen Adınızı Giriniz</div>
                       </div>
 
-                      <div className="mb-3 col-12">
+                      {/* About */}
+                      <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="about">
                           Hakkımda
                         </label>
                         <textarea
+                          id="about"
                           onChange={handleProfileChange}
                           name="about"
-                          id="about"
-                          cols="30"
-                          rows="5"
+                          rows={5}
                           className="form-control"
                           value={profileData.about}
                         />
                       </div>
 
-                      <div className="mb-3 col-12">
+                      {/* Country */}
+                      <div className="mb-3 col-12 col-md-12">
                         <label className="form-label" htmlFor="country">
                           Ülke
                         </label>
@@ -211,14 +232,44 @@ function Profile() {
                           onChange={handleProfileChange}
                           name="country"
                         />
-                        <div className="invalid-feedback">
-                          Lütfen Ülke Seçiniz
-                        </div>
+                      </div>
+
+                      {/* Education */}
+                      <div className="mb-3 col-12 col-md-12">
+                        <label className="form-label" htmlFor="education">
+                          Eğitim Bilgisi
+                        </label>
+                        <input
+                          type="text"
+                          id="education"
+                          className="form-control"
+                          placeholder="Eğitim Bilgisi"
+                          value={profileData.education}
+                          onChange={handleProfileChange}
+                          name="education"
+                        />
+                      </div>
+
+                      {/* Expertise */}
+                      <div className="mb-3 col-12 col-md-12">
+                        <label className="form-label" htmlFor="expertise">
+                          Uzmanlık Alanı
+                        </label>
+                        <input
+                          type="text"
+                          id="expertise"
+                          className="form-control"
+                          placeholder="Uzmanlık Alanı"
+                          value={profileData.expertise}
+                          onChange={handleProfileChange}
+                          name="expertise"
+                        />
                       </div>
 
                       <div className="col-12">
-                        <button className="btn btn-primary" type="submit">
-                          Profili Güncelle <i className="fas fa-check-circle"></i>
+                        <button className="btn btn-primary" type="submit" disabled={submitting}>
+                          {submitting ? "Güncelleniyor..." : "Profili Güncelle"}{" "}
+                          <i className="fas fa-check-circle"></i>
                         </button>
                       </div>
                     </div>
@@ -230,7 +281,6 @@ function Profile() {
           </div>
         </div>
       </section>
-
       <AkademiBaseFooter />
     </>
   );

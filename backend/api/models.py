@@ -1,14 +1,21 @@
 from datetime import datetime
+import os
+import uuid
+import mimetypes
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
 from decimal import Decimal
 
 from django.conf import settings
+from utils.files import educator_document_upload_to, validate_file_size
 from userauths.models import User, Profile
 from shortuuid.django_fields import ShortUUIDField
 from moviepy.editor import VideoFileClip
 import math
+from django.core.validators import FileExtensionValidator
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 YEAR =set()
 yearNow =int(datetime.strftime(datetime.now(),"%Y"))
@@ -1037,7 +1044,7 @@ class Question_AnswerDersSonuRaporu(models.Model):
     date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.user.username} - {self.derssonuraporu.title}"
+        return f"{self.derssonuraporu.title}"
     
     class Meta:
         ordering = ['-date']
@@ -1091,28 +1098,30 @@ Question_Answer_MessageDersSonuRaporu._meta.get_field('qa_id').verbose_name = "S
 Question_Answer_MessageDersSonuRaporu._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
 class Question_AnswerKitapTahlili(models.Model):
-    kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
-    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_kitap", on_delete=models.SET_NULL, null=True, blank=True)
-    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_kitap", on_delete=models.SET_NULL, null=True, blank=True) 
+    kitaptahlili   = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE, related_name="question_answers")
+    mesajiAlan     = models.ForeignKey(User, related_name="qam_mesajiAlan_kitap", on_delete=models.SET_NULL, null=True, blank=True)
+    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_kitap", on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=1000, null=True, blank=True)
     qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
-    date = models.DateTimeField(default=timezone.now)
+    date  = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.user.username} - {self.kitaptahlili.title}"
-    
-    class Meta:
-        ordering = ['-date']
+        return f"{self.kitaptahlili.title} - {self.title or ''}".strip(" -")
 
+    # 💡 Serializer'ın okuduğu alan
+    @property
     def messages(self):
-        return Question_Answer_MessageKitapTahlili.objects.filter(question=self)
-    
+        from .models import Question_Answer_MessageKitapTahlili
+        return Question_Answer_MessageKitapTahlili.objects.filter(question=self).order_by("date")
+
+    @property
     def profile(self):
-        return Profile.objects.get(user=self.user)
-    
+        return getattr(self.mesajiGonderen, "profile", None)
+
     class Meta:
+        ordering = ["-date"]
         verbose_name = "Kitap Tahlili Soru Cevap"
-        verbose_name_plural = "Kitap Tahlili Soru Cevaplar" 
+        verbose_name_plural = "Kitap Tahlili Soru Cevaplar"
         
 Question_AnswerKitapTahlili._meta.get_field('kitaptahlili').verbose_name = "Kitap Tahlili" 
 Question_AnswerKitapTahlili._meta.get_field('title').verbose_name = "Soru Başlığı"
@@ -1122,35 +1131,52 @@ Question_AnswerKitapTahlili._meta.get_field('qa_id').verbose_name = "Soru Cevap 
 Question_AnswerKitapTahlili._meta.get_field('date').verbose_name = "Soru Sorulan Tarih" 
 
 class Question_Answer_MessageKitapTahlili(models.Model):
-    kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
-    question = models.ForeignKey(Question_AnswerDersSonuRaporu, on_delete=models.CASCADE)
-    mesajiAlan = models.ForeignKey(User, related_name="qam_mesajiAlan_mesaj_kitap", on_delete=models.SET_NULL, null=True, blank=True)
-    mesajiGonderen = models.ForeignKey(User, related_name="qam_mesajiGonderen_mesaj_kitap", on_delete=models.SET_NULL, null=True, blank=True)
-    message = models.TextField(null=True, blank=True)
-    qam_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
-    qa_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
-    date = models.DateTimeField(default=timezone.now)
+    kitaptahlili = models.ForeignKey(
+        KitapTahlili,
+        on_delete=models.CASCADE,
+        related_name="qa_messages",
+        verbose_name="Kitap Tahlili",
+    )
+    question = models.ForeignKey(
+        Question_AnswerKitapTahlili,
+        on_delete=models.CASCADE,
+        related_name="messages",     # <-- serializer'da 'messages' ile okunur
+        verbose_name="Soru Başlığı",
+    )
+    mesajiGonderen = models.ForeignKey(
+        User,
+        related_name="qam_msg_gonderen_kitap",
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name="Mesajı Gönderen",
+    )
+    mesajiAlan = models.ForeignKey(
+        User,
+        related_name="qam_msg_alan_kitap",
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name="Mesajı Alan",
+    )
+    message = models.TextField(verbose_name="Mesaj")
+    qam_id = ShortUUIDField(                     # <-- Eksik alanı ekledik
+        unique=True, length=6, max_length=20,
+        alphabet="1234567890",
+        verbose_name="Soru Cevap Numarası",
+    )
+    date = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Soru Sorulan Tarih",
+    )
+
+    class Meta:
+        verbose_name = "Kitap Tahlili Mesajı"
+        verbose_name_plural = "Kitap Tahlili Mesajları"
+        ordering = ["date"]
 
     def __str__(self):
-        return f"{self.user.username} - {self.kitaptahlili.title}"
-    
-    class Meta:
-        ordering = ['date']
-
-    def profile(self):
-        return Profile.objects.get(user=self.user)
-    
-    class Meta:
-        verbose_name = "Kitap Tahlili Soru Cevap Mesaj"
-        verbose_name_plural = "Kitap Tahlili Soru Cevap Mesajlar" 
-        
-Question_Answer_MessageKitapTahlili._meta.get_field('kitaptahlili').verbose_name = "Kitap Tahlili" 
-Question_Answer_MessageKitapTahlili._meta.get_field('question').verbose_name = "Soru Başlığı"
-Question_Answer_MessageKitapTahlili._meta.get_field('mesajiAlan').verbose_name = "Mesajı Alan"
-Question_Answer_MessageKitapTahlili._meta.get_field('mesajiGonderen').verbose_name = "Mesajı Gönderen"
-Question_Answer_MessageKitapTahlili._meta.get_field('qam_id').verbose_name = "Soru Cevap Numarası"  
-Question_Answer_MessageKitapTahlili._meta.get_field('qa_id').verbose_name = "Soru Cevap Numarası"  
-Question_Answer_MessageKitapTahlili._meta.get_field('date').verbose_name = "Soru Sorulan Tarih"
+        # question.title güvenli değilse, fallback kullanın
+        title = getattr(self.question, "title", "")
+        return f"{title} - {self.message[:30]}"
 
 class Question_AnswerEskepProje(models.Model):
     eskepproje = models.ForeignKey(EskepProje, on_delete=models.CASCADE)
@@ -1659,7 +1685,7 @@ class NoteOdev(models.Model):
 class NoteKitapTahlili(models.Model):
     ogrenciStajer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     koordinator = models.ForeignKey(Koordinator, on_delete=models.SET_NULL, null=True, blank=True)
-    kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE)
+    kitaptahlili = models.ForeignKey(KitapTahlili, on_delete=models.CASCADE,related_name='notes')
     title = models.CharField(max_length=1000, null=True, blank=True)
     note = models.TextField()
     note_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -2367,3 +2393,109 @@ class EducatorVideo(models.Model):
 
     def __str__(self):
         return f"{self.title} (Teacher#{self.instructor_id})"
+    
+class EducatorDocument(models.Model):
+    """
+    Eğitmen dökümanı (PDF/Word/PowerPoint/Metin vb.)
+    """
+    DOCUMENT_EXTS = [
+        "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx",
+        "txt", "rtf", "odt", "csv", "md"
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    instructor = models.ForeignKey(
+        "Teacher",  # veya from ... import Teacher ile doğrudan model
+        on_delete=models.CASCADE,
+        related_name="uploaded_documents",
+        help_text="Dökümanı yükleyen eğitmen (Teacher).",
+    )
+
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
+    file = models.FileField(
+        upload_to=educator_document_upload_to,
+        validators=[
+            FileExtensionValidator(allowed_extensions=DOCUMENT_EXTS),
+            validate_file_size,
+        ],
+        help_text="PDF, Word, PowerPoint vb. (maks. 50 MB).",
+    )
+
+    # Otomatik bilgi alanları
+    original_filename = models.CharField(max_length=255, blank=True, editable=False)
+    file_size = models.PositiveBigIntegerField(default=0, editable=False, help_text="Bayt cinsinden.")
+    mime_type = models.CharField(max_length=100, blank=True, editable=False)
+
+    # Görünürlük
+    is_public = models.BooleanField(default=False, help_text="Herkese açık mı?")
+    tags = models.CharField(max_length=255, blank=True, help_text="Virgülle ayırın. Örn: pdf, sunum")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Eğitmen Dökümanı"
+        verbose_name_plural = "Eğitmen Dökümanları"
+
+    def __str__(self):
+        return f"{self.title} (Teacher#{self.instructor_id})"
+
+    @property
+    def extension(self):
+        _, ext = os.path.splitext(self.file.name or "")
+        return ext.lstrip(".").lower()
+
+    def save(self, *args, **kwargs):
+        # Yeni dosya geldiğinde meta bilgileri güncelle
+        if self.file and hasattr(self.file, "name"):
+            self.original_filename = os.path.basename(
+                getattr(self.file, "name", self.original_filename)
+            )
+            self.file_size = getattr(self.file, "size", self.file_size) or 0
+            self.mime_type = mimetypes.guess_type(self.original_filename or "")[0] or ""
+        super().save(*args, **kwargs)
+        
+class VideoPurchase(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="video_purchases"
+    )
+    # Hem EducatorVideo, hem EducatorVideoLink desteklemek için GenericFK
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    video_object = GenericForeignKey("content_type", "object_id")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "content_type", "object_id")
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} bought {self.content_type_id}:{self.object_id}"
+    
+class VideoEnrollment(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="video_enrollments"
+    )
+    video = models.ForeignKey(
+        "EducatorVideo",
+        on_delete=models.CASCADE,
+        related_name="enrollments"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "video")
+
+    def __str__(self):
+        return f"{self.user_id} enrolled {self.video_id}"

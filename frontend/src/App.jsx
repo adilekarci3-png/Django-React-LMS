@@ -60,6 +60,16 @@ import CourseDetail from "./views/instructor/CourseDetail";
 //EHAD Akademi Pages
 import AkademiIndex from "./views/base/AkademiIndex";
 import AkademiCourses from "./views/Akademi/Courses";
+import {
+  AllYoutubeVideosPage,
+  AllInstructorVideosPage,
+  VideoPurchasersPage,
+  VideoEnrolleesPage,
+  MyInstructorVideosPage,
+  AllVideoPurchasesPage,
+  AllVideoEnrollmentsPage,
+} from "./views/AkademiKoordinator/VideoLists";
+import AllInstructorDocumentsCrudPage from "./views/AkademiKoordinator/DocumentsPage";
 
 //HDM Pages
 import HDMIndex from "./views/base/HDMIndex";
@@ -157,6 +167,7 @@ import WebcamRecordPage from "./views/ESKEPEgitmen/WebcamRecordPage";
 
 // Akademi Egitmen
 import EducatorAddCanliDers from "./views/AkademiEgitmen/EducatorAddCanliDers";
+import EducatorMediaDashboard from "./views/AkademiEgitmen/EducatorMediaDashboard";
 import EducatorAddLesson from "./views/AkademiEgitmen/EducatorAddLesson";
 import EducatorEgitmenLiveDersListesi from "./views/AkademiEgitmen/EducatorEgitmenLiveDersListesi";
 import EducatorEgitmenSchedule from "./views/AkademiEgitmen/EducatorEgitmenSchedule";
@@ -168,6 +179,12 @@ import EducatorVideosPage from "./views/AkademiEgitmen/EducatorVideosPage";
 import AllVideosPage from "./views/Akademi/AllVideosPage";
 import MySavedVideosPage from "./views/Akademi/MySavedVideosPage";
 import EducatorVideoCreate from "./views/AkademiEgitmen/EducatorVideoCreate";
+import EducatorDocuments from "./views/AkademiEgitmen/EducatorDocuments";
+import EducatorDocumentCreate from "./views/AkademiEgitmen/EducatorDocumentCreate";
+import OgrenciList from "./views/AkademiKoordinator/OgenciList";
+import EgitmenList from "./views/AkademiKoordinator/EgitmenList";
+import StudentList from "./views/AkademiKoordinator/OgenciList";
+
 
 const BASENAME = import.meta.env.VITE_BASENAME || "/test.akademi.ehad.org.tr";
 
@@ -505,8 +522,25 @@ function App() {
             {/* EHAD Akademi */}
             <Route path="/akademi/videos" element={<AllVideosPage />} />
             <Route path="/akademi/me/saved-videos" element={<MySavedVideosPage />} />
+
+            {/* EHAD Akademi Koordinator */}
+            <Route path="/koordinator/youtube-videolar" element={<AllYoutubeVideosPage />} />
+            <Route path="/koordinator/egitmen-videolari" element={<AllInstructorVideosPage />} />
+            <Route path="/koordinator/egitmen-dokumanlari" element={<AllInstructorDocumentsCrudPage />} />
+            <Route path="/koordinator/egitmen/:instructorId/videolar" element={<MyInstructorVideosPage />} />
+
+            {/* Dokümanlar */}            
+            <Route path="/koordinator/egitmenlist" element={<EgitmenList />} />
+            <Route path="/koordinator/ogrencilist" element={<StudentList />} />
+            {/* Öğrenci listeleri */}
+            <Route path="/koordinator/video/:videoId/satin-alanlar" element={<VideoPurchasersPage />} />
+            <Route path="/koordinator/video/:videoId/kayitli-ogrenciler" element={<VideoEnrolleesPage />} />
+            {/* Toplu satın alma & kayıt listeleri */}
+            <Route path="/koordinator/satin-almalar" element={<AllVideoPurchasesPage />} />
+            <Route path="/koordinator/video-kayitlari" element={<AllVideoEnrollmentsPage />} />
             {/* EHAD Akademi Egitmen */}
             <Route path="/educator/add-canli-ders" element={<EducatorAddCanliDers />} />
+            <Route path="/educator/dashboard" element={<EducatorMediaDashboard />} />
             <Route path="/educator/add-lesson" element={<EducatorAddLesson />} />
             <Route path="/educator/live-ders-listesi" element={<EducatorEgitmenLiveDersListesi />} />
             <Route path="/educator/schedule" element={<EducatorEgitmenSchedule />} />
@@ -514,6 +548,8 @@ function App() {
             <Route path="/educator/video-create/:id" element={<EducatorVideoCreate />} />
             <Route path="/educator/video-link-create" element={<AkademiEducatorVideoLinkCreate />} />
             <Route path="/educator/webcam-record" element={<AkademiWebcamRecordPage />} />
+            <Route path="/educator/documents" element={<EducatorDocuments />} />
+            <Route path="/educator/documents/create" element={<EducatorDocumentCreate />} />
             <Route
               path="/educator/youtube-video-list/"
               element={
@@ -562,7 +598,23 @@ function App() {
                 </PrivateRoute>
               }
             />
-
+            {/* EHAD Akademi Egitmen */}
+            <Route
+              path="/koordinator/ogrencilist/"
+              element={
+                <PrivateRoute>
+                  <OgrenciList />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/koordinator/egitmenlist/"
+              element={
+                <PrivateRoute>
+                  <EgitmenList />
+                </PrivateRoute>
+              }
+            />
             {/* HDM */}
             <Route
               path="/hdm/"

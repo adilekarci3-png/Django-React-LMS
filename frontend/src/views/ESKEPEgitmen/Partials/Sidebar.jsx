@@ -1,127 +1,188 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 function Sidebar() {
+  const linkCls = ({ isActive }) =>
+    "nav-link d-flex align-items-center gap-2 px-3 py-2 rounded " +
+    (isActive ? "active" : "");
+
   return (
-    <nav className="navbar navbar-expand-md shadow-sm mb-4 mb-lg-0 sidenav">
-      <a
-        className="d-xl-none d-lg-none d-md-none text-inherit fw-bold text-decoration-none text-dark p-3"
-        href="#"
-      >
-        Menu
-      </a>
+    <aside className="sidenav shadow-sm mb-4 mb-lg-0" data-sidebar="educator">
+      {/* Mobile toggle */}
       <button
-        className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light m-3"
+        className="btn btn-primary d-md-none m-3"
         type="button"
         data-bs-toggle="collapse"
         data-bs-target="#sidenav"
         aria-controls="sidenav"
         aria-expanded="false"
-        aria-label="Toggle navigation"
+        aria-label="Menüyü Aç/Kapat"
       >
-        <span className="bi bi-grid" />
+        <i className="bi bi-grid"></i>
       </button>
 
-      <div className="collapse navbar-collapse p-3" id="sidenav">
-        <div className="navbar-nav flex-column">
+      <div className="collapse d-md-block" id="sidenav">
+        <div className="px-3 py-2">
 
           {/* --- Ana (Eğitmen) --- */}
-          <ul className="list-unstyled ms-n2 mb-4">
+          <ul className="list-unstyled mb-4">
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/dashboard/`}>
-                <i className="fa-solid fa-gauge text-primary me-2"></i> Panel
-              </Link>
+              <NavLink className={linkCls} to="/educator/dashboard">
+                <i className="fa-solid fa-gauge text-primary"></i>
+                <span>Panel</span>
+              </NavLink>
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/live-lessons/`}>
-                <i className="fa-solid fa-video text-danger me-2"></i> Canlı Derslerim
-              </Link>
+              <NavLink className={linkCls} to="/educator/live-ders-listesi">
+                <i className="fa-solid fa-video text-danger"></i>
+                <span>Canlı Derslerim</span>
+              </NavLink>
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/youtube-video-list/`}>
-                <i className="fa-brands fa-youtube text-danger me-2"></i> YouTube Videolarım
-              </Link>
+              <NavLink className={linkCls} to="/educator/youtube-video-list">
+                <i className="fa-brands fa-youtube text-danger"></i>
+                <span>YouTube Videolarım</span>
+              </NavLink>
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/video-list/`}>
-                <i className="fa-solid fa-photo-film text-info me-2"></i> Videolarım
-              </Link>
+              <NavLink className={linkCls} to="/educator/video-list">
+                <i className="fa-solid fa-photo-film text-info"></i>
+                <span>Videolarım</span>
+              </NavLink>
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/created-videos/`}>
-                <i className="fa-solid fa-clapperboard text-warning me-2"></i> Oluşturduğum Videolar
-              </Link>
+              <NavLink className={linkCls} to="/educator/created-videos">
+                <i className="fa-solid fa-clapperboard text-warning"></i>
+                <span>Oluşturduğum Videolar</span>
+              </NavLink>
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/documents/`}>
-                <i className="fa-regular fa-file-lines text-secondary me-2"></i> Dökümanlarım
-              </Link>
+              <NavLink className={linkCls} to="/educator/documents">
+                <i className="fa-regular fa-file-lines text-secondary"></i>
+                <span>Dökümanlarım</span>
+              </NavLink>
             </li>
           </ul>
 
           {/* --- İçerik Ekle (Eğitmen) --- */}
-          <span className="navbar-header mb-2">İçerik Ekle</span>
-          <ul className="list-unstyled ms-n2 mb-4">
+          <div className="navbar-header">İçerik Ekle</div>
+          <ul className="list-unstyled mb-4">
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/canli-ders-ekle/`}>
-                <i className="fa-solid fa-video text-danger me-2"></i> Canlı Ders Ekle
-              </Link>
+              <NavLink className={linkCls} to="/educator/add-canli-ders">
+                <i className="fa-solid fa-video text-danger"></i>
+                <span>Canlı Ders Ekle</span>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/youtube-video-ekle/`}>
-                <i className="fa-brands fa-youtube text-danger me-2"></i> YouTube Video Ekle
-              </Link>
+              <NavLink className={linkCls} to="/educator/video-link-create">
+                <i className="fa-brands fa-youtube text-danger"></i>
+                <span>YouTube Video Ekle</span>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/ders-olustur/`}>
-                <i className="fa-regular fa-clock text-success me-2"></i> Ders Saati Ekle
-              </Link>
+              <NavLink className={linkCls} to="/educator/add-lesson">
+                <i className="fa-regular fa-clock text-success"></i>
+                <span>Ders Saati Ekle</span>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/video-olustur/`}>
-                <i className="fa-solid fa-film text-warning me-2"></i> Video Oluştur
-              </Link>
+              <NavLink className={linkCls} to="/educator/video-create">
+                <i className="fa-solid fa-film text-warning"></i>
+                <span>Video Oluştur</span>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/video-ekle/`}>
-                <i className="fa-solid fa-upload text-info me-2"></i> Video Ekle
-              </Link>
+              <NavLink className={linkCls} to="/educator/webcam-record">
+                <i className="fa-solid fa-upload text-info"></i>
+                <span>Video Ekle</span>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to={`/eskepegitmen/dokuman-ekle/`}>
-                <i className="fa-solid fa-file-arrow-up text-secondary me-2"></i> Döküman Ekle
-              </Link>
-            </li>
-          </ul>
-
-          {/* --- Hesap (genel yolların sende nasıl olduğuna göre güncelle) --- */}
-          <span className="navbar-header mb-3">Hesap Ayarları</span>
-          <ul className="list-unstyled ms-n2 mb-0">
-            <li className="nav-item">
-              <Link className="nav-link" to={`/student/profile/`}>
-                <i className="fas fa-edit text-primary me-2"></i> Profil Düzenle
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to={`/student/change-password/`}>
-                <i className="fas fa-lock text-warning me-2"></i> Şifre Değiştir
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to={`/login/`}>
-                <i className="fas fa-sign-out-alt text-danger me-2"></i> Çıkış Yap
-              </Link>
+              <NavLink className={linkCls} to="/educator/documents/create">
+                <i className="fa-solid fa-file-arrow-up text-secondary"></i>
+                <span>Döküman Ekle</span>
+              </NavLink>
             </li>
           </ul>
 
+          {/* --- Hesap --- */}
+          <div className="navbar-header">Hesap Ayarları</div>
+          <ul className="list-unstyled mb-0">
+            <li className="nav-item">
+              <NavLink className={linkCls} to="/student/profile">
+                <i className="fas fa-edit text-primary"></i>
+                <span>Profil Düzenle</span>
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink className={linkCls} to="/student/change-password">
+                <i className="fas fa-lock text-warning"></i>
+                <span>Şifre Değiştir</span>
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink className={linkCls} to="/login">
+                <i className="fas fa-sign-out-alt text-danger"></i>
+                <span>Çıkış Yap</span>
+              </NavLink>
+            </li>
+          </ul>
         </div>
       </div>
-    </nav>
+
+      {/* Styles */}
+      <style>{`
+        /* Kökte Bootstrap nav değişkenlerini override et */
+        .sidenav{
+          background:#fff;
+          border-radius:.75rem;
+          /* Bootstrap 5 değişkenleri */
+          --bs-nav-link-color: #0f172a;
+          --bs-nav-link-hover-color: #0b5ed7;
+          --bs-link-color: #0f172a;
+          --bs-link-hover-color: #0b5ed7;
+          --bs-secondary-color: #0f172a;
+        }
+        .sidenav .navbar-header{
+          font-size:.75rem;
+          font-weight:700;
+          text-transform:uppercase;
+          letter-spacing:.08em;
+          color:#64748b;
+          margin:.5rem 1rem;
+        }
+
+        /* Yazıyı soluk yapan tüm kuralları bastır */
+        .sidenav .nav-link,
+        .sidenav .nav-link span,
+        .sidenav .nav-link i{
+          color:#0f172a !important;
+          opacity:1 !important;
+          filter:none !important;
+        }
+
+        .sidenav .nav-link{
+          font-weight:600;
+          display:flex;
+          align-items:center;
+          gap:.5rem;
+        }
+        .sidenav .nav-link i{ width:1.25rem; text-align:center; }
+        .sidenav .nav-link:hover{ background:#f1f5f9; }
+        .sidenav .nav-link.active{
+          color:#0b5ed7 !important;
+          background:#e7f1ff;
+        }
+        @media (min-width:768px){
+          .sidenav{ position:sticky; top:1rem; }
+        }
+      `}</style>
+    </aside>
   );
 }
 

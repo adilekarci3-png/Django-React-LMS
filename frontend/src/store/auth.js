@@ -1,9 +1,8 @@
-// src/store/auth.js
 import { createWithEqualityFn } from "zustand/traditional";
 import { persist } from "zustand/middleware";
 
 const initialState = {
-  allUserData: null,     // { user_id, username, email, full_name, base_roles, sub_roles, ... }
+  allUserData: null,   // { user_id, username, email, full_name, base_roles, sub_roles, ... }
   access_token: null,
   rehydrated: false,
 };
@@ -13,7 +12,7 @@ export const useAuthStore = createWithEqualityFn(
     (set, get) => ({
       ...initialState,
 
-      // Türetilmiş kullanıcı bilgisi (okuma kolaylığı için)
+      // Türetilmiş kullanıcı bilgisi
       user: () => {
         const u = get().allUserData || {};
         return {
@@ -31,16 +30,16 @@ export const useAuthStore = createWithEqualityFn(
         set(update);
       },
 
-      // Basit login durumu (fonksiyon → her yerde isLoggedIn() diye çağır)
+      // Basit login durumu
       isLoggedIn: () => get().allUserData !== null,
 
-      // Çıkış
+      // Çıkış (store tarafı)
       logout: () => set({ allUserData: null, access_token: null }),
 
       // Rehydrate tamam
       setRehydrated: () => set({ rehydrated: true }),
 
-      // ---- Rol yardımcıları ----
+      /* ---------- Rol yardımcıları ---------- */
       hasBaseRole: (role) => {
         const roles = get().allUserData?.base_roles || [];
         return roles.includes(role);
@@ -54,7 +53,7 @@ export const useAuthStore = createWithEqualityFn(
         return roles?.some((r) => subRoles.includes(r)) || false;
       },
 
-      // Role bilgilerini güncelle (mevcut user üstüne yazar)
+      // Role bilgilerini güncelle (mevcut kullanıcı üstüne yazar)
       setRoleData: (roleData) => {
         const current = get().allUserData || {};
         set({
@@ -66,7 +65,7 @@ export const useAuthStore = createWithEqualityFn(
         });
       },
 
-      // (Opsiyonel) Tam sıfırlama
+      // Tam sıfırlama (rehydrated true kalsın ki UI beklemesin)
       reset: () => set({ ...initialState, rehydrated: true }),
     }),
     {

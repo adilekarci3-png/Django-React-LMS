@@ -1,8 +1,12 @@
+# userauths/admin.py
 from django.contrib import admin
-from userauths.models import User, Profile
+from django.contrib.auth import get_user_model
+from userauths.models import Profile
 
+User = get_user_model()
+
+@admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'full_name', 'date']
-
-admin.site.register(User)
-admin.site.register(Profile, ProfileAdmin)
+    list_display = ("user", "full_name", "date")
+    search_fields = ("full_name", "user__email", "user__full_name")
+    autocomplete_fields = ("user",)

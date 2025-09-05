@@ -15,8 +15,11 @@ from rest_framework.exceptions import NotFound
 from api import serializer as api_serializer
 from api import models as api_models
 from setuptools.dist import strtobool
+from api.permissions import IsGeneralKoordinator, IsGeneralTeacher
 
-from utils.educator import get_user_instructor_id
+from utils.hbs_user import _get_user_agent_city, _is_hbs_koordinator
+from utils.instructor_videos import _get_video_object
+
 from utils.permissions import CanModifyVideoLink, IsEskepKoordinatorOrTeacher, get_educator_for_user, get_teacher_for_user, is_eskep_koordinator
 from userauths.models import User, Profile
 from django.db.models import Count
@@ -40,6 +43,8 @@ from django.db import transaction
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
+from api import models as M
 # import distutils
 # from distutils.util import strtobool
 
@@ -93,125 +98,6 @@ class BaseListAPIView(generics.ListAPIView):
 class BaseDestroyAPIView(generics.DestroyAPIView):
     permission_classes = [AllowAny]
 
-# class IsEskepKoordinatorOrTeacher(BasePermission):
-#     """
-#     - Kullanıcı Koordinator tablosunda ve rolü ESKEPKoordinator ise izin verilir.
-#     - Kullanıcı Teacher tablosunda ve rolü ESKEPEgitmen ise izin verilir.
-#     """
-#     def has_permission(self, request, view):
-#         user = request.user
-
-#         if not user.is_authenticated:
-#             return False
-
-#         # Koordinator kontrolü
-#         try:
-#             koordinator = api_models.Koordinator.objects.get(user=user)
-#             if koordinator.roles.filter(name="ESKEPKoordinator").exists():
-#                 return True
-#         except ObjectDoesNotExist:
-#             pass
-
-#         # Teacher kontrolü
-#         try:
-#             teacher = api_models.Teacher.objects.get(user=user)
-#             if teacher.roles.filter(name="ESKEPEgitmen").exists():
-#                 return True
-#         except ObjectDoesNotExist:
-#             pass
-
-#         return False
-
-
-class IsGeneralKoordinator(BasePermission):
-    """
-    Kullanıcının Koordinator modelinde olup,
-    base_roles içinde 'Koordinator' varsa VEYA
-    sub_roles içinde aşağıdakilerden biri varsa izin verilir.
-    """
-    allowed_sub_roles = [
-        "HBSKoordinator",
-        "HDMKoordinator",
-        "AkademiKoordinator",
-        "ESKEPKoordinator",
-        "ESKEPOgrenciKoordinator",
-        "ESKEPGenelKoordinator",
-        "ESKEPStajerKoordinator",
-    ]
-
-    def has_permission(self, request, view):
-        user = request.user
-
-        if not user.is_authenticated:
-            return False
-        try:
-            koordinator = api_models.Koordinator.objects.get(user=user)
-            # Kullanıcının Koordinator rolü varsa ve alt rollerden biri eşleşiyorsa izin ver
-            if koordinator.roles.filter(name__in=self.allowed_sub_roles).exists():
-                return True
-            
-            # JWT'den gelen base_roles içinde "Koordinator" varsa izin ver
-            if hasattr(user, "token") and isinstance(user.token, dict):
-                return "Koordinator" in user.token.get("base_roles", [])
-
-            # Alternatif olarak, custom user modelinde base_roles alanı varsa
-            if hasattr(user, "base_roles"):
-                return "Koordinator" in user.base_roles
-
-            return False
-
-        except ObjectDoesNotExist:
-            return False
-
-
-class IsGeneralTeacher(BasePermission):
-    """
-    Kullanıcının Teacher tablosunda olup,
-    rolleri arasında aşağıdaki teacher_roles'ten biri varsa izin verilir.
-    """
-    allowed_teacher_roles = [
-        "HBSEgitmen",
-        "HDMEgitmen",
-        "AkademiEgitmen",
-        "ESKEPEgitmen",
-    ]
-
-    def has_permission(self, request, view):
-        user = request.user
-
-        if not user.is_authenticated:
-            return False
-
-        try:
-            teacher = api_models.Teacher.objects.get(user=user)
-            return teacher.roles.filter(name__in=self.allowed_teacher_roles).exists()
-        except ObjectDoesNotExist:
-            return False
-        
-# class EskepOgrenciDersSonuRaporuListAPIView(BaseListAPIView):
-#     serializer_class = api_serializer.DersSonuRaporuSerializer
-
-#     def get_queryset(self):
-#         ogrenci_id = self.kwargs['ogrenci_id']
-#         ogrenci = api_models.Ogrenci.objects.get(id=ogrenci_id)
-#         return api_models.DersSonuRaporu.objects.filter(ogrenci=ogrenci)
-
-# class EskepOgrenciKitapTahliliListAPIView(BaseListAPIView):
-#     serializer_class = api_serializer.KitapTahliliSerializer
-
-#     def get_queryset(self):
-#         ogrenci_id = self.kwargs['ogrenci_id']
-#         ogrenci = api_models.Ogrenci.objects.get(id=ogrenci_id)
-#         return api_models.KitapTahlili.objects.filter(ogrenci=ogrenci)
-
-# class EskepOgrenciProjeListAPIView(BaseListAPIView):
-#     serializer_class = api_serializer.EskepProjeSerializer
-
-#     def get_queryset(self):
-#         ogrenci_id = self.kwargs['ogrenci_id']
-#         ogrenci = api_models.Ogrenci.objects.get(id=ogrenci_id)
-#         return api_models.EskepProje.objects.filter(ogrenci=ogrenci)
-    
 class EskepOgrenciOdevListAPIView(BaseListAPIView):
     serializer_class = api_serializer.OdevSerializer
 
@@ -262,18 +148,17 @@ class EskepInstructorProjeListAPIView(BaseListAPIView):
         return api_models.EskepProje.objects.filter(koordinator=koordinator)
 
 class EskepInstructorOdevListAPIView(BaseListAPIView):
-    serializer_class = api_serializer.OdevSerializer
-    
-    def get_queryset(self):
-        user_id = self.kwargs['user_id']
-        print(user_id)
-        try:
-            koordinator = api_models.Koordinator.objects.get(user__id=user_id)
-            print(koordinator)
-        except api_models.Koordinator.DoesNotExist:
-            return api_models.Odev.objects.none()
-        print(api_models.Odev.objects.filter(koordinator=koordinator))
-        return api_models.Odev.objects.filter(koordinator=koordinator)
+     serializer_class = api_serializer.OdevListSerializer
+     permission_classes = [IsAuthenticated]
+
+     def get_queryset(self):
+        user_id = self.kwargs["user_id"]
+        return (
+            api_models.Odev.objects
+            .filter(koordinator__user_id=user_id)  # kendi filtremi örnek verdim
+            .select_related("inserteduser", "koordinator", "category")
+            .order_by("-date")
+        )
 
 class EskepStajerDersSonuRaporuListAPIView(BaseListAPIView):
     serializer_class = api_serializer.DersSonuRaporuSerializer
@@ -1805,10 +1690,10 @@ class EskepInstructorDersSonuRaporuDetailAPIView(generics.RetrieveAPIView):
 
     def get_object(self):
         koordinator_id = self.kwargs['koordinator_id']
-        dersSonuRaporu_id = self.kwargs['dersSonuRaporu_id']
+        derssonuraporu_id = self.kwargs['derssonuraporu_id']
 
         # user = get_object_or_404(User, id=user_id)
-        return api_models.DersSonuRaporu.objects.get(id=dersSonuRaporu_id,koordinator_id=koordinator_id)
+        return api_models.DersSonuRaporu.objects.get(id=derssonuraporu_id,koordinator_id=koordinator_id)
 
 class EskepInstructorProjeDetailAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.ProjeSerializer
@@ -2112,17 +1997,20 @@ class StudentNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 class EskepInstructorOdevNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = api_serializer.NoteOdevSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # gerektiği gibi ayarlayın
 
     def get_object(self):
-        odev_id = self.kwargs['odev_id']
         koordinator_id = self.kwargs['koordinator_id']
-        note_id = self.kwargs['note_id']
+        odev_id = self.kwargs['odev_id']
+        pk = self.kwargs['pk']
 
-        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
-        odev = api_models.Odev.objects.get(id=odev_id)
-        note = api_models.NoteOdev.objects.get(koordinator=koordinator, odev=odev, id=note_id)
-        return note
+        # Önce notu ilgili ödev altından çekin; koordinator NULL olabilir.
+        return get_object_or_404(
+            api_models.NoteOdev,
+            Q(koordinator_id=koordinator_id) | Q(koordinator__isnull=True),
+            odev_id=odev_id,
+            pk=pk
+        )
 
 class EskepInstructorDersSonuRaporuNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = api_serializer.NoteDersSonuRaporuSerializer
@@ -2403,43 +2291,89 @@ class CourseQuestionAnswerMessageCreateAPIView(APIView):
             {"message": "Mesaj gönderildi", "question": serialized_question.data},
             status=status.HTTP_201_CREATED,
         )
-        
 class OdevQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = api_serializer.Question_AnswerOdevSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+
+    def _get_odev(self, request, **kwargs):
+        # URL, query veya body'den al; olmayan durumda düzgün bir 404 döndür
+        odev_id = (
+            kwargs.get("odev_id")
+            or request.query_params.get("odev_id")
+            or request.data.get("odev_id")
+        )
+        if not odev_id:
+            raise NotFound("odev_id gerekiyor.")
+        return get_object_or_404(api_models.Odev, id=odev_id)
 
     def get_queryset(self):
-        odev_id = self.kwargs['odev_id']
-        odev = get_object_or_404(api_models.Odev, id=odev_id)
-        return api_models.Question_AnswerOdev.objects.filter(odev=odev)
-    
-    def create(self, request, *args, **kwargs):
-        odev_id = request.data.get('odev_id')
-        user_id = request.data.get('user_id')
-        title = request.data.get('title')
-        message = request.data.get('message')
+        odev = self._get_odev(self.request, **self.kwargs)
+        return api_models.Question_AnswerOdev.objects.filter(odev=odev).order_by("-id")
 
-        odev = get_object_or_404(api_models.Odev, id=odev_id)
-        mesajiGonderen = get_object_or_404(User, id=user_id)
+    def create(self, request, *args, **kwargs):
+        odev = self._get_odev(request, **kwargs)
+        user = request.user if request.user.is_authenticated else None
+        if not user:
+            user_id = request.data.get("user_id") or request.data.get("gonderen_id")
+            user = get_object_or_404(User, id=user_id)
+
+        title = request.data.get("title")
+        message = request.data.get("message")
         mesajiAlan = odev.inserteduser
 
         question = api_models.Question_AnswerOdev.objects.create(
             odev=odev,
-            mesajiAlan=mesajiAlan,           # ✅ DÜZELTİLDİ
-            mesajiGonderen=mesajiGonderen,   # ✅ DÜZELTİLDİ
-            title=title
+            mesajiAlan=mesajiAlan,
+            mesajiGonderen=user,
+            title=title,
+        )
+        api_models.Question_Answer_MessageOdev.objects.create(
+            odev=odev,
+            mesajiAlan=mesajiAlan,
+            mesajiGonderen=user,
+            message=message,
+            question=question,
+            # title=title,
         )
 
+        data = self.get_serializer(question).data
+        return Response(
+            {"message": "Grup Konuşması Başlatıldı", "question_id": question.id, "question": data},
+            status=status.HTTP_201_CREATED,
+        )
+            
+class OdevQuestionAnswerMessageCreateAPIView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = api_serializer.OdevQAMessageCreateSerializer
+    
+    def _get_odev(self, request, **kwargs):
+        odev_id = kwargs.get("odev_id") or request.data.get("odev_id")
+        if not odev_id:
+            raise NotFound("odev_id gerekiyor.")
+        return get_object_or_404(api_models.Odev, id=odev_id)
+
+    def create(self, request, *args, **kwargs):
+        odev = self._get_odev(request, **kwargs)
+        question_id = request.data.get("question_id")
+        # title = request.data.get("title")
+        message = request.data.get("message")
+
+        question = get_object_or_404(api_models.Question_AnswerOdev, id=question_id, odev=odev)
+
+        mesajiGonderen = request.user
+        mesajiAlan = question.mesajiAlan or odev.inserteduser
+        print("KWARGS:", self.kwargs, "QUERY:", self.request.query_params, "DATA:", self.request.data)
         api_models.Question_Answer_MessageOdev.objects.create(
             odev=odev,
             mesajiAlan=mesajiAlan,
             mesajiGonderen=mesajiGonderen,
             message=message,
-            question=question
+            question=question,
+            # title=title,
         )
 
-        return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
-
+        return Response({"ok": True, "question_id": question.id}, status=status.HTTP_201_CREATED)
+    
 class OdevQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.Question_Answer_MessageOdevSerializer
     permission_classes = [AllowAny]
@@ -2632,39 +2566,93 @@ class EskepProjeCreateOrUpdateNoteAPIView(APIView):
         
 class KitapTahliliQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = api_serializer.Question_AnswerKitapTahliliSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+    queryset = api_models.Question_AnswerKitapTahlili.objects.all()
 
     def get_queryset(self):
-        kitaptahlili_id = self.kwargs['kitaptahlili_id']
-        kitaptahlili = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
-        return api_models.Question_AnswerKitapTahlili.objects.filter(kitaptahlili=kitaptahlili)
-    
+        kt_id = self.kwargs.get("kitaptahlili_id") or self.request.query_params.get("kitaptahlili_id")
+        kt = get_object_or_404(api_models.KitapTahlili, id=kt_id)
+        return self.queryset.filter(kitaptahlili=kt).order_by("-id")
+
     def create(self, request, *args, **kwargs):
-        kitaptahlili_id = request.data.get('kitaptahlili_id')
-        gonderen_id = request.data.get('gonderen_id')
-        title = request.data.get('title')
-        message = request.data.get('message')
+        # URL ya da body'den al
+        kt_id = kwargs.get("kitaptahlili_id") or request.data.get("kitaptahlili_id")
+        kt = get_object_or_404(api_models.KitapTahlili, id=kt_id)
 
-        kitaptahlili = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
-        mesajiGonderen = get_object_or_404(User, id=gonderen_id)
-        mesajiAlan = kitaptahlili.inserteduser
+        # Gönderen (auth varsa request.user)
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated:
+            sender = user
+        else:
+            user_id = request.data.get("user_id") or request.data.get("gonderen_id")
+            sender = get_object_or_404(User, id=user_id)
 
+        title = (request.data.get("title") or "").strip()
+        message = (request.data.get("message") or "").strip()
+        if not title or not message:
+            return Response({"detail": "title ve message zorunlu"}, status=status.HTTP_400_BAD_REQUEST)
+
+        receiver = kt.inserteduser  # projendeki mantık
+
+        # Konuşmayı oluştur
         question = api_models.Question_AnswerKitapTahlili.objects.create(
-            kitaptahlili=kitaptahlili,
-            mesajiAlan=mesajiAlan,
-            mesajiGonderen=mesajiGonderen,
-            title=title
+            kitaptahlili=kt,
+            mesajiAlan=receiver,
+            mesajiGonderen=sender,
+            title=title,
         )
+
+        # İlk mesajı yaz
+        api_models.Question_Answer_MessageKitapTahlili.objects.create(
+            kitaptahlili=kt,
+            mesajiAlan=receiver,
+            mesajiGonderen=sender,
+            message=message,
+            question=question,
+        )
+
+        return Response(
+            {"message": "Grup Konuşması Başlatıldı", "question_id": question.id},
+            status=status.HTTP_201_CREATED,
+        )
+
+# -----------------------------
+# KitapTahlili: Var olan konuşmaya mesaj ekle
+# -----------------------------
+class KitapTahliliQuestionAnswerMessageCreateAPIView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        kt_id = kwargs.get("kitaptahlili_id") or request.data.get("kitaptahlili_id")
+        kt = get_object_or_404(api_models.KitapTahlili, id=kt_id)
+
+        question_id = request.data.get("question_id")
+        message = (request.data.get("message") or "").strip()
+        if not question_id or not message:
+            return Response({"detail": "question_id ve message zorunlu"}, status=status.HTTP_400_BAD_REQUEST)
+
+        question = get_object_or_404(
+            api_models.Question_AnswerKitapTahlili, id=question_id, kitaptahlili=kt
+        )
+
+        user = getattr(request, "user", None)
+        if user and user.is_authenticated:
+            sender = user
+        else:
+            user_id = request.data.get("user_id") or request.data.get("gonderen_id")
+            sender = get_object_or_404(User, id=user_id)
+
+        receiver = question.mesajiAlan or kt.inserteduser
 
         api_models.Question_Answer_MessageKitapTahlili.objects.create(
-            kitaptahlili=kitaptahlili,
-            mesajiAlan=mesajiAlan,
-            mesajiGonderen=mesajiGonderen,
+            kitaptahlili=kt,
+            mesajiAlan=receiver,
+            mesajiGonderen=sender,
             message=message,
-            question=question
+            question=question,
         )
 
-        return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
+        return Response({"ok": True, "question_id": question.id}, status=status.HTTP_201_CREATED)
 
 class KitapTahliliQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.Question_Answer_MessageKitapTahliliSerializer
@@ -2720,29 +2708,64 @@ class KitapTahliliQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 class DersSonuRaporuQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
+    """
+    GET  -> Belirli bir DSR (ders sonu raporu) için tüm Q/A kayıtları
+    POST -> Yeni bir soru (question) + ilk mesaj (message) oluşturur
+    """
     serializer_class = api_serializer.Question_AnswerDersSonuRaporuSerializer
-    permission_classes = [AllowAny]
+    # İstersen AllowAny bırakabilirsin; ben güvenlik için IsAuthenticated kullandım:
+    permission_classes = [IsAuthenticated]
 
+    # ---- helpers ----
+    def _get_dsr_id(self, request, **kwargs):
+        # URL: /.../<int:derssonuraporu_id>/  veya /.../<int:dersSonuRaporu_id>/
+        return (
+            kwargs.get("derssonuraporu_id")
+            or kwargs.get("dersSonuRaporu_id")
+            or request.data.get("derssonuraporu_id")
+            or request.data.get("dersSonuRaporu_id")
+        )
+
+    def _get_sender(self, request):
+        # Tercihen auth kullan
+        if getattr(request, "user", None) and request.user.is_authenticated:
+            return request.user
+        # Değilse body'den id al
+        uid = request.data.get("user_id") or request.data.get("gonderen_id")
+        return get_object_or_404(User, id=uid)
+
+    # ---- list ----
     def get_queryset(self):
-        dersSonuRaporu_id = self.kwargs['dersSonuRaporu_id']
-        kitaptahlili = get_object_or_404(api_models.DersSonuRaporu, id=dersSonuRaporu_id)
-        return api_models.Question_AnswerKitapTahlili.objects.filter(kitaptahlili=kitaptahlili)
-    
-    def create(self, request, *args, **kwargs):
-        dersSonuRaporu_id = request.data.get('dersSonuRaporu_id')
-        gonderen_id = request.data.get('gonderen_id')
-        title = request.data.get('title')
-        message = request.data.get('message')
+        dsr_id = self._get_dsr_id(self.request, **self.kwargs)
+        dsr = get_object_or_404(api_models.DersSonuRaporu, id=dsr_id)
+        return (
+            api_models.Question_AnswerDersSonuRaporu
+            .objects
+            .filter(derssonuraporu=dsr)
+            .order_by("-id")
+        )
 
-        derssonuraporu = get_object_or_404(api_models.DersSonuRaporu, id=dersSonuRaporu_id)
-        mesajiGonderen = get_object_or_404(User, id=gonderen_id)
-        mesajiAlan = derssonuraporu.inserteduser
+    # ---- create (new question + first message) ----
+    def create(self, request, *args, **kwargs):
+        dsr_id = self._get_dsr_id(request, **kwargs)
+        if not dsr_id:
+            return Response({"detail": "derssonuraporu_id gerekli"}, status=status.HTTP_400_BAD_REQUEST)
+
+        derssonuraporu = get_object_or_404(api_models.DersSonuRaporu, id=dsr_id)
+
+        title = (request.data.get("title") or "").strip()
+        message = (request.data.get("message") or "").strip()
+        if not title or not message:
+            return Response({"detail": "title ve message zorunludur"}, status=status.HTTP_400_BAD_REQUEST)
+
+        mesajiGonderen = self._get_sender(request)
+        mesajiAlan = getattr(derssonuraporu, "inserteduser", None)
 
         question = api_models.Question_AnswerDersSonuRaporu.objects.create(
             derssonuraporu=derssonuraporu,
             mesajiAlan=mesajiAlan,
             mesajiGonderen=mesajiGonderen,
-            title=title
+            title=title,
         )
 
         api_models.Question_Answer_MessageDersSonuRaporu.objects.create(
@@ -2750,10 +2773,57 @@ class DersSonuRaporuQuestionAnswerListCreateAPIView(generics.ListCreateAPIView):
             mesajiAlan=mesajiAlan,
             mesajiGonderen=mesajiGonderen,
             message=message,
-            question=question
+            question=question,
         )
 
-        return Response({"message": "Grup Konuşması Başlatıldı"}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"message": "Grup Konuşması Başlatıldı", "question_id": question.id},
+            status=status.HTTP_201_CREATED,
+        )
+        
+class DersSonuRaporuQuestionAnswerMessageCreateAPIView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        dsr_id = (
+            kwargs.get("derssonuraporu_id")
+            or request.data.get("derssonuraporu_id")
+            or request.data.get("dersSonuRaporu_id")
+        )
+        if not dsr_id:
+            return Response({"detail": "derssonuraporu_id gerekli"}, status=status.HTTP_400_BAD_REQUEST)
+
+        derssonuraporu = get_object_or_404(api_models.DersSonuRaporu, id=dsr_id)
+
+        qid = request.data.get("question_id")
+        if not qid:
+            return Response({"detail": "question_id gerekli"}, status=status.HTTP_400_BAD_REQUEST)
+
+        question = get_object_or_404(
+            api_models.Question_AnswerDersSonuRaporu, id=qid, derssonuraporu=derssonuraporu
+        )
+
+        msg_text = (request.data.get("message") or "").strip()
+        if not msg_text:
+            return Response({"detail": "message boş olamaz"}, status=status.HTTP_400_BAD_REQUEST)
+
+        sender = request.user if request.user.is_authenticated else None
+        if not sender:
+            uid = request.data.get("user_id") or request.data.get("gonderen_id")
+            sender = get_object_or_404(User, id=uid)
+
+        receiver = question.mesajiAlan or getattr(derssonuraporu, "inserteduser", None)
+
+        msg = api_models.Question_Answer_MessageDersSonuRaporu.objects.create(
+            derssonuraporu=derssonuraporu,
+            question=question,   # FK —> instance
+            mesajiGonderen=sender,
+            mesajiAlan=receiver,
+            message=msg_text,
+        )
+
+        return Response({"ok": True, "question_id": question.id, "message_id": msg.id}, status=status.HTTP_201_CREATED)
+
 
 class DersSonuRaporuQuestionAnswerMessageSendAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.Question_Answer_MessageDersSonuRaporuSerializer
@@ -3540,20 +3610,41 @@ class AgentHafizListAPIView(generics.ListAPIView):
      
 class HafizsListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.HafizBilgiSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):        
-        queryset = api_models.Hafiz.objects.all()
-        print(queryset)      
-        return queryset   
+    def get_queryset(self):
+        user = self.request.user
+
+        # 1) HBSKoordinator ise TÜM kayıtlar
+        if _is_hbs_koordinator(user):
+            return api_models.Hafiz.objects.select_related("adresIl").all()
+
+        # 2) Değilse (ör. HBSTemsilci), kendi şehrindeki hafızlar
+        city = _get_user_agent_city(user)
+        if city:
+            return api_models.Hafiz.objects.select_related("adresIl").filter(adresIl=city)
+
+        # 3) Hiçbiri değilse liste boş
+        return api_models.Hafiz.objects.none()
+
 
 class HafizsListByAgentAPIView(generics.ListAPIView):
     serializer_class = api_serializer.HafizBilgiSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        agent = self.kwargs["agent"]
-        return api_models.Hafiz.objects.filter(agent=agent) 
+        """
+        URL: .../hafizlar/agent/<agent_id>/
+        Agent.city == Hafiz.adresIl eşleşmesine göre filtreler.
+        """
+        agent_id = self.kwargs.get("agent") or self.kwargs.get("agent_id")
+        agent = get_object_or_404(api_models.Agent, pk=agent_id)
+
+        return (
+            api_models.Hafiz.objects
+            .select_related("adresIl")
+            .filter(adresIl=agent.city)
+        )
     
 class JobListAPIView(generics.ListAPIView):   
     serializer_class = api_serializer.JobSerializer 
@@ -4423,3 +4514,420 @@ class HafizDetailAPIView(APIView):
             return Response({"error": "Hafız bulunamadı."}, status=404)
         hafiz.delete()
         return Response(status=204)
+    
+def human_size(num, suffix="B"):
+    # basit boyut formatlayıcı
+    for unit in ["", "K", "M", "G", "T"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f} {unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f} P{suffix}"
+
+def abs_url(request, f_or_url):
+    url = None
+    try:
+        url = getattr(f_or_url, "url")
+    except Exception:
+        url = f_or_url
+    if not url:
+        return None
+    return request.build_absolute_uri(url) if (request and isinstance(url, str) and url.startswith("/")) else url
+
+
+class InstructorViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    /api/v1/instructors/
+      - ?q=...               -> full_name, email arar
+      - ?ordering=full_name  -> sıralama
+      - ?sub_role=...        -> varsayılan: 'AkademiEgitmen'
+      - ?only_teachers=1     -> sadece Teacher bağlı kullanıcıları döndür
+    Dönen: teacher.roles içinde belirtilen alt role sahip kullanıcılar.
+    """
+    serializer_class = api_serializer.InstructorListSerializer
+    permission_classes = [IsAuthenticated, IsGeneralKoordinator]
+
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["full_name", "email", "profile__full_name"]
+    ordering_fields = ["date_joined", "full_name"]
+    ordering = ["-date_joined"]
+
+    def get_queryset(self):
+        role_name = self.request.query_params.get("sub_role", "AkademiEgitmen")
+        only_teachers = self.request.query_params.get("only_teachers") in ("1", "true", "True")
+
+        qs = (
+            User.objects.filter(active=True)
+            .select_related("profile", "teacher")
+            .prefetch_related("teacher__roles")
+            .filter(teacher__roles__name=role_name)
+            .distinct()
+        )
+
+        if only_teachers:
+            qs = qs.filter(teacher__isnull=False)
+
+        # 💡 Sayaçlar için annotate
+        qs = qs.annotate(
+            video_link_count=Count("teacher__video_links", distinct=True),
+            uploaded_video_count=Count("teacher__uploaded_videos", distinct=True),
+            document_count=Count("teacher__uploaded_documents", distinct=True),
+        )
+        return qs
+
+    # ---- Detay (profil için) ----
+    def retrieve(self, request, *args, **kwargs):
+        user = self.get_object()
+        teacher = getattr(user, "teacher", None)
+        profile = getattr(user, "profile", None)
+
+        data = {
+            "id": user.id,
+            "full_name": user.full_name,
+            "email": user.email,
+            "about": getattr(teacher, "about", "") or getattr(profile, "about", "") or "",
+            "country": getattr(teacher, "country", "") or "",
+            "image": None,
+        }
+        # image öncelik Teacher -> Profile
+        if teacher and getattr(teacher, "image", None):
+            data["image"] = abs_url(request, teacher.image)
+        elif profile and getattr(profile, "image", None):
+            data["image"] = abs_url(request, profile.image)
+
+        return Response(data)
+
+    # ---- VIDEOS: YouTube linkleri + yüklenen video dosyaları (tek listede) ----
+    @action(detail=True, methods=["get"])
+    def videos(self, request, pk=None):
+        user = self.get_object()
+        teacher = getattr(user, "teacher", None)
+        if not teacher:
+            return Response([])
+
+        # YouTube linkleri
+        links_qs = api_models.EducatorVideoLink.objects.filter(instructor=teacher).only(
+            "id", "title", "videoUrl", "created_at"
+        )
+
+        # Yüklenen videolar (file)
+        vids_qs = api_models.EducatorVideo.objects.filter(instructor=teacher).only(
+            "id", "title", "file", "created_at"
+        )
+
+        items = []
+        for v in links_qs:
+            items.append({
+                "id": f"link-{v.id}",
+                "title": v.title,
+                "source": "YouTube",
+                "url": v.videoUrl,
+                "created_at": v.created_at,
+            })
+        for v in vids_qs:
+            items.append({
+                "id": f"upload-{v.id}",
+                "title": v.title,
+                "source": "Upload",
+                "url": abs_url(request, v.file) if v.file else None,
+                "created_at": v.created_at,
+            })
+
+        # created_at’e göre yeni → eski
+        items.sort(key=lambda x: x.get("created_at") or "", reverse=True)
+        # ISO string biçimine çevir (opsiyonel)
+        for it in items:
+            if it["created_at"]:
+                it["created_at"] = it["created_at"].isoformat()
+        return Response(items)
+
+    # ---- DOCUMENTS: Eğitmen dökümanları ----
+    @action(detail=True, methods=["get"])
+    def documents(self, request, pk=None):
+        user = self.get_object()
+        teacher = getattr(user, "teacher", None)
+        if not teacher:
+            return Response([])
+
+        docs = api_models.EducatorDocument.objects.filter(instructor=teacher).only(
+            "id", "title", "description", "file", "mime_type", "tags", "created_at"
+        ).order_by("-created_at")
+
+        data = []
+        for d in docs:
+            data.append({
+                "id": str(d.id),
+                "title": d.title,
+                "category": d.tags or None,             # frontend 'category' bekliyordu
+                "summary": (d.description or "")[:200], # basit özet
+                "view_url": abs_url(request, d.file),
+                "mime": d.mime_type or None,
+                "created_at": d.created_at.isoformat() if d.created_at else None,
+            })
+        return Response(data)
+
+    # ---- FILES: (isteğe bağlı) Videoların dosyaları + Döküman dosyaları tek listede ----
+    @action(detail=True, methods=["get"])
+    def files(self, request, pk=None):
+        user = self.get_object()
+        teacher = getattr(user, "teacher", None)
+        if not teacher:
+            return Response([])
+
+        out = []
+
+        # Dökümanlar
+        for d in api_models.EducatorDocument.objects.filter(instructor=teacher):
+            size = getattr(d.file, "size", None) or d.file_size or 0
+            out.append({
+                "id": f"doc-{d.id}",
+                "name": getattr(d, "original_filename", None) or (d.file.name if d.file else d.title),
+                "mime": d.mime_type or None,
+                "size": size,
+                "size_readable": human_size(size) if size else None,
+                "download_url": abs_url(request, d.file),
+                "created_at": d.created_at.isoformat() if d.created_at else None,
+            })
+
+        # Yüklenen videolar (dosya)
+        for v in api_models.EducatorVideo.objects.filter(instructor=teacher):
+            if not v.file:
+                continue
+            size = getattr(v.file, "size", None)
+            out.append({
+                "id": f"vid-{v.id}",
+                "name": v.file.name,
+                "mime": None,
+                "size": size,
+                "size_readable": human_size(size) if size else None,
+                "download_url": abs_url(request, v.file),
+                "created_at": v.created_at.isoformat() if v.created_at else None,
+            })
+
+        # Yeni → eski
+        out.sort(key=lambda x: x.get("created_at") or "", reverse=True)
+        return Response(out)
+
+    # ---- CALENDAR: (şimdilik boş; ileride program modelinle doldur) ----
+    @action(detail=True, methods=["get"])
+    def calendar(self, request, pk=None):
+        # Uygun bir Event modeli eklediğinde burayı doldurabilirsin
+        # Şimdilik boş liste dönüyoruz ki frontend modal'ı hatasız açılsın.
+        return Response([])
+    
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated, IsGeneralKoordinator])
+def delete_purchase(request, kind, pk, user_id):
+    video = _get_video_object(kind, pk)
+    ct = ContentType.objects.get_for_model(video.__class__)
+    M.VideoPurchase.objects.filter(content_type=ct, object_id=video.pk, user_id=user_id).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated, IsGeneralKoordinator])
+def delete_enrollment(request, kind, pk, user_id):
+    video = _get_video_object(kind, pk)
+    if kind == "link":
+        M.SavedVideo.objects.filter(video=video, user_id=user_id).delete()
+    else:
+        M.VideoEnrollment.objects.filter(video=video, user_id=user_id).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+def _get_video_object(kind, pk):
+    if kind == "link":
+        return get_object_or_404(M.EducatorVideoLink, pk=pk)
+    if kind == "file":
+        return get_object_or_404(M.EducatorVideo, pk=pk)
+    raise ValueError("Invalid kind")
+
+
+class VideoBuyersView(APIView):
+    permission_classes = [IsAuthenticated, IsGeneralKoordinator]
+
+    def get(self, request, kind, pk):
+        video = _get_video_object(kind, pk)
+
+        # Purchases (Generic FK)
+        ct = ContentType.objects.get_for_model(video.__class__)
+        purchases = (
+            M.VideoPurchase.objects
+            .filter(content_type=ct, object_id=video.pk)
+            .select_related("user", "user__teacher", "user__profile")
+            .order_by("-created_at")
+        )
+
+        rows = [
+            {"user": S.UserMiniSerializer(p.user, context={"request": request}).data,
+             "created_at": p.created_at}
+            for p in purchases
+        ]
+        return Response(rows)
+
+
+class VideoEnrolledView(APIView):
+    permission_classes = [IsAuthenticated, IsGeneralKoordinator]
+
+    def get(self, request, kind, pk):
+        video = _get_video_object(kind, pk)
+
+        if kind == "link":
+            # SavedVideo(user, video=EducatorVideoLink)
+            items = (
+                M.SavedVideo.objects
+                .filter(video=video)
+                .select_related("user", "user__teacher", "user__profile")
+                .order_by("-created_at")
+            )
+            rows = [
+                {"user": S.UserMiniSerializer(s.user, context={"request": request}).data,
+                 "created_at": s.created_at}
+                for s in items
+            ]
+            return Response(rows)
+
+        # kind == "file" → VideoEnrollment(user, video=EducatorVideo)
+        items = (
+            M.VideoEnrollment.objects
+            .filter(video=video)
+            .select_related("user", "user__teacher", "user__profile")
+            .order_by("-created_at")
+        )
+        rows = [
+            {"user": S.UserMiniSerializer(e.user, context={"request": request}).data,
+             "created_at": e.created_at}
+            for e in items
+        ]
+        return Response(rows)
+    
+def abs_url(request, fobj):
+    """
+    FileField ya da url string'i için mutlak URL döndür.
+    """
+    if not fobj:
+        return None
+    try:
+        url = fobj.url  # FileField
+        return request.build_absolute_uri(url)
+    except Exception:
+        # Düz string olabilir
+        return str(fobj)
+
+class StudentViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    /api/v1/students/
+      - ?q=...                 -> full_name, email arar
+      - ?ordering=full_name    -> sıralama
+      - ?sub_role=...          -> varsayılan: 'AkademiOgrenci'
+      - ?only_students=1       -> sadece Ogrenci bağlı kullanıcılar
+    Dönen: ogrenci.roles içinde belirtilen alt-role sahip kullanıcılar.
+    """
+    serializer_class = api_serializer.StudentListSerializer
+    permission_classes = [IsAuthenticated, IsGeneralKoordinator]
+
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["full_name", "email", "profile__full_name"]
+    ordering_fields = ["date_joined", "full_name"]
+    ordering = ["-date_joined"]
+
+    def get_queryset(self):
+        role_name = self.request.query_params.get("sub_role", "AkademiOgrenci")
+        only_students = self.request.query_params.get("only_students") in ("1", "true", "True")
+
+        qs = (
+            User.objects.filter(active=True)
+            .select_related("profile", "ogrenci")       # ogrenci.image & profile.image için
+            .prefetch_related("ogrenci__roles")         # M2M optimizasyonu
+            .distinct()
+        )
+
+        # Öğrenci alt-rolünden filtrele
+        qs = qs.filter(ogrenci__roles__name=role_name)
+
+        if only_students:
+            qs = qs.filter(ogrenci__isnull=False)
+
+        # İstersen sayaç ekleyebilirsin (şimdilik gerekmiyor)
+        # qs = qs.annotate(
+        #     enrolled_count=Count("enrolledcourse", distinct=True),
+        # )
+
+        return qs
+
+    # ---- PROFIL ----
+    @action(detail=True, methods=["get"], url_path="profile")
+    def profile(self, request, pk=None):
+        user = self.get_object()
+        ogrenci = getattr(user, "ogrenci", None)
+        profile = getattr(user, "profile", None)
+
+        data = {
+            "id": user.id,
+            "full_name": user.full_name,
+            "email": user.email,
+            "about": getattr(ogrenci, "about", "") or getattr(profile, "about", "") or "",
+            "country_name": getattr(ogrenci, "country", "") or getattr(profile, "country", "") or "",
+            "city_name": getattr(profile, "city", "") or "",
+            "image": None,
+        }
+        if ogrenci and getattr(ogrenci, "image", None):
+            data["image"] = abs_url(request, ogrenci.image)
+        elif profile and getattr(profile, "image", None):
+            data["image"] = abs_url(request, profile.image)
+        return Response(data)
+
+    # ---- COURSES: öğrencinin aldığı derslerin listesi ----
+    @action(detail=True, methods=["get"], url_path="courses")
+    def courses(self, request, pk=None):
+        """
+        Basit örnek: EnrolledCourse üzerinden o öğrencinin derslerini döndür.
+        """
+        user = self.get_object()
+        # EnrolledCourse modelin: user(FK), course(FK) varsayıldı
+        enrolls = (
+            api_models.EnrolledCourse.objects
+            .filter(user=user)
+            .select_related("course", "course__teacher")
+            .order_by("-id")
+        )
+
+        out = []
+        for e in enrolls:
+            course = getattr(e, "course", None)
+            teacher = getattr(course, "teacher", None)
+            out.append({
+                "id": getattr(course, "id", e.id),
+                "title": getattr(course, "title", "-"),
+                "teacher_name": getattr(teacher, "full_name", None) or getattr(getattr(teacher, "user", None), "full_name", None),
+                "level": getattr(course, "level", None) or getattr(course, "education_level", None),
+                "status": getattr(e, "status", "Aktif"),
+            })
+        return Response(out)
+
+    # ---- ENROLLMENTS: kayıt satırlarını (tarih, ilerleme, not) döndür ----
+    @action(detail=True, methods=["get"], url_path="enrollments")
+    def enrollments(self, request, pk=None):
+        user = self.get_object()
+        enrolls = (
+            api_models.EnrolledCourse.objects
+            .filter(user=user)
+            .select_related("course")
+            .order_by("-id")
+        )
+
+        out = []
+        for e in enrolls:
+            course = getattr(e, "course", None)
+            out.append({
+                "id": e.id,
+                "course_title": getattr(course, "title", "-"),
+                "enrolled_at": getattr(e, "created_at", None) or getattr(e, "date", None),
+                "progress": getattr(e, "progress", None),
+                "note": getattr(e, "note", None),
+            })
+        # ISO string'e çevir (opsiyonel)
+        for it in out:
+            if it["enrolled_at"]:
+                try:
+                    it["enrolled_at"] = it["enrolled_at"].isoformat()
+                except Exception:
+                    pass
+        return Response(out)

@@ -3,12 +3,14 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from . import views as api_views
 from .views import (
-    CourseQuestionAnswerMessageCreateAPIView, DersAtamasiAPIView, DersAtamasiDetailAPIView, EducatorVideoCreateAPIView, EducatorVideoDeleteAPIView, EducatorVideoLinkCreateAPIView, EducatorVideoLinkDeleteAPIView, EducatorVideoLinkListAPIView, EducatorVideoLinkUpdateAPIView, EducatorVideoListAPIView, EducatorVideoUpdateAPIView, EskepStajerOdevDetailAPIView, HBSKoordinatorDashboardViewSet, HafizAPIView, HafizAgentListAPIView, HafizDetailAPIView, HafizsListAPIView, HataNotuViewSet, KoordinatorByRoleAPIView,peer_id_view
+    CourseQuestionAnswerMessageCreateAPIView, DersAtamasiAPIView, DersAtamasiDetailAPIView, EducatorVideoCreateAPIView, EducatorVideoDeleteAPIView, EducatorVideoLinkCreateAPIView, EducatorVideoLinkDeleteAPIView, EducatorVideoLinkListAPIView, EducatorVideoLinkUpdateAPIView, EducatorVideoListAPIView, EducatorVideoUpdateAPIView, EskepStajerOdevDetailAPIView, HBSKoordinatorDashboardViewSet, HafizAPIView, HafizAgentListAPIView, HafizDetailAPIView, HafizsListAPIView, HataNotuViewSet, InstructorViewSet, KoordinatorByRoleAPIView,peer_id_view
 )
 
 # ViewSet'ler için router
 router = DefaultRouter()
 router.register(r"egitmenler", api_views.TeacherViewSet,basename="egitmen")
+router.register(r"instructors", InstructorViewSet, basename="instructors")
+router.register(r"students", api_views.StudentViewSet, basename="student") 
 # router.register(r"hafizlar", HafizViewSet, basename="hafiz")
 router.register(r"hatalar", HataNotuViewSet, basename="hatalar")
 router.register(r"dersler", api_views.DersViewSet)
@@ -194,15 +196,68 @@ urlpatterns = [
     path("eskepstudent/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
     
     # Eskep Koordinator
+    path("videos/<str:kind>/<int:pk>/buyers/", api_views.VideoBuyersView.as_view()),
+    path("videos/<str:kind>/<int:pk>/enrolled/", api_views.VideoEnrolledView.as_view()),
+    path("videos/<str:kind>/<int:pk>/buyers/<int:user_id>/", api_views.delete_purchase),
+    path("videos/<str:kind>/<int:pk>/enrolled/<int:user_id>/", api_views.delete_enrollment),
     path("eskepinstructor/odev-list/<user_id>/", api_views.EskepInstructorOdevListAPIView.as_view()),
     path("eskepinstructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
     path("eskepinstructor/odev-detail/<odev_id>/<koordinator_id>/", api_views.EskepInstructorOdevDetailAPIView.as_view()),
     path("eskepinstructor/odev-completed/", api_views.InstructorOdevCompletedCreateAPIView.as_view()),
     path("eskepinstructor/odev-note/<odev_id>/<koordinator_id>/", api_views.EskepInstructorOdevNoteCreateAPIView.as_view()),
-    path("eskepinstructor/odev-note-detail/<odev_id>/<koordinator_id>/<note_id>/", api_views.EskepInstructorOdevNoteDetailAPIView.as_view()),
+    # path("eskepinstructor/odev-note-detail/<odev_id>/<koordinator_id>/<note_id>/", api_views.EskepInstructorOdevNoteDetailAPIView.as_view()),
+    path("eskepinstructor/odev-note-detail/<int:koordinator_id>/<int:odev_id>/<int:pk>/",api_views.EskepInstructorOdevNoteDetailAPIView.as_view()),
     path("eskepinstructor/rate-odev/", api_views.InstructorRateCourseCreateAPIView.as_view()),
-    path("eskepinstructor/question-answer-list-create/<odev_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
-    path("eskepinstructor/question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
+      path(
+        "eskepinstructor/question-answer-list-create/<int:odev_id>/",
+        api_views.OdevQuestionAnswerListCreateAPIView.as_view(),
+    ),
+    # path("eskepinstructor/odev-question-answer-message-create/", api_views.OdevQuestionAnswerMessageSendAPIView.as_view()),
+     path(
+        "eskepinstructor/question-answer-message-create/<int:odev_id>/",
+        api_views.OdevQuestionAnswerMessageCreateAPIView.as_view(),
+    ),
+    path(  # opsiyonel
+        "eskepinstructor/question-answer-message-create/",
+        api_views.OdevQuestionAnswerMessageCreateAPIView.as_view(),
+    ),
+    path(
+        "eskepinstructor/kitaptahlili-question-answer-list-create/<int:kitaptahlili_id>/",
+        api_views.KitapTahliliQuestionAnswerListCreateAPIView.as_view(),
+    ),
+    path(
+        "eskepinstructor/kitaptahlili-question-answer-message-create/<int:kitaptahlili_id>/",
+        api_views.KitapTahliliQuestionAnswerMessageCreateAPIView.as_view(),
+    ),
+    path(
+        "eskepinstructor/kitaptahlili-question-answer-message-create/",
+        api_views.KitapTahliliQuestionAnswerMessageCreateAPIView.as_view(),
+    ),
+    path(
+    "eskepinstructor/dsr-question-answer-list-create/<int:derssonuraporu_id>/",
+    api_views.DersSonuRaporuQuestionAnswerListCreateAPIView.as_view(),
+),
+path(
+    "eskepinstructor/dsr-question-answer-message-create/<int:derssonuraporu_id>/",
+    api_views.DersSonuRaporuQuestionAnswerMessageCreateAPIView.as_view(),
+),
+path(  # body’den dsr_id alacaksan
+    "eskepinstructor/dsr-question-answer-message-create/",
+    api_views.DersSonuRaporuQuestionAnswerMessageCreateAPIView.as_view(),
+),
+#     path(
+#     "eskepinstructor/dsr-question-answer-list-create/<int:derssonuraporu_id>/",
+#     api_views.DersSonuRaporuQuestionAnswerListCreateAPIView.as_view(),
+# ),
+# path(
+#     "eskepinstructor/dsr-question-answer-message-create/<int:derssonuraporu_id>/",
+#     api_views.DersSonuRaporuQuestionAnswerMessageCreateAPIView.as_view(),
+# ),
+# path(  # body’den dsr_id alacaksan
+#     "eskepinstructor/dsr-question-answer-message-create/",
+#     api_views.DersSonuRaporuQuestionAnswerMessageCreateAPIView.as_view(),
+# ),
+
     path("eskepinstructor/kitaptahlili-list/<user_id>/", api_views.EskepInstructorKitapTahliliListAPIView.as_view()),
     path("eskepinstructor/kitaptahlili-detail/<int:kitaptahlili_id>/<int:koordinator_id>/",api_views.EskepInstructorKitapTahliliDetailAPIView.as_view()),
     path('eskepinstructor/kitaptahlili-note/<int:kitaptahlili_id>/<int:koordinator_id>/', api_views.EskepInstructorKitapTahliliNoteCreateAPIView.as_view(),name='kitaptahlili-note-create'),
@@ -218,8 +273,7 @@ urlpatterns = [
     path("eskepinstructor/student-lists/<user_id>/", api_views.EskepInstructorStudentsStajersListAPIView.as_view({'get': 'list'})),
     path('eskepinstructor/<int:user_id>/kisisel-liste/', api_views.koordinator_students_stajers, name='koordinator-student-stajer-list'),
     path("eskepinstructor/koordinatorler/by-role/", KoordinatorByRoleAPIView.as_view()),
-    path("eskepinstructor/course-list/<user_id>/", api_views.MyCourseListAPIView.as_view()),
-    
+    path("eskepinstructor/course-list/<user_id>/", api_views.MyCourseListAPIView.as_view()),   
     
     # Eğitmen
     path("instructor/summary/<user_id>/", api_views.InstructorSummaryAPIView.as_view()),   
@@ -247,6 +301,10 @@ urlpatterns = [
     path("educator/video/", EducatorVideoListAPIView.as_view(), name="educator-video-list"),
     path("educator/video/<int:pk>/update/", EducatorVideoUpdateAPIView.as_view(), name="educator-video-update"),
     path("educator/video/<int:pk>/delete/", EducatorVideoDeleteAPIView.as_view(), name="educator-video-delete"),
+    path("educator/document/create/", EducatorVideoCreateAPIView.as_view(), name="educator-video-create"),
+    path("educator/document/", EducatorVideoListAPIView.as_view(), name="educator-video-list"),
+    path("educator/document/<int:pk>/update/", EducatorVideoUpdateAPIView.as_view(), name="educator-video-update"),
+    path("educator/document/<int:pk>/delete/", EducatorVideoDeleteAPIView.as_view(), name="educator-video-delete"),
     
     # Eskep Listeler
     path("eskep/coordinators/", api_views.CoordinatorListAPIView.as_view()),

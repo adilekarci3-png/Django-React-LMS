@@ -4,9 +4,9 @@ from django.db.models.signals import post_save
 
 
 class User(AbstractUser):
-    username = models.CharField(unique=True, max_length=100)
+    username = models.CharField(max_length=100, blank=True, null=True, unique=False)
     email = models.EmailField(unique=True)
-    full_name = models.CharField(unique=True, max_length=100)
+    full_name = models.CharField(max_length=100,unique=True)
     otp = models.CharField(max_length=100, null=True, blank=True)
     refresh_token = models.CharField(max_length=1000, null=True, blank=True)
     active = models.BooleanField(default=True)
@@ -62,8 +62,14 @@ class User(AbstractUser):
         if not self.full_name:
             self.full_name = email_username
         if not self.username:
-            self.username = email_username
-        super(User, self).save(*args, **kwargs)    
+            base_username = email_username
+            new_username = base_username
+            counter = 1
+            while User.objects.filter(username=new_username).exists():
+                new_username = f"{base_username}{counter}"
+                counter += 1
+            self.username = new_username
+        super(User, self).save(*args, **kwargs)   
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

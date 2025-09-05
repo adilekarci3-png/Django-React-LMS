@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 
 export const login = async (email, password) => {
   try {
-    const { data } = await axios.post("user/token/", { email, password });
+    const { data } = await axios.post("http://127.0.0.1:8000/api/v1/user/token/", { email, password });
     if (data.access && data.refresh) {
       setAuthUser(data.access, data.refresh);
       return { data, error: null };
@@ -91,7 +91,7 @@ export const isAccessTokenExpired = (token) => {
 
 export const register = async (full_name, email, password, password2) => {
   try {
-    const response = await axios.post("user/register/", {
+    const response = await axios.post("http://127.0.0.1:8000/api/v1/user/register/", {
       full_name,
       email,
       password,

@@ -441,11 +441,39 @@ class Question_Answer_MessageOdevSerializer(serializers.ModelSerializer):
         model = api_models.Question_Answer_MessageOdev
 
 class Question_Answer_MessageKitapTahliliSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(many=False)
+    profile = serializers.SerializerMethodField(read_only=True)
+
+    def get_profile(self, obj):
+        user = obj.mesajiGonderen or obj.mesajiAlan
+        p = Profile.objects.filter(user=user).first()
+        return ProfileSerializer(p).data if p else None
 
     class Meta:
-        fields = '__all__'
         model = api_models.Question_Answer_MessageKitapTahlili
+        fields = (
+            'id', 'kitaptahlili', 'question',
+            'mesajiGonderen', 'mesajiAlan',
+            'message', 'date',
+            'profile',
+        )
+
+
+class Question_AnswerKitapTahliliSerializer(serializers.ModelSerializer):
+    profile = serializers.SerializerMethodField(read_only=True)
+    messages = Question_Answer_MessageKitapTahliliSerializer(many=True, read_only=True)
+
+    def get_profile(self, obj):
+        user = obj.mesajiGonderen or obj.mesajiAlan
+        p = Profile.objects.filter(user=user).first()
+        return ProfileSerializer(p).data if p else None
+
+    class Meta:
+        model = api_models.Question_AnswerKitapTahlili
+        fields = (
+            'id', 'kitaptahlili', 'title', 'date',
+            'mesajiGonderen', 'mesajiAlan',
+            'profile', 'messages',
+        )
         
 class Question_Answer_MessageDersSonuRaporuSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
@@ -479,13 +507,13 @@ class Question_AnswerOdevSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = api_models.Question_AnswerOdev
         
-class Question_AnswerKitapTahliliSerializer(serializers.ModelSerializer):
-    messages = Question_Answer_MessageKitapTahliliSerializer(many=True)
-    profile = ProfileSerializer(many=False)
+# class Question_AnswerKitapTahliliSerializer(serializers.ModelSerializer):
+#     messages = Question_Answer_MessageKitapTahliliSerializer(many=True)
+#     profile = ProfileSerializer(many=False)
     
-    class Meta:
-        fields = '__all__'
-        model = api_models.Question_AnswerKitapTahlili
+#     class Meta:
+#         fields = '__all__'
+#         model = api_models.Question_AnswerKitapTahlili
 
 class Question_AnswerDersSonuRaporuSerializer(serializers.ModelSerializer):
     messages = serializers.SerializerMethodField()
@@ -870,7 +898,28 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'language', 'price', 'date', 'teacher_name', 'students',
             'variants', 'reviews'
         ]
-        
+class OdevListSerializer(serializers.ModelSerializer):
+    prepared_by_full_name = serializers.SerializerMethodField()
+    prepared_by_id = serializers.IntegerField(source="inserteduser_id", read_only=True)
+    prepared_by_username = serializers.CharField(source="inserteduser.username", read_only=True)
+
+    class Meta:
+        model = api_models.Odev
+        fields = [
+            "id", "title", "description", "date", "odev_status", "koordinator_odev_status",
+            "image", "file", "active",
+            # 👇 yeni alanlar
+            "prepared_by_id", "prepared_by_username", "prepared_by_full_name",
+        ]
+
+    def get_prepared_by_full_name(self, obj):
+        u = obj.inserteduser
+        if not u:
+            return None
+        # mümkün olan en iyi görünen adı döndür
+        full = getattr(u, "full_name", None) or u.get_full_name()
+        return (full or u.username or u.email)
+            
 class OdevSerializer(serializers.ModelSerializer):
     # students = EnrolledCourseSerializer(many=True, required=False, read_only=True,)
     curriculum = VariantSerializer(many=True, required=False, read_only=True,)
@@ -1223,3 +1272,173 @@ class EducatorVideoSerializer(serializers.ModelSerializer):
         # Modelde olmayan alanı (instructor_id) at
         validated_data.pop("instructor_id", None)
         return super().create(validated_data)
+    
+class EducatorDocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = api_models.EducatorDocument
+        fields = "__all__"
+        read_only_fields = ("id", "original_filename", "file_size", "mime_type", "created_at", "updated_at")
+        
+class InstructorListSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    video_link_count = serializers.IntegerField(read_only=True)
+    uploaded_video_count = serializers.IntegerField(read_only=True)
+    document_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "full_name",
+            "email",
+            "image",
+            "date_joined",
+            "video_link_count",
+            "uploaded_video_count",
+            "document_count",
+        )
+
+    def _abs(self, file_or_url):
+        req = self.context.get("request")
+        # FileField ise .url var; string URL gelirse direkt dön
+        url = None
+        try:
+            url = getattr(file_or_url, "url")
+        except Exception:
+            url = file_or_url
+        if not url:
+            return None
+        return req.build_absolute_uri(url) if (req and url.startswith("/")) else url
+
+    def get_image(self, obj):
+        # 1) Teacher.image
+        teacher = getattr(obj, "teacher", None)
+        if teacher and getattr(teacher, "image", None):
+            return self._abs(teacher.image)
+        # 2) Profile.image
+        profile = getattr(obj, "profile", None)
+        if profile and getattr(profile, "image", None):
+            return self._abs(profile.image)
+        return None
+    
+class UserMiniSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ("id", "full_name", "email", "image")
+
+    def get_image(self, obj):
+        # Teacher.image -> Profile.image -> None
+        req = self.context.get("request")
+        teacher = getattr(obj, "teacher", None)
+        if teacher and getattr(teacher, "image", None):
+            try:
+                url = teacher.image.url
+                return req.build_absolute_uri(url) if req else url
+            except Exception:
+                return teacher.image
+        profile = getattr(obj, "profile", None)
+        if profile and getattr(profile, "image", None):
+            try:
+                url = profile.image.url
+                return req.build_absolute_uri(url) if req else url
+            except Exception:
+                return profile.image
+        return None
+
+
+class StudentListItemSerializer(serializers.Serializer):
+    """Liste satırı için kullanıcı + tarih"""
+    user = UserMiniSerializer()
+    created_at = serializers.DateTimeField()
+
+class OdevQAMessageCreateSerializer(serializers.ModelSerializer):
+    # URL'den gelebilir ya da body'den gelebilir
+    odev_id = serializers.IntegerField(write_only=True, required=False)
+    question_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = api_models.Question_Answer_MessageOdev
+        fields = ("id", "odev_id", "question_id", "message", "created_at")
+        read_only_fields = ("id", "created_at")
+
+    def validate(self, attrs):
+        request = self.context["request"]
+        view = self.context.get("view")
+
+        # odev_id: kwargs'tan ya da body'den
+        odev_id = (getattr(view, "kwargs", {}) or {}).get("odev_id") or attrs.get("odev_id")
+        if not odev_id:
+            raise serializers.ValidationError({"odev_id": "Gerekli."})
+
+        try:
+            odev = api_models.Odev.objects.get(id=odev_id)
+        except api_models.Odev.DoesNotExist:
+            raise serializers.ValidationError({"odev_id": "Geçersiz ödev."})
+
+        qid = attrs.get("question_id")
+        if not qid:
+            raise serializers.ValidationError({"question_id": "Gerekli."})
+
+        try:
+            question = api_models.Question_AnswerOdev.objects.get(id=qid, odev=odev)
+        except api_models.Question_AnswerOdev.DoesNotExist:
+            raise serializers.ValidationError({"question_id": "Soru bulunamadı ya da bu ödeve ait değil."})
+
+        # İleri kullanım için sakla
+        attrs["odev"] = odev
+        attrs["question"] = question
+        return attrs
+
+    def create(self, validated_data):
+        request = self.context["request"]
+        odev = validated_data["odev"]
+        question = validated_data["question"]
+
+        mesajiGonderen = request.user
+        mesajiAlan = question.mesajiAlan or getattr(odev, "inserteduser", None)
+
+        obj = api_models.Question_Answer_MessageOdev.objects.create(
+            odev=odev,
+            question=question,
+            mesajiAlan=mesajiAlan,
+            mesajiGonderen=mesajiGonderen,
+            message=validated_data["message"],
+        )
+        return obj    
+
+class StudentListSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ("id", "full_name", "email", "image", "date_joined")
+
+    def get_image(self, obj):
+        """
+        Önce Ogrenci.image varsa onu kullan; yoksa Profile.image.
+        """
+        request = self.context.get("request")
+        # Ogrenci ilişkisi: obj.ogrenci (model ismi Ogrenci ise)
+        ogrenci = getattr(obj, "ogrenci", None)
+        if ogrenci and getattr(ogrenci, "image", None):
+            try:
+                url = ogrenci.image.url
+            except Exception:
+                url = ogrenci.image
+            if request and hasattr(ogrenci.image, "url"):
+                return request.build_absolute_uri(url)
+            return url
+
+        profile = getattr(obj, "profile", None)
+        if profile and getattr(profile, "image", None):
+            try:
+                url = profile.image.url
+            except Exception:
+                url = profile.image
+            if request and hasattr(profile.image, "url"):
+                return request.build_absolute_uri(url)
+            return url
+
+        return None

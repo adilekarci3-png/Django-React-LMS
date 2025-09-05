@@ -100,6 +100,7 @@ function EskepInstructorDashboard() {
 
   // 3) ID bulma: önce type'a özgü id key'leri, sonra generic
   function getItemId(item) {
+    debugger;
     const t = getItemType(item);
     if (t && TYPE_HINTS[t]?.id) {
       for (const k of TYPE_HINTS[t].id) {
@@ -119,6 +120,48 @@ function EskepInstructorDashboard() {
       null
     );
   }
+
+  // Hazırlayan bilgisini "inserteduser" üzerinden üretir
+  const getPreparedBy = (item) => {
+    if (!item) return "Bilinmiyor";
+
+    // 1) Düz (flattened) alanlar
+    const flat =
+      item?.inserteduser_full_name ||
+      item?.inserteduser_fullname ||
+      item?.inserteduser_name ||
+      item?.inserteduser_display_name ||
+      null;
+    if (flat) return String(flat).trim();
+
+    // 2) Kullanıcı adı / e-posta (flattened)
+    const flatUser =
+      item?.inserteduser_username ||
+      item?.inserteduser_email ||
+      null;
+    if (flatUser) return String(flatUser).trim();
+
+    // 3) Nesne alanı
+    const u = item?.inserteduser || null;
+    if (u) {
+      const fullName =
+        u?.full_name ||
+        u?.fullName ||
+        (u?.first_name || u?.firstName || u?.ad
+          ? `${u?.first_name ?? u?.firstName ?? u?.ad} ${u?.last_name ?? u?.lastName ?? u?.soyad}`.trim()
+          : null);
+
+      if (fullName) return fullName;
+      if (u?.username) return u.username;
+      if (u?.email) return u.email;
+      if (u?.id != null) return `Kullanıcı #${u.id}`;
+    }
+
+    // 4) Sadece id geldiyse
+    if (item?.inserteduser_id != null) return `Kullanıcı #${item.inserteduser_id}`;
+
+    return "Bilinmiyor";
+  };
 
   // Başlık ve tarih için sağlam yardımcılar
   const getItemLabel = (item, labelKey = "title") =>
@@ -142,7 +185,7 @@ function EskepInstructorDashboard() {
     const t = ctx.forceType || getItemType(item);
     const tpl = TYPE_ROUTES[t];
     if (!tpl) return null;
-
+    debugger;
     const itemId = getItemId(item);
     const _userId = ctx.userId;
     if (!itemId || !_userId) return null;
@@ -165,10 +208,10 @@ function EskepInstructorDashboard() {
       setBookReviews(books.data ?? []);
       setProjects(proj.data ?? []);
       setLessonReports(reports.data ?? []);
-console.log(hw.data);
-console.log(books.data);
-console.log(proj.data);
-console.log(reports.data);
+      console.log(hw.data);
+      console.log(books.data);
+      console.log(proj.data);
+      console.log(reports.data);
       // Örnek stat verisi (backend'den geliyorsa burayı değiştir)
       setStats({
         total_students: 25,
@@ -211,9 +254,14 @@ console.log(reports.data);
                   className="list-group-item d-flex justify-content-between align-items-center gap-2 flex-wrap"
                   key={item?.id ?? item?.pk ?? index}
                 >
-                  <div className="d-flex align-items-center">
-                    <i className="bi bi-file-earmark-text me-2 text-primary"></i>
-                    {getItemLabel(item, labelKey)}
+                  <div className="d-flex flex-column">
+                    <div className="d-flex align-items-center">
+                      <i className="bi bi-file-earmark-text me-2 text-primary"></i>
+                      {getItemLabel(item, labelKey)}
+                    </div>
+                    <small className="text-muted">
+                      Hazırlayan: <span className="fw-medium">{getPreparedBy(item)}</span>
+                    </small>
                   </div>
                   <div className="d-flex align-items-center gap-2">
                     <span className="badge bg-secondary rounded-pill">
