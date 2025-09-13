@@ -78,7 +78,7 @@ function EskepInstructorOdevs() {
                         </tr>
                       </thead>
                       <tbody>
-                        {odevs.length > 0 ? (
+                        {odevs.length > 0 ? (                          
                           odevs.map((c, index) => (
                             <tr key={index}>
                               <td>
@@ -105,11 +105,11 @@ function EskepInstructorOdevs() {
                               <td>{moment(c.date).format("D MMM, YYYY")}</td>
                               <td>{c.lectures?.length || 0}</td>
                               <td>{c.level}</td>
-                              <td>{c.koordinator?.full_name || "Bilinmiyor"}</td>
-                              <td>{c.inserteduser?.full_name || "Bilinmiyor"}</td>
+                              <td>{c.koordinator_username || "Bilinmiyor"}</td>
+                              <td>{c.prepared_by_full_name || "Bilinmiyor"}</td>
                               <td>
                                 <Link
-                                  to={`/eskepinstructor/odevs/${c.id}/${c.koordinator?.id}/`}
+                                  to={`/eskepinstructor/odevs/${c.id}/${c.koordinator_id}/`}
                                   className="btn btn-success btn-sm"
                                 >
                                   İncele <i className="fas fa-arrow-right ms-2"></i>

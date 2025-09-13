@@ -72,12 +72,12 @@ function HBSBaseHeader() {
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav me-auto">
               <li className="nav-item">
-                <Link className="nav-link" to="/hbs/about/">
+                <Link className="nav-link" to="/about-hbs">
                   Hakkımızda
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/hbs/contact/">
+                <Link className="nav-link" to="/contact">
                   İletişim
                 </Link>
               </li>

@@ -67,7 +67,8 @@ export function AllYoutubeVideosPage() {
   ];
 
   // NOT: useAxios.baseURL /api/v1/ ile bitiyorsa, önde / kullanma.
-  const fetchUrl = "videos/?source=youtube";
+  // const fetchUrl = "videos/?source=youtube";
+  const fetchUrl = "videos/";
 
   const onCreate = () => {
     setEditing(null);

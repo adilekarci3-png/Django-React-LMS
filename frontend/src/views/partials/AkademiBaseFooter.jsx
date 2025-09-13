@@ -9,7 +9,7 @@ function AkademiBaseFooter() {
     { label: "Bağış", to: "/donate" },
     { label: "EHAD Akademi", to: "/akademi/courses" },
     { label: "EHAD Akademisi Bünyesinde Faaliyet", to: "/pages/activities/" },
-    { label: "İletişim", to: "/pages/contact-us/" },
+    { label: "İletişim", to: "/contact" },
   ];
 
   const supportLinks = [
@@ -17,7 +17,7 @@ function AkademiBaseFooter() {
     { label: "Eğitmen Ol", to: "/educator/apply" },
     { label: "Mobil Uygulama", to: "/apps" },
     { label: "SSS", to: "/faq" },
-    { label: "Ders", to: "/akademi/courses" },
+    { label: "Dersler", to: "/akademi/courses" }, // ad ve hedef sync
   ];
 
   const socials = [
@@ -136,20 +136,34 @@ function AkademiBaseFooter() {
         </div>
       </div>
 
-      {/* Mini CSS (Bootstrap 5 ile uyumlu) */}
+      {/* THEME & FOOTER STYLES (Header ile %100 uyumlu) */}
       <style>{`
+        :root{
+          --akd-bg-1:#023e8a;
+          --akd-bg-2:#03045e;
+          --akd-bg-3:#0077b6;
+          --akd-fg:#eaf1ff;
+          --akd-muted: rgba(255,255,255,.80);
+          --akd-pill-grad: linear-gradient(90deg,#7aa2ff,#c0d0ff);
+          --akd-card-bg: rgba(255,255,255,.88);
+          --akd-shadow: 0 10px 30px rgba(2,62,138,.25);
+          --akd-radius: 16px;
+        }
+
         .akd-footer{
           position: relative;
-          color:#eaf1ff;
-          background: radial-gradient(1200px 400px at 80% -10%, rgba(255,255,255,.08), transparent 60%),
-                      radial-gradient(900px 300px at -10% 120%, rgba(255,255,255,.06), transparent 60%),
-                      linear-gradient(90deg, #023e8a, #03045e 40%, #0077b6);
+          color: var(--akd-fg);
+          background:
+            radial-gradient(1200px 400px at 80% -10%, rgba(255,255,255,.08), transparent 60%),
+            radial-gradient(900px 300px at -10% 120%, rgba(255,255,255,.06), transparent 60%),
+            linear-gradient(90deg, var(--akd-bg-1), var(--akd-bg-2) 40%, var(--akd-bg-3));
+          box-shadow: var(--akd-shadow);
         }
         .brand-pill{
-          background: linear-gradient(90deg,#7aa2ff,#c0d0ff);
+          background: var(--akd-pill-grad);
           color:#0b1a2b; padding:.25rem .6rem; border-radius:999px; font-weight:800; letter-spacing:.02em;
         }
-        .text-muted-100{ color: rgba(255,255,255,.75); }
+        .text-muted-100{ color: var(--akd-muted); }
         .footer-title{
           color:#fff; font-weight:700; margin-bottom:.75rem; letter-spacing:.02em;
         }

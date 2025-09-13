@@ -69,7 +69,7 @@ function HDMBaseHeader() {
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav me-auto">
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/pages/contact-us/">
+                <Link className="nav-link text-white" to="/contact">
                   <i className="fas fa-phone"></i> İletişim
                 </Link>
               </li>
@@ -79,7 +79,7 @@ function HDMBaseHeader() {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/pages/about-us/">
+                <Link className="nav-link text-white" to="/about-hdm">
                   <i className="fas fa-address-card"></i> Hakkımızda
                 </Link>
 

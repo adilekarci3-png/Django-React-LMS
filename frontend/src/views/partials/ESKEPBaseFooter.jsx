@@ -62,7 +62,7 @@ function ESKEPBaseFooter() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="nav-link text-dark">
+                  <a href="/contact" className="nav-link text-dark">
                     İletişim
                   </a>
                 </li>

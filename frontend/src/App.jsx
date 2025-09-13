@@ -105,6 +105,7 @@ import ESKEPinstructorOdevs from "./views/ESKEPinstructor/EskepInstructorOdevs";
 import ESKEPinstructorKitapTahlils from "./views/ESKEPinstructor/EskepInstructorKitapTahlils";
 import ESKEPinstructorDersSonuRaporus from "./views/ESKEPinstructor/EskepInstructorDersSonuRaporus";
 import ESKEPinstructorOdevDetail from "./views/ESKEPinstructor/OdevDetail";
+import ESKEPinstructorProjeDetail from "./views/ESKEPinstructor/ProjeDetail";
 import ESKEPinstructorKitapTahliliDetail from "./views/ESKEPinstructor/KitapTahliliDetail";
 import ESKEPinstructorAssingCoordinator from "./views/ESKEPinstructor/AssignCoordinator";
 import EskepInstructorStudents from "./views/ESKEPinstructor/EskepInstructorStudents";
@@ -184,6 +185,13 @@ import EducatorDocumentCreate from "./views/AkademiEgitmen/EducatorDocumentCreat
 import OgrenciList from "./views/AkademiKoordinator/OgenciList";
 import EgitmenList from "./views/AkademiKoordinator/EgitmenList";
 import StudentList from "./views/AkademiKoordinator/OgenciList";
+import OrgChart from "./views/base/OrgChart";
+import AboutEHAD from "./views/base/AboutEHAD";
+import Contact from "./views/base/Contact";
+import Eskephakkimizda from "./views/ESKEP/Eskephakkimizda";
+import HDMHakkimizda from "./views/HDM/HDMHakkimizda";
+import HBSHakkimizda from "./views/hafizbilgi/HBSHakkimizda";
+import Akademihakkimizda from "./views/Akademi/Akademihakkimizda";
 
 
 const BASENAME = import.meta.env.VITE_BASENAME || "/test.akademi.ehad.org.tr";
@@ -522,6 +530,13 @@ function App() {
             {/* EHAD Akademi */}
             <Route path="/akademi/videos" element={<AllVideosPage />} />
             <Route path="/akademi/me/saved-videos" element={<MySavedVideosPage />} />
+            <Route path="/org-chart" element={<OrgChart />} />
+            <Route path="/about-ehad" element={<AboutEHAD />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/about-eskep" element={<Eskephakkimizda />} />
+            <Route path="/about-hdm" element={<HDMHakkimizda />} />
+            <Route path="/about-hbs" element={<HBSHakkimizda />} />
+            <Route path="/about-akademi" element={<Akademihakkimizda />} />
 
             {/* EHAD Akademi Koordinator */}
             <Route path="/koordinator/youtube-videolar" element={<AllYoutubeVideosPage />} />
@@ -788,6 +803,14 @@ function App() {
               }
             />
             <Route
+              path="/eskepinstructor/odev-detail/:odev_id/:koordinator_id"
+              element={
+                <PrivateRoute>
+                  <ESKEPinstructorOdevDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/eskepinstructor/course-create/"
               element={
                 <PrivateRoute>
@@ -844,7 +867,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/dersSonuRaporus/:koordinator_id/:derssonuraporu_id/"
+              path="/eskepinstructor/dersSonuRaporus/:derssonuraporu_id/:koordinator_id/"
               element={
                 <PrivateRoute>
                   <DersSonuRaporuDetail />
@@ -860,7 +883,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/kitaptahlileris/:koordinator_id/:kitaptahlili_id/"
+              path="/eskepinstructor/kitaptahlileris/:kitaptahlili_id/:koordinator_id/"
               element={
                 <PrivateRoute>
                   <ESKEPinstructorKitapTahliliDetail />
@@ -876,10 +899,10 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/projes/:koordinator_id/:proje_id/"
+              path="/eskepinstructor/projes/:proje_id/:koordinator_id/"
               element={
                 <PrivateRoute>
-                  <ESKEPinstructorOdevDetail />
+                  <ESKEPinstructorProjeDetail />
                 </PrivateRoute>
               }
             />

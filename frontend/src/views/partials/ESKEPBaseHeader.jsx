@@ -82,14 +82,14 @@ function ESKEPBaseHeader() {
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/pages/about-us/">
+                <Link className="nav-link text-white" to="/about-eskep">
                   <i className="fas fa-address-card"></i> Hakkımızda
                 </Link>
               </li>
               <li className="nav-item">
                 <Link
                   className="nav-link text-white"
-                  to="/admin/OrganizationChart/"
+                  to="/org-chart"
                 >
                   <i className="fas fa-sitemap"></i> Organizasyon Şemaları
                 </Link>
@@ -117,6 +117,8 @@ function ESKEPBaseHeader() {
                 "ESKEPOgrenci",
                 "ESKEPStajer",
                 "ESKEPGenelKoordinator",
+                "ESKEPStajerKoordinator",
+                "ESKEPOgrenciKoordinator",
               ]) && (
                 <>
                   {hasBaseRole("Koordinator") && <KoordinatorMenu />}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import Button from "react-bootstrap/Button";
@@ -14,6 +14,14 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import useUserData from "../plugin/useUserData";
 
+/**
+ * OdevDetail (Modernized)
+ * - Daha temiz layout
+ * - Solda sticky özet + ilerleme
+ * - Sağda sekmeli içerik (Bölümler / Notlar / Konuşma / Not Ver)
+ * - Tek modal akışları korunuyor
+ * - Daha belirgin boş durumlar, loading skeleton'ları
+ */
 function OdevDetail() {
   // ---- STATE ----
   const [odev, setOdev] = useState(null);
@@ -21,6 +29,8 @@ function OdevDetail() {
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
   const [conversationLoading, setConversationLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+
   const [createNote, setCreateNote] = useState({ title: "", note: "" });
   const [selectedNote, setSelectedNote] = useState(null); // null => create, obj => edit
 
@@ -33,6 +43,7 @@ function OdevDetail() {
 
   const userData = useUserData();
   const { odev_id, koordinator_id } = useParams();
+  console.log(odev_id,koordinator_id)
   const api = useAxios();
   const lastElementRef = useRef(null);
 
@@ -58,26 +69,26 @@ function OdevDetail() {
     setNoteShow(true);
   };
 
-  // konuşmayı id ile tazele
+  // Konuşmayı id ile tazele
   const refreshConversation = async (questionId) => {
     try {
       setConversationLoading(true);
-      // Bu endpoint list dönüyor: aynı odev'e ait tüm konuşmalar
       const res = await api.get(`eskepinstructor/question-answer-list-create/${odev_id}/`);
       setQuestions(res.data || []);
-      const fresh = (res.data || []).find(q => q.id === questionId);
+      const fresh = (res.data || []).find((q) => q.id === questionId);
       setSelectedConversation(fresh || null);
     } finally {
       setConversationLoading(false);
     }
   };
+
   // Conversation modal
   const [conversationShow, setConversationShow] = useState(false);
   const handleConversationClose = () => setConversationShow(false);
   const handleConversationShow = async (conversation) => {
     setConversationShow(true);
     await refreshConversation(conversation.id);
-  }
+  };
 
   // Add question modal
   const [addQuestionShow, setAddQuestionShow] = useState(false);
@@ -86,19 +97,18 @@ function OdevDetail() {
 
   // ---- FETCH DETAIL ----
   const fetchOdevDetail = async () => {
-    debugger;
     try {
+      setFetching(true);
+      debugger;
       const res = await api.get(`eskepinstructor/odev-detail/${odev_id}/${koordinator_id}/`);
+      
       const data = res.data;
       setOdev(data);
       setQuestions(data?.question_answers || []);
       setStudentReview(data?.review || null);
 
-      // Tamamlama yüzdesi: curriculum toplam item sayısı üzerinden, yoksa lectures
-      const totalFromCurriculum = (data?.curriculum || []).reduce(
-        (sum, v) => sum + (v?.variant_items?.length || 0),
-        0
-      );
+      // Tamamlama yüzdesi
+      const totalFromCurriculum = (data?.curriculum || []).reduce((sum, v) => sum + (v?.variant_items?.length || 0), 0);
       const totalLectures = data?.lectures?.length || 0;
       const total = totalFromCurriculum || totalLectures || 0;
 
@@ -107,6 +117,8 @@ function OdevDetail() {
       setCompletionPercentage(percentage);
     } catch (error) {
       console.error("Ödev detayları alınırken hata oluştu:", error);
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -139,8 +151,10 @@ function OdevDetail() {
     setCreateNote((n) => ({ ...n, [event.target.name]: event.target.value }));
   };
 
-  // Tek submit: selectedNote varsa PATCH, yoksa POST
   const handleSubmitNote = async (e) => {
+    console.log(koordinator_id);
+    console.log(odev_id);
+    console.log(selectedNote);
     e.preventDefault();
     try {
       const formdata = new FormData();
@@ -150,10 +164,7 @@ function OdevDetail() {
       formdata.append("note", createNote.note);
 
       if (selectedNote?.id) {
-        await api.patch(
-          `eskepinstructor/odev-note-detail/${koordinator_id}/${odev_id}/${selectedNote.id}/`,
-          formdata
-        );
+        await api.patch(`eskepinstructor/odev-note-detail/${koordinator_id}/${odev_id}/${selectedNote.id}/`, formdata);
         Toast().fire({ icon: "success", title: "Not Güncellendi" });
       } else {
         await api.post(`eskepinstructor/odev-note/${odev_id}/${koordinator_id}/`, formdata);
@@ -184,44 +195,7 @@ function OdevDetail() {
     setCreateMessage((m) => ({ ...m, [event.target.name]: event.target.value }));
   };
 
-  // Yeni konuşma (soru) oluştur
-  const handleSaveQuestion = async (e) => {
-    e.preventDefault();
-
-    const title = createMessage.title?.trim();
-    const message = createMessage.message?.trim();
-
-    if (!title || !message) {
-      Toast().fire({ icon: "error", title: "Başlık ve mesaj giriniz" });
-      return;
-    }
-
-    try {
-      const res = await api.post(
-        `eskepinstructor/question-answer-message-create/${odev_id}/`,
-        {
-          odev_id,
-          question_id: selectedConversation.id,
-          title: createMessage.title?.trim() || undefined,
-          message: createMessage.message.trim(),
-        }
-      );
-      const qid = res?.data?.question_id ?? selectedConversation.id;
-      await refreshConversation(qid);
-      setCreateMessage({ title: "", message: "" });
-      handleQuestionClose();
-      Toast().fire({ icon: "success", title: "Mesaj Gönderildi" });
-    } catch (error) {
-      console.error("Sunucu hatası:", error);
-      Toast().fire({
-        icon: "error",
-        title: error?.response?.data?.detail || "Mesaj gönderilemedi",
-      });
-    }
-  };
-
-
-  // Var olan konuşmaya yeni mesaj gönder
+  // Yeni konuşma mesajı (var olan konuşmaya ek)
   const sendNewMessage = async (e) => {
     e.preventDefault();
 
@@ -238,28 +212,48 @@ function OdevDetail() {
       const payload = {
         odev_id,
         question_id: selectedConversation.id,
-        // title opsiyonel; boşsa göndermiyoruz
-        //title: createMessage.title?.trim() || undefined,
         message: createMessage.message.trim(),
       };
 
-      const res = await api.post(
-        `eskepinstructor/question-answer-message-create/${odev_id}/`,
-        payload
-      );
-
+      const res = await api.post(`eskepinstructor/question-answer-message-create/${odev_id}/`, payload);
       const qid = res?.data?.question_id ?? selectedConversation.id;
       await refreshConversation(qid);
       setCreateMessage({ title: "", message: "" });
     } catch (error) {
       console.error(error);
-      Toast().fire({
-        icon: "error",
-        title: error?.response?.data?.detail || "Mesaj gönderilemedi",
-      });
+      Toast().fire({ icon: "error", title: error?.response?.data?.detail || "Mesaj gönderilemedi" });
     }
   };
 
+  // Yeni soru + ilk mesaj
+  const handleSaveQuestion = async (e) => {
+    e.preventDefault();
+
+    const title = createMessage.title?.trim();
+    const message = createMessage.message?.trim();
+
+    if (!title || !message) {
+      Toast().fire({ icon: "error", title: "Başlık ve mesaj giriniz" });
+      return;
+    }
+
+    try {
+      const res = await api.post(`eskepinstructor/question-answer-message-create/${odev_id}/`, {
+        odev_id,
+        question_id: selectedConversation?.id, // backend yeni olusturup id döndürmeli
+        title: title,
+        message: message,
+      });
+      const qid = res?.data?.question_id ?? selectedConversation?.id;
+      await refreshConversation(qid);
+      setCreateMessage({ title: "", message: "" });
+      handleQuestionClose();
+      Toast().fire({ icon: "success", title: "Mesaj Gönderildi" });
+    } catch (error) {
+      console.error("Sunucu hatası:", error);
+      Toast().fire({ icon: "error", title: error?.response?.data?.detail || "Mesaj gönderilemedi" });
+    }
+  };
 
   useEffect(() => {
     if (lastElementRef.current) {
@@ -273,9 +267,7 @@ function OdevDetail() {
       setQuestions(odev?.question_answers || []);
       return;
     }
-    const filtered = (odev?.question_answers || []).filter((q) =>
-      q?.title?.toLowerCase?.().includes(query)
-    );
+    const filtered = (odev?.question_answers || []).filter((q) => q?.title?.toLowerCase?.().includes(query));
     setQuestions(filtered);
   };
 
@@ -320,370 +312,410 @@ function OdevDetail() {
     }
   };
 
-  // ---- RENDER HELPERS ----
+  // ---- HELPERS ----
   const isItemCompleted = (item) => {
     const itemId = item?.id ?? item?.variant_item_id;
-    return (
-      odev?.completed_lesson?.some((cl) => cl?.variant_item?.id === itemId) || false
-    );
+    return odev?.completed_lesson?.some((cl) => cl?.variant_item?.id === itemId) || false;
   };
 
-  // ---- JSX ----
+  const totalCounts = useMemo(() => {
+    const lessonCount = (odev?.curriculum || []).reduce((sum, v) => sum + (v?.variant_items?.length || 0), 0);
+    return {
+      variants: (odev?.curriculum || []).length,
+      lessons: lessonCount,
+      notes: odev?.notes?.length || 0,
+      questions: (odev?.question_answers || []).length,
+    };
+  }, [odev]);
+
   return (
     <>
       <ESKEPBaseHeader />
 
-      <section className="pt-5 pb-5">
+      <section className="py-4 py-md-5 bg-light">
         <div className="container">
-          {/* Header Here */}
+          {/* Global Header */}
           <Header />
-          <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
-            <div className="col-lg-3 col-md-4 col-12">
-              <Sidebar />
-            </div>
-            <div className="col-lg-9 col-md-8 col-12">
-              <section className="mt-4">
-                <div className="container">
-                  <div className="row">
-                    {/* Main content START */}
-                    <div className="col-12">
-                      <div className="card shadow rounded-2 p-0 mt-n5">
-                        {/* Tabs START */}
-                        <div className="card-header border-bottom px-4 pt-3 pb-0">
-                          <ul className="nav nav-bottom-line py-0" id="course-pills-tab" role="tablist">
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0 active"
-                                id="course-pills-tab-1"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-1"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-1"
-                                aria-selected="true"
-                              >
-                                Ödev Bölümleri
-                              </button>
-                            </li>
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                id="course-pills-tab-2"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-2"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-2"
-                                aria-selected="false"
-                              >
-                                Notlar
-                              </button>
-                            </li>
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                id="course-pills-tab-3"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-3"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-3"
-                                aria-selected="false"
-                              >
-                                Konuşma
-                              </button>
-                            </li>
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                id="course-pills-tab-4"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-4"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-4"
-                                aria-selected="false"
-                              >
-                                Not Ver
-                              </button>
-                            </li>
-                          </ul>
+
+          <div className="row g-4 g-lg-5 mt-0 mt-md-4">
+            {/* SOL: Özet kartı (sticky) */}
+            <div className="col-lg-4 col-xl-3">
+              <div className="position-sticky" style={{ top: 88 }}>
+                <div className="card border-0 shadow-sm rounded-3">
+                  <div className="card-body p-3 p-md-4">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <h5 className="mb-0">Ödev Özeti</h5>
+                      {fetching && <span className="badge bg-secondary">Yükleniyor</span>}
+                    </div>
+
+                    <div className="small text-muted mb-3">
+                      {odev?.odev?.title || "—"}
+                    </div>
+
+                    <div className="mb-3">
+                      <div className="d-flex justify-content-between align-items-center mb-1">
+                        <span className="small fw-semibold">Tamamlama</span>
+                        <span className="small fw-bold">{completionPercentage}%</span>
+                      </div>
+                      <div className="progress" style={{ height: 10 }}>
+                        <div
+                          className="progress-bar"
+                          role="progressbar"
+                          style={{ width: `${completionPercentage}%` }}
+                          aria-valuenow={completionPercentage}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="row text-center g-2">
+                      <div className="col-6">
+                        <div className="p-2 border rounded-3 bg-white">
+                          <div className="small text-muted">Bölüm</div>
+                          <div className="fw-bold">{totalCounts.variants}</div>
                         </div>
-                        {/* Tabs END */}
-
-                        {/* Tab contents START */}
-                        <div className="card-body p-sm-4">
-                          <div className="tab-content" id="course-pills-tabContent">
-                            {/* Ödev Bölümleri */}
-                            <div className="tab-pane fade show active" id="course-pills-1" role="tabpanel" aria-labelledby="course-pills-tab-1">
-                              <div className="accordion accordion-icon accordion-border" id="accordionExample2">
-                                <div className="progress mb-3">
-                                  <div
-                                    className="progress-bar"
-                                    role="progressbar"
-                                    style={{ width: `${completionPercentage}%` }}
-                                    aria-valuenow={completionPercentage}
-                                    aria-valuemin={0}
-                                    aria-valuemax={100}
-                                  >
-                                    {completionPercentage}%
-                                  </div>
-                                </div>
-
-                                {/* Varsayılan: ders listesi */}
-                                {(odev?.lectures || []).map((c, index) => (
-                                  <div key={index}>
-                                    <h3>{c?.name}</h3>
-                                  </div>
-                                ))}
-
-                                {/* Curriculum */}
-                                {(odev?.curriculum || []).map((c, index) => (
-                                  <div className="accordion-item mb-3 p-3 bg-light" key={index}>
-                                    <h6 className="accordion-header font-base" id={`heading-${index}`}>
-                                      <button
-                                        className="accordion-button p-3 w-100 bg-light btn border fw-bold rounded d-sm-flex d-inline-block collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target={`#collapse-${c?.variant_id}`}
-                                        aria-expanded="true"
-                                        aria-controls={`collapse-${c?.variant_id}`}
-                                      >
-                                        {c?.title}
-                                        <span className="small ms-0 ms-sm-2">
-                                          ({c?.variant_items?.length || 0} Ders{(c?.variant_items?.length || 0) > 1 && "s"})
-                                        </span>
-                                      </button>
-                                    </h6>
-
-                                    <div
-                                      id={`collapse-${c?.variant_id}`}
-                                      className="accordion-collapse collapse show"
-                                      aria-labelledby={`heading-${index}`}
-                                      data-bs-parent="#accordionExample2"
-                                    >
-                                      <div className="accordion-body mt-3">
-                                        {(c?.variant_items || []).map((l, idx) => {
-                                          const itemId = l?.id ?? l?.variant_item_id;
-                                          return (
-                                            <div key={idx}>
-                                              <div className="d-flex justify-content-between align-items-center">
-                                                <div className="position-relative d-flex align-items-center gap-2">
-                                                  {l?.file ? (
-                                                    <a
-                                                      href={l.file}
-                                                      target="_blank"
-                                                      rel="noopener noreferrer"
-                                                      className="btn btn-primary-soft btn-round btn-sm mb-0 position-static"
-                                                    >
-                                                      <i className="fas fa-file-pdf me-1" /> PDF'yi Görüntüle
-                                                    </a>
-                                                  ) : (
-                                                    <span className="text-muted">PDF mevcut değil</span>
-                                                  )}
-
-                                                  {l?.video_url && (
-                                                    <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => handleShow(l)}>
-                                                      <i className="fas fa-play me-1" /> Videoyu Aç
-                                                    </button>
-                                                  )}
-                                                </div>
-
-                                                <div className="d-flex align-items-center">
-                                                  <p className="mb-0 me-2">{l?.content_duration || "0m 0s"}</p>
-                                                  <input
-                                                    type="checkbox"
-                                                    className="form-check-input ms-2"
-                                                    onChange={() => handleMarkLessonAsCompleted(itemId)}
-                                                    checked={isItemCompleted(l)}
-                                                  />
-                                                </div>
-                                              </div>
-                                              <hr />
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Notlar */}
-                            <div className="tab-pane fade" id="course-pills-2" role="tabpanel" aria-labelledby="course-pills-tab-2">
-                              <div className="card">
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  <div className="d-sm-flex justify-content-between align-items-center">
-                                    <h4 className="mb-0 p-3">Tüm Notlar</h4>
-                                    <Button className="btn btn-primary me-3" onClick={() => handleNoteShow()}>
-                                      Not Ekle <i className="fas fa-pen"></i>
-                                    </Button>
-                                  </div>
-                                </div>
-
-                                <div className="card-body p-0 pt-3">
-                                  {(odev?.notes || []).map((n) => (
-                                    <div key={n?.id} className="row g-4 p-3">
-                                      <div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
-                                        <h5>{n?.title}</h5>
-                                        <p>{n?.note}</p>
-                                        <div className="hstack gap-3 flex-wrap">
-                                          <button type="button" onClick={() => handleNoteShow(n)} className="btn btn-success mb-0">
-                                            <i className="bi bi-pencil-square me-2" /> Düzenle
-                                          </button>
-                                          <button type="button" onClick={() => handleDeleteNote(n?.id)} className="btn btn-danger mb-0">
-                                            <i className="bi bi-trash me-2" /> Sil
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-
-                                  {(odev?.notes?.length || 0) < 1 && <p className="mt-3 p-3">Not Bulunamadı</p>}
-                                  <hr />
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Konuşma */}
-                            <div className="tab-pane fade" id="course-pills-3" role="tabpanel" aria-labelledby="course-pills-tab-3">
-                              <div className="card">
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  <h4 className="mb-3 p-3">Konuşma</h4>
-                                  <form className="row g-4 p-3" onSubmit={(e) => e.preventDefault()}>
-                                    <div className="col-sm-6 col-lg-9">
-                                      <div className="position-relative">
-                                        <input
-                                          className="form-control pe-5 bg-transparent"
-                                          type="search"
-                                          placeholder="Ara"
-                                          aria-label="Ara"
-                                          onChange={handleSearchQuestion}
-                                        />
-                                        <button className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset" type="submit">
-                                          <i className="fas fa-search fs-6 " />
-                                        </button>
-                                      </div>
-                                    </div>
-                                    <div className="col-sm-6 col-lg-3">
-                                      <button type="button" onClick={handleQuestionShow} className="btn btn-primary mb-0 w-100">
-                                        Soru Sor
-                                      </button>
-                                    </div>
-                                  </form>
-                                </div>
-
-                                <div className="card-body p-0 pt-3">
-                                  <div className="vstack gap-3 p-3">
-                                    {(questions || []).map((q, index) => (
-                                      <div className="shadow rounded-3 p-3" key={q?.id || index}>
-                                        <div className="d-sm-flex justify-content-sm-between mb-3">
-                                          <div className="d-flex align-items-center">
-                                            <div className="avatar avatar-sm flex-shrink-0">
-                                              <img
-                                                src={q?.profile?.image}
-                                                className="avatar-img rounded-circle"
-                                                alt="avatar"
-                                                style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover" }}
-                                              />
-                                            </div>
-                                            <div className="ms-2">
-                                              <h6 className="mb-0">
-                                                <span className="text-decoration-none text-dark">{q?.profile?.full_name}</span>
-                                              </h6>
-                                              <small>{moment(q?.date).format("DD MMM, YYYY")}</small>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <h5>{q?.title}</h5>
-                                        <button className="btn btn-primary btn-sm mb-3 mt-3" onClick={() => handleConversationShow(q)}>
-                                          Konuşmaya Katıl <i className="fas fa-arrow-right"></i>
-                                        </button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Not Ver */}
-                            <div className="tab-pane fade" id="course-pills-4" role="tabpanel" aria-labelledby="course-pills-tab-4">
-                              <div className="card">
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  <h4 className="mb-3 p-3">{studentReview?.rating ? <p>Not Ver {studentReview.rating}</p> : "Not Ver"}</h4>
-                                  <div className="mt-2">
-                                    {!studentReview && (
-                                      <form className="row g-3 p-3" onSubmit={handleCreateReviewSubmit}>
-                                        <div className="col-12 bg-light-input">
-                                          <select id="inputState2" className="form-select js-choice" onChange={handleReviewChange} name="rating" defaultValue={1}>
-                                            <option value={1}>★☆☆☆☆ (1/5)</option>
-                                            <option value={2}>★★☆☆☆ (2/5)</option>
-                                            <option value={3}>★★★☆☆ (3/5)</option>
-                                            <option value={4}>★★★★☆ (4/5)</option>
-                                            <option value={5}>★★★★★ (5/5)</option>
-                                          </select>
-                                        </div>
-                                        <div className="col-12 bg-light-input">
-                                          <textarea
-                                            className="form-control"
-                                            id="exampleFormControlTextarea1"
-                                            placeholder="Yorumun"
-                                            rows={3}
-                                            onChange={handleReviewChange}
-                                            name="review"
-                                          />
-                                        </div>
-                                        <div className="col-12">
-                                          <button type="submit" className="btn btn-primary mb-0">
-                                            Not Ver
-                                          </button>
-                                        </div>
-                                      </form>
-                                    )}
-
-                                    {studentReview && (
-                                      <form className="row g-3 p-3" onSubmit={handleUpdateReviewSubmit}>
-                                        <div className="col-12 bg-light-input">
-                                          <select id="inputState2" className="form-select js-choice" onChange={handleReviewChange} name="rating" defaultValue={studentReview?.rating}>
-                                            <option value={1}>★☆☆☆☆ (1/5)</option>
-                                            <option value={2}>★★☆☆☆ (2/5)</option>
-                                            <option value={3}>★★★☆☆ (3/5)</option>
-                                            <option value={4}>★★★★☆ (4/5)</option>
-                                            <option value={5}>★★★★★ (5/5)</option>
-                                          </select>
-                                        </div>
-                                        <div className="col-12 bg-light-input">
-                                          <textarea
-                                            className="form-control"
-                                            id="exampleFormControlTextarea1"
-                                            placeholder="Yorumun"
-                                            rows={3}
-                                            onChange={handleReviewChange}
-                                            name="review"
-                                            defaultValue={studentReview?.review}
-                                          />
-                                        </div>
-                                        <div className="col-12">
-                                          <button type="submit" className="btn btn-primary mb-0">
-                                            Yorumu Güncelle
-                                          </button>
-                                        </div>
-                                      </form>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                      </div>
+                      <div className="col-6">
+                        <div className="p-2 border rounded-3 bg-white">
+                          <div className="small text-muted">Ders</div>
+                          <div className="fw-bold">{totalCounts.lessons}</div>
                         </div>
-                        {/* Tab contents END */}
+                      </div>
+                      <div className="col-6">
+                        <div className="p-2 border rounded-3 bg-white mt-2">
+                          <div className="small text-muted">Not</div>
+                          <div className="fw-bold">{totalCounts.notes}</div>
+                        </div>
+                      </div>
+                      <div className="col-6">
+                        <div className="p-2 border rounded-3 bg-white mt-2">
+                          <div className="small text-muted">Konuşma</div>
+                          <div className="fw-bold">{totalCounts.questions}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </section>
+
+                {/* Sidebar bileşenini aşağıda ayrı kartta koruyalım */}
+                <div className="card border-0 shadow-sm rounded-3 mt-3">
+                  <div className="card-body p-2 p-md-3">
+                    <Sidebar />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* SAĞ: İçerik */}
+            <div className="col-lg-8 col-xl-9">
+              <div className="card shadow rounded-3 border-0">
+                {/* Tabs */}
+                <div className="card-header bg-white border-0 px-3 px-md-4 pt-3 pb-0">
+                  <ul className="nav nav-pills gap-2 flex-wrap" id="course-pills-tab" role="tablist">
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link active" id="course-pills-tab-1" data-bs-toggle="pill" data-bs-target="#course-pills-1" type="button" role="tab" aria-controls="course-pills-1" aria-selected="true">
+                        Ödev Bölümleri
+                      </button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link" id="course-pills-tab-2" data-bs-toggle="pill" data-bs-target="#course-pills-2" type="button" role="tab" aria-controls="course-pills-2" aria-selected="false">
+                        Notlar
+                      </button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link" id="course-pills-tab-3" data-bs-toggle="pill" data-bs-target="#course-pills-3" type="button" role="tab" aria-controls="course-pills-3" aria-selected="false">
+                        Konuşma
+                      </button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link" id="course-pills-tab-4" data-bs-toggle="pill" data-bs-target="#course-pills-4" type="button" role="tab" aria-controls="course-pills-4" aria-selected="false">
+                        Not Ver
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Tab contents */}
+                <div className="card-body p-3 p-md-4">
+                  <div className="tab-content" id="course-pills-tabContent">
+                    {/* Ödev Bölümleri */}
+                    <div className="tab-pane fade show active" id="course-pills-1" role="tabpanel" aria-labelledby="course-pills-tab-1">
+                      {fetching ? (
+                        <SkeletonCurriculum />
+                      ) : (
+                        <div className="accordion" id="accordionExample2">
+                          {/* Varsayılan: ders listesi */}
+                          {(odev?.lectures || []).length > 0 && (
+                            <div className="mb-3">
+                              <h6 className="text-uppercase text-muted small mb-2">Dersler</h6>
+                              {(odev?.lectures || []).map((c, index) => (
+                                <div key={index} className="p-3 border rounded-3 mb-2 bg-white">
+                                  <div className="d-flex align-items-center justify-content-between">
+                                    <span className="fw-semibold">{c?.name}</span>
+                                    <span className="badge bg-light text-dark">{c?.content_duration || "0m 0s"}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Curriculum */}
+                          {(odev?.curriculum || []).map((c, index) => (
+                            <div className="accordion-item border rounded-3 overflow-hidden mb-3" key={index}>
+                              <h2 className="accordion-header" id={`heading-${index}`}>
+                                <button
+                                  className="accordion-button collapsed bg-white fw-semibold"
+                                  type="button"
+                                  data-bs-toggle="collapse"
+                                  data-bs-target={`#collapse-${c?.variant_id}`}
+                                  aria-expanded="false"
+                                  aria-controls={`collapse-${c?.variant_id}`}
+                                >
+                                  <div className="d-flex align-items-center w-100">
+                                    <span className="me-2">{c?.title}</span>
+                                    <span className="badge bg-secondary-subtle text-dark ms-auto">{c?.variant_items?.length || 0} Ders</span>
+                                  </div>
+                                </button>
+                              </h2>
+                              <div id={`collapse-${c?.variant_id}`} className="accordion-collapse collapse" aria-labelledby={`heading-${index}`} data-bs-parent="#accordionExample2">
+                                <div className="accordion-body bg-light">
+                                  {(c?.variant_items || []).map((l, idx) => {
+                                    const itemId = l?.id ?? l?.variant_item_id;
+                                    const completed = isItemCompleted(l);
+                                    return (
+                                      <div key={idx} className="p-3 bg-white rounded-3 mb-2 border">
+                                        <div className="d-flex justify-content-between align-items-center gap-3">
+                                          <div className="d-flex align-items-center gap-2 flex-wrap">
+                                            <span className={`badge ${completed ? "bg-success" : "bg-light text-dark"}`}>
+                                              {completed ? "Tamamlandı" : "Bekliyor"}
+                                            </span>
+
+                                            {l?.file ? (
+                                              <a href={l.file} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary btn-sm">
+                                                <i className="fas fa-file-pdf me-1" /> PDF'yi Görüntüle
+                                              </a>
+                                            ) : (
+                                              <span className="text-muted small">PDF yok</span>
+                                            )}
+
+                                            {l?.video_url && (
+                                              <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => handleShow(l)}>
+                                                <i className="fas fa-play me-1" /> Videoyu Aç
+                                              </button>
+                                            )}
+                                          </div>
+
+                                          <div className="d-flex align-items-center gap-2">
+                                            <span className="text-muted small">{l?.content_duration || "0m 0s"}</span>
+                                            <div className="form-check">
+                                              <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                onChange={() => handleMarkLessonAsCompleted(itemId)}
+                                                checked={completed}
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {(odev?.curriculum?.length || 0) < 1 && (odev?.lectures?.length || 0) < 1 && (
+                            <EmptyState title="İçerik Bulunamadı" subtitle="Bu ödev için henüz ders veya müfredat eklenmemiş görünüyor." />
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Notlar */}
+                    <div className="tab-pane fade" id="course-pills-2" role="tabpanel" aria-labelledby="course-pills-tab-2">
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="mb-0">Notlar</h5>
+                        <Button className="btn btn-primary" onClick={() => handleNoteShow()}>
+                          Not Ekle <i className="fas fa-pen" />
+                        </Button>
+                      </div>
+
+                      {fetching ? (
+                        <SkeletonNotes />
+                      ) : (
+                        <div className="vstack gap-3">
+                          {(odev?.notes || []).map((n) => (
+                            <div key={n?.id} className="border rounded-3 p-3 bg-white shadow-sm">
+                              <div className="d-flex justify-content-between align-items-start">
+                                <div>
+                                  <h6 className="mb-1">{n?.title}</h6>
+                                  <p className="mb-0 text-muted">{n?.note}</p>
+                                </div>
+                                <div className="ms-3 d-flex gap-2">
+                                  <button type="button" onClick={() => handleNoteShow(n)} className="btn btn-sm btn-outline-success">
+                                    <i className="bi bi-pencil-square me-1" /> Düzenle
+                                  </button>
+                                  <button type="button" onClick={() => handleDeleteNote(n?.id)} className="btn btn-sm btn-outline-danger">
+                                    <i className="bi bi-trash me-1" /> Sil
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {(odev?.notes?.length || 0) < 1 && (
+                            <EmptyState title="Not Bulunamadı" subtitle="Henüz not eklenmemiş. Yeni bir not oluşturabilirsiniz." />
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Konuşma */}
+                    <div className="tab-pane fade" id="course-pills-3" role="tabpanel" aria-labelledby="course-pills-tab-3">
+                      <div className="row g-3">
+                        {/* Sol: Arama + Liste */}
+                        <div className="col-lg-5">
+                          <div className="card border-0 shadow-sm">
+                            <div className="card-body">
+                              <div className="input-group mb-3">
+                                <input className="form-control" type="search" placeholder="Konuşmalarda ara" aria-label="Ara" onChange={handleSearchQuestion} />
+                                <button className="btn btn-outline-primary" type="button" onClick={handleQuestionShow}>
+                                  Soru Sor
+                                </button>
+                              </div>
+                              <div className="vstack gap-2" style={{ maxHeight: 480, overflowY: "auto" }}>
+                                {(questions || []).map((q) => (
+                                  <button key={q?.id} className={`text-start p-3 rounded-3 border ${selectedConversation?.id === q?.id ? "bg-primary text-white" : "bg-white"}`} onClick={() => handleConversationShow(q)}>
+                                    <div className="d-flex align-items-center gap-2">
+                                      <img src={q?.profile?.image} alt="avatar" className="rounded-circle" style={{ width: 40, height: 40, objectFit: "cover" }} />
+                                      <div>
+                                        <div className="fw-semibold small mb-1">{q?.profile?.full_name}</div>
+                                        <div className="small text-truncate" style={{ maxWidth: 220 }}>{q?.title}</div>
+                                        <div className="small opacity-75">{moment(q?.date).format("DD MMM, YYYY")}</div>
+                                      </div>
+                                    </div>
+                                  </button>
+                                ))}
+                                {(questions?.length || 0) < 1 && <EmptyState title="Konuşma yok" subtitle="Yeni bir soru oluşturarak başlayın." />}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Sağ: Mesajlar */}
+                        <div className="col-lg-7">
+                          <div className="card border-0 shadow-sm">
+                            <div className="card-body">
+                              {selectedConversation ? (
+                                <>
+                                  <div className="d-flex align-items-center justify-content-between mb-3">
+                                    <h6 className="mb-0">{selectedConversation?.title}</h6>
+                                    <span className="badge bg-light text-dark">{selectedConversation?.messages?.length || 0} mesaj</span>
+                                  </div>
+                                  <div className="border rounded-3" style={{ height: 420, overflowY: "auto" }}>
+                                    {conversationLoading ? (
+                                      <div className="text-center py-5">Yükleniyor…</div>
+                                    ) : (
+                                      <div className="p-3">
+                                        {(selectedConversation?.messages || []).map((m, i) => (
+                                          <div key={m?.id || i} className="d-flex gap-2 mb-3">
+                                            <img
+                                              className="rounded-circle mt-1"
+                                              src={m?.profile?.image?.startsWith("http://127.0.0.1:8000") ? m?.profile?.image : `http://127.0.0.1:8000${m?.profile?.image}`}
+                                              style={{ width: 36, height: 36, objectFit: "cover" }}
+                                              alt="user"
+                                            />
+                                            <div className="bg-light p-2 px-3 rounded-3 w-100">
+                                              <div className="d-flex justify-content-between align-items-center">
+                                                <div className="fw-semibold small">{m?.profile?.full_name}</div>
+                                                <div className="small text-muted">{moment(m?.date).format("DD MMM, YYYY")}</div>
+                                              </div>
+                                              <div className="mt-2">{m?.message}</div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                        <div ref={lastElementRef} />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <form className="d-flex gap-2 mt-3" onSubmit={sendNewMessage}>
+                                    <textarea name="message" className="form-control bg-light" rows={2} onChange={handleMessageChange} placeholder="Mesaj yazın" value={createMessage.message} required />
+                                    <button className="btn btn-primary" type="submit">
+                                      Gönder <i className="fas fa-paper-plane" />
+                                    </button>
+                                  </form>
+                                </>
+                              ) : (
+                                <EmptyState title="Konuşma seçilmedi" subtitle="Soldan bir konuşma seçin veya yeni bir soru oluşturun." />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Not Ver */}
+                    <div className="tab-pane fade" id="course-pills-4" role="tabpanel" aria-labelledby="course-pills-tab-4">
+                      <div className="card border-0">
+                        <div className="card-body p-0">
+                          <div className="d-flex align-items-center justify-content-between mb-3">
+                            <h5 className="mb-0">{studentReview?.rating ? `Notunuz: ${studentReview.rating}/5` : "Not Ver"}</h5>
+                          </div>
+
+                          {!studentReview ? (
+                            <form className="row g-3" onSubmit={handleCreateReviewSubmit}>
+                              <div className="col-12">
+                                <label className="form-label">Puan</label>
+                                <select id="inputState2" className="form-select" onChange={handleReviewChange} name="rating" defaultValue={1}>
+                                  <option value={1}>★☆☆☆☆ (1/5)</option>
+                                  <option value={2}>★★☆☆☆ (2/5)</option>
+                                  <option value={3}>★★★☆☆ (3/5)</option>
+                                  <option value={4}>★★★★☆ (4/5)</option>
+                                  <option value={5}>★★★★★ (5/5)</option>
+                                </select>
+                              </div>
+                              <div className="col-12">
+                                <label className="form-label">Yorum</label>
+                                <textarea className="form-control" rows={3} onChange={handleReviewChange} name="review" placeholder="Geri bildiriminiz" />
+                              </div>
+                              <div className="col-12 d-flex justify-content-end">
+                                <button type="submit" className="btn btn-primary">
+                                  Not Ver
+                                </button>
+                              </div>
+                            </form>
+                          ) : (
+                            <form className="row g-3" onSubmit={handleUpdateReviewSubmit}>
+                              <div className="col-12">
+                                <label className="form-label">Puan</label>
+                                <select id="inputState2" className="form-select" onChange={handleReviewChange} name="rating" defaultValue={studentReview?.rating}>
+                                  <option value={1}>★☆☆☆☆ (1/5)</option>
+                                  <option value={2}>★★☆☆☆ (2/5)</option>
+                                  <option value={3}>★★★☆☆ (3/5)</option>
+                                  <option value={4}>★★★★☆ (4/5)</option>
+                                  <option value={5}>★★★★★ (5/5)</option>
+                                </select>
+                              </div>
+                              <div className="col-12">
+                                <label className="form-label">Yorum</label>
+                                <textarea className="form-control" rows={3} onChange={handleReviewChange} name="review" defaultValue={studentReview?.review} />
+                              </div>
+                              <div className="col-12 d-flex justify-content-end">
+                                <button type="submit" className="btn btn-primary">
+                                  Yorumu Güncelle
+                                </button>
+                              </div>
+                            </form>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -713,99 +745,30 @@ function OdevDetail() {
           <form onSubmit={handleSubmitNote}>
             <div className="mb-3">
               <label className="form-label">Not Başlığı</label>
-              <input
-                value={createNote.title}
-                name="title"
-                onChange={handleNoteChange}
-                type="text"
-                className="form-control"
-                required
-              />
+              <input value={createNote.title} name="title" onChange={handleNoteChange} type="text" className="form-control" required />
             </div>
             <div className="mb-3">
               <label className="form-label">İçerik</label>
-              <textarea
-                value={createNote.note}
-                name="note"
-                onChange={handleNoteChange}
-                className="form-control"
-                cols={30}
-                rows={8}
-                required
-              ></textarea>
+              <textarea value={createNote.note} name="note" onChange={handleNoteChange} className="form-control" cols={30} rows={8} required />
             </div>
-            <button type="button" className="btn btn-secondary me-2" onClick={handleNoteClose}>
-              <i className="fas fa-arrow-left"></i> Kapat
-            </button>
-            <button type="submit" className="btn btn-primary">
-              {selectedNote?.id ? "Güncelle" : "Kaydet"} <i className="fas fa-check-circle"></i>
-            </button>
+            <div className="d-flex justify-content-end gap-2">
+              <button type="button" className="btn btn-outline-secondary" onClick={handleNoteClose}>
+                Kapat
+              </button>
+              <button type="submit" className="btn btn-primary">
+                {selectedNote?.id ? "Güncelle" : "Kaydet"}
+              </button>
+            </div>
           </form>
         </Modal.Body>
       </Modal>
 
-      {/* Conversation Modal */}
-      <Modal show={conversationShow} size="lg" onHide={handleConversationClose} centered>
+      {/* Conversation Modal: (Artık sağdaki panel ile büyük oranda redundant, ama istersen korunuyor) */}
+      <Modal show={false} size="lg" onHide={() => {}} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Konuşma: {selectedConversation?.title}</Modal.Title>
+          <Modal.Title>Konuşma</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <div className="border p-2 p-sm-4 rounded-3">
-            <ul className="list-unstyled mb-0" style={{ overflowY: "scroll", height: "500px" }}>
-              {conversationLoading ? (
-                <div className="text-center py-4">Yükleniyor…</div>
-              ) : (
-                <ul className="list-unstyled mb-0" style={{ overflowY: "scroll", height: "500px" }}>
-                  {(selectedConversation?.messages || []).map((m, index) => (
-                    <li key={m?.id || index} className="comment-item mb-3">
-                      <div className="d-flex">
-                        <div className="avatar avatar-sm flex-shrink-0">
-                          <img
-                            className="avatar-img rounded-circle"
-                            src={m?.profile?.image?.startsWith("http://127.0.0.1:8000") ? m?.profile?.image : `http://127.0.0.1:8000${m?.profile?.image}`}
-                            style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }}
-                            alt="user"
-                          />
-                        </div>
-                        <div className="ms-2 w-100">
-                          <div className="bg-light p-3 rounded w-100">
-                            <div className="d-flex w-100 justify-content-center">
-                              <div className="me-2">
-                                <h6 className="mb-1 lead fw-bold">
-                                  <span className="text-decoration-none text-dark">{m?.profile?.full_name}</span>
-                                  <br />
-                                  <span style={{ fontSize: "12px", color: "gray" }}>{moment(m?.date).format("DD MMM, YYYY")}</span>
-                                </h6>
-                                <p className="mb-0 mt-3">{m?.message}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div ref={lastElementRef}></div>
-            </ul>
-
-            <form className="w-100 d-flex mt-3" onSubmit={sendNewMessage}>
-              <textarea
-                name="message"
-                className="one form-control pe-4 bg-light w-75"
-                rows={2}
-                onChange={handleMessageChange}
-                placeholder="Sorunuz Nedir?"
-                value={createMessage.message}
-                required
-              ></textarea>
-              <button className="btn btn-primary ms-2 mb-0 w-25" type="submit">
-                Gönder <i className="fas fa-paper-plane"></i>
-              </button>
-            </form>
-          </div>
-        </Modal.Body>
+        <Modal.Body>—</Modal.Body>
       </Modal>
 
       {/* Soru Sor Modal */}
@@ -817,33 +780,20 @@ function OdevDetail() {
           <form onSubmit={handleSaveQuestion}>
             <div className="mb-3">
               <label className="form-label">Soru Başlığı</label>
-              <input
-                value={createMessage.title}
-                name="title"
-                onChange={handleMessageChange}
-                type="text"
-                className="form-control"
-                required
-              />
+              <input value={createMessage.title} name="title" onChange={handleMessageChange} type="text" className="form-control" required />
             </div>
             <div className="mb-3">
               <label className="form-label">Mesaj</label>
-              <textarea
-                value={createMessage.message}
-                name="message"
-                onChange={handleMessageChange}
-                className="form-control"
-                cols={30}
-                rows={8}
-                required
-              ></textarea>
+              <textarea value={createMessage.message} name="message" onChange={handleMessageChange} className="form-control" cols={30} rows={8} required />
             </div>
-            <button type="button" className="btn btn-secondary me-2" onClick={handleQuestionClose}>
-              <i className="fas fa-arrow-left"></i> Kapat
-            </button>
-            <button type="submit" className="btn btn-primary">
-              Mesaj Gönder <i className="fas fa-check-circle"></i>
-            </button>
+            <div className="d-flex justify-content-end gap-2">
+              <button type="button" className="btn btn-outline-secondary" onClick={handleQuestionClose}>
+                Kapat
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Mesaj Gönder
+              </button>
+            </div>
           </form>
         </Modal.Body>
       </Modal>
@@ -854,3 +804,50 @@ function OdevDetail() {
 }
 
 export default OdevDetail;
+
+/** Simple Empty State */
+function EmptyState({ title = "Kayıt bulunamadı", subtitle = "" }) {
+  return (
+    <div className="text-center p-4 border rounded-3 bg-white">
+      <div className="display-6 mb-2">🗂️</div>
+      <h6 className="mb-1">{title}</h6>
+      {subtitle && <div className="text-muted small">{subtitle}</div>}
+    </div>
+  );
+}
+
+/** Loading Skeletons */
+function SkeletonCurriculum() {
+  return (
+    <div className="vstack gap-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="p-3 bg-white border rounded-3">
+          <div className="placeholder-glow">
+            <span className="placeholder col-6"></span>
+            <span className="placeholder col-4 ms-2"></span>
+          </div>
+          <div className="mt-2 placeholder-glow">
+            <span className="placeholder col-12"></span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SkeletonNotes() {
+  return (
+    <div className="vstack gap-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="p-3 bg-white border rounded-3">
+          <div className="placeholder-glow">
+            <span className="placeholder col-5"></span>
+          </div>
+          <div className="mt-2 placeholder-glow">
+            <span className="placeholder col-9"></span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

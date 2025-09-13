@@ -21,7 +21,7 @@ function HomeFooter() {
           <div className="col-md-4 mb-4">
             <h5 className="text-white">Bağlantılar</h5>
             <ul className="list-unstyled">
-              <li><a href="/about" className="text-light text-decoration-none">Hakkımızda</a></li>
+              <li><a href="/about-ehad" className="text-light text-decoration-none">Hakkımızda</a></li>
               <li><a href="/donate" className="text-light text-decoration-none">Bağış</a></li>
               <li><a href="/academy" className="text-light text-decoration-none">Akademi</a></li>
               <li><a href="/contact" className="text-light text-decoration-none">İletişim</a></li>

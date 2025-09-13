@@ -157,7 +157,9 @@ function ProjeCreate() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <Sidebar />
+            <div className="col-lg-3 col-md-3 col-12 mb-4 mb-md-0">
+                         <Sidebar />
+                       </div>
             <form className="col-lg-9 col-md-8 col-12" onSubmit={handleSubmit}>
               <h2 className="mb-4">📘 Proje Oluştur</h2>
 

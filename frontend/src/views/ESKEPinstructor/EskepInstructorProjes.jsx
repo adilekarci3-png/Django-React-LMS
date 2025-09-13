@@ -11,7 +11,7 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 function EskepInstructorProjes() {
-  const [dersSonuProjes, setDersSonuProjes] = useState([]);
+  const [projes, setProjes] = useState([]);
   const [fetching, setFetching] = useState(true);
 
   const api = useAxios();
@@ -24,7 +24,8 @@ function EskepInstructorProjes() {
     api
       .get(`eskepinstructor/proje-list/${userId}/`)
       .then((res) => {
-        setDersSonuProjes(res.data);
+        setProjes(res.data);
+        console.log(res.data);
         setFetching(false);
       })
       .catch(() => setFetching(false));
@@ -73,8 +74,8 @@ function EskepInstructorProjes() {
                         </tr>
                       </thead>
                       <tbody>
-                        {dersSonuProjes.length > 0 ? (
-                          dersSonuProjes.map((c, index) => (
+                        {projes.length > 0 ? (
+                          projes.map((c, index) => (
                             <tr key={index}>
                               <td>
                                 <div className="d-flex align-items-center">
@@ -101,7 +102,7 @@ function EskepInstructorProjes() {
                               <td>{c.inserteduser?.full_name || "Bilinmiyor"}</td>
                               <td>
                                 <Link
-                                  to={`/eskepinstructor/dersSonuProjes/${c.id}/${c.koordinator?.id}/`}
+                                  to={`/eskepinstructor/projes/${c.id}/${c.koordinator?.id}/`}
                                   className="btn btn-outline-info btn-sm d-flex align-items-center gap-2"
                                   style={{ borderRadius: "20px" }}
                                 >

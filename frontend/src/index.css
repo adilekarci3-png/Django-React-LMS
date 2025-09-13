@@ -70,3 +70,4 @@ button:focus-visible {
   direction: rtl !important;
   text-align: left !important;
 } */
+html, body, #root { height: 100%; margin: 0; }

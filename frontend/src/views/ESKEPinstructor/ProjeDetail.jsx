@@ -14,23 +14,25 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 function ProjeDetail() {
-  const [proje, setProje] = useState([]);
+  // ⬇️ hook'ları en üstte çağır
+  const api = useAxios();
+  const user = UserData();
+  const { proje_id } = useParams();
+
+  const [proje, setProje] = useState({});
   const [variantItem, setVariantItem] = useState(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
   const [createNote, setCreateNote] = useState({ title: "", note: "" });
   const [selectedNote, setSelectedNote] = useState(null);
-  const [createMessage, setCreateMessage] = useState({
-    title: "",
-    message: "",
-  });
+  const [createMessage, setCreateMessage] = useState({ title: "", message: "" });
   const [questions, setQuestions] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [createReview, setCreateReview] = useState({ rating: 1, review: "" });
-  const [studentReview, setStudentReview] = useState([]);
+  const [studentReview, setStudentReview] = useState(null);
 
-  const param = useParams();
   const lastElementRef = useRef(null);
+
   // Play Ders Silindi Modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -48,9 +50,9 @@ function ProjeDetail() {
 
   const [ConversationShow, setConversationShow] = useState(false);
   const handleConversationClose = () => setConversationShow(false);
-  const handleConversationShow = (converation) => {
+  const handleConversationShow = (conversation) => {
     setConversationShow(true);
-    setSelectedConversation(converation);
+    setSelectedConversation(conversation);
   };
 
   const [addQuestionShow, setAddQuestionShow] = useState(false);
@@ -59,88 +61,72 @@ function ProjeDetail() {
 
   const fetchProjeDetail = async () => {
     try {
-      debugger;
-      //const { proje_id } = param.proje_id; // URL parametresinden al
-      const response = await useAxios().get(
-        `eskepinstructor/proje-detail/${param.proje_id}/${UserData()?.user_id}/`
+      if (!user?.user_id || !proje_id) return;
+
+      // API view desenine göre: /<koordinator_id>/<proje_id>/
+      const response = await api.get(
+        `eskepinstructor/proje-detail/${user.user_id}/${proje_id}/`
       );
 
-      const data = response.data;
+      const data = response.data || {};
       setProje(data);
-      setQuestions(data.question_answers);
-      setStudentReview(data.review);
-      console.log(proje);
-      debugger;
-      // setVariantItem eksik, örnek olarak aşağıya ekliyorum:
-      // setVariantItem(data.variant_item || null);
-      const completed = data.completed_lesson?.length || 0;
-      const total = data.lectures?.length || 1; // sıfıra bölünme hatasını engelle
+      setQuestions(data.question_answers || []);
+      setStudentReview(data.review || null);
 
-      const percentageCompleted = (completed / total) * 100;
-      setCompletionPercentage(percentageCompleted.toFixed(0));
+      const completed = data?.completed_lesson?.length || 0;
+      const total = data?.lectures?.length || 0;
+      const percentageCompleted = total ? Math.round((completed / total) * 100) : 0;
+      setCompletionPercentage(percentageCompleted);
     } catch (error) {
-      console.error("Ödev detayları alınırken hata oluştu:", error);
+      console.error("Proje detayları alınırken hata oluştu:", error);
+      try {
+        Toast().fire({ icon: "error", title: "Proje detayları alınamadı" });
+      } catch (_) {}
     }
   };
+
   useEffect(() => {
     fetchProjeDetail();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.user_id, proje_id]);
 
-  //console.log(createReview?.rating);
-  // console.log(studentReview);
   const handleMarkLessonAsCompleted = (variantItemId) => {
     const key = `lecture_${variantItemId}`;
-    setMarkAsCompletedStatus({
-      ...markAsCompletedStatus,
-      [key]: "Updating",
-    });
+    setMarkAsCompletedStatus((prev) => ({ ...prev, [key]: "Updating" }));
 
     const formdata = new FormData();
-    formdata.append("user_id", UserData()?.user_id || 0);
-    formdata.append("proje_id", proje.proje?.id);
+    formdata.append("user_id", user?.user_id || 0);
+    formdata.append("proje_id", proje?.id); // API nesnesi doğrudan proje ise
     formdata.append("variant_item_id", variantItemId);
 
-    useAxios()
-      .post(`instructor/proje-completed/`, formdata)
-      .then((res) => {
-        fetchProjeDetail();
-        setMarkAsCompletedStatus({
-          ...markAsCompletedStatus,
-          [key]: "Updated",
-        });
-      });
+    api.post(`instructor/proje-completed/`, formdata).then(() => {
+      fetchProjeDetail();
+      setMarkAsCompletedStatus((prev) => ({ ...prev, [key]: "Updated" }));
+    });
   };
 
   const handleNoteChange = (event) => {
-    setCreateNote({
-      ...createNote,
-      [event.target.name]: event.target.value,
-    });
+    setCreateNote({ ...createNote, [event.target.name]: event.target.value });
   };
 
   const handleSubmitCreateNote = async (e) => {
     e.preventDefault();
+    if (!user?.user_id || !proje_id) return;
+
     const formdata = new FormData();
-    debugger;
-    formdata.append("koordinator_id", UserData()?.user_id);
-    formdata.append("proje_id", param.proje_id);
+    formdata.append("koordinator_id", user.user_id);
+    formdata.append("proje_id", proje_id);
     formdata.append("title", createNote.title);
     formdata.append("note", createNote.note);
-   
+
     try {
-      await useAxios()
-        .post(
-          `eskepinstructor/proje-note/${param.proje_id}/${UserData()?.user_id}/`,
-          formdata
-        )
-        .then((res) => {
-          fetchProjeDetail();
-          handleNoteClose();
-          Toast().fire({
-            icon: "success",
-            title: "Not Eklendi",
-          });
-        });
+      await api.post(
+        `eskepinstructor/proje-note/${proje_id}/${user.user_id}/`,
+        formdata
+      );
+      fetchProjeDetail();
+      handleNoteClose();
+      Toast().fire({ icon: "success", title: "Not Eklendi" });
     } catch (error) {
       console.log(error);
     }
@@ -148,89 +134,74 @@ function ProjeDetail() {
 
   const handleSubmitEditNote = (e, noteId) => {
     e.preventDefault();
-    const formdata = new FormData();
+    if (!user?.user_id || !proje_id || !noteId) return;
 
-    formdata.append("user_id", UserData()?.user_id);
-    formdata.append("koordinator_id", param.koordinator_id);
+    const formdata = new FormData();
+    formdata.append("user_id", user.user_id);
+    formdata.append("koordinator_id", user.user_id);
     formdata.append("title", createNote.title || selectedNote?.title);
     formdata.append("note", createNote.note || selectedNote?.note);
 
-    useAxios()
+    api
       .patch(
-        `eskepinstructor/proje-note-detail/${param.proje_id}/${UserData()?.user_id}/${noteId}/`,
+        `eskepinstructor/proje-note-detail/${proje_id}/${user.user_id}/${noteId}/`,
         formdata
       )
-      .then((res) => {
+      .then(() => {
         fetchProjeDetail();
-        Toast().fire({
-          icon: "success",
-          title: "Not Güncellendi",
-        });
+        Toast().fire({ icon: "success", title: "Not Güncellendi" });
       });
   };
 
   const handleDeleteNote = (noteId) => {
-    useAxios()
+    if (!user?.user_id || !proje_id || !noteId) return;
+
+    api
       .delete(
-        `eskepinstructor/proje-note-detail/${param.proje_id}/${UserData()?.user_id}/${noteId}/`
+        `eskepinstructor/proje-note-detail/${proje_id}/${user.user_id}/${noteId}/`
       )
-      .then((res) => {
+      .then(() => {
         fetchProjeDetail();
-        Toast().fire({
-          icon: "success",
-          title: "Not Silindi",
-        });
+        Toast().fire({ icon: "success", title: "Not Silindi" });
       });
   };
 
   const handleMessageChange = (event) => {
-    setCreateMessage({
-      ...createMessage,
-      [event.target.name]: event.target.value,
-    });
+    setCreateMessage({ ...createMessage, [event.target.name]: event.target.value });
   };
 
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
-    const formdata = new FormData();
+    if (!user?.user_id || !proje_id) return;
 
-    formdata.append("proje_id", param.proje_id);
-    formdata.append("gonderen_id", UserData()?.user_id);
-    //formdata.append("koordinator_id", UserData()?.user_id);
+    const formdata = new FormData();
+    formdata.append("proje_id", proje_id);
+    formdata.append("gonderen_id", user.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
-    debugger;
-    await useAxios()
-      .post(
-        `eskepinstructor/question-answer-list-create/${param.proje_id}/`,
-        formdata
-      )
-      .then((res) => {
-        debugger;
+
+    await api
+      .post(`eskepinstructor/question-answer-list-create/${proje_id}/`, formdata)
+      .then(() => {
         fetchProjeDetail();
         handleQuestionClose();
-        Toast().fire({
-          icon: "success",
-          title: "Mesaj Gönderildi",
-        });
+        Toast().fire({ icon: "success", title: "Mesaj Gönderildi" });
       });
   };
 
   const sendNewMessage = async (e) => {
     e.preventDefault();
+    if (!user?.user_id || !proje_id) return;
+
     const formdata = new FormData();
-    formdata.append("proje_id", param.proje_id);
-    formdata.append("gonderen_id", UserData()?.user_id);
-    //formdata.append("koordinator_id", UserData()?.user_id);
+    formdata.append("proje_id", proje_id);
+    formdata.append("gonderen_id", user.user_id);
     formdata.append("title", createMessage.title);
     formdata.append("message", createMessage.message);
-    debugger;
-    useAxios()
-      .post(`eskepinstructor/question-answer-message-create/`, formdata)
-      .then((res) => {
-        debugger;
-        setSelectedConversation(res.data.question);
-      });
+
+    api.post(`eskepinstructor/question-answer-message-create/`, formdata).then((res) => {
+      setSelectedConversation(res.data?.question || null);
+    });
   };
 
   useEffect(() => {
@@ -241,65 +212,51 @@ function ProjeDetail() {
 
   const handleSearchQuestion = (event) => {
     const query = event.target.value.toLowerCase();
-    if (query === "") {
-      fetchProjeDetail();
+    if (!query) {
+      setQuestions(proje?.question_answers || []);
     } else {
-      const filtered = questions?.filter((question) => {
-        return question.title.toLowerCase().includes(query);
-      });
+      const filtered = (proje?.question_answers || []).filter((q) =>
+        q.title?.toLowerCase().includes(query)
+      );
       setQuestions(filtered);
     }
   };
 
   const handleReviewChange = (event) => {
-    setCreateReview({
-      ...createReview,
-      [event.target.name]: event.target.value,
-    });
+    setCreateReview({ ...createReview, [event.target.name]: event.target.value });
   };
 
   const handleCreateReviewSubmit = (e) => {
     e.preventDefault();
+    if (!user?.user_id || !proje?.id) return;
 
     const formdata = new FormData();
-    formdata.append("proje_id", proje.proje?.id);
-    formdata.append("user_id", UserData()?.user_id);
+    formdata.append("proje_id", proje.id);
+    formdata.append("user_id", user.user_id);
     formdata.append("rating", createReview.rating);
     formdata.append("review", createReview.review);
 
-    useAxios()
-      .post(`stajer/rate-proje/`, formdata)
-      .then((res) => {
-        console.log(res.data);
-        fetchProjeDetail();
-        Toast().fire({
-          icon: "success",
-          title: "Yorum Oluştur",
-        });
-      });
+    api.post(`stajer/rate-proje/`, formdata).then(() => {
+      fetchProjeDetail();
+      Toast().fire({ icon: "success", title: "Yorum Oluşturuldu" });
+    });
   };
 
   const handleUpdateReviewSubmit = (e) => {
     e.preventDefault();
+    if (!user?.user_id || !proje?.id || !studentReview?.id) return;
 
     const formdata = new FormData();
-    formdata.append("proje", proje.proje?.id);
-    formdata.append("user", UserData()?.user_id);
+    formdata.append("proje", proje.id);
+    formdata.append("user", user.user_id);
     formdata.append("rating", createReview.rating || studentReview?.rating);
     formdata.append("review", createReview.review || studentReview?.review);
 
-    useAxios()
-      .patch(
-        `stajer/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
-        formdata
-      )
-      .then((res) => {
-        console.log(res.data);
+    api
+      .patch(`stajer/review-detail/${user.user_id}/${studentReview.id}/`, formdata)
+      .then(() => {
         fetchProjeDetail();
-        Toast().fire({
-          icon: "success",
-          title: "Yorum Güncelle",
-        });
+        Toast().fire({ icon: "success", title: "Yorum Güncellendi" });
       });
   };
 
@@ -313,13 +270,10 @@ function ProjeDetail() {
           <Header />
           <div className="row mt-0 mt-md-4">
             {/* Sidebar Here */}
-            <Sidebar />
-            <div className="col-lg-10 col-md-8 col-12">
-              {/* <section className="bg-blue py-7">
-                <div className="container">
-                  <ReactPlayer url='https://www.youtube.com/watch?v=LXb3EKWsInQ' width={"100%"} height={600} />
-                </div>
-              </section> */}
+            <div className="col-lg-3 col-md-4 col-12">
+              <Sidebar />
+            </div>
+            <div className="col-lg-9 col-md-8 col-12">
               <section className="mt-4">
                 <div className="container">
                   <div className="row">
@@ -328,16 +282,9 @@ function ProjeDetail() {
                       <div className="card shadow rounded-2 p-0 mt-n5">
                         {/* Tabs START */}
                         <div className="card-header border-bottom px-4 pt-3 pb-0">
-                          <ul
-                            className="nav nav-bottom-line py-0"
-                            id="course-pills-tab"
-                            role="tablist"
-                          >
+                          <ul className="nav nav-bottom-line py-0" id="course-pills-tab" role="tablist">
                             {/* Tab item */}
-                            <li
-                              className="nav-item me-2 me-sm-4"
-                              role="presentation"
-                            >
+                            <li className="nav-item me-2 me-sm-4" role="presentation">
                               <button
                                 className="nav-link mb-2 mb-md-0 active"
                                 id="course-pills-tab-1"
@@ -348,14 +295,11 @@ function ProjeDetail() {
                                 aria-controls="course-pills-1"
                                 aria-selected="true"
                               >
-                                Ödev Bölümleri
+                                Proje Bölümleri
                               </button>
                             </li>
                             {/* Tab item */}
-                            <li
-                              className="nav-item me-2 me-sm-4"
-                              role="presentation"
-                            >
+                            <li className="nav-item me-2 me-sm-4" role="presentation">
                               <button
                                 className="nav-link mb-2 mb-md-0"
                                 id="course-pills-tab-2"
@@ -370,10 +314,7 @@ function ProjeDetail() {
                               </button>
                             </li>
                             {/* Tab item */}
-                            <li
-                              className="nav-item me-2 me-sm-4"
-                              role="presentation"
-                            >
+                            <li className="nav-item me-2 me-sm-4" role="presentation">
                               <button
                                 className="nav-link mb-2 mb-md-0"
                                 id="course-pills-tab-3"
@@ -388,10 +329,7 @@ function ProjeDetail() {
                               </button>
                             </li>
 
-                            <li
-                              className="nav-item me-2 me-sm-4"
-                              role="presentation"
-                            >
+                            <li className="nav-item me-2 me-sm-4" role="presentation">
                               <button
                                 className="nav-link mb-2 mb-md-0"
                                 id="course-pills-tab-4"
@@ -408,12 +346,10 @@ function ProjeDetail() {
                           </ul>
                         </div>
                         {/* Tabs END */}
+
                         {/* Tab contents START */}
                         <div className="card-body p-sm-4">
-                          <div
-                            className="tab-content"
-                            id="course-pills-tabContent"
-                          >
+                          <div className="tab-content" id="course-pills-tabContent">
                             {/* Content START */}
                             <div
                               className="tab-pane fade show active"
@@ -422,17 +358,12 @@ function ProjeDetail() {
                               aria-labelledby="course-pills-tab-1"
                             >
                               {/* Accordion START */}
-                              <div
-                                className="accordion accordion-icon accordion-border"
-                                id="accordionExample2"
-                              >
+                              <div className="accordion accordion-icon accordion-border" id="accordionExample2">
                                 <div className="progress mb-3">
                                   <div
                                     className="progress-bar"
                                     role="progressbar"
-                                    style={{
-                                      width: `${completionPercentage}%`,
-                                    }}
+                                    style={{ width: `${completionPercentage}%` }}
                                     aria-valuenow={completionPercentage}
                                     aria-valuemin={0}
                                     aria-valuemax={100}
@@ -440,22 +371,17 @@ function ProjeDetail() {
                                     {completionPercentage}%
                                   </div>
                                 </div>
-                                {/* Item */}
+
+                                {/* (Opsiyonel) Flat lectures listesi */}
                                 {proje?.lectures?.map((c, index) => (
                                   <div key={index}>
-                                    <h3>{c.name}</h3> {/* Ders Silindi Name */}
+                                    <h3>{c.title}</h3>
                                   </div>
                                 ))}
 
                                 {proje?.curriculum?.map((c, index) => (
-                                  <div
-                                    className="accordion-item mb-3 p-3 bg-light"
-                                    key={index}
-                                  >
-                                    <h6
-                                      className="accordion-header font-base"
-                                      id={`heading-${index}`}
-                                    >
+                                  <div className="accordion-item mb-3 p-3 bg-light" key={index}>
+                                    <h6 className="accordion-header font-base" id={`heading-${index}`}>
                                       <button
                                         className="accordion-button p-3 w-100 bg-light btn border fw-bold rounded d-sm-flex d-inline-block collapsed"
                                         type="button"
@@ -466,8 +392,7 @@ function ProjeDetail() {
                                       >
                                         {c.title}
                                         <span className="small ms-0 ms-sm-2">
-                                          ({c.variant_items?.length} Ders
-                                          {c.variant_items?.length > 1 && "s"})
+                                          ({c.variant_items?.length} Ders{c.variant_items?.length > 1 && "s"})
                                         </span>
                                       </button>
                                     </h6>
@@ -490,32 +415,20 @@ function ProjeDetail() {
                                                     rel="noopener noreferrer"
                                                     className="btn btn-primary-soft btn-round btn-sm mb-0 stretched-link position-static"
                                                   >
-                                                    <i className="fas fa-file-pdf me-1" />{" "}
-                                                    PDF'yi Görüntüle
+                                                    <i className="fas fa-file-pdf me-1" /> PDF'yi Görüntüle
                                                   </a>
                                                 ) : (
-                                                  <span className="text-muted">
-                                                    PDF mevcut değil
-                                                  </span>
+                                                  <span className="text-muted">PDF mevcut değil</span>
                                                 )}
                                               </div>
                                               <div className="d-flex">
-                                                <p className="mb-0">
-                                                  {l.content_duration ||
-                                                    "0m 0s"}
-                                                </p>
+                                                <p className="mb-0">{l.content_duration || "0m 0s"}</p>
                                                 <input
                                                   type="checkbox"
                                                   className="form-check-input ms-2"
-                                                  onChange={() =>
-                                                    handleMarkLessonAsCompleted(
-                                                      l.variant_item_id
-                                                    )
-                                                  }
+                                                  onChange={() => handleMarkLessonAsCompleted(l.variant_item_id)}
                                                   checked={proje.completed_lesson?.some(
-                                                    (cl) =>
-                                                      cl.variant_item.id ===
-                                                      l.id
+                                                    (cl) => cl.variant_item?.id === l.id
                                                   )}
                                                 />
                                               </div>
@@ -531,12 +444,7 @@ function ProjeDetail() {
                               {/* Accordion END */}
                             </div>
 
-                            <div
-                              className="tab-pane fade"
-                              id="course-pills-2"
-                              role="tabpanel"
-                              aria-labelledby="course-pills-tab-2"
-                            >
+                            <div className="tab-pane fade" id="course-pills-2" role="tabpanel" aria-labelledby="course-pills-tab-2">
                               <div className="card">
                                 <div className="card-header border-bottom p-0 pb-3">
                                   <div className="d-sm-flex justify-content-between align-items-center">
@@ -550,78 +458,41 @@ function ProjeDetail() {
                                     >
                                       Not Ekle <i className="fas fa-pen"></i>
                                     </button>
-                                    <div                                      
-                                      className="modal fade"
-                                      id="exampleModal"
-                                      tabIndex={-1}
-                                      aria-labelledby="exampleModalLabel"
-                                      aria-hidden="true"
-                                    >
+                                    <div className="modal fade" id="exampleModal" tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
                                       <div className="modal-dialog modal-dialog-centered">
                                         <div className="modal-content">
                                           <div className="modal-header">
-                                            <h5
-                                              className="modal-title"
-                                              id="exampleModalLabel"
-                                            >
-                                              Yeni Not Ekle{" "}
-                                              <i className="fas fa-pen"></i>
+                                            <h5 className="modal-title" id="exampleModalLabel">
+                                              Yeni Not Ekle <i className="fas fa-pen"></i>
                                             </h5>
-                                            <button
-                                              type="button"
-                                              className="btn-close"
-                                              data-bs-dismiss="modal"
-                                              aria-label="Kapat"
-                                            />
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Kapat" />
                                           </div>
                                           <div className="modal-body">
-                                            <form
-                                              onSubmit={handleSubmitCreateNote}
-                                            >
+                                            <form onSubmit={handleSubmitCreateNote}>
                                               <div className="mb-3">
-                                                <label
-                                                  htmlFor="exampleInputEmail1"
-                                                  className="form-label"
-                                                >
+                                                <label htmlFor="noteTitle" className="form-label">
                                                   Not Başlığı
                                                 </label>
-                                                <input
-                                                  type="text"
-                                                  className="form-control"
-                                                  name="title"
-                                                  onChange={handleNoteChange}
-                                                />
+                                                <input type="text" className="form-control" id="noteTitle" name="title" onChange={handleNoteChange} />
                                               </div>
                                               <div className="mb-3">
-                                                <label
-                                                  htmlFor="exampleInputPassword1"
-                                                  className="form-label"
-                                                >
+                                                <label htmlFor="noteContent" className="form-label">
                                                   İçerik
                                                 </label>
                                                 <textarea
                                                   className="form-control"
-                                                  id=""
+                                                  id="noteContent"
                                                   cols="30"
                                                   rows="10"
                                                   name="note"
                                                   onChange={handleNoteChange}
                                                 ></textarea>
                                               </div>
-                                              <button
-                                                type="button"
-                                                className="btn btn-secondary me-2"
-                                                data-bs-dismiss="modal"
-                                              >
-                                                <i className="fas fa-arrow-left"></i>{" "}
-                                                Kapat
+                                              <button type="button" className="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                                <i className="fas fa-arrow-left"></i> Kapat
                                               </button>
-                                              <button
-                                                type="submit"
-                                                className="btn btn-primary"
-                                              >
-                                                Notu Kaydet{" "}
-                                                <i className="fas fa-check-circle"></i>
+                                              <button type="submit" className="btn btn-primary">
+                                                Notu Kaydet <i className="fas fa-check-circle"></i>
                                               </button>
                                             </form>
                                           </div>
@@ -630,49 +501,34 @@ function ProjeDetail() {
                                     </div>
                                   </div>
                                 </div>
+
                                 <div className="card-body p-0 pt-3">
                                   {/* Note item start */}
                                   {proje?.notes?.map((n, index) => (
-                                    <div className="row g-4 p-3">
+                                    <div className="row g-4 p-3" key={n.id || index}>
                                       <div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
-                                        <h5> {n.title}</h5>
-                                        <p>{n.notes}</p>
+                                        <h5>{n.title}</h5>
+                                        <p>{n.notes || n.note}</p>
                                         {/* Buttons */}
                                         <div className="hstack gap-3 flex-wrap">
-                                          <a
-                                            onClick={() => handleNoteShow(n)}
-                                            className="btn btn-success mb-0"
-                                          >
-                                            <i className="bi bi-pencil-square me-2" />{" "}
-                                            Düzenle
-                                          </a>
-                                          <a
-                                            onClick={() =>
-                                              handleDeleteNote(n.id)
-                                            }
-                                            className="btn btn-danger mb-0"
-                                          >
-                                            <i className="bi bi-trash me-2" />{" "}
-                                            Sil
-                                          </a>
+                                          <button onClick={() => handleNoteShow(n)} className="btn btn-success mb-0">
+                                            <i className="bi bi-pencil-square me-2" /> Düzenle
+                                          </button>
+                                          <button onClick={() => handleDeleteNote(n.id)} className="btn btn-danger mb-0">
+                                            <i className="bi bi-trash me-2" /> Sil
+                                          </button>
                                         </div>
                                       </div>
                                     </div>
                                   ))}
 
-                                  {proje?.notes?.length < 1 && (
-                                    <p className="mt-3 p-3">Not Bulunamadı</p>
-                                  )}
+                                  {(proje?.notes?.length || 0) < 1 && <p className="mt-3 p-3">Not Bulunamadı</p>}
                                   <hr />
                                 </div>
                               </div>
                             </div>
-                            <div
-                              className="tab-pane fade"
-                              id="course-pills-3"
-                              role="tabpanel"
-                              aria-labelledby="course-pills-tab-3"
-                            >
+
+                            <div className="tab-pane fade" id="course-pills-3" role="tabpanel" aria-labelledby="course-pills-tab-3">
                               <div className="card">
                                 {/* Card header */}
                                 <div className="card-header border-bottom p-0 pb-3">
@@ -691,21 +547,22 @@ function ProjeDetail() {
                                         />
                                         <button
                                           className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
-                                          type="submit"
+                                          type="button"
                                         >
                                           <i className="fas fa-search fs-6 " />
                                         </button>
                                       </div>
                                     </div>
                                     <div className="col-sm-6 col-lg-3">
-                                      <a
+                                      <button
                                         onClick={handleQuestionShow}
                                         className="btn btn-primary mb-0 w-100"
                                         data-bs-toggle="modal"
                                         data-bs-target="#modalCreatePost"
+                                        type="button"
                                       >
                                         Soru Sor
-                                      </a>
+                                      </button>
                                     </div>
                                   </form>
                                 </div>
@@ -714,15 +571,12 @@ function ProjeDetail() {
                                   <div className="vstack gap-3 p-3">
                                     {/* Question item START */}
                                     {questions?.map((q, index) => (
-                                      <div
-                                        className="shadow rounded-3 p-3"
-                                        key={index}
-                                      >
+                                      <div className="shadow rounded-3 p-3" key={q.id || index}>
                                         <div className="d-sm-flex justify-content-sm-between mb-3">
                                           <div className="d-flex align-items-center">
                                             <div className="avatar avatar-sm flex-shrink-0">
                                               <img
-                                                src={q.profile.image}
+                                                src={q.profile?.image}
                                                 className="avatar-img rounded-circle"
                                                 alt="avatar"
                                                 style={{
@@ -735,30 +589,17 @@ function ProjeDetail() {
                                             </div>
                                             <div className="ms-2">
                                               <h6 className="mb-0">
-                                                <a
-                                                  href="#"
-                                                  className="text-decoration-none text-dark"
-                                                >
-                                                  {q.profile.full_name}
-                                                </a>
+                                                <span className="text-decoration-none text-dark">
+                                                  {q.profile?.full_name}
+                                                </span>
                                               </h6>
-                                              <small>
-                                                {moment(q.date).format(
-                                                  "DD MMM, YYYY"
-                                                )}
-                                              </small>
+                                              <small>{moment(q.date).format("DD MMM, YYYY")}</small>
                                             </div>
                                           </div>
                                         </div>
                                         <h5>{q.title}</h5>
-                                        <button
-                                          className="btn btn-primary btn-sm mb-3 mt-3"
-                                          onClick={() =>
-                                            handleConversationShow(q)
-                                          }
-                                        >
-                                          Konuşmaya Katıl{" "}
-                                          <i className="fas fa-arrow-right"></i>
+                                        <button className="btn btn-primary btn-sm mb-3 mt-3" onClick={() => handleConversationShow(q)}>
+                                          Konuşmaya Katıl <i className="fas fa-arrow-right"></i>
                                         </button>
                                       </div>
                                     ))}
@@ -766,27 +607,17 @@ function ProjeDetail() {
                                 </div>
                               </div>
                             </div>
-                            <div
-                              className="tab-pane fade"
-                              id="course-pills-4"
-                              role="tabpanel"
-                              aria-labelledby="course-pills-tab-4"
-                            >
+
+                            <div className="tab-pane fade" id="course-pills-4" role="tabpanel" aria-labelledby="course-pills-tab-4">
                               <div className="card">
                                 {/* Card header */}
                                 <div className="card-header border-bottom p-0 pb-3">
-                                  {/* Title */}
                                   <h4 className="mb-3 p-3">
-                                    {studentReview?.rating && (
-                                      <p>Not Ver {studentReview.rating}</p>
-                                    )}
+                                    {studentReview?.rating && <span>Not Ver {studentReview.rating}</span>}
                                   </h4>
                                   <div className="mt-2">
                                     {!studentReview && (
-                                      <form
-                                        className="row g-3 p-3"
-                                        onSubmit={handleCreateReviewSubmit}
-                                      >
+                                      <form className="row g-3 p-3" onSubmit={handleCreateReviewSubmit}>
                                         {/* Rating */}
                                         <div className="col-12 bg-light-input">
                                           <select
@@ -794,48 +625,29 @@ function ProjeDetail() {
                                             className="form-select js-choice"
                                             onChange={handleReviewChange}
                                             name="rating"
-                                            defaultValue={
-                                              studentReview?.rating || 0
-                                            }
+                                            defaultValue={studentReview?.rating || 1}
                                           >
-                                            <option value={1}>
-                                              ★☆☆☆☆ (1/5)
-                                            </option>
-                                            <option value={2}>
-                                              ★★☆☆☆ (2/5)
-                                            </option>
-                                            <option value={3}>
-                                              ★★★☆☆ (3/5)
-                                            </option>
-                                            <option value={4}>
-                                              ★★★★☆ (4/5)
-                                            </option>
-                                            <option value={5}>
-                                              ★★★★★ (5/5)
-                                            </option>
+                                            <option value={1}>★☆☆☆☆ (1/5)</option>
+                                            <option value={2}>★★☆☆☆ (2/5)</option>
+                                            <option value={3}>★★★☆☆ (3/5)</option>
+                                            <option value={4}>★★★★☆ (4/5)</option>
+                                            <option value={5}>★★★★★ (5/5)</option>
                                           </select>
                                         </div>
                                         {/* Message */}
                                         <div className="col-12 bg-light-input">
                                           <textarea
                                             className="form-control"
-                                            id="exampleFormControlTextarea1"
                                             placeholder="Yorumun"
                                             rows={3}
                                             onChange={handleReviewChange}
                                             name="review"
-                                            defaultValue={
-                                              studentReview?.review ||
-                                              createReview?.review
-                                            }
+                                            defaultValue={createReview?.review}
                                           />
                                         </div>
                                         {/* Button */}
                                         <div className="col-12">
-                                          <button
-                                            type="submit"
-                                            className="btn btn-primary mb-0"
-                                          >
+                                          <button type="submit" className="btn btn-primary mb-0">
                                             Not Ver
                                           </button>
                                         </div>
@@ -843,10 +655,7 @@ function ProjeDetail() {
                                     )}
 
                                     {studentReview && (
-                                      <form
-                                        className="row g-3 p-3"
-                                        onSubmit={handleUpdateReviewSubmit}
-                                      >
+                                      <form className="row g-3 p-3" onSubmit={handleUpdateReviewSubmit}>
                                         {/* Rating */}
                                         <div className="col-12 bg-light-input">
                                           <select
@@ -854,30 +663,19 @@ function ProjeDetail() {
                                             className="form-select js-choice"
                                             onChange={handleReviewChange}
                                             name="rating"
-                                            //value={course.review.rating}
+                                            defaultValue={studentReview?.rating || 1}
                                           >
-                                            <option value={1}>
-                                              ★☆☆☆☆ (1/5)
-                                            </option>
-                                            <option value={2}>
-                                              ★★☆☆☆ (2/5)
-                                            </option>
-                                            <option value={3}>
-                                              ★★★☆☆ (3/5)
-                                            </option>
-                                            <option value={4}>
-                                              ★★★★☆ (4/5)
-                                            </option>
-                                            <option value={5}>
-                                              ★★★★★ (5/5)
-                                            </option>
+                                            <option value={1}>★☆☆☆☆ (1/5)</option>
+                                            <option value={2}>★★☆☆☆ (2/5)</option>
+                                            <option value={3}>★★★☆☆ (3/5)</option>
+                                            <option value={4}>★★★★☆ (4/5)</option>
+                                            <option value={5}>★★★★★ (5/5)</option>
                                           </select>
                                         </div>
                                         {/* Message */}
                                         <div className="col-12 bg-light-input">
                                           <textarea
                                             className="form-control"
-                                            id="exampleFormControlTextarea1"
                                             placeholder="Yorumun"
                                             rows={3}
                                             onChange={handleReviewChange}
@@ -887,10 +685,7 @@ function ProjeDetail() {
                                         </div>
                                         {/* Button */}
                                         <div className="col-12">
-                                          <button
-                                            type="submit"
-                                            className="btn btn-primary mb-0"
-                                          >
+                                          <button type="submit" className="btn btn-primary mb-0">
                                             Yorumu Güncelle
                                           </button>
                                         </div>
@@ -902,8 +697,10 @@ function ProjeDetail() {
                             </div>
                           </div>
                         </div>
+                        {/* Tab contents END */}
                       </div>
                     </div>
+                    {/* Main content END */}
                   </div>
                 </div>
               </section>
@@ -918,12 +715,7 @@ function ProjeDetail() {
           <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ReactPlayer
-            url={variantItem?.file}
-            controls
-            width={"100%"}
-            height={"100%"}
-          />
+          <ReactPlayer url={variantItem?.file} controls width={"100%"} height={"100%"} />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
@@ -940,9 +732,7 @@ function ProjeDetail() {
         <Modal.Body>
           <form onSubmit={(e) => handleSubmitEditNote(e, selectedNote?.id)}>
             <div className="mb-3">
-              <label htmlFor="exampleInputEmail1" className="form-label">
-                Not Başlığı
-              </label>
+              <label className="form-label">Not Başlığı</label>
               <input
                 defaultValue={selectedNote?.title}
                 name="title"
@@ -952,9 +742,7 @@ function ProjeDetail() {
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="exampleInputPassword1" className="form-label">
-                İçerik
-              </label>
+              <label className="form-label">İçerik</label>
               <textarea
                 defaultValue={selectedNote?.note}
                 name="note"
@@ -964,11 +752,7 @@ function ProjeDetail() {
                 rows="10"
               ></textarea>
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary me-2"
-              onClick={handleNoteClose}
-            >
+            <button type="button" className="btn btn-secondary me-2" onClick={handleNoteClose}>
               <i className="fas fa-arrow-left"></i> Kapat
             </button>
             <button type="submit" className="btn btn-primary">
@@ -985,51 +769,43 @@ function ProjeDetail() {
         </Modal.Header>
         <Modal.Body>
           <div className="border p-2 p-sm-4 rounded-3">
-            <ul
-              className="list-unstyled mb-0"
-              style={{ overflowY: "scroll", height: "500px" }}
-            >
+            <ul className="list-unstyled mb-0" style={{ overflowY: "scroll", height: "500px" }}>
               {selectedConversation?.messages?.map((m, index) => (
-                <li className="comment-item mb-3">
+                <li className="comment-item mb-3" key={m.id || index}>
                   <div className="d-flex">
                     <div className="avatar avatar-sm flex-shrink-0">
-                      <a href="#">
-                        <img
-                          className="avatar-img rounded-circle"
-                          src={
-                            m.profile.image?.startsWith("http://127.0.0.1:8000")
-                              ? m.profile.image
-                              : `http://127.0.0.1:8000${m.profile.image}`
-                          }
-                          style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                          }}
-                          alt="womans image"
-                        />
-                      </a>
+                      <img
+                        className="avatar-img rounded-circle"
+                        src={
+                          m.profile?.image?.startsWith("http://127.0.0.1:8000")
+                            ? m.profile.image
+                            : m.profile?.image
+                            ? `http://127.0.0.1:8000${m.profile.image}`
+                            : ""
+                        }
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                        alt="profile"
+                      />
                     </div>
                     <div className="ms-2">
-                      {/* Comment by */}
                       <div className="bg-light p-3 rounded w-100">
                         <div className="d-flex w-100 justify-content-center">
                           <div className="me-2 ">
                             <h6 className="mb-1 lead fw-bold">
-                              <a
-                                href="#!"
-                                className="text-decoration-none text-dark"
-                              >
-                                {" "}
-                                {m.profile.full_name}{" "}
-                              </a>
+                              <span className="text-decoration-none text-dark">
+                                {m.profile?.full_name}
+                              </span>
                               <br />
                               <span style={{ fontSize: "12px", color: "gray" }}>
                                 {moment(m.date).format("DD MMM, YYYY")}
                               </span>
                             </h6>
-                            <p className="mb-0 mt-3  ">{m.message}</p>
+                            <p className="mb-0 mt-3">{m.message}</p>
                           </div>
                         </div>
                       </div>
@@ -1041,44 +817,23 @@ function ProjeDetail() {
               <div ref={lastElementRef}></div>
             </ul>
 
-            <form class="w-100 d-flex" onSubmit={sendNewMessage}>
+            <form className="w-100 d-flex" onSubmit={sendNewMessage}>
               <textarea
                 name="message"
-                class="one form-control pe-4 bg-light w-75"
-                id="autoheighttextarea"
+                className="one form-control pe-4 bg-light w-75"
                 rows="2"
                 onChange={handleMessageChange}
                 placeholder="Sorunuz Nedir?"
               ></textarea>
-              <button class="btn btn-primary ms-2 mb-0 w-25" type="submit">
+              <button className="btn btn-primary ms-2 mb-0 w-25" type="submit">
                 Gönder <i className="fas fa-paper-plane"></i>
               </button>
             </form>
-
-            {/* <form class="w-100">
-              <input
-                name="title"
-                type="text"
-                className="form-control mb-2"
-                placeholder="Question Title"
-              />
-              <textarea
-                name="message"
-                class="one form-control pe-4 mb-2 bg-light"
-                id="autoheighttextarea"
-                rows="5"
-                placeholder="What's your question?"
-              ></textarea>
-              <button class="btn btn-primary mb-0 w-25" type="button">
-                Post <i className="fas fa-paper-plane"></i>
-              </button>
-            </form> */}
           </div>
         </Modal.Body>
       </Modal>
 
       {/* Soru Sor Modal */}
-      {/* Note Edit Modal */}
       <Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose}>
         <Modal.Header closeButton>
           <Modal.Title>Soru Sor</Modal.Title>
@@ -1086,9 +841,7 @@ function ProjeDetail() {
         <Modal.Body>
           <form onSubmit={handleSaveQuestion}>
             <div className="mb-3">
-              <label htmlFor="exampleInputEmail1" className="form-label">
-                Soru Başlığı
-              </label>
+              <label className="form-label">Soru Başlığı</label>
               <input
                 value={createMessage.title}
                 name="title"
@@ -1098,9 +851,7 @@ function ProjeDetail() {
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="exampleInputPassword1" className="form-label">
-                Mesaj
-              </label>
+              <label className="form-label">Mesaj</label>
               <textarea
                 value={createMessage.message}
                 name="message"
@@ -1110,11 +861,7 @@ function ProjeDetail() {
                 rows="10"
               ></textarea>
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary me-2"
-              onClick={handleQuestionClose}
-            >
+            <button type="button" className="btn btn-secondary me-2" onClick={handleQuestionClose}>
               <i className="fas fa-arrow-left"></i> Kapat
             </button>
             <button type="submit" className="btn btn-primary">

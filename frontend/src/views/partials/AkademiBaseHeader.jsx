@@ -33,12 +33,12 @@ function AkademiBaseHeader() {
     navigate(`/search/?search=${encodeURIComponent(q.trim())}`);
   };
 
-  const { base_roles = [], sub_roles = [] } = roleData;
+  const { base_roles = [] } = roleData;
 
   return (
     <>
       {/* Header */}
-      <header className="glass sticky-top border-bottom border-0">
+      <header className="akd-header sticky-top border-0">
         <nav className="navbar navbar-expand-lg navbar-dark">
           <div className="container-xl">
 
@@ -50,10 +50,10 @@ function AkademiBaseHeader() {
 
             {/* Right cluster (mobile first) */}
             <div className="d-flex align-items-center gap-2 d-lg-none">
-              <button className="btn btn-icon btn-outline-light" data-bs-toggle="collapse" data-bs-target="#global-search">
+              <button className="btn btn-icon btn-outline-light" data-bs-toggle="collapse" data-bs-target="#global-search" aria-label="Ara">
                 <i className="bi bi-search"></i>
               </button>
-              <button className="navbar-toggler shadow-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#main-navbar">
+              <button className="navbar-toggler shadow-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#main-navbar" aria-label="Menüyü aç">
                 <span className="navbar-toggler-icon"></span>
               </button>
             </div>
@@ -63,13 +63,13 @@ function AkademiBaseHeader() {
               {/* Left nav */}
               <ul className="navbar-nav me-auto align-items-lg-center">
                 <li className="nav-item">
-                  <Link className="nav-link" to="/pages/about-us/"><i className="bi bi-info-circle me-1"></i>Hakkımızda</Link>
+                  <Link className="nav-link" to="/about-akademi"><i className="bi bi-info-circle me-1"></i>Hakkımızda</Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/pages/contact-us/"><i className="bi bi-telephone me-1"></i>İletişim</Link>
+                  <Link className="nav-link" to="/contact"><i className="bi bi-telephone me-1"></i>İletişim</Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/admin/OrganizationChart/"><i className="bi bi-diagram-3 me-1"></i>Organizasyon</Link>
+                  <Link className="nav-link" to="/org-chart"><i className="bi bi-diagram-3 me-1"></i>Organizasyon</Link>
                 </li>
 
                 {/* AKADEMİ */}
@@ -152,61 +152,55 @@ function AkademiBaseHeader() {
                   </li>
                 )}
 
-               {/* KOORDİNATÖR (MEGA) */}
-{base_roles.includes("Koordinator") && (
-  <li className="nav-item dropdown dropdown-mega">
-    <a className="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-      <i className="bi bi-person-gear me-1"></i>Koordinatör
-    </a>
-
-    <div className="dropdown-menu mega rounded-4 shadow p-3">
-      <div className="row g-3">
-        {/* Sütun 1: Genel Listeler */}
-        <div className="col-12 col-md-4">
-          <div className="mega-col">
-            <div className="mega-title">Genel</div>
-            <Link to="/koordinator/egitmenlist" className="mega-item">
-              <i className="bi bi-people-fill"></i><span>Eğitmen Listesi</span>
-            </Link>
-            <Link to="/koordinator/ogrencilist" className="mega-item">
-              <i className="bi bi-person-lines-fill"></i><span>Öğrenci Listesi</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Sütun 2: Videolar */}
-        <div className="col-12 col-md-4">
-          <div className="mega-col">
-            <div className="mega-title">Videolar</div>
-            <Link to="/koordinator/youtube-videolar" className="mega-item">
-              <i className="bi bi-youtube"></i><span>YouTube Videoları</span>
-            </Link>
-            <Link to="/koordinator/egitmen-videolari" className="mega-item">
-              <i className="bi bi-collection-play"></i><span>Eğitmen Videoları</span>
-            </Link>
-            <div className="mega-divider"></div>
-            <Link to="/koordinator/video-kayitlari" className="mega-item">
-              <i className="bi bi-people"></i><span>Tüm Video Kayıtları</span>
-            </Link>
-            <Link to="/koordinator/satin-almalar" className="mega-item">
-              <i className="bi bi-bag-check"></i><span>Tüm Video Satın Almalar</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Sütun 3: Dökümanlar */}
-        <div className="col-12 col-md-4">
-          <div className="mega-col">
-            <div className="mega-title">Dökümanlar</div>
-            <Link to="/koordinator/egitmen-dokumanlari" className="mega-item">
-              <i className="bi bi-file-earmark-text"></i><span>Eğitmen Dökümanları</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
-  </li>
-)}
+                {/* KOORDİNATÖR (MEGA) */}
+                {base_roles.includes("Koordinator") && (
+                  <li className="nav-item dropdown dropdown-mega">
+                    <a className="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                      <i className="bi bi-person-gear me-1"></i>Koordinatör
+                    </a>
+                    <div className="dropdown-menu mega rounded-4 shadow p-3">
+                      <div className="row g-3">
+                        <div className="col-12 col-md-4">
+                          <div className="mega-col">
+                            <div className="mega-title">Genel</div>
+                            <Link to="/koordinator/egitmenlist" className="mega-item">
+                              <i className="bi bi-people-fill"></i><span>Eğitmen Listesi</span>
+                            </Link>
+                            <Link to="/koordinator/ogrencilist" className="mega-item">
+                              <i className="bi bi-person-lines-fill"></i><span>Öğrenci Listesi</span>
+                            </Link>
+                          </div>
+                        </div>
+                        <div className="col-12 col-md-4">
+                          <div className="mega-col">
+                            <div className="mega-title">Videolar</div>
+                            <Link to="/koordinator/youtube-videolar" className="mega-item">
+                              <i className="bi bi-youtube"></i><span>YouTube Videoları</span>
+                            </Link>
+                            <Link to="/koordinator/egitmen-videolari" className="mega-item">
+                              <i className="bi bi-collection-play"></i><span>Eğitmen Videoları</span>
+                            </Link>
+                            <div className="mega-divider"></div>
+                            <Link to="/koordinator/video-kayitlari" className="mega-item">
+                              <i className="bi bi-people"></i><span>Tüm Video Kayıtları</span>
+                            </Link>
+                            <Link to="/koordinator/satin-almalar" className="mega-item">
+                              <i className="bi bi-bag-check"></i><span>Tüm Video Satın Almalar</span>
+                            </Link>
+                          </div>
+                        </div>
+                        <div className="col-12 col-md-4">
+                          <div className="mega-col">
+                            <div className="mega-title">Dökümanlar</div>
+                            <Link to="/koordinator/egitmen-dokumanlari" className="mega-item">
+                              <i className="bi bi-file-earmark-text"></i><span>Eğitmen Dökümanları</span>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                )}
 
                 {/* ÖĞRENCİ */}
                 {base_roles.includes("Ogrenci") && (
@@ -238,8 +232,9 @@ function AkademiBaseHeader() {
                     placeholder="Ara"
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
+                    aria-label="Ara"
                   />
-                  <button className="btn btn-sm btn-light rounded-pill">Ara</button>
+                  <button className="btn btn-sm btn-light rounded-pill" type="submit">Ara</button>
                 </div>
               </form>
 
@@ -278,7 +273,7 @@ function AkademiBaseHeader() {
                 <div className="input-group input-group-sm">
                   <span className="input-group-text bg-white border-0"><i className="bi bi-search"></i></span>
                   <input className="form-control border-0" placeholder="Ara" value={q} onChange={(e)=>setQ(e.target.value)} />
-                  <button className="btn btn-light">Ara</button>
+                  <button className="btn btn-light" type="submit">Ara</button>
                 </div>
               </form>
             </div>
@@ -287,24 +282,43 @@ function AkademiBaseHeader() {
         </nav>
       </header>
 
-      {/* Inline minimal CSS (Bootstrap üstüne) */}
+      {/* THEME & HEADER STYLES */}
       <style>{`
-        .glass {
-          background: rgba(10, 17, 40, 0.65);
-          backdrop-filter: saturate(160%) blur(14px);
+        :root{
+          --akd-bg-1:#023e8a;
+          --akd-bg-2:#03045e;
+          --akd-bg-3:#0077b6;
+          --akd-fg:#eaf1ff;
+          --akd-muted: rgba(255,255,255,.80);
+          --akd-pill-grad: linear-gradient(90deg,#7aa2ff,#c0d0ff);
+          --akd-glass: rgba(10, 17, 40, 0.65);
+          --akd-card-bg: rgba(255,255,255,.88);
+          --akd-shadow: 0 10px 30px rgba(2,62,138,.25);
+          --akd-radius: 16px;
         }
-        .text-muted-100 { color: rgba(255,255,255,.8); }
-        .brand-pill {
-          background: linear-gradient(90deg,#7aa2ff,#c0d0ff);
-          color:#0b1a2b; padding:.25rem .6rem; border-radius:999px; font-weight:800;
+
+        .text-muted-100 { color: var(--akd-muted); }
+        .brand-pill{
+          background: var(--akd-pill-grad);
+          color:#0b1a2b; padding:.25rem .6rem; border-radius:999px; font-weight:800; letter-spacing:.02em;
         }
-        .navbar .nav-link { color:#eaf1ff; opacity:.9; }
+
+        .akd-header{
+          background:
+            radial-gradient(1200px 400px at 80% -10%, rgba(255,255,255,.08), transparent 60%),
+            radial-gradient(900px 300px at -10% 120%, rgba(255,255,255,.06), transparent 60%),
+            linear-gradient(90deg, var(--akd-bg-1), var(--akd-bg-2) 40%, var(--akd-bg-3));
+          color: var(--akd-fg);
+          box-shadow: var(--akd-shadow);
+          backdrop-filter: saturate(160%) blur(10px);
+        }
+
+        .navbar .nav-link { color: var(--akd-fg); opacity:.9; }
         .navbar .nav-link:hover, .navbar .dropdown-item:hover { opacity:1; }
+
         .dropdown-menu { border:0; }
-        .dropdown-mega .mega {
-          min-width: 720px;
-        }
-        .mega-col { background: rgba(255,255,255,.85); border-radius:16px; padding:12px; }
+        .dropdown-mega .mega { min-width: 720px; }
+        .mega-col { background: var(--akd-card-bg); border-radius: var(--akd-radius); padding:12px; }
         .mega-title { font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; color:#334155; margin-bottom:6px; }
         .mega-item {
           display:flex; align-items:center; gap:.6rem; padding:.45rem .55rem; color:#0b2447; text-decoration:none; border-radius:10px;
@@ -312,10 +326,12 @@ function AkademiBaseHeader() {
         .mega-item i { width:1.1rem; text-align:center; }
         .mega-item:hover { background: rgba(0,0,0,.06); }
         .mega-divider { height:1px; background: rgba(0,0,0,.08); margin:.35rem 0; }
+
         .search-pill {
           display:flex; align-items:center; gap:.5rem; background:#fff; border-radius:999px; padding:.2rem .25rem .2rem .6rem; border:1px solid rgba(255,255,255,.15);
         }
         .search-pill input { border:0; outline:0; box-shadow:none; width:220px; }
+
         .btn-icon { width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:10px; }
         .avatar { width:26px; height:26px; border-radius:50%; object-fit:cover; }
         .avatar.placeholder { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#fff; color:#0b2447; font-weight:800; }

@@ -21,7 +21,7 @@ function HomeHeader() {
           <Link to="/" className="mx-3 text-white text-decoration-none">
             Anasayfa
           </Link>
-          <Link to="/about" className="mx-3 text-white text-decoration-none">
+          <Link to="/about-ehad" className="mx-3 text-white text-decoration-none">
             Hakkımızda
           </Link>
           <Link to="/contact" className="mx-3 text-white text-decoration-none">

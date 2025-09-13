@@ -85,10 +85,11 @@ function KitapTahliliDetail() {
     try {
       if (!userData?.user_id) return;
       const res = await api.get(
-        `eskepinstructor/kitaptahlili-detail/${kitaptahlili_id}/${userData.user_id}/`
+        `eskepinstructor/kitaptahlili-detail/${userData.user_id}/${kitaptahlili_id}/`
       );
       const data = res.data;
       setKitapTahlili(data);
+      console.log(data);
       setQuestions(data?.question_answers || []);
       setStudentReview(data?.review || null);
 

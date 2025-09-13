@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import moment from "moment";
 import "moment/locale/tr";
 import { Link } from "react-router-dom";
@@ -18,6 +18,7 @@ function EskepInstructorDashboard() {
   const [projects, setProjects] = useState([]);
   const [lessonReports, setLessonReports] = useState([]);
   const [fetching, setFetching] = useState(true);
+  const [activeTab, setActiveTab] = useState("odev");
 
   const userId = useUserData()?.user_id;
   const api = useAxios();
@@ -26,175 +27,91 @@ function EskepInstructorDashboard() {
     moment.locale("tr");
   }, []);
 
-  // -- ROUTE'ların sende zaten tanımlı olduğunu varsayıyorum --
-  const TYPE_ROUTES = {
-    derssonuraporu: ({ itemId, userId }) =>
-      `/eskepinstructor/dersSonuRaporus/${userId}/${itemId}/`,
-    kitaptahlili: ({ itemId, userId }) =>
-      `/eskepinstructor/kitaptahlileris/${userId}/${itemId}/`,
-    odev: ({ itemId, userId }) =>
-      `/eskepinstructor/odevs/${userId}/${itemId}/`,
-    proje: ({ itemId, userId }) =>
-      `/eskepinstructor/projes/${userId}/${itemId}/`,
-  };
+  // Liste endpoint rotaları
+  const TYPE_ROUTES = useMemo(
+    () => ({
+      derssonuraporu: ({ itemId, userId }) =>
+        `/eskepinstructor/dersSonuRaporus/${userId}/${itemId}/`,
+      kitaptahlili: ({ itemId, userId }) =>
+        `/eskepinstructor/kitaptahlileris/${userId}/${itemId}/`,
+      odev: ({ itemId, userId }) =>
+        `/eskepinstructor/odevs/${userId}/${itemId}/`,
+      proje: ({ itemId, userId }) =>
+        `/eskepinstructor/projes/${userId}/${itemId}/`,
+    }),
+    []
+  );
 
-  // 1) Tür ipuçları: status ve id key'leri (kendi alan adlarına göre genişlet)
-  const TYPE_HINTS = {
-    derssonuraporu: {
-      status: [
-        "derssonuraporu_status",
-        "ders_sonu_raporu_status",
-        "dersSonuRaporuStatus",
-      ],
-      id: ["derssonuraporu_id", "ders_sonu_raporu_id"],
-    },
-    kitaptahlili: {
-      status: [
-        "kitaptahlili_status",
-        "kitap_tahlili_status",
-        "kitapTahliliStatus",
-      ],
-      id: ["kitaptahlili_id", "kitap_tahlili_id"],
-    },
-    odev: {
-      status: ["odev_status", "ödev_status", "odevStatus"],
-      id: ["odev_id", "ödev_id"],
-    },
-    proje: {
-      status: ["proje_status", "projeStatus"],
-      id: ["proje_id"],
-    },
-  };
+  // Detay endpoint rotaları
+  const TYPE_DETAIL_ROUTES = useMemo(
+    () => ({
+      odev: ({ itemId, koordinatorId }) =>
+        `/eskepinstructor/odev-detail/${itemId}/${koordinatorId}/`,
+    }),
+    []
+  );
 
   const normalize = (s) => String(s || "").toLowerCase().replace(/[\s\-_]/g, "");
   const hasKey = (obj, k) => Object.prototype.hasOwnProperty.call(obj, k);
   const hasAnyKey = (obj, keys = []) => keys.some((k) => hasKey(obj, k));
 
-  // 2) TYPE belirleme: önce *_status, sonra *_id, sonra raw alanlar
+  const TYPE_HINTS = useMemo(
+    () => ({
+      derssonuraporu: { status: ["derssonuraporu_status"], id: ["derssonuraporu_id"] },
+      kitaptahlili: { status: ["kitaptahlili_status"], id: ["kitaptahlili_id"] },
+      odev: { status: ["odev_status"], id: ["odev_id"] },
+      proje: { status: ["proje_status"], id: ["proje_id"] },
+    }),
+    []
+  );
+
   function getItemType(item) {
-    // a) status anahtarları
     for (const [type, hints] of Object.entries(TYPE_HINTS)) {
       if (hasAnyKey(item, hints.status)) return type;
     }
-    // b) id anahtarları
     for (const [type, hints] of Object.entries(TYPE_HINTS)) {
       if (hasAnyKey(item, hints.id)) return type;
     }
-    // c) raw type/kind/... alanları
-    const raw =
-      item?.type ??
-      item?.kind ??
-      item?.content_type ??
-      item?.contentType ??
-      item?.model ??
-      item?.kategori ??
-      "";
+    const raw = item?.type ?? "";
     const t = normalize(raw);
     if (t.includes("derssonuraporu")) return "derssonuraporu";
-    if (t.includes("kitaptahlili") || t.includes("kitaptahlil"))
-      return "kitaptahlili";
-    if (t.includes("odev") || t.includes("ödev")) return "odev";
+    if (t.includes("kitaptahlili")) return "kitaptahlili";
+    if (t.includes("odev")) return "odev";
     if (t.includes("proje")) return "proje";
-    return ""; // bilinmiyorsa boş dön
+    return "";
   }
 
-  // 3) ID bulma: önce type'a özgü id key'leri, sonra generic
   function getItemId(item) {
-    debugger;
-    const t = getItemType(item);
-    if (t && TYPE_HINTS[t]?.id) {
-      for (const k of TYPE_HINTS[t].id) {
-        if (item?.[k] != null) return item[k];
-      }
-    }
-    // generic fallback'ler
     return (
       item?.id ??
-      item?.pk ??
-      item?.item_id ??
       item?.odev_id ??
       item?.kitaptahlili_id ??
       item?.proje_id ??
-      item?.derssonuraporu_id ??
-      item?.ders_sonu_raporu_id ??
       null
     );
   }
 
-  // Hazırlayan bilgisini "inserteduser" üzerinden üretir
-  const getPreparedBy = (item) => {
-    if (!item) return "Bilinmiyor";
+  const getPreparedBy = (item) =>
+    item?.prepared_by_full_name || item?.koordinator_full_name || "Bilinmiyor";
 
-    // 1) Düz (flattened) alanlar
-    const flat =
-      item?.inserteduser_full_name ||
-      item?.inserteduser_fullname ||
-      item?.inserteduser_name ||
-      item?.inserteduser_display_name ||
-      null;
-    if (flat) return String(flat).trim();
+  const getItemLabel = (item) => item?.title ?? `#${item?.id ?? ""}`;
+  const getItemDate = (item) => item?.date ?? item?.created_at ?? null;
 
-    // 2) Kullanıcı adı / e-posta (flattened)
-    const flatUser =
-      item?.inserteduser_username ||
-      item?.inserteduser_email ||
-      null;
-    if (flatUser) return String(flatUser).trim();
-
-    // 3) Nesne alanı
-    const u = item?.inserteduser || null;
-    if (u) {
-      const fullName =
-        u?.full_name ||
-        u?.fullName ||
-        (u?.first_name || u?.firstName || u?.ad
-          ? `${u?.first_name ?? u?.firstName ?? u?.ad} ${u?.last_name ?? u?.lastName ?? u?.soyad}`.trim()
-          : null);
-
-      if (fullName) return fullName;
-      if (u?.username) return u.username;
-      if (u?.email) return u.email;
-      if (u?.id != null) return `Kullanıcı #${u.id}`;
-    }
-
-    // 4) Sadece id geldiyse
-    if (item?.inserteduser_id != null) return `Kullanıcı #${item.inserteduser_id}`;
-
-    return "Bilinmiyor";
-  };
-
-  // Başlık ve tarih için sağlam yardımcılar
-  const getItemLabel = (item, labelKey = "title") =>
-    item?.[labelKey] ??
-    item?.name ??
-    item?.baslik ??
-    item?.subject ??
-    `#${item?.id ?? ""}`;
-
-  const getItemDate = (item) =>
-    item?.date ??
-    item?.created_at ??
-    item?.createdAt ??
-    item?.updated_at ??
-    item?.updatedAt ??
-    item?.timestamp ??
-    null;
-
-  // 4) Link üretici (ctx.forceType ile istersen türü zorlayabilirsin)
+  // Link oluşturucu
   const defaultLinkBuilder = (item, ctx = {}) => {
     const t = ctx.forceType || getItemType(item);
-    const tpl = TYPE_ROUTES[t];
-    if (!tpl) return null;
-    debugger;
     const itemId = getItemId(item);
-    const _userId = ctx.userId;
-    if (!itemId || !_userId) return null;
-
-    return tpl({ itemId, userId: _userId });
+    const koordinatorId = item?.koordinator_id ?? ctx.koordinatorId ?? ctx.userId;
+    if (!t || !itemId || !koordinatorId) return null;
+    if (TYPE_DETAIL_ROUTES[t]) {
+      return TYPE_DETAIL_ROUTES[t]({ itemId, koordinatorId });
+    }
+    const listTpl = TYPE_ROUTES[t];
+    return listTpl ? listTpl({ itemId, userId: koordinatorId }) : null;
   };
 
   const fetchData = async () => {
-    if (!userId) return; // userId hazır olmadan çağırma
+    if (!userId) return;
     setFetching(true);
     try {
       const [hw, books, proj, reports] = await Promise.all([
@@ -203,22 +120,11 @@ function EskepInstructorDashboard() {
         api.get(`eskepinstructor/proje-list/${userId}/`),
         api.get(`eskepinstructor/derssonuraporu-list/${userId}/`),
       ]);
-
       setHomeworks(hw.data ?? []);
       setBookReviews(books.data ?? []);
       setProjects(proj.data ?? []);
       setLessonReports(reports.data ?? []);
-      console.log(hw.data);
-      console.log(books.data);
-      console.log(proj.data);
-      console.log(reports.data);
-      // Örnek stat verisi (backend'den geliyorsa burayı değiştir)
-      setStats({
-        total_students: 25,
-        total_interns: 10,
-        total_graduates: 8,
-        total_certificates: 12,
-      });
+      setStats({ total_students: 25, total_interns: 10, total_graduates: 8, total_certificates: 12 });
     } catch (error) {
       console.error("Veri çekme hatası:", error);
     } finally {
@@ -228,48 +134,31 @@ function EskepInstructorDashboard() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  const renderList = (
-    title,
-    data,
-    labelKey = "title",
-    linkBuilder = defaultLinkBuilder,
-    ctx = {}
-  ) => (
-    <div className="card shadow-sm mb-4 border-0">
-      <div className="card-header bg-light">
+  const renderList = (title, data, ctx = {}) => (
+    <div className="card shadow-sm border-0 rounded-4">
+      <div className="card-header bg-white border-0 py-3">
         <h6 className="mb-0">{title}</h6>
       </div>
-      <div className="card-body">
+      <div className="card-body p-0">
         {Array.isArray(data) && data.length > 0 ? (
           <ul className="list-group list-group-flush">
             {data.map((item, index) => {
-              const href = linkBuilder(item, ctx); // tipine göre link
+              const href = defaultLinkBuilder(item, ctx);
               const dt = getItemDate(item);
               const dateText = dt ? moment(dt).format("DD MMM YYYY") : "-";
               return (
-                <li
-                  className="list-group-item d-flex justify-content-between align-items-center gap-2 flex-wrap"
-                  key={item?.id ?? item?.pk ?? index}
-                >
-                  <div className="d-flex flex-column">
-                    <div className="d-flex align-items-center">
-                      <i className="bi bi-file-earmark-text me-2 text-primary"></i>
-                      {getItemLabel(item, labelKey)}
-                    </div>
-                    <small className="text-muted">
-                      Hazırlayan: <span className="fw-medium">{getPreparedBy(item)}</span>
-                    </small>
+                <li className="list-group-item d-flex justify-content-between" key={item?.id ?? index}>
+                  <div>
+                    <div className="fw-semibold">{getItemLabel(item)}</div>
+                    <small className="text-muted">Hazırlayan: {getPreparedBy(item)}</small>
                   </div>
-                  <div className="d-flex align-items-center gap-2">
-                    <span className="badge bg-secondary rounded-pill">
-                      {dateText}
-                    </span>
+                  <div>
+                    <span className="badge bg-secondary me-2">{dateText}</span>
                     {href && (
-                      <Link to={href} className="btn btn-primary btn-sm">
-                        Detay <i className="fas fa-gear fa-spin ms-1"></i>
+                      <Link to={href} className="btn btn-sm btn-primary rounded-pill">
+                        Detay
                       </Link>
                     )}
                   </div>
@@ -278,124 +167,51 @@ function EskepInstructorDashboard() {
             })}
           </ul>
         ) : (
-          <p className="text-muted small fst-italic mb-0">
-            Henüz içerik bulunamadı.
-          </p>
+          <div className="p-4 text-muted">Henüz içerik yok.</div>
         )}
       </div>
     </div>
   );
 
+  const TABS = [
+    { key: "odev", title: "Ödevler", data: homeworks, forceType: "odev" },
+    { key: "kitaptahlili", title: "Kitap Tahlilleri", data: bookReviews, forceType: "kitaptahlili" },
+    { key: "proje", title: "Projeler", data: projects, forceType: "proje" },
+    { key: "derssonuraporu", title: "Ders Sonu Raporları", data: lessonReports, forceType: "derssonuraporu" },
+  ];
+
   return (
     <>
       <EskepBaseHeader />
-
-      <section className="pt-5 pb-5">
+      <section className="pt-4 pb-5">
         <div className="container">
           <Header />
-          <div className="row mt-0 mt-md-2">
-            <div className="col-lg-3 col-md-3 col-12">
+          <div className="row g-4">
+            <div className="col-12 col-lg-3">
               <Sidebar />
             </div>
-
-            <div className="col-lg-9 col-md-9 col-12">
-              <h4 className="mb-4 d-flex align-items-center">
-                <i className="bi bi-speedometer2 me-2 text-primary"></i>
-                Koordinatör Paneli
-              </h4>
-
-              {/* İstatistik Kartları */}
-              <div className="row g-4 mb-4">
-                {[
-                  {
-                    icon: "fa-user-graduate",
-                    color: "warning",
-                    value: stats.total_students,
-                    label: "Tüm Öğrenciler",
-                  },
-                  {
-                    icon: "fa-briefcase",
-                    color: "info",
-                    value: stats.total_interns,
-                    label: "Tüm Stajyerler",
-                  },
-                  {
-                    icon: "fa-user-check",
-                    color: "success",
-                    value: stats.total_graduates,
-                    label: "Tüm Mezunlar",
-                  },
-                  {
-                    icon: "fa-medal",
-                    color: "primary",
-                    value: stats.total_certificates,
-                    label: "Verdiği Sertifika",
-                  },
-                ].map(({ icon, color, value, label }, idx) => (
-                  <div className="col-sm-6 col-lg-3" key={idx}>
-                    <div
-                      className={`border-start border-4 border-${color} p-4 shadow-sm rounded bg-white`}
+            <div className="col-12 col-lg-9">
+              <ul className="nav nav-tabs mb-3">
+                {TABS.map((t) => (
+                  <li className="nav-item" key={t.key}>
+                    <button
+                      className={`nav-link ${activeTab === t.key ? "active" : ""}`}
+                      onClick={() => setActiveTab(t.key)}
                     >
-                      <div className="d-flex align-items-center">
-                        <i
-                          className={`fas ${icon} fa-2x text-${color} me-3`}
-                        ></i>
-                        <div>
-                          <h5 className="fw-bold mb-0">{value ?? 0}</h5>
-                          <small className="text-muted">{label}</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                      {t.title}
+                    </button>
+                  </li>
                 ))}
-              </div>
-
-              {/* İçerikler */}
-              {fetching ? (
-                <div className="text-center p-5">
-                  <div
-                    className="spinner-border text-primary mb-3"
-                    role="status"
-                  ></div>
-                  <p>İçerikler yükleniyor...</p>
+              </ul>
+              {TABS.filter((t) => t.key === activeTab).map((t) => (
+                <div key={t.key}>
+                  {renderList(t.title, t.data, { userId, forceType: t.forceType })}
                 </div>
-              ) : (
-                <>
-                  {renderList(
-                    "Gönderilen Ödevler",
-                    homeworks,
-                    "title",
-                    defaultLinkBuilder,
-                    { userId, forceType: "odev" }
-                  )}
-                  {renderList(
-                    "Kitap Tahlilleri",
-                    bookReviews,
-                    "title",
-                    defaultLinkBuilder,
-                    { userId, forceType: "kitaptahlili" }
-                  )}
-                  {renderList(
-                    "Projeler",
-                    projects,
-                    "title",
-                    defaultLinkBuilder,
-                    { userId, forceType: "proje" }
-                  )}
-                  {renderList(
-                    "Ders Sonu Raporları",
-                    lessonReports,
-                    "title",
-                    defaultLinkBuilder,
-                    { userId, forceType: "derssonuraporu" }
-                  )}
-                </>
-              )}
+              ))}
             </div>
           </div>
         </div>
       </section>
-
       <EskepBaseFooter />
     </>
   );

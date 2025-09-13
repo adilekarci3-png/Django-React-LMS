@@ -1,0 +1,67 @@
+/* küçük dokunuşlar */
+.eskep-thumb {
+  width: 100px;
+  height: 70px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.eskep-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #495057;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.skeleton-row {
+  height: 56px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f2f2f2 25%, #e9e9e9 37%, #f2f2f2 63%);
+  background-size: 400% 100%;
+  animation: skel 1.2s ease-in-out infinite;
+}
+@keyframes skel {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* mobilde tabloyu kartlaştırma */
+@media (max-width: 768px) {
+  .eskep-table thead { display: none; }
+  .eskep-table tr {
+    display: block;
+    border-bottom: 1px solid #f1f1f1;
+    padding: 12px 8px;
+  }
+  .eskep-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+  }
+  .eskep-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 12px;
+    color: #6c757d;
+  }
+}
+
+/* filtre bar boşlukları */
+.eskep-filterbar .form-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* boş durum */
+.empty-state {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  color: #6c757d;
+}
