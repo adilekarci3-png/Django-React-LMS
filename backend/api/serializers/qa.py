@@ -33,14 +33,15 @@ class Question_Answer_MessageKitapTahliliSerializer(serializers.ModelSerializer)
     profile = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = api_models.Question_Answer_MessageKitapTahlili
-        fields = ('id','kitaptahlili','question','mesajiGonderen','mesajiAlan','message','date','profile')
+        model  = api_models.Question_Answer_MessageKitapTahlili
+        fields = ("id", "kitaptahlili", "question", "mesajiGonderen",
+                  "mesajiAlan", "message", "date", "profile")
 
     def get_profile(self, obj):
-        from userauths.models import Profile
+        # Öncelik gönderen kullanıcıda, yoksa alıcı
         user = obj.mesajiGonderen or obj.mesajiAlan
-        p = Profile.objects.filter(user=user).first()
-        return ProfileSerializer(p).data if p else None
+        prof = getattr(user, "profile", None) if user else None
+        return ProfileSerializer(prof, context=self.context).data if prof else None
 
 class Question_AnswerKitapTahliliSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField(read_only=True)

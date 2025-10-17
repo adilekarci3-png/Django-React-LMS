@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import "../css/Sidebar.css"; // 👈 yeni CSS
 
 /** prefix bazlı aktif kontrol ("/eskepinstructor/orders/" altında her şey aktif) */
 const isActivePrefix = (pathname, target) =>
@@ -52,8 +53,10 @@ export default function Sidebar() {
       to={to}
       className={({ isActive }) =>
         [
-          "nav-link d-flex align-items-center justify-content-between sidebar-link",
-          (isActive || (!exact && isActivePrefix(pathname, to))) ? "active fw-semibold text-primary" : ""
+          "nav-link d-flex align-items-center justify-content-between sidebar-link px-3 py-2",
+          (isActive || (!exact && isActivePrefix(pathname, to)))
+            ? "active fw-semibold text-primary"
+            : ""
         ].join(" ")
       }
       aria-current={
@@ -61,9 +64,8 @@ export default function Sidebar() {
       }
     >
       <span className="d-inline-flex align-items-center">
-        {/* icon parametresi ile gelen renk sınıfı korunur */}
         <i className={`${icon} me-2`} />
-        {children}
+        <span className="sidebar-link-text">{children}</span>
       </span>
     </NavLink>
   );
@@ -72,7 +74,7 @@ export default function Sidebar() {
   const SectionTitle = ({ open, onToggle, emoji, children }) => (
     <button
       type="button"
-      className="nav-link text-muted fw-bold small d-flex align-items-center w-100 justify-content-between section-title"
+      className="nav-link text-muted fw-bold small d-flex align-items-center w-100 justify-content-between section-title px-3 py-2"
       aria-expanded={open}
       onClick={onToggle}
     >
@@ -85,12 +87,12 @@ export default function Sidebar() {
 
   return (
     <nav
-      className="navbar navbar-expand-md shadow-sm mb-4 mb-lg-0 sidenav"
+      className="navbar navbar-expand-md mb-4 mb-lg-0 sidenav w-100"
       aria-label="Eğitmen yan menü"
     >
       {/* Mobile toggler */}
       <button
-        className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light m-3"
+        className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light m-2"
         type="button"
         data-bs-toggle="collapse"
         data-bs-target="#sidenav"
@@ -101,165 +103,168 @@ export default function Sidebar() {
         <span className="bi bi-grid" />
       </button>
 
-      <div className="collapse navbar-collapse p-3" id="sidenav">
-        <ul className="navbar-nav flex-column w-100">
+      <div className="collapse navbar-collapse w-100" id="sidenav">
+        <div className="card border-0 w-100">
+          <div className="card-body p-2">
+            <ul className="navbar-nav flex-column w-100">
 
-          {/* 1. Genel Panel */}
-          <li className="nav-item mb-2">
-            <SectionTitle
-              open={openGenel}
-              onToggle={() => setOpenGenel((o) => !o)}
-              emoji="📊"
-            >
-              Genel
-            </SectionTitle>
-          </li>
-          {openGenel && (
-            <li className="nav-item mb-2">
-              <Item to="/eskepinstructor/dashboard/" icon="bi bi-grid-fill text-primary">
-                Panel
-              </Item>
-            </li>
-          )}
+              {/* 1. Genel Panel */}
+              <li className="nav-item mb-1">
+                <SectionTitle
+                  open={openGenel}
+                  onToggle={() => setOpenGenel((o) => !o)}
+                  emoji="📊"
+                >
+                  Genel
+                </SectionTitle>
+              </li>
+              {openGenel && (
+                <li className="nav-item mb-1">
+                  <Item to="/eskepinstructor/dashboard/" icon="bi bi-grid-fill text-primary">
+                    Panel
+                  </Item>
+                </li>
+              )}
 
-          {/* 2. Kurs Yönetimi */}
-          <li className="nav-item mt-3 mb-2">
-            <SectionTitle
-              open={openKurs}
-              onToggle={() => setOpenKurs((o) => !o)}
-              emoji="🎓"
-            >
-              Kurs Yönetimi
-            </SectionTitle>
-          </li>
-          {openKurs && (
-            <>
-              <li className="nav-item mb-2">
-                <Item to="/instructor/courses/" icon="fas fa-chalkboard-user text-success">
-                  Kurslarım
-                  {counters.courses != null && (
-                    <span className="badge bg-light text-muted ms-2">{counters.courses}</span>
-                  )}
-                </Item>
+              {/* 2. Kurs Yönetimi */}
+              <li className="nav-item mt-3 mb-1">
+                <SectionTitle
+                  open={openKurs}
+                  onToggle={() => setOpenKurs((o) => !o)}
+                  emoji="🎓"
+                >
+                  Kurs Yönetimi
+                </SectionTitle>
               </li>
-              <li className="nav-item mb-2">
-                <Item to="/instructor/create-course/" icon="fas fa-plus text-info">
-                  Kurs Oluştur
-                </Item>
-              </li>
-              <li className="nav-item mb-2">
-                <Item to="/instructor/reviews/" icon="fas fa-star text-warning">
-                  Yorumlar
-                  {counters.reviews != null && (
-                    <span className="badge bg-warning-subtle text-dark ms-2">{counters.reviews}</span>
-                  )}
-                </Item>
-              </li>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/orders/" icon="fas fa-comment-dots text-danger">
-                  Kurs Talepleri
-                  {counters.orders != null && (
-                    <span className="badge bg-primary-subtle text-primary ms-2">{counters.orders}</span>
-                  )}
-                </Item>
-              </li>
-            </>
-          )}
+              {openKurs && (
+                <>
+                  <li className="nav-item mb-1">
+                    <Item to="/instructor/courses/" icon="fas fa-chalkboard-user text-success">
+                      Kurslarım
+                      {counters.courses != null && (
+                        <span className="badge bg-light text-muted ms-2">{counters.courses}</span>
+                      )}
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-1">
+                    <Item to="/instructor/create-course/" icon="fas fa-plus text-info">
+                      Kurs Oluştur
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-1">
+                    <Item to="/instructor/reviews/" icon="fas fa-star text-warning">
+                      Yorumlar
+                      {counters.reviews != null && (
+                        <span className="badge bg-warning-subtle text-dark ms-2">{counters.reviews}</span>
+                      )}
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/orders/" icon="fas fa-comment-dots text-danger">
+                      Kurs Talepleri
+                      {counters.orders != null && (
+                        <span className="badge bg-primary-subtle text-primary ms-2">{counters.orders}</span>
+                      )}
+                    </Item>
+                  </li>
+                </>
+              )}
 
-          {/* 3. Kullanıcı ve Etkileşim */}
-          <li className="nav-item mt-3 mb-2">
-            <SectionTitle
-              open={openUser}
-              onToggle={() => setOpenUser((o) => !o)}
-              emoji="👥"
-            >
-              Kullanıcı ve Etkileşim
-            </SectionTitle>
-          </li>
-          {openUser && (
-            <>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/ogrenciler/" icon="fas fa-graduation-cap text-success">
-                  Öğrenciler
-                </Item>
+              {/* 3. Kullanıcı ve Etkileşim */}
+              <li className="nav-item mt-3 mb-1">
+                <SectionTitle
+                  open={openUser}
+                  onToggle={() => setOpenUser((o) => !o)}
+                  emoji="👥"
+                >
+                  Kullanıcı ve Etkileşim
+                </SectionTitle>
               </li>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/question-answer/" icon="fas fa-envelope-open-text text-purple">
-                  Soru/Cevap
-                  {counters.qna != null && (
-                    <span className="badge bg-danger-subtle text-danger ms-2">{counters.qna}</span>
-                  )}
-                </Item>
-              </li>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/notifications/" icon="fas fa-bell text-orange">
-                  Bildirimler
-                  {counters.notifications != null && (
-                    <span className="badge bg-success-subtle text-success ms-2">
-                      {counters.notifications}
-                    </span>
-                  )}
-                </Item>
-              </li>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/coupon/" icon="fas fa-tag text-teal">
-                  Ödüller
-                </Item>
-              </li>
-            </>
-          )}
+              {openUser && (
+                <>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/ogrenciler/" icon="fas fa-graduation-cap text-success">
+                      Öğrenciler
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/question-answer/" icon="fas fa-envelope-open-text text-purple">
+                      Soru/Cevap
+                      {counters.qna != null && (
+                        <span className="badge bg-danger-subtle text-danger ms-2">{counters.qna}</span>
+                      )}
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/notifications/" icon="fas fa-bell text-orange">
+                      Bildirimler
+                      {counters.notifications != null && (
+                        <span className="badge bg-success-subtle text-success ms-2">
+                          {counters.notifications}
+                        </span>
+                      )}
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/coupon/" icon="fas fa-tag text-teal">
+                      Ödüller
+                    </Item>
+                  </li>
+                </>
+              )}
 
-          {/* 4. Yönetim ve Yetkiler */}
-          <li className="nav-item mt-3 mb-2">
-            <SectionTitle
-              open={openAdmin}
-              onToggle={() => setOpenAdmin((o) => !o)}
-              emoji="🔐"
-            >
-              Yönetim &amp; Yetkiler
-            </SectionTitle>
-          </li>
-          {openAdmin && (
-            <>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/koordinator-ata/" icon="fas fa-user-shield text-danger">
-                  Yetki Ata
-                </Item>
+              {/* 4. Yönetim ve Yetkiler */}
+              <li className="nav-item mt-3 mb-1">
+                <SectionTitle
+                  open={openAdmin}
+                  onToggle={() => setOpenAdmin((o) => !o)}
+                  emoji="🔐"
+                >
+                  Yönetim &amp; Yetkiler
+                </SectionTitle>
               </li>
-              <li className="nav-item mb-3">
-                <Item to="/eskepinstructor/egitmen-ekle/" icon="fas fa-user-plus text-success">
-                  Eğitmen Ekle
-                </Item>
-              </li>
-            </>
-          )}
+              {openAdmin && (
+                <>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/koordinator-ata/" icon="fas fa-user-shield text-danger">
+                      Yetki Ata
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-2">
+                    <Item to="/eskepinstructor/egitmen-ekle/" icon="fas fa-user-plus text-success">
+                      Eğitmen Ekle
+                    </Item>
+                  </li>
+                </>
+              )}
 
-          {/* 5. Hesap Ayarları */}
-          <li className="nav-item mt-3 mb-2">
-            <SectionTitle
-              open={openAccount}
-              onToggle={() => setOpenAccount((o) => !o)}
-              emoji="⚙️"
-            >
-              Hesap Ayarları
-            </SectionTitle>
-          </li>
-          {openAccount && (
-            <>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/profile/" icon="fas fa-user-edit text-primary">
-                  Profili Düzenle
-                </Item>
+              {/* 5. Hesap Ayarları */}
+              <li className="nav-item mt-3 mb-1">
+                <SectionTitle
+                  open={openAccount}
+                  onToggle={() => setOpenAccount((o) => !o)}
+                  emoji="⚙️"
+                >
+                  Hesap Ayarları
+                </SectionTitle>
               </li>
-              <li className="nav-item mb-2">
-                <Item to="/eskepinstructor/change-password/" icon="fas fa-lock text-dark">
-                  Şifre Değiştir
-                </Item>
-              </li>
-            </>
-          )}
-
-        </ul>
+              {openAccount && (
+                <>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/profile/" icon="fas fa-user-edit text-primary">
+                      Profili Düzenle
+                    </Item>
+                  </li>
+                  <li className="nav-item mb-1">
+                    <Item to="/eskepinstructor/change-password/" icon="fas fa-lock text-dark">
+                      Şifre Değiştir
+                    </Item>
+                  </li>
+                </>
+              )}
+            </ul>
+          </div>
+        </div>
       </div>
     </nav>
   );

@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .. import models as api_models, serializers as api_serializer
-from ..permissions import IsGeneralTeacher, IsGeneralKoordinator
+from api.views.permissions import IsGeneralKoordinator
 
 User = get_user_model()
 
@@ -28,7 +28,7 @@ class ESKEPEventCreateAPIView(generics.CreateAPIView):
 @permission_classes([IsAuthenticated])
 class InstructorEventListAPIView(generics.ListAPIView):
     serializer_class = api_serializer.ESKEPEventSerializer
-    permission_classes = [IsAuthenticated, IsGeneralTeacher]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_id = self.kwargs.get("user_id")

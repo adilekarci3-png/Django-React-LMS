@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
+import "moment/locale/tr";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
@@ -10,171 +11,296 @@ import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
+moment.locale("tr");
+
 function EskepInstructorKitapTahlils() {
-  const [kitapTahlils, setKitapTahlils] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [search, setSearch] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [items, setItems] = useState([]);
   const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState("");
 
-  const api = useAxios(); // ✅ hook üstte çağrılır
-  const userData = useUserData(); // ✅ hook üstte çağrılır
+  const [search, setSearch] = useState("");
+  const [level, setLevel] = useState("all");
+  const [sort, setSort] = useState({ key: "date", dir: "desc" });
 
-  const fetchData = (userId) => {
+  const api = useAxios();
+  const userData = useUserData();
+  const abortRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  const fetchData = async (userId) => {
     if (!userId) return;
     setFetching(true);
-    api
-      .get(`eskepinstructor/kitaptahlili-list/${userId}/`)
-      .then((res) => {
-        console.log(res.data);
-        setKitapTahlils(res.data);
-        setFiltered(res.data);
-        setFetching(false);
-      })
-      .catch(() => setFetching(false));
+    setError("");
+    abortRef.current?.abort?.();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const res = await api.get(`eskepinstructor/kitaptahlili-list/${userId}/`, {
+        signal: controller.signal,
+      });
+      const arr = Array.isArray(res.data) ? res.data : [];
+      setItems(arr);
+    } catch (e) {
+      if (e.name !== "CanceledError" && e.name !== "AbortError") {
+        setError("Veriler alınırken bir sorun oluştu.");
+      }
+    } finally {
+      setFetching(false);
+    }
   };
 
   useEffect(() => {
-    if (userData?.user_id) {
-      fetchData(userData.user_id); // ✅ burada parametre olarak gönder
-    }
-  }, [userData]);
+    if (userData?.user_id) fetchData(userData.user_id);
+    return () => abortRef.current?.abort?.();
+  }, [userData?.user_id]); // ❗️ ikinci, boş fetch kaldırıldı
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const levels = useMemo(() => {
+    const set = new Set(items.map((x) => x.level).filter(Boolean));
+    return ["all", ...Array.from(set)];
+  }, [items]);
 
-  useEffect(() => {
-    const filteredData = kitapTahlils.filter((item) =>
-      item.title.toLowerCase().includes(search.toLowerCase())
-    );
-    setFiltered(filteredData);
-  }, [search, kitapTahlils]);
-
-  const sortData = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-
-    const sorted = [...filtered].sort((a, b) => {
-      const aVal = a[key] || "";
-      const bVal = b[key] || "";
-      if (aVal < bVal) return direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return direction === "asc" ? 1 : -1;
-      return 0;
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list = items.filter((it) => {
+      const matchesQ =
+        !q ||
+        it.title?.toLowerCase().includes(q) ||
+        it.koordinator?.full_name?.toLowerCase?.().includes(q) ||
+        it.inserteduser?.full_name?.toLowerCase?.().includes(q);
+      const matchesLevel =
+        level === "all" || String(it.level || "").toLowerCase() === String(level).toLowerCase();
+      return matchesQ && matchesLevel;
     });
 
-    setFiltered(sorted);
+    const dir = sort.dir === "asc" ? 1 : -1;
+    list.sort((a, b) => {
+      switch (sort.key) {
+        case "title":
+          return dir * String(a.title || "").localeCompare(String(b.title || ""), "tr");
+        case "level":
+          return dir * String(a.level || "").localeCompare(String(b.level || ""), "tr");
+        case "date":
+        default:
+          return dir * (new Date(a.date).getTime() - new Date(b.date).getTime());
+      }
+    });
+
+    return list;
+  }, [items, search, level, sort]);
+
+  const onSort = (key) => {
+    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+  };
+
+  const SortIcon = ({ col }) => {
+    if (sort.key !== col) return <i className="fas fa-sort ms-1 text-muted" />;
+    return sort.dir === "asc" ? <i className="fas fa-sort-up ms-1" /> : <i className="fas fa-sort-down ms-1" />;
+  };
+
+  const imgFallback = (e) => {
+    e.currentTarget.src = "https://via.placeholder.com/160x120.png?text=Kitap";
+  };
+
+  const onSearch = (e) => {
+    const v = e.target.value;
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearch(v), 180);
   };
 
   return (
     <>
       <ESKEPBaseHeader />
-      <section className="pt-5 pb-5">
-        <div className="container">
+      <section className="pt-5 pb-5 bg-light">
+        <div className="container-xxl">
           <Header />
-          <div className="row mt-0 mt-md-4">
+          <div className="row mt-0 mt-md-4 g-4">
             <div className="col-lg-3 col-md-4 col-12">
               <Sidebar />
             </div>
-            <div className="col-lg-9 col-md-8 col-12">
-              <h4 className="mb-4 d-flex align-items-center">
-                <i
-                  className="fas fa-book-open text-success me-2"
-                  style={{ fontSize: "1.5rem" }}
-                ></i>
-                Gönderilen Kitap Tahlilleri
-              </h4>
 
-              <div className="mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Kitap ismine göre ara..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+            <div className="col-lg-9 col-md-8 col-12">
+              <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <h4 className="mb-0 d-flex align-items-center">
+                  <i className="fas fa-book-open text-success me-2" style={{ fontSize: "1.4rem" }} />
+                  Gönderilen Kitap Tahlilleri
+                </h4>
+
+                <div className="d-flex gap-2">
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="fas fa-search" />
+                    </span>
+                    <input
+                      type="search"
+                      className="form-control"
+                      placeholder="Başlık, koordinatör, hazırlayan ara…"
+                      onChange={onSearch}
+                    />
+                  </div>
+                  <select
+                    className="form-select"
+                    style={{ minWidth: 160 }}
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value)}
+                  >
+                    {levels.map((lv) => (
+                      <option key={lv} value={lv}>
+                        {lv === "all" ? "Tüm Seviyeler" : lv}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {fetching ? (
-                <p className="mt-3 p-3">Yükleniyor...</p>
-              ) : (
-                <div className="card mb-4">
-                  <div className="card-header">
-                    <h3 className="mb-0">Kitap Tahlilleri</h3>
+              <div className="card mb-4 shadow-sm">
+                <div className="card-header bg-white">
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div>
+                      <h5 className="mb-0">Kitap Tahlilleri</h5>
+                      <small className="text-muted">
+                        Toplam <strong>{items.length}</strong> • Filtrelenen <strong>{filtered.length}</strong>
+                      </small>
+                    </div>
+                    {fetching && <span className="badge bg-secondary">Yükleniyor</span>}
+                    {error && <span className="badge bg-danger">{error}</span>}
                   </div>
-                  <div className="table-responsive overflow-y-hidden">
-                    <table className="table mb-0 text-nowrap table-hover table-centered">
-                      <thead className="table-light">
-                        <tr>
-                          <th onClick={() => sortData("title")} style={{ cursor: "pointer" }}>
-                            Kitap Tahlili
-                          </th>
-                          <th onClick={() => sortData("date")} style={{ cursor: "pointer" }}>
-                            Kayıt Tarihi
-                          </th>
-                          <th>Ders Sayısı</th>
-                          <th onClick={() => sortData("level")} style={{ cursor: "pointer" }}>
-                            Seviye
-                          </th>
-                          <th>Koordinatör</th>
-                          <th>Hazırlayan</th>
-                          <th>İşlem</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filtered.length > 0 ? (
-                          filtered.map((c, index) => (
-                            <tr key={index}>
-                              <td>
-                                <div className="d-flex align-items-center">
-                                  <img
-                                    src={c.image}
-                                    alt={c.title}
-                                    className="rounded"
-                                    style={{
-                                      width: "80px",
-                                      height: "60px",
-                                      objectFit: "cover",
-                                    }}
-                                  />
-                                  <div className="ms-3">
-                                    <h5 className="mb-1">{c.title}</h5>
-                                  </div>
+                </div>
+
+                <div className="table-responsive" style={{ maxHeight: 540 }}>
+                  <table className="table mb-0 text-nowrap table-hover align-middle">
+                    <thead className="table-light sticky-top" style={{ top: 0, zIndex: 1 }}>
+                      <tr>
+                        <th role="button" onClick={() => onSort("title")} className="text-nowrap">
+                          Kitap Tahlili <SortIcon col="title" />
+                        </th>
+                        <th role="button" onClick={() => onSort("date")} className="text-nowrap">
+                          Kayıt Tarihi <SortIcon col="date" />
+                        </th>
+                        <th className="text-nowrap">Ders Sayısı</th>
+                        <th role="button" onClick={() => onSort("level")} className="text-nowrap">
+                          Seviye <SortIcon col="level" />
+                        </th>
+                        <th className="text-nowrap">Koordinatör</th>
+                        <th className="text-nowrap">Hazırlayan</th>
+                        <th className="text-nowrap">İşlem</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {fetching && (
+                        <>
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <tr key={`sk-${i}`}>
+                              <td colSpan="7" className="p-0">
+                                <div
+                                  className="placeholder-wave"
+                                  style={{ height: 64, display: "flex", alignItems: "center", padding: "0.75rem" }}
+                                >
+                                  <span className="placeholder col-1 me-3" style={{ height: 48 }} />
+                                  <span className="placeholder col-3 me-2" />
+                                  <span className="placeholder col-2 me-2" />
+                                  <span className="placeholder col-1 me-2" />
+                                  <span className="placeholder col-2 me-2" />
+                                  <span className="placeholder col-2" />
                                 </div>
                               </td>
-                              <td>{moment(c.date).format("D MMM, YYYY")}</td>
-                              <td>{c.lectures?.length || 0}</td>
-                              <td>{c.level}</td>
-                              <td>{c.koordinator?.full_name || "Bilinmiyor"}</td>
-                              <td>{c.inserteduser?.full_name || "Bilinmiyor"}</td>
-                              <td>
-                                {c.koordinator?.id ? (
-                                  <Link
-                                    to={`/eskepinstructor/kitaptahlileris/${c.id}/${c.koordinator.id}/`}
-                                    className="btn btn-success btn-sm"
-                                  >
-                                    İncele <i className="fas fa-arrow-right ms-2"></i>
-                                  </Link>
-                                ) : (
-                                  <button className="btn btn-secondary btn-sm" disabled>
-                                    Koordinatör Yok
-                                  </button>
-                                )}
-                              </td>
                             </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan="7" className="text-center p-4">
-                              Kitap Tahlili bulunamadı.
+                          ))}
+                        </>
+                      )}
+
+                      {!fetching && !error && filtered.length === 0 && (
+                        <tr>
+                          <td colSpan="7" className="text-center p-5">
+                            <EmptyState
+                              title="Kitap tahlili bulunamadı"
+                              subtitle="Arama terimini değiştirin veya filtreleri temizleyin."
+                            />
+                          </td>
+                        </tr>
+                      )}
+
+                      {!fetching &&
+                        !error &&
+                        filtered.map((c) => (
+                          <tr key={c.id}>
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <img
+                                  src={c.image}
+                                  onError={imgFallback}
+                                  alt={c.title}
+                                  className="rounded"
+                                  style={{
+                                    width: 80,
+                                    height: 60,
+                                    objectFit: "cover",
+                                    borderRadius: 8,
+                                  }}
+                                />
+                                <div className="ms-3">
+                                  <h6 className="mb-1 text-dark">{c.title}</h6>
+                                  {c.category_name && (
+                                    <span className="badge bg-light text-dark border">{c.category_name}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="text-nowrap">{moment(c.date).format("D MMM YYYY")}</td>
+                            <td>
+                              <span className="badge bg-secondary-subtle text-secondary border">
+                                {c.lectures?.length || 0}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="badge bg-primary-subtle text-primary border">{c.level || "-"}</span>
+                            </td>
+                            <td className="text-nowrap">
+                              {c.koordinator?.full_name ? (
+                                <span className="badge bg-success-subtle text-success border">
+                                  {c.koordinator.full_name}
+                                </span>
+                              ) : (
+                                <span className="text-muted">Bilinmiyor</span>
+                              )}
+                            </td>
+                            <td className="text-nowrap">{c.inserteduser?.full_name || <span className="text-muted">Bilinmiyor</span>}</td>
+                            <td className="text-nowrap">
+                              {c.koordinator?.id ? (
+                                <Link
+                                  to={`/eskepinstructor/kitaptahlileris/${c.id}/${c.koordinator.id}/`}
+                                  className="btn btn-success btn-sm"
+                                >
+                                  İncele <i className="fas fa-arrow-right ms-2" />
+                                </Link>
+                              ) : (
+                                <button className="btn btn-secondary btn-sm" disabled>
+                                  Koordinatör Yok
+                                </button>
+                              )}
                             </td>
                           </tr>
-                        )}
-                      </tbody>
-                    </table>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* küçük özet kutuları */}
+              {!fetching && !error && (
+                <div className="d-flex gap-3 flex-wrap">
+                  <div className="card border-0 shadow-sm">
+                    <div className="card-body">
+                      <div className="fw-semibold text-muted">Toplam</div>
+                      <div className="fs-4">{items.length}</div>
+                    </div>
+                  </div>
+                  <div className="card border-0 shadow-sm">
+                    <div className="card-body">
+                      <div className="fw-semibold text-muted">Filtrelenen</div>
+                      <div className="fs-4">{filtered.length}</div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -188,3 +314,15 @@ function EskepInstructorKitapTahlils() {
 }
 
 export default EskepInstructorKitapTahlils;
+
+// ————————————————————————
+
+function EmptyState({ title = "Kayıt bulunamadı", subtitle = "" }) {
+  return (
+    <div className="text-center p-4 border rounded-3 bg-white">
+      <div className="display-6 mb-2">📚</div>
+      <h6 className="mb-1">{title}</h6>
+      {subtitle && <div className="text-muted small">{subtitle}</div>}
+    </div>
+  );
+}

@@ -20,7 +20,8 @@ PROJECT_DIR = Path(__file__).resolve().parent          # ...\Django React LMS\ba
 # -------------------------------------------------
 # CORE / SECURITY
 # -------------------------------------------------
-DEBUG = env.bool("DEBUG", default=True)
+# DEBUG = env.bool("DEBUG", default=True)
+DEBUG = True
 SECRET_KEY = env.str("SECRET_KEY", default="!!!-SET-IN-ENV-!!!")
 
 ALLOWED_HOSTS = [
@@ -53,6 +54,7 @@ if DEBUG:
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # SECURE_SSL_REDIRECT = False if DEBUG else True
+# SECURE_SSL_REDIRECT = True
 SECURE_SSL_REDIRECT = False
 
 if DEBUG:
@@ -66,8 +68,8 @@ else:
 
 # SESSION_COOKIE_SECURE = False if DEBUG else True
 # CSRF_COOKIE_SECURE = False if DEBUG else True
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = "Lax"
 

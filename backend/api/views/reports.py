@@ -5,7 +5,9 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from api.views.base import BaseListAPIView
 from api import models as api_models
 from api import serializers as api_serializer
-from utils.permissions import IsEskepKoordinatorOrTeacher
+from api.views.utils import KoordinatorLookupMixin
+from api.views.permissions import IsEskepKoordinatorOrTeacher
+
 from .base import BaseCreateAPIView, BaseUpdateAPIView, BaseListAPIView, BaseDestroyAPIView
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -14,29 +16,24 @@ from rest_framework.exceptions import NotFound
 
 User = get_user_model()
 
-class EskepInstructorDersSonuRaporuListAPIView(BaseListAPIView):
+class EskepInstructorDersSonuRaporuListAPIView(KoordinatorLookupMixin, BaseListAPIView):
     serializer_class   = api_serializer.DersSonuRaporuSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user_id = self.kwargs.get("user_id")
-        try:
-            koordinator = api_models.Koordinator.objects.select_related("user").get(user__id=user_id)
-        except api_models.Koordinator.DoesNotExist:
+        koordinator = self.get_koordinator()
+        if not koordinator:
             return api_models.DersSonuRaporu.objects.none()
 
+        base_qs = api_models.DersSonuRaporu.objects.all() if self.is_genel_koordinator(koordinator) \
+                  else api_models.DersSonuRaporu.objects.filter(koordinator=koordinator)
+
         return (
-            api_models.DersSonuRaporu.objects
-            .filter(
-                Q(inserteduser__stajer__instructor=koordinator) |
-                Q(inserteduser__ogrenci__instructor=koordinator) |
-                Q(koordinator=koordinator)
-            )
+            base_qs
             .select_related("inserteduser", "koordinator", "koordinator__user", "category")
             .order_by("-date", "-id")
             .distinct()
         )
-
 
 class EskepStajerDersSonuRaporuListAPIView(BaseListAPIView):
     serializer_class = api_serializer.DersSonuRaporuSerializer

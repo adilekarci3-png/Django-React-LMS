@@ -1,0 +1,48 @@
+/* ==== Dashboard sayfa iskeleti ve kart standardı ==== */
+.page-section {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  background: #f8f9fa; /* bg-light görünümü */
+}
+
+.content-card {
+  background: #fff;
+  border-radius: 0.75rem; /* rounded-3 yakın */
+  padding: 1.5rem;
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); /* shadow-sm */
+}
+@media (min-width: 768px) {
+  .content-card { padding: 2rem; }
+}
+
+/* Başlık satırı: sağda arama/filtre, solda başlık */
+.content-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+/* Kart başlığı satır içi hizalama */
+.card-title-ellipsis {
+  line-height: 1.2em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Küçük kozmetik iyileştirmeler */
+.section-badge {
+  margin-left: .5rem;
+}
+.page-section { background: #f8f9fa !important; }
+.dashboard-content {
+  background: #fff !important;
+  border-radius: 0.75rem !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+}
+@media (min-width: 768px){
+  .dashboard-content { padding: 2rem !important; }
+}

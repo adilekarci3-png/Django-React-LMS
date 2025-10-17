@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from api import models as api_models
-from .variants import VariantSerializer, VariantItemSerializer
+from .variants import VariantDersSonuRaporuSerializer, VariantItemDersSonuRaporuSerializer, VariantSerializer, VariantItemSerializer
 from .qa import Question_AnswerDersSonuRaporuSerializer
 
 class DersSonuRaporuSerializer(serializers.ModelSerializer):
@@ -36,14 +36,15 @@ class DersSonuRaporuSerializer(serializers.ModelSerializer):
 
     def get_curriculum(self, obj):
         qs = self._get_variants_qs(obj)
-        return VariantSerializer(qs, many=True, context=self.context).data if qs is not None else []
+        return VariantDersSonuRaporuSerializer(qs, many=True, context=self.context).data if qs is not None else []
+
 
     def get_lectures(self, obj):
         variants = self._get_variants_qs(obj)
         if variants is None and hasattr(obj, "lectures") and callable(getattr(obj, "lectures")):
             try:
                 items_qs = obj.lectures()
-                return VariantItemSerializer(items_qs, many=True, context=self.context).data
+                return VariantItemDersSonuRaporuSerializer(items_qs, many=True, context=self.context).data
             except Exception:
                 return []
         if variants is None:
@@ -60,7 +61,7 @@ class DersSonuRaporuSerializer(serializers.ModelSerializer):
                         break
                     except Exception:
                         continue
-        return VariantItemSerializer(collected, many=True, context=self.context).data
+        return VariantItemDersSonuRaporuSerializer(collected, many=True, context=self.context).data
 
     def get_question_answers(self, obj):
         qas = api_models.Question_AnswerDersSonuRaporu.objects.filter(derssonuraporu=obj)

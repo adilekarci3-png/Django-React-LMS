@@ -124,6 +124,7 @@ function EskepInstructorDashboard() {
       setBookReviews(books.data ?? []);
       setProjects(proj.data ?? []);
       setLessonReports(reports.data ?? []);
+      console.log(hw.data, books.data, proj.data, reports.data);
       setStats({ total_students: 25, total_interns: 10, total_graduates: 8, total_certificates: 12 });
     } catch (error) {
       console.error("Veri çekme hatası:", error);
@@ -184,13 +185,13 @@ function EskepInstructorDashboard() {
     <>
       <EskepBaseHeader />
       <section className="pt-4 pb-5">
-        <div className="container">
+        <div className="container-xxl">
           <Header />
           <div className="row g-4">
-            <div className="col-12 col-lg-3">
+            <div className="col-12 col-lg-3 col-xl-3">
               <Sidebar />
             </div>
-            <div className="col-12 col-lg-9">
+            <div className="col-12 col-lg-9 col-xl-9">
               <ul className="nav nav-tabs mb-3">
                 {TABS.map((t) => (
                   <li className="nav-item" key={t.key}>

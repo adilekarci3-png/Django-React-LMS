@@ -1,125 +1,800 @@
-.giris-section {
-    padding: 80px 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background: #f9f9f9;
-    min-height: 80vh;
-  }
-  
-  .giris-content-centered {
-    max-width: 900px;
-  }
-  
-  .giris-centered-image {
-    width: 100%;
-    max-width: 500px;
-    height: auto;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
-  }
-  
-  .giris-centered-image:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
-  }
-  
-  .giris-centered-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-  }
-  
-  .giris-centered-subtitle {
-    font-size: 1.3rem;
-    color: #555;
-    line-height: 1.6;
-  }
+/* ===========================
+   ORTAK — Header / Footer / Hero
+   =========================== */
 
-  .hafizlik-asymmetrical-section {
-    background: #ffffff;
-    min-height: 90vh;
-    padding: 60px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* PALET & DEĞİŞKENLER */
+:root{
+  --hdm-hue1: 79 70 229;   /* indigo-600 */
+  --hdm-hue2: 67 56 202;   /* indigo-700 */
+  --hdm-hue3: 45 42 134;   /* indigo-900-ish */
+
+  --hdm-header-h: 72px;
+  --hdm-border-alpha: .12;
+
+  --hdm-menu:#fff; --hdm-menu-hover:#fff; --hdm-menu-active:#fff;
+
+  --hdm-cta-from:#34d399; --hdm-cta-to:#10b981; --hdm-cta-fg:#063a2c;
+}
+
+/* HEADER — ince, cam */
+.hdm-min-header{
+  position: sticky; top: 0; z-index: 1030;
+  backdrop-filter: saturate(160%) blur(8px);
+  -webkit-backdrop-filter: saturate(160%) blur(8px);
+  border-bottom: 1px solid rgba(255 255 255 / var(--hdm-border-alpha));
+}
+.hdm-min-header .navbar{
+  background: linear-gradient(
+    90deg,
+    rgb(var(--hdm-hue1) / .92) 0%,
+    rgb(var(--hdm-hue2) / .92) 40%,
+    rgb(var(--hdm-hue3) / .92) 100%
+  );
+  --bs-navbar-color:#fff; --bs-navbar-hover-color:#fff;
+  --bs-navbar-active-color:#fff; --bs-navbar-brand-color:#fff;
+  --bs-navbar-brand-hover-color:#fff;
+}
+.hdm-logo-dot{
+  width:10px;height:10px;border-radius:50%;display:inline-block;
+  background: radial-gradient(circle at 30% 30%, #b9f3ff, #34d1ff 40%, #0ea5ea 70%, #0369a1 100%);
+  box-shadow: 0 0 0 3px rgba(255 255 255 / .25);
+}
+.hdm-burger{
+  width:1.4rem;height:1.4rem;display:inline-block;
+  background-image:linear-gradient(#fff,#fff),linear-gradient(#fff,#fff),linear-gradient(#fff,#fff);
+  background-position:center calc(50% - 6px),center,center calc(50% + 6px);
+  background-size:22px 2px,22px 2px,22px 2px; background-repeat:no-repeat;
+}
+.hdm-link{
+  color: var(--hdm-menu) !important; opacity:1; font-weight:600;
+  text-shadow: 0 1px 2px rgba(0 0 0 / .25); transition: filter .15s ease;
+}
+.hdm-link:hover, .hdm-link:focus{ filter: brightness(1.06); }
+.navbar-brand{ color:#fff !important; text-shadow:0 1px 2px rgba(0 0 0 / .18); }
+.navbar-text{ color:#e5e7eb !important; }
+
+/* CTA (genel) */
+.btn-cta{
+  background: linear-gradient(90deg, var(--hdm-cta-from), var(--hdm-cta-to));
+  color: var(--hdm-cta-fg) !important; border: none;
+}
+.btn-cta:hover{ filter: brightness(.96); }
+
+/* mobil menü */
+@media (max-width: 991.98px){
+  .hdm-min-header .navbar-collapse{
+    background: rgb(15 23 42 / .32);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: .5rem; margin-top: .5rem;
   }
-  
-  .hafizlik-asymmetrical-container {
-    width: 100%;
-    max-width: 1000px;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
+}
+
+/* FOOTER — sade */
+.hdm-min-footer{
+  background: linear-gradient(180deg, #0f1137 0%, #0d0f2e 100%);
+  border-top: 1px solid rgba(255 255 255 / .08);
+}
+.hdm-min-footer__bottom{
+  background: rgba(0 0 0 / .25);
+  border-top: 1px solid rgba(255 255 255 / .08);
+  padding: .75rem 0;
+}
+.text-footer{ color:#cbd5e1; }
+.footer-link{ color:#dbeafe; text-decoration:none; }
+.footer-link:hover{ color:#fff; text-decoration:underline; }
+
+/* HERO — TAM SAYFA (HDM) */
+.page-hdm .asym-hero{
+  min-height: calc(100vh - var(--hdm-header-h));
+  display:flex; align-items:center;
+  padding-top:5rem; padding-bottom:4rem;
+}
+@media (max-width: 991.98px){
+  .page-hdm .asym-hero{ min-height:auto; padding-top:3.5rem; padding-bottom:2.5rem; }
+}
+
+/* AsymHero iç sınıflar */
+.asym-hero__title{ font-weight:800; line-height:1.1; letter-spacing:.2px; }
+.asym-hero__subtitle{ font-size:1.05rem; }
+.asym-hero__img{
+  width:100%; display:block; border-radius:1.25rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.2);
+}
+.btn-cta--solid{ background:#fff; color:#0f172a; border:none; }
+.btn-cta--ghost{ background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28); }
+
+/* Dropdownlar */
+.hdm-min-header .dropdown-menu{
+  --hdm-dd-bg: rgb(15 23 42 / .85);
+  --hdm-dd-bd: rgba(255 255 255 / .10);
+  background: var(--hdm-dd-bg);
+  border: 1px solid var(--hdm-dd-bd);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.hdm-min-header .dropdown-item{
+  color:#e2e8f0 !important; transition: color .2s ease, background-color .2s ease;
+}
+.hdm-min-header .dropdown-item:hover,
+.hdm-min-header .dropdown-item:focus{ color:#fff !important; background:transparent; }
+
+/* erişilebilirlik */
+@media (prefers-reduced-motion: reduce){
+  .hdm-link, .hdm-min-header .dropdown-item{ transition:none; }
+}
+
+/* --- ANİMASYON & REVEAL --- */
+.reveal{ opacity:0; transform:translateY(14px);
+  transition:opacity .6s cubic-bezier(.2,.8,.2,1), transform .6s cubic-bezier(.2,.8,.2,1); }
+.reveal-visible{ opacity:1; transform:none; }
+.hover-lift{ transition: transform .2s ease, box-shadow .2s ease; }
+.hover-lift:hover{ transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+
+/* --- STATS STRIP --- */
+.hdm-stats-section{
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.04));
+  border-top: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  padding: 1.25rem 0;
+}
+.hdm-stat-card{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px; padding: .9rem .95rem;
+  display:flex; align-items:center; gap:.75rem; color:#fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.15);
+}
+.hdm-stat-icon{
+  width:40px;height:40px;border-radius:12px; display:grid;place-items:center;
+  background: linear-gradient(135deg, rgba(99,102,241,.8), rgba(67,56,202,.8));
+}
+.hdm-stat-icon .bi{ font-size:1.1rem; color:#fff; }
+.hdm-stat-value{ font-size:1.4rem; font-weight:800; line-height:1; }
+.hdm-stat-label{ font-size:.85rem; opacity:.9; }
+
+/* --- FEATURES --- */
+.hdm-features-section{
+  background: radial-gradient(900px 400px at 15% -10%, rgba(129,140,248,.15), transparent 60%);
+  padding: 2.5rem 0 3rem;
+}
+.hdm-feature-card{
+  background: rgba(13,17,43,.55);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px; padding: 1.15rem 1.1rem; min-height:160px;
+}
+.hdm-feature-icon{
+  width:44px;height:44px;border-radius:12px;margin-bottom:.5rem;
+  display:grid;place-items:center; background: linear-gradient(135deg, #818cf8, #4f46e5);
+  color:#fff; font-size:1.1rem;
+}
+
+/* --- CALLOUT BAND --- */
+.hdm-callout{
+  position: relative; margin:1.5rem 0 3.5rem; padding:1.1rem 0;
+  background: linear-gradient(100deg, rgba(79,70,229,.95), rgba(67,56,202,.95), rgba(45,42,134,.95));
+  border-top: 1px solid rgba(255,255,255,.18);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  overflow: hidden;
+}
+.hdm-callout .btn-outline-light{ border-color: rgba(255,255,255,.8); }
+.callout-orb{
+  position:absolute; border-radius:50%; filter: blur(24px); opacity:.4; pointer-events:none;
+  animation: float 9s ease-in-out infinite;
+}
+.callout-orb--a{ width:220px;height:220px; left:-60px; top:-60px; background:#60a5fa; animation-delay:.2s; }
+.callout-orb--b{ width:200px;height:200px; right:-60px; bottom:-80px; background:#34d399; animation-delay:.9s; }
+@keyframes float{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-10px) } }
+
+/* =========================
+   AKADEMİ — geniş hero & ORCHID tema
+   ========================= */
+.page-akd .asym-hero{
+  min-height: calc(100vh - 72px);
+  display:flex; align-items:center;
+  padding: clamp(2rem, 6vw, 5rem) 0;
+}
+.page-akd .asym-hero .container{
+  max-width:100%;
+  padding-left: clamp(16px, 4vw, 48px);
+  padding-right: clamp(16px, 4vw, 48px);
+}
+
+/* Orchid tema: stats/feature/callout */
+.akd-theme.akd-theme--orchid .hdm-stats-section{
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.06));
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.akd-theme.akd-theme--orchid .hdm-stat-card{ background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16); color:#fff; }
+.akd-theme.akd-theme--orchid .hdm-stat-icon{ background: linear-gradient(135deg, #a78bfa, #7c3aed); color:#fff; }
+.akd-theme.akd-theme--orchid .hdm-features-section{ background: radial-gradient(900px 400px at 15% -10%, rgba(167,139,250,.18), transparent 60%); }
+.akd-theme.akd-theme--orchid .hdm-feature-card{ background: rgba(28,12,61,.55); border:1px solid rgba(255,255,255,.12); }
+.akd-theme.akd-theme--orchid .hdm-feature-icon{ background: linear-gradient(135deg, #f472b6, #a78bfa); color:#fff; }
+.akd-theme.akd-theme--orchid .hdm-callout{
+  background:
+    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .10), transparent 60%),
+    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .12), transparent 60%),
+    linear-gradient(100deg,
+      rgb(147 51 234 / .95) 0%,
+      rgb(236 72 153 / .95) 33%,
+      rgb(244 114 182 / .95) 66%,
+      rgb(124 58 237 / .95) 100%
+    );
+  border-top:1px solid rgba(255,255,255,.16);
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+.akd-theme.akd-theme--orchid .hdm-callout .btn.btn-light{ color:#0b1220; }
+
+/* =========================
+   HBS — mavi/cyan tema (tek palet uyumu)
+   ========================= */
+.page-hbs, .hbs-theme{
+  --hbs-1:  2 132 199;   /* #0284c7 */
+  --hbs-2: 14 165 233;   /* #0ea5e9 */
+  --hbs-3:  3 105 161;   /* #0369a1 */
+  --hbs-4: 16 185 129;   /* #10b981 */
+
+  --hbs-cta-from:#fbbf24; --hbs-cta-to:#f59e0b; /* amber CTA */
+}
+
+/* Header */
+.hbs-theme.hdm-min-header .navbar{
+  background: linear-gradient(
+    100deg,
+    rgb(var(--hbs-1) / .97) 0%,
+    rgb(var(--hbs-2) / .97) 48%,
+    rgb(var(--hbs-3) / .97) 100%
+  ) !important;
+  box-shadow: 0 8px 24px rgba(2,132,199,.20);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+/* Header içi arama */
+.hbs-theme .navbar .form-control{
+  border-radius: 999px; background: rgba(255,255,255,.14);
+  border: 1px solid transparent; color:#fff;
+}
+.hbs-theme .navbar .form-control::placeholder{ color: rgba(255,255,255,.86); }
+.hbs-theme .navbar .form-control:focus{
+  background: rgba(255,255,255,.20);
+  border-color: rgba(255,255,255,.45);
+  box-shadow: 0 0 0 .15rem rgba(255,255,255,.12);
+}
+
+/* Hero — header’la uyumlu degrade */
+.page-hbs .asym-hero{
+  min-height: 58vh;
+  padding-top: 2.2rem; padding-bottom: 2rem;
+  background:
+    radial-gradient(1100px 380px at -10% 10%, rgba(255,255,255,.08), transparent 60%),
+    radial-gradient(1000px 320px at 110% 120%, rgba(0,0,0,.10), transparent 60%),
+    linear-gradient(100deg,
+      rgb(var(--hbs-1) / .94) 0%,
+      rgb(var(--hbs-2) / .94) 48%,
+      rgb(var(--hbs-3) / .94) 100%
+    );
+}
+.page-hbs .asym-hero__title{ color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.18); }
+.page-hbs .asym-hero__subtitle{ color:rgba(255,255,255,.92); }
+
+/* Rozetler */
+.page-hbs .asym-hero__chip{
+  color:#eff6ff; background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(3px);
+}
+
+/* Görsel kartı */
+.page-hbs .asym-hero__imgwrap{
+  max-width:520px; margin-inline:auto; border-radius:18px;
+  background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.9));
+  box-shadow: 0 18px 50px rgba(2,132,199,.18), 0 2px 8px rgba(0,0,0,.12);
+}
+.page-hbs .asym-hero__img{ width:100%; max-height:360px; object-fit:contain; border-radius:16px; }
+
+/* CTA’lar */
+.page-hbs .btn-cta.btn-cta--solid{
+  background: linear-gradient(90deg, var(--hbs-cta-from), var(--hbs-cta-to));
+  color:#1f2937 !important; border:none;
+}
+.page-hbs .btn-cta.btn-cta--ghost{
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); color:#fff !important;
+}
+
+/* Stats / Feature */
+.page-hbs .hdm-stats-section{
+  background: linear-gradient(180deg, rgba(14,165,233,.10), rgba(3,105,161,.10));
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.page-hbs .hdm-stat-card{ background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); color:#fff; }
+.page-hbs .hdm-feature-card{ background: rgba(3,105,161,.22); border:1px solid rgba(255,255,255,.14); }
+.page-hbs .hdm-feature-icon{ background: linear-gradient(135deg, rgb(var(--hbs-2)), rgb(var(--hbs-1))); color:#fff; }
+
+/* Callout — mavi bar (animasyonlu) */
+.page-hbs .hdm-callout{
+  color:#fff;
+  background:
+    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .08), transparent 60%),
+    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .10), transparent 60%),
+    linear-gradient(100deg,
+      rgb(var(--hbs-1) / .96) 0%,
+      rgb(var(--hbs-2) / .96) 50%,
+      rgb(var(--hbs-3) / .96) 100%
+    );
+  border-top: 1px solid rgba(255,255,255,.16);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.page-hbs .hdm-callout.hdm-callout--animated{
+  background-size: 200% 100%, 200% 100%, 200% 100%;
+  animation: hbsBar 16s ease-in-out infinite alternate;
+}
+@keyframes hbsBar{
+  0%{ background-position:left center, left center, 0% 50%; }
+  100%{ background-position:right center, right center, 100% 50%; }
+}
+
+/* HBS header genişlik */
+.hbs-header--wide .navbar{ min-height:76px; padding-block:.35rem; }
+
+/* HBS chip/link & arama kapsülü & dropdown */
+.hbs-chip-link{
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.45rem .75rem; border-radius:999px;
+  background: rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.22);
+  margin:.15rem;
+}
+.hbs-chip-link:hover{ background: rgba(255,255,255,.16); }
+.hbs-chip-link.active, .hbs-chip-link[aria-current="page"]{ background:#fff; color:#0a2740 !important; border-color:transparent; }
+
+.hbs-search-pill{
+  display:flex; align-items:center; gap:.5rem;
+  background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28);
+  border-radius:999px; padding:.25rem .25rem .25rem .6rem;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.hbs-search-pill .form-control{ border:0; background:transparent; color:#fff; width:220px; box-shadow:none; }
+.hbs-search-pill .form-control::placeholder{ color: rgba(255,255,255,.75); }
+
+.dropdown-menu-hbs{
+  --hbs-dd-bg: rgb(4 20 34 / .92);
+  --hbs-dd-bd: rgba(255 255 255 / .10);
+  background: var(--hbs-dd-bg); border:1px solid var(--hbs-dd-bd);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.dropdown-menu-hbs .dropdown-item{ color:#e2e8f0; }
+.dropdown-menu-hbs .dropdown-item:hover{ color:#fff; background:transparent; }
+
+@media (max-width: 991.98px){
+  .hbs-search-pill .form-control{ width:100%; }
+}
+@media (max-width: 575.98px){
+  .page-hbs .asym-hero{ min-height:auto; padding-top:1.6rem; padding-bottom:1.2rem; }
+  .page-hbs .asym-hero__img{ max-height:300px; }
+}
+
+/* =========================
+   ESKEP — hero kısaltma (opsiyonel)
+   ========================= */
+.page-eskep .asym-hero{
+  min-height: 58vh;
+  padding-block: 2rem 1.75rem;
+}
+.page-eskep .asym-hero--compact{
+  min-height: 46vh; padding-block: 1.25rem;
+}
+.page-eskep .asym-hero--compact .asym-hero__imgwrap{ max-width:520px; border-radius:16px; }
+.page-eskep .asym-hero--compact .asym-hero__img{ max-height:320px; object-fit:contain; border-radius:14px; }
+.page-eskep .asym-hero--compact .asym-hero__card{ transform: scale(.92); }
+.page-eskep .asym-hero--compact .asym-hero__wave--bottom{ display:none; }
+@media (max-width: 991.98px){
+  .page-eskep .asym-hero--compact{ min-height:auto; padding-block:1rem; }
+  .page-eskep .asym-hero--compact .asym-hero__img{ max-height:260px; }
+}
+
+/* (İsteğe bağlı) ESKEP header için yeşil degrade */
+.eskep-theme.hdm-min-header .navbar{
+  background: linear-gradient(
+    100deg,
+    rgb(5 150 105 / .95) 0%,
+    rgb(16 185 129 / .95) 45%,
+    rgb(13 148 136 / .95) 100%
+  ) !important;
+  border-bottom: 1px solid rgba(0,0,0,.10);
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+}
+
+/* ==============================
+   HBS – Solid tema iyileştirmeleri
+   ============================== */
+
+/* Paleti tek noktadan kullanalım (header ile aynı tonlar) */
+.page-hbs.hbs-solid,
+.hbs-theme {
+  --hbs-1:  2 132 199;  /* #0284c7 */
+  --hbs-2: 14 165 233;  /* #0ea5e9 */
+  --hbs-3:  3 105 161;  /* #0369a1 */
+  --hbs-4: 16 185 129;  /* #10b981 (aksan) */
+  --hbs-amber-1: #fbbf24;
+  --hbs-amber-2: #f59e0b;
+}
+
+/* HEADER: zaten uyumlu; sadece küçük netlik dokunuşu */
+.hbs-theme.hdm-min-header .navbar{
+  background: linear-gradient(
+    100deg,
+    rgb(var(--hbs-1) / .97) 0%,
+    rgb(var(--hbs-2) / .97) 50%,
+    rgb(var(--hbs-3) / .97) 100%
+  ) !important;
+  box-shadow: 0 8px 24px rgba(2,132,199,.18);
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+
+/* HERO: header ile birebir aynı degrade + hafif cam parıltı (siliklik yok) */
+.page-hbs.hbs-solid .asym-hero{
+  min-height: 58vh;
+  padding-top: 2.2rem; padding-bottom: 2rem;
+  background:
+    radial-gradient(1100px 380px at -10% 10%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(1000px 320px at 110% 120%, rgba(0,0,0,.08), transparent 60%),
+    linear-gradient(
+      100deg,
+      rgb(var(--hbs-1) / .96) 0%,
+      rgb(var(--hbs-2) / .96) 50%,
+      rgb(var(--hbs-3) / .96) 100%
+    ) !important;
+}
+.page-hbs.hbs-solid .asym-hero__title{ color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.18); }
+.page-hbs.hbs-solid .asym-hero__subtitle{ color:rgba(255,255,255,.95); }
+
+/* Hero görselini biraz küçült – daha dengeli */
+.page-hbs.hbs-solid .asym-hero__imgwrap{
+  max-width: 520px;
+  margin-inline: auto;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.94));
+  box-shadow: 0 18px 50px rgba(2,132,199,.18), 0 2px 8px rgba(0,0,0,.12);
+}
+.page-hbs.hbs-solid .asym-hero__img{
+  width:100%; max-height:360px; object-fit:contain; border-radius:16px;
+}
+
+/* CTA’lar (amber): mavi/teal’e karşı yüksek kontrast */
+.page-hbs.hbs-solid .btn-cta.btn-cta--solid{
+  background: linear-gradient(90deg, var(--hbs-amber-1), var(--hbs-amber-2));
+  color:#1f2937 !important; border:none;
+}
+.page-hbs.hbs-solid .btn-cta.btn-cta--ghost{
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.30);
+  color:#fff !important;
+}
+
+/* ====== “Silik” hissi giderme – kartlar daha tok ====== */
+
+/* İstatistik şeridi */
+.page-hbs.hbs-solid .hdm-stats-section{
+  background: linear-gradient(180deg, rgba(14,165,233,.10), rgba(3,105,161,.10));
+  border-top: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.page-hbs.hbs-solid .hdm-stat-card{
+  background: rgba(255,255,255,.14);          /* önce .06 idi → belirginleştirildi */
+  border: 1px solid rgba(255,255,255,.24);
+  color:#fff;
+  box-shadow: 0 10px 24px rgba(0,0,0,.18);
+}
+.page-hbs.hbs-solid .hdm-stat-icon{
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+}
+.page-hbs.hbs-solid .hdm-stat-label{ opacity:.96; }
+
+/* Özellik kartları */
+.page-hbs.hbs-solid .hdm-features-section{
+  background: radial-gradient(900px 400px at 15% -10%, rgba(56,189,248,.16), transparent 60%);
+}
+.page-hbs.hbs-solid .hdm-feature-card{
+  background: rgba(3,105,161,.34);           /* önce .22 idi → daha tok */
+  border: 1px solid rgba(255,255,255,.22);
+}
+.page-hbs.hbs-solid .hdm-feature-icon{
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color:#fff;
+}
+/* kart içi açıklama metinleri artık soluk değil */
+.page-hbs.hbs-solid .hdm-feature-card p{ color: rgba(255,255,255,.92) !important; }
+
+/* Çağrı bandı: header ile aynı bar geçişi */
+.page-hbs.hbs-solid .hdm-callout{
+  color:#fff;
+  background:
+    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .08), transparent 60%),
+    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .10), transparent 60%),
+    linear-gradient(100deg,
+      rgb(var(--hbs-1) / .97) 0%,
+      rgb(var(--hbs-2) / .97) 50%,
+      rgb(var(--hbs-3) / .97) 100%
+    );
+  border-top: 1px solid rgba(255,255,255,.16);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.page-hbs.hbs-solid .hdm-callout.hdm-callout--animated{
+  background-size: 200% 100%, 200% 100%, 200% 100%;
+  animation: hbsBarSolid 14s ease-in-out infinite alternate;
+}
+@keyframes hbsBarSolid{
+  0%   { background-position: left center, left center,   0% 50%; }
+  100% { background-position: right center, right center, 100% 50%; }
+}
+
+/* Footer zaten hbs-theme ile uyumlu; link kontrastını bir tık arttıralım */
+.hbs-theme .footer-link{ color:#e0f2fe; }
+.hbs-theme .footer-link:hover{ color:#fff; }
+
+/* Konteyner genişliği: “daha dar” görünüm */
+.hbs-theme .navbar .container-xl{ max-width: 1240px; } /* istersen 1140px yapabilirsin */
+
+/* ==============================
+   HBS – Kartları daha belirgin yap
+   ============================== */
+
+/* ÜSTTEKİ sayaç kutuları (istatistik çipleri) */
+.page-hbs.hbs-solid .hdm-stat-card{
+  /* daha tok arkaplan */
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.14));
+  border: 1px solid rgba(255,255,255,.40);
+  box-shadow:
+    0 10px 24px rgba(2,132,199,.20),
+    inset 0 1px 0 rgba(255,255,255,.25);
+  backdrop-filter: none;               /* sütlü/silik hissi kapat */
+  -webkit-backdrop-filter: none;
+  color:#fff;
+  padding: 1rem 1.05rem;
+  border-radius: 16px;
+}
+
+.page-hbs.hbs-solid .hdm-stat-icon{
+  width:44px; height:44px; border-radius:12px;
+  display:grid; place-items:center;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  box-shadow: 0 6px 12px rgba(2,132,199,.25), inset 0 1px 0 rgba(255,255,255,.35);
+  border: 1px solid rgba(255,255,255,.28);
+}
+.page-hbs.hbs-solid .hdm-stat-value{ font-size:1.45rem; font-weight:800; letter-spacing:.2px; }
+.page-hbs.hbs-solid .hdm-stat-label{ color:#eaf6ff; opacity:1; font-weight:600; }
+
+/* ALTTAKİ özellik kartları */
+.page-hbs.hbs-solid .hdm-feature-card{
+  /* cam yerine yarı-solid degrade */
+  background: linear-gradient(180deg, rgba(2,132,199,.70), rgba(3,105,161,.62));
+  border: 1px solid rgba(3,105,161,.75);
+  box-shadow: 0 14px 28px rgba(3,105,161,.35);
+  color:#fff;
+  padding: 1.15rem 1.15rem;
+  border-radius: 18px;
+}
+.page-hbs.hbs-solid .hdm-feature-card h6{ color:#ffffff; font-weight:800; }
+.page-hbs.hbs-solid .hdm-feature-card p{ color: rgba(255,255,255,.95); }
+
+/* özellik kartı ikonları */
+.page-hbs.hbs-solid .hdm-feature-icon{
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  box-shadow: 0 6px 12px rgba(2,132,199,.25), inset 0 1px 0 rgba(255,255,255,.35);
+  border: 1px solid rgba(255,255,255,.28);
+}
+
+/* Hover/odak durumunda “halka” ve yükselme */
+.page-hbs.hbs-solid .hdm-stat-card:hover,
+.page-hbs.hbs-solid .hdm-feature-card:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px rgba(3,105,161,.38);
+}
+.page-hbs.hbs-solid .hdm-feature-card:hover{
+  outline: 3px solid rgba(255,255,255,.16);
+  outline-offset: 0;
+}
+
+/* bölüm zemini de biraz daha belirgin olsun */
+.page-hbs.hbs-solid .hdm-features-section{
+  background: radial-gradient(900px 400px at 15% -10%, rgba(56,189,248,.22), transparent 60%);
+}
+.page-hbs.hbs-solid .hdm-stats-section{
+  background: linear-gradient(180deg, rgba(14,165,233,.12), rgba(3,105,161,.12));
+}
+/* ===== HDM hero'u kısalt (orta kısmı daha kompakt) ===== */
+.page-hdm .asym-hero{
+  min-height: 46vh;                 /* önce ~tam ekran, şimdi daha kısa */
+  padding-top: 1.6rem;
+  padding-bottom: 1.4rem;
+}
+
+/* Görsel kutusu ve görseli küçült */
+.page-hdm .asym-hero__imgwrap{
+  max-width: 480px;                 /* kart genişliği */
+  border-radius: 16px;
+}
+.page-hdm .asym-hero__img{
+  max-height: 300px;                /* görsel yüksekliği */
+  object-fit: contain;
+  border-radius: 14px;
+}
+
+/* Büyük ekranlarda hafif esnetme */
+@media (min-width: 1200px){
+  .page-hdm .asym-hero{ min-height: 44vh; }
+  .page-hdm .asym-hero__img{ max-height: 320px; }
+}
+
+/* Mobilde daha da kompakt kalsın */
+@media (max-width: 991.98px){
+  .page-hdm .asym-hero{
+    min-height: auto;
+    padding-top: 1.2rem;
+    padding-bottom: 1rem;
   }
-  
-  .hafizlik-asymmetrical-header {
-    font-size: 2.8rem;
-    font-weight: bold;
-    color: #003366;
-    align-self: flex-start;
-    margin-bottom: 20px;
-    animation: slideInLeft 1s ease forwards;
+  .page-hdm .asym-hero__img{ max-height: 240px; }
+}
+
+/* === AKADEMİ: hero'yu daha kısa ve kompakt yap === */
+.page-akd .asym-hero{
+  min-height: 50vh;             /* tam ekran yerine daha kısa */
+  padding-top: 1.9rem;
+  padding-bottom: 1.5rem;
+}
+
+/* Görsel kutusunu ve görsel yüksekliğini küçült */
+.page-akd .asym-hero__imgwrap{
+  max-width: 520px;
+  margin-inline: auto;
+  border-radius: 16px;
+}
+.page-akd .asym-hero__img{
+  max-height: 320px;            /* 300–340 arası oynatılabilir */
+  object-fit: contain;
+  border-radius: 14px;
+}
+
+/* Büyük ekranlarda bir tık daha kısa */
+@media (min-width: 1200px){
+  .page-akd .asym-hero{ min-height: 46vh; }
+  .page-akd .asym-hero__img{ max-height: 340px; }
+}
+
+/* Mobilde daha kompakt */
+@media (max-width: 991.98px){
+  .page-akd .asym-hero{
+    min-height: auto;
+    padding-top: 1.4rem;
+    padding-bottom: 1.1rem;
   }
-  
-  .hafizlik-asymmetrical-image-wrapper {
-    width: 100%;
-    overflow: hidden;
-    border-radius: 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    animation: fadeIn 1.2s ease forwards;
+  .page-akd .asym-hero__img{ max-height: 260px; }
+}
+
+/* (Varsa) alt dalga efektini kapatıp ekstra boşluğu kes */
+.page-akd .asym-hero__wave--bottom{ display:none; }
+
+
+/* ===========================
+   ESKEP — Sage (teal/slate) tema (mat görünüm)
+   =========================== */
+.eskep-theme.eskep-theme--sage{
+  /* temel renkler (doygunluğu düşük) */
+  --eskep-1: 13 148 136;  /* #0d9488 teal-600 */
+  --eskep-2: 15 118 110;  /* #0f766e teal-700 */
+  --eskep-3:  8  47  43;  /* #082f2b teal-900 */
+
+  /* metin & vurgu */
+  --eskep-ink:   #ecfdf5;
+  --eskep-muted: rgba(236,253,245,.85);
+
+  /* ikon/çip geçişi ve CTA */
+  --eskep-chip: linear-gradient(135deg,#5eead4,#14b8a6);
+  --eskep-cta-from:#eab308; /* amber-500  (sıcak ama mat) */
+  --eskep-cta-to:  #d97706; /* amber-600 */
+  --eskep-cta-fg:  #0b1f1d;
+
+  /* footer */
+  --eskep-footer-a:#071c1a;
+  --eskep-footer-b:#051513;
+}
+
+/* HEADER – mat degrade, yüksek okunabilirlik */
+.eskep-theme.eskep-theme--sage.hdm-min-header .navbar{
+  background: linear-gradient(
+    100deg,
+    rgb(var(--eskep-1) / .96) 0%,
+    rgb(var(--eskep-2) / .96) 48%,
+    rgb(var(--eskep-3) / .96) 100%
+  ) !important;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 8px 24px rgba(8,47,43,.18);
+  --bs-navbar-color:#fff; --bs-navbar-hover-color:#fff;
+  --bs-navbar-active-color:#fff; --bs-navbar-brand-color:#fff;
+}
+
+/* HERO – header’la uyumlu mat arka plan ve compact desteği */
+.page-eskep.eskep-theme--sage .asym-hero{
+  background:
+    radial-gradient(1100px 360px at -10% 10%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(1000px 320px at 110% 120%, rgba(0,0,0,.10), transparent 60%),
+    linear-gradient(105deg,
+      rgb(var(--eskep-1) / .94) 0%,
+      rgb(var(--eskep-2) / .94) 52%,
+      rgb(var(--eskep-3) / .94) 100%
+    );
+  color: var(--eskep-ink);
+}
+.page-eskep.eskep-theme--sage .asym-hero__title{ color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.16); }
+.page-eskep.eskep-theme--sage .asym-hero__subtitle{ color:var(--eskep-muted); }
+
+/* compact mod (yükseklik kısa) */
+.page-eskep.eskep-theme--sage .asym-hero--compact,
+.page-eskep.eskep-theme--sage .asym-hero[compact]{  /* prop set ediyorsanız */
+  min-height: 46vh;
+  padding-block: 1.2rem 1.1rem;
+}
+@media (max-width: 991.98px){
+  .page-eskep.eskep-theme--sage .asym-hero--compact,
+  .page-eskep.eskep-theme--sage .asym-hero[compact]{
+    min-height: auto; padding-block: 1rem;
   }
-  
-  .hafizlik-asymmetrical-image {
-    width: 100%;
-    height: 400px;
-    object-fit: cover;
-  }
-  
-  .hafizlik-asymmetrical-subtitle {
-    font-size: 1.4rem;
-    color: #555;
-    align-self: flex-end;
-    max-width: 600px;
-    text-align: right;
-    line-height: 1.6;
-    animation: slideInRight 1.2s ease forwards;
-  }
-  
-  /* Animasyonlar */
-  @keyframes slideInLeft {
-    0% {
-      opacity: 0;
-      transform: translateX(-50px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-      transform: scale(1.05);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
-  @keyframes slideInRight {
-    0% {
-      opacity: 0;
-      transform: translateX(50px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
+}
+
+/* Chip/rozetler – yarı saydam çerçeveli */
+.page-eskep.eskep-theme--sage .asym-hero__chip{
+  color:#e7f8f4;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.22);
+  backdrop-filter: blur(3px);
+}
+
+/* Kartlar/ikonlar – siliklik yok, mat cam */
+.eskep-theme.eskep-theme--sage .hdm-stat-card,
+.eskep-theme.eskep-theme--sage .hdm-feature-card{
+  background: rgba(4,28,26,.58);
+  border: 1px solid rgba(255,255,255,.14);
+  color:#f0fdfa;
+}
+.eskep-theme.eskep-theme--sage .hdm-stat-icon,
+.eskep-theme.eskep-theme--sage .hdm-feature-icon{
+  background: var(--eskep-chip);
+  color:#0b1f1d;
+}
+
+/* Bölüm zeminleri – mat geçiş */
+.eskep-theme.eskep-theme--sage .hdm-stats-section{
+  background: linear-gradient(180deg, rgba(236,253,245,.05), rgba(13,148,136,.08));
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.eskep-theme.eskep-theme--sage .hdm-features-section{
+  background: radial-gradient(900px 400px at 15% -10%, rgba(20,184,166,.18), transparent 60%);
+}
+
+/* Callout bar – mat sage bandı */
+.eskep-theme.eskep-theme--sage .hdm-callout{
+  background:
+    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .08), transparent 60%),
+    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .10), transparent 60%),
+    linear-gradient(100deg,
+      rgb(var(--eskep-1) / .96) 0%,
+      rgb(var(--eskep-2) / .96) 50%,
+      rgb(var(--eskep-3) / .96) 100%
+    );
+  border-top: 1px solid rgba(255,255,255,.14);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  color:#ecfdf5;
+}
+
+/* CTA butonu – sıcak amber, mat */
+.eskep-theme.eskep-theme--sage .btn-cta{
+  background: linear-gradient(90deg, var(--eskep-cta-from), var(--eskep-cta-to));
+  color: var(--eskep-cta-fg) !important; border:none;
+}
+
+/* Footer – daha koyu, mat */
+.eskep-theme.eskep-theme--sage .hdm-min-footer{
+  background: linear-gradient(180deg, var(--eskep-footer-a) 0%, var(--eskep-footer-b) 100%);
+}

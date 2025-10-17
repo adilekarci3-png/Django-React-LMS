@@ -93,9 +93,9 @@ import DersSonuRaporuCreate from "./views/ESKEP/DersSonuRaporuCreate";
 import DersSonuRaporuEdit from "./views/ESKEP/DersSonuRaporuEdit";
 import ProjeCreate from "./views/ESKEP/ProjeCreate";
 import ProjeEdit from "./views/ESKEP/ProjeEdit";
-import DersSonuRaporuDetail from "./views/ESKEP/DersSonuRaporuDetail";
-import OdevDetail from "./views/ESKEP/OdevDetail";
-import ProjeDetail from "./views/ESKEP/ProjeDetail";
+import DersSonuRaporuDetail from "./views/ESKEPinstructor/DersSonuRaporuDetail";
+import OdevDetail from "./views/ESKEPinstructor/OdevDetail";
+import ProjeDetail from "./views/ESKEPinstructor/ProjeDetail";
 
 //Eskep Instructor Pages
 import ESKEPinstructorCourseCreate from "./views/ESKEPinstructor/EskepInstructorCourseCreate";
@@ -129,12 +129,17 @@ import ESKEPEgitmenVideoList from "./views/ESKEPinstructor/InstructorVideoList";
 import ESKEPEgitmenYoutubeCanli from "./views/ESKEPinstructor/YouTubeLivePage";
 import ESKEPEgitmenSchedule from "./views/ESKEPEgitmen/ESKEPEgitmenSchedule";
 import EducatorVideoLinksPage from "./views/ESKEPEgitmen/EducatorVideoLinksPage";
+
+
 //Eskep Stajer Pages
 import EskepStajerOdevs from "./views/ESKEPstajer/EskepStajerOdevs";
 import EskepStajerDersSonuRaporus from "./views/ESKEPstajer/EskepStajerDersSonuRaporus";
 import EskepStajerKitapTahlilis from "./views/ESKEPstajer/EskepStajerKitapTahlilis";
 import EskepStajerProjes from "./views/ESKEPstajer/EskepStajerProjes";
 import EskepStajerDashboard from "./views/ESKEPstajer/EskepStajerDashboard";
+
+//Eskep Ogrenci Pages
+import EskepOgrenciDashboard from "./views/ESKEPstudent/Dashboard";
 
 import EducationSchedule from "./views/ESKEPinstructor/EducationSchedule";
 // Admin Pages
@@ -1081,6 +1086,7 @@ function App() {
             <Route path="/eskepstajer/works/passive" element={<EskepStajerPasifCalismalar />} />
             <Route path="/eskepstajer/works/rejected" element={<EskepStajerReddedilmisCalismalar />} />
             <Route path="/eskepstajer/works/submitted" element={<EskepStajerTeslimEdilmisCalismalar />} />
+
             {/* ESKEP Öğrenci */}
             <Route
               path="/eskepogrenci/odevs/"
@@ -1098,14 +1104,14 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* <Route
-              path="/eskepogrenci/calismalar/incelemede/"
+            <Route
+              path="/eskepogrenci/dashboard/"
               element={
                 <PrivateRoute>
-                  <EskepOgrenciIncelemedeCalismalar />
+                  <EskepOgrenciDashboard />
                 </PrivateRoute>
               }
-            /> */}
+            />
             <Route path="/student/works/incele" element={<EskepOgrenciIncelemedeCalismalar />} />
             <Route path="/student/works/draft" element={<EskepOgrenciTaslakCalismalar />} />
             <Route path="/student/works/passive" element={<EskepOgrenciPasifCalismalar />} />

@@ -44,8 +44,11 @@ const DersSonuAnketi = () => {
               <Header />
               <div className="row mt-0 mt-md-4">
                 {/* Sidebar Here */}
-                <Sidebar />
-                <div className="col-lg-10 col-md-8 col-12">
+                <div className="col-lg-3 col-md-3 col-12 mb-4 mb-md-0">
+              <Sidebar />
+            </div>
+
+            <div className="col-lg-9 col-md-9 col-12">
                   {/* Card */}
                   <div className="card">
                     {/* Card header */}

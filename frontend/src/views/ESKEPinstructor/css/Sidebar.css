@@ -1,0 +1,54 @@
+/* Tam genişlik ve daralma engeli */
+.sidenav {
+  width: 100%;
+  max-width: none; /* varsa eski sınırı kaldır */
+}
+
+/* Masaüstünde sticky olsun, içerik kayarken görünür kalsın */
+@media (min-width: 992px) {
+  .sidenav {
+    position: sticky;
+    top: 88px; /* üst header yüksekliğinize göre ayarlayın */
+  }
+}
+
+/* Collapse bölümü tam genişlikte büyüsün */
+.sidenav .navbar-collapse {
+  flex-grow: 1;
+  width: 100%;
+}
+
+/* İç kart tam genişlik */
+.sidenav .card {
+  width: 100%;
+}
+
+/* Link stilleri: daha ferah padding ve metin sarımı */
+.sidebar-link {
+  border-radius: 10px;
+  transition: background-color .15s ease, color .15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-link:hover {
+  background: var(--bs-light);
+}
+
+.section-title {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.section-title:hover {
+  background: var(--bs-light);
+}
+
+/* Mobilde içerik taşmasın */
+@media (max-width: 991.98px) {
+  .sidenav .navbar-collapse {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}

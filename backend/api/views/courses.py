@@ -6,9 +6,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from api import models as api_models
-from utils.permissions import IsEskepKoordinatorOrTeacher
+from api.views.permissions import IsEskepKoordinatorOrTeacher
 from .. import models as api_models, serializers as api_serializer
-# from ..permissions import IsEskepKoordinatorOrTeacher
 from django.contrib.auth import get_user_model
 
 from utils.booleans import strtobool

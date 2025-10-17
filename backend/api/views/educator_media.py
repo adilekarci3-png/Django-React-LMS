@@ -7,12 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.permissions import IsGeneralKoordinator
-from utils.permissions import CanModifyVideoLink, IsEskepKoordinatorOrTeacher, get_teacher_for_user, is_eskep_koordinator
-
+from api.views.permissions import CanModifyVideoLink, IsEskepKoordinatorOrTeacher, IsGeneralKoordinator, get_teacher_for_user, is_eskep_koordinator
 from .. import models as M, serializers as S
-# from ..permissions import IsEskepKoordinatorOrTeacher, CanModifyVideoLink, IsGeneralKoordinator
-   # projendeki yardımcılar
 
 
 # ---------- Video Linkleri ----------

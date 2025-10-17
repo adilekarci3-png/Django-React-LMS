@@ -31,14 +31,23 @@ from .commerce import CartOrderItemListAPIView
 
 # --- agents & hafiz ---
 from .agents_hafiz import (
+    # IsAgent,
+    # AgentListAPIView,
+    # HafizBilgiCreateAPIView,
+    # HafizBilgiUpdateAPIView,
+    # HafizListAPIView,
+    # AgentHafizListAPIView,
+    HafizsListAPIView,
+    HafizsListByAgentAPIView,
+)
+
+from .permissions import (
     IsAgent,
     AgentListAPIView,
     HafizBilgiCreateAPIView,
     HafizBilgiUpdateAPIView,
     HafizListAPIView,
-    AgentHafizListAPIView,
-    HafizsListAPIView,
-    HafizsListByAgentAPIView,
+    AgentHafizListAPIView    
 )
 
 # --- lookups ---

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from api import models as M
-from api.permissions import IsGeneralKoordinator
+from api.views.permissions import IsGeneralKoordinator
 from api import serializer as S
 
 def _get_video_object(kind, pk):

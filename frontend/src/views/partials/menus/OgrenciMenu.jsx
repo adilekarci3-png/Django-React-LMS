@@ -15,7 +15,7 @@ const OgrenciMenu = () => {
       <ul className="dropdown-menu dropdown-menu-end shadow-lg p-2" style={{ minWidth: "250px" }}>
         {/* Panel */}
         <li>
-          <Link className="dropdown-item" to={`/student/dashboard/`}>
+          <Link className="dropdown-item" to={`/eskepogrenci/dashboard/`}>
             <i className="fa-solid fa-table-columns me-2"></i> Panel
           </Link>
         </li>

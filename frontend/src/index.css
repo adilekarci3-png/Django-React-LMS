@@ -71,3 +71,96 @@ button:focus-visible {
   text-align: left !important;
 } */
 html, body, #root { height: 100%; margin: 0; }
+
+/* Header glass + gradient */
+.header-glass {
+  background: linear-gradient(90deg, #0ea5ea 0%, #0066d9 40%, #023e8a 100%);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Nav link görünümü */
+.nav-link-ghost {
+  color: #e5f0ff !important;
+  opacity: .9;
+  position: relative;
+}
+.nav-link-ghost.active,
+.nav-link-ghost:hover {
+  opacity: 1;
+}
+.nav-link-ghost.active::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg,#fff 0%, #bfe3ff 100%);
+  border-radius: 2px;
+}
+
+/* Toggler ikonunu beyaz yap */
+.navbar-toggler-icon-white {
+  width: 1.5rem; height: 1.5rem;
+  display: inline-block;
+  background-image:
+    linear-gradient(#ffffff, #ffffff),
+    linear-gradient(#ffffff, #ffffff),
+    linear-gradient(#ffffff, #ffffff);
+  background-position:
+    center calc(50% - 6px),
+    center,
+    center calc(50% + 6px);
+  background-size: 24px 2px, 24px 2px, 24px 2px;
+  background-repeat: no-repeat;
+}
+
+/* Küçük marka rozeti */
+.brand-badge {
+  display: inline-block;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #b9f3ff, #34d1ff 40%, #0ea5ea 70%, #0369a1 100%);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.25);
+}
+
+/* Gradient CTA */
+.btn-grad {
+  background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+  color: #073b2d !important;
+  border: none;
+}
+.btn-grad:hover { filter: brightness(0.95); }
+
+/* Footer */
+.footer-wrap {
+  background: radial-gradient(1200px 600px at 10% -10%, #0b3a79 0%, #0b2a58 35%, #0a1f44 70%, #0a1835 100%);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.text-footer { color: #cbd5e1; }
+
+.footer-link {
+  color: #dbeafe; text-decoration: none;
+}
+.footer-link:hover { color: #ffffff; text-decoration: underline; }
+
+.footer-input {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e5e7eb;
+}
+.footer-input::placeholder { color: #93a3b8; }
+
+.footer-bottom {
+  background: rgba(0,0,0,0.25);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Küçük rozetler */
+.tiny-badge {
+  font-size: .75rem;
+  padding: .25rem .5rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.15);
+}

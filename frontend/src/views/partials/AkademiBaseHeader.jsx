@@ -40,12 +40,12 @@ function AkademiBaseHeader() {
       {/* Header */}
       <header className="akd-header sticky-top border-0">
         <nav className="navbar navbar-expand-lg navbar-dark">
-          <div className="container-xl">
+          <div className="container-fluid px-3 px-lg-4">
 
             {/* Brand */}
             <Link to="/" className="navbar-brand fw-bold d-flex align-items-center gap-2">
-              <span className="brand-pill">EHAD</span>
-              <span className="d-none d-sm-inline text-muted-100 small">akademi</span>
+              <span className="brand-pill">AKADEMİ</span>
+              
             </Link>
 
             {/* Right cluster (mobile first) */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import Button from "react-bootstrap/Button";
@@ -7,866 +7,726 @@ import Modal from "react-bootstrap/Modal";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
-import UserData from "../plugin/UserData";
+import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
 import moment from "moment";
+import "moment/locale/tr";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
-function ProjeDetail() {
-  // ⬇️ hook'ları en üstte çağır
+function DersSonuRaporuDetail() {
   const api = useAxios();
-  const user = UserData();
-  const { proje_id } = useParams();
+  const userData = useUserData();
+  const { dersSonuRaporu_id } = useParams();
 
-  const [proje, setProje] = useState({});
+  const [detail, setDetail] = useState(null);
   const [variantItem, setVariantItem] = useState(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
+  const [fetching, setFetching] = useState(true);
+
   const [createNote, setCreateNote] = useState({ title: "", note: "" });
   const [selectedNote, setSelectedNote] = useState(null);
+
   const [createMessage, setCreateMessage] = useState({ title: "", message: "" });
   const [questions, setQuestions] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [conversationLoading, setConversationLoading] = useState(false);
+
   const [createReview, setCreateReview] = useState({ rating: 1, review: "" });
   const [studentReview, setStudentReview] = useState(null);
 
   const lastElementRef = useRef(null);
 
-  // Play Ders Silindi Modal
+  useEffect(() => {
+    moment.locale("tr");
+  }, []);
+
+  // Video modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (variant_item) => {
-    setShow(true);
     setVariantItem(variant_item);
+    setShow(true);
   };
 
+  // Note modal
   const [noteShow, setNoteShow] = useState(false);
-  const handleNoteClose = () => setNoteShow(false);
-  const handleNoteShow = (note) => {
-    setNoteShow(true);
+  const handleNoteClose = () => {
+    setNoteShow(false);
+    setSelectedNote(null);
+    setCreateNote({ title: "", note: "" });
+  };
+  const handleNoteShow = (note = null) => {
     setSelectedNote(note);
+    setCreateNote({ title: note?.title || "", note: note?.note || "" });
+    setNoteShow(true);
   };
 
-  const [ConversationShow, setConversationShow] = useState(false);
-  const handleConversationClose = () => setConversationShow(false);
-  const handleConversationShow = (conversation) => {
-    setConversationShow(true);
-    setSelectedConversation(conversation);
-  };
-
-  const [addQuestionShow, setAddQuestionShow] = useState(false);
-  const handleQuestionClose = () => setAddQuestionShow(false);
-  const handleQuestionShow = () => setAddQuestionShow(true);
-
-  const fetchProjeDetail = async () => {
+  // Fetch detail
+  const fetchDetail = async () => {
+    if (!userData?.user_id || !dersSonuRaporu_id) return;
     try {
-      if (!user?.user_id || !proje_id) return;
-
-      // API view desenine göre: /<koordinator_id>/<proje_id>/
-      const response = await api.get(
-        `eskepinstructor/proje-detail/${user.user_id}/${proje_id}/`
+      setFetching(true);
+      const res = await api.get(
+        `eskepinstructor/derssonuraporu-detail/${dersSonuRaporu_id}/${userData.user_id}/`
       );
+      const data = res.data || {};
+      setDetail(data);
+      setQuestions(data?.question_answers || []);
+      setStudentReview(data?.review || null);
 
-      const data = response.data || {};
-      setProje(data);
-      setQuestions(data.question_answers || []);
-      setStudentReview(data.review || null);
-
+      const totalFromCurriculum = (data?.curriculum || []).reduce(
+        (sum, v) => sum + (v?.variant_items?.length || 0),
+        0
+      );
+      const totalLectures = data?.lectures?.length || 0;
+      const total = totalFromCurriculum || totalLectures || 0;
       const completed = data?.completed_lesson?.length || 0;
-      const total = data?.lectures?.length || 0;
-      const percentageCompleted = total ? Math.round((completed / total) * 100) : 0;
-      setCompletionPercentage(percentageCompleted);
-    } catch (error) {
-      console.error("Proje detayları alınırken hata oluştu:", error);
-      try {
-        Toast().fire({ icon: "error", title: "Proje detayları alınamadı" });
-      } catch (_) {}
+      setCompletionPercentage(total ? Math.round((completed / total) * 100) : 0);
+    } catch (e) {
+      console.error(e);
+      try { Toast().fire({ icon: "error", title: "Detay alınamadı" }); } catch(_) {}
+    } finally {
+      setFetching(false);
     }
   };
 
   useEffect(() => {
-    fetchProjeDetail();
+    fetchDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.user_id, proje_id]);
+  }, [userData?.user_id, dersSonuRaporu_id]);
 
-  const handleMarkLessonAsCompleted = (variantItemId) => {
+  // Complete lesson
+  const handleMarkLessonAsCompleted = async (variantItemId) => {
     const key = `lecture_${variantItemId}`;
-    setMarkAsCompletedStatus((prev) => ({ ...prev, [key]: "Updating" }));
-
-    const formdata = new FormData();
-    formdata.append("user_id", user?.user_id || 0);
-    formdata.append("proje_id", proje?.id); // API nesnesi doğrudan proje ise
-    formdata.append("variant_item_id", variantItemId);
-
-    api.post(`instructor/proje-completed/`, formdata).then(() => {
-      fetchProjeDetail();
-      setMarkAsCompletedStatus((prev) => ({ ...prev, [key]: "Updated" }));
-    });
-  };
-
-  const handleNoteChange = (event) => {
-    setCreateNote({ ...createNote, [event.target.name]: event.target.value });
-  };
-
-  const handleSubmitCreateNote = async (e) => {
-    e.preventDefault();
-    if (!user?.user_id || !proje_id) return;
-
-    const formdata = new FormData();
-    formdata.append("koordinator_id", user.user_id);
-    formdata.append("proje_id", proje_id);
-    formdata.append("title", createNote.title);
-    formdata.append("note", createNote.note);
-
+    setMarkAsCompletedStatus((s) => ({ ...s, [key]: "Updating" }));
     try {
-      await api.post(
-        `eskepinstructor/proje-note/${proje_id}/${user.user_id}/`,
-        formdata
-      );
-      fetchProjeDetail();
-      handleNoteClose();
-      Toast().fire({ icon: "success", title: "Not Eklendi" });
-    } catch (error) {
-      console.log(error);
+      const formdata = new FormData();
+      formdata.append("user_id", userData?.user_id || 0);
+      formdata.append("dersSonuRaporu_id", dersSonuRaporu_id);
+      formdata.append("variant_item_id", variantItemId);
+      await api.post(`instructor/derssonuraporu-completed/`, formdata);
+      await fetchDetail();
+      setMarkAsCompletedStatus((s) => ({ ...s, [key]: "Updated" }));
+    } catch (e) {
+      setMarkAsCompletedStatus((s) => ({ ...s, [key]: "Error" }));
     }
   };
 
-  const handleSubmitEditNote = (e, noteId) => {
+  // Notes
+  const handleNoteChange = (e) => {
+    setCreateNote((n) => ({ ...n, [e.target.name]: e.target.value }));
+  };
+  const handleSubmitNote = async (e) => {
     e.preventDefault();
-    if (!user?.user_id || !proje_id || !noteId) return;
-
-    const formdata = new FormData();
-    formdata.append("user_id", user.user_id);
-    formdata.append("koordinator_id", user.user_id);
-    formdata.append("title", createNote.title || selectedNote?.title);
-    formdata.append("note", createNote.note || selectedNote?.note);
-
-    api
-      .patch(
-        `eskepinstructor/proje-note-detail/${proje_id}/${user.user_id}/${noteId}/`,
-        formdata
-      )
-      .then(() => {
-        fetchProjeDetail();
-        Toast().fire({ icon: "success", title: "Not Güncellendi" });
-      });
+    const fd = new FormData();
+    fd.append("koordinator_id", userData?.user_id);
+    fd.append("dersSonuRaporu_id", dersSonuRaporu_id);
+    fd.append("title", (createNote.title || "").trim());
+    fd.append("note", (createNote.note || "").trim());
+    try {
+      if (selectedNote?.id) {
+        await api.patch(
+          `eskepinstructor/derssonuraporu-note-detail/${dersSonuRaporu_id}/${userData?.user_id}/${selectedNote.id}/`,
+          fd
+        );
+        Toast().fire({ icon: "success", title: "Not güncellendi" });
+      } else {
+        await api.post(
+          `eskepinstructor/derssonuraporu-note/${dersSonuRaporu_id}/${userData?.user_id}/`,
+          fd
+        );
+        Toast().fire({ icon: "success", title: "Not eklendi" });
+      }
+      await fetchDetail();
+      handleNoteClose();
+    } catch (e) {
+      Toast().fire({ icon: "error", title: "Not kaydedilemedi" });
+    }
+  };
+  const handleDeleteNote = async (noteId) => {
+    try {
+      await api.delete(
+        `eskepinstructor/derssonuraporu-note-detail/${dersSonuRaporu_id}/${userData?.user_id}/${noteId}/`
+      );
+      await fetchDetail();
+      Toast().fire({ icon: "success", title: "Not silindi" });
+    } catch (e) {
+      Toast().fire({ icon: "error", title: "Not silinemedi" });
+    }
   };
 
-  const handleDeleteNote = (noteId) => {
-    if (!user?.user_id || !proje_id || !noteId) return;
-
-    api
-      .delete(
-        `eskepinstructor/proje-note-detail/${proje_id}/${user.user_id}/${noteId}/`
-      )
-      .then(() => {
-        fetchProjeDetail();
-        Toast().fire({ icon: "success", title: "Not Silindi" });
-      });
+  // QA
+  const handleMessageChange = (e) => {
+    setCreateMessage((m) => ({ ...m, [e.target.name]: e.target.value }));
   };
-
-  const handleMessageChange = (event) => {
-    setCreateMessage({ ...createMessage, [event.target.name]: event.target.value });
+  const refreshConversation = async (questionId) => {
+    try {
+      setConversationLoading(true);
+      const res = await api.get(
+        `eskepinstructor/question-answer-list-create/${dersSonuRaporu_id}/`
+      );
+      const list = res.data || [];
+      setQuestions(list);
+      const fresh = list.find((q) => q.id === questionId) || null;
+      setSelectedConversation(fresh);
+    } finally {
+      setConversationLoading(false);
+    }
   };
-
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
-    if (!user?.user_id || !proje_id) return;
-
-    const formdata = new FormData();
-    formdata.append("proje_id", proje_id);
-    formdata.append("gonderen_id", user.user_id);
-    formdata.append("title", createMessage.title);
-    formdata.append("message", createMessage.message);
-
-    await api
-      .post(`eskepinstructor/question-answer-list-create/${proje_id}/`, formdata)
-      .then(() => {
-        fetchProjeDetail();
-        handleQuestionClose();
-        Toast().fire({ icon: "success", title: "Mesaj Gönderildi" });
-      });
+    const title = createMessage.title?.trim();
+    const message = createMessage.message?.trim();
+    if (!title || !message) {
+      Toast().fire({ icon: "error", title: "Başlık ve mesaj giriniz" });
+      return;
+    }
+    const fd = new FormData();
+    fd.append("dersSonuRaporu_id", dersSonuRaporu_id);
+    fd.append("gonderen_id", userData?.user_id);
+    fd.append("title", title);
+    fd.append("message", message);
+    const res = await api.post(
+      `eskepinstructor/question-answer-list-create/${dersSonuRaporu_id}/`,
+      fd
+    );
+    const newQid = res?.data?.question_id;
+    await fetchDetail();
+    if (newQid) await refreshConversation(newQid);
+    setCreateMessage({ title: "", message: "" });
+    Toast().fire({ icon: "success", title: "Mesaj gönderildi" });
   };
-
   const sendNewMessage = async (e) => {
     e.preventDefault();
-    if (!user?.user_id || !proje_id) return;
-
-    const formdata = new FormData();
-    formdata.append("proje_id", proje_id);
-    formdata.append("gonderen_id", user.user_id);
-    formdata.append("title", createMessage.title);
-    formdata.append("message", createMessage.message);
-
-    api.post(`eskepinstructor/question-answer-message-create/`, formdata).then((res) => {
-      setSelectedConversation(res.data?.question || null);
-    });
+    if (!selectedConversation?.id) {
+      Toast().fire({ icon: "error", title: "Önce bir konuşma seçin" });
+      return;
+    }
+    const msg = createMessage.message?.trim();
+    if (!msg) return;
+    const fd = new FormData();
+    fd.append("dersSonuRaporu_id", dersSonuRaporu_id);
+    fd.append("gonderen_id", userData?.user_id);
+    fd.append("question_id", selectedConversation.id);
+    fd.append("message", msg);
+    await api.post(`eskepinstructor/question-answer-message-create/`, fd);
+    await refreshConversation(selectedConversation.id);
+    setCreateMessage({ title: "", message: "" });
   };
 
   useEffect(() => {
-    if (lastElementRef.current) {
-      lastElementRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    if (lastElementRef.current) lastElementRef.current.scrollIntoView({ behavior: "smooth" });
   }, [selectedConversation]);
 
-  const handleSearchQuestion = (event) => {
-    const query = event.target.value.toLowerCase();
-    if (!query) {
-      setQuestions(proje?.question_answers || []);
-    } else {
-      const filtered = (proje?.question_answers || []).filter((q) =>
-        q.title?.toLowerCase().includes(query)
-      );
-      setQuestions(filtered);
+  const handleSearchQuestion = (e) => {
+    const q = e.target.value.toLowerCase();
+    if (!q) {
+      setQuestions(detail?.question_answers || []);
+      return;
     }
+    setQuestions((detail?.question_answers || []).filter((it) => it?.title?.toLowerCase().includes(q)));
   };
 
-  const handleReviewChange = (event) => {
-    setCreateReview({ ...createReview, [event.target.name]: event.target.value });
+  // Review
+  const handleReviewChange = (e) => {
+    setCreateReview((r) => ({ ...r, [e.target.name]: e.target.value }));
   };
-
-  const handleCreateReviewSubmit = (e) => {
+  const handleCreateReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!user?.user_id || !proje?.id) return;
-
-    const formdata = new FormData();
-    formdata.append("proje_id", proje.id);
-    formdata.append("user_id", user.user_id);
-    formdata.append("rating", createReview.rating);
-    formdata.append("review", createReview.review);
-
-    api.post(`stajer/rate-proje/`, formdata).then(() => {
-      fetchProjeDetail();
-      Toast().fire({ icon: "success", title: "Yorum Oluşturuldu" });
-    });
+    const fd = new FormData();
+    fd.append("dersSonuRaporu_id", detail?.dersSonuRaporu?.id || detail?.id);
+    fd.append("user_id", userData?.user_id);
+    fd.append("rating", createReview.rating);
+    fd.append("review", createReview.review);
+    await api.post(`stajer/rate-derssonuraporu/`, fd);
+    await fetchDetail();
+    Toast().fire({ icon: "success", title: "Yorum oluşturuldu" });
   };
-
-  const handleUpdateReviewSubmit = (e) => {
+  const handleUpdateReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!user?.user_id || !proje?.id || !studentReview?.id) return;
-
-    const formdata = new FormData();
-    formdata.append("proje", proje.id);
-    formdata.append("user", user.user_id);
-    formdata.append("rating", createReview.rating || studentReview?.rating);
-    formdata.append("review", createReview.review || studentReview?.review);
-
-    api
-      .patch(`stajer/review-detail/${user.user_id}/${studentReview.id}/`, formdata)
-      .then(() => {
-        fetchProjeDetail();
-        Toast().fire({ icon: "success", title: "Yorum Güncellendi" });
-      });
+    const fd = new FormData();
+    fd.append("dersSonuRaporu", detail?.dersSonuRaporu?.id || detail?.id);
+    fd.append("user", userData?.user_id);
+    fd.append("rating", createReview.rating || studentReview?.rating);
+    fd.append("review", createReview.review || studentReview?.review);
+    await api.patch(`stajer/review-detail/${userData?.user_id}/${studentReview?.id}/`, fd);
+    await fetchDetail();
+    Toast().fire({ icon: "success", title: "Yorum güncellendi" });
   };
+
+  const isItemCompleted = (item) => {
+    const itemId = item?.id ?? item?.variant_item_id;
+    return detail?.completed_lesson?.some((cl) => cl?.variant_item?.id === itemId) || false;
+  };
+
+  const totalCounts = useMemo(() => {
+    const lessonCount = (detail?.curriculum || []).reduce(
+      (sum, v) => sum + (v?.variant_items?.length || 0),
+      0
+    );
+    return {
+      variants: (detail?.curriculum || []).length,
+      lessons: lessonCount,
+      notes: detail?.notes?.length || 0,
+      questions: (detail?.question_answers || []).length,
+    };
+  }, [detail]);
 
   return (
     <>
       <ESKEPBaseHeader />
 
-      <section className="pt-5 pb-5">
-        <div className="container">
-          {/* Header Here */}
+      <section className="py-4 py-md-5 bg-light">
+        <div className="container-xxl">
           <Header />
-          <div className="row mt-0 mt-md-4">
-            {/* Sidebar Here */}
-            <div className="col-lg-3 col-md-4 col-12">
-              <Sidebar />
+
+          <div className="row g-4 g-lg-5 mt-0 mt-md-4">
+            {/* SOL: Sidebar (sticky kart) */}
+            <div className="col-lg-2 col-xl-2">
+              <div className="position-sticky" style={{ top: 88 }}>
+                <div className="card border-0 shadow-sm rounded-3">
+                  <div className="card-body p-2 p-md-3">
+                    <Sidebar />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="col-lg-9 col-md-8 col-12">
-              <section className="mt-4">
-                <div className="container">
-                  <div className="row">
-                    {/* Main content START */}
-                    <div className="col-12">
-                      <div className="card shadow rounded-2 p-0 mt-n5">
-                        {/* Tabs START */}
-                        <div className="card-header border-bottom px-4 pt-3 pb-0">
-                          <ul className="nav nav-bottom-line py-0" id="course-pills-tab" role="tablist">
-                            {/* Tab item */}
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0 active"
-                                id="course-pills-tab-1"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-1"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-1"
-                                aria-selected="true"
-                              >
-                                Proje Bölümleri
-                              </button>
-                            </li>
-                            {/* Tab item */}
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                id="course-pills-tab-2"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-2"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-2"
-                                aria-selected="false"
-                              >
-                                Notlar
-                              </button>
-                            </li>
-                            {/* Tab item */}
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                id="course-pills-tab-3"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-3"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-3"
-                                aria-selected="false"
-                              >
-                                Konuşma
-                              </button>
-                            </li>
 
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                id="course-pills-tab-4"
-                                data-bs-toggle="pill"
-                                data-bs-target="#course-pills-4"
-                                type="button"
-                                role="tab"
-                                aria-controls="course-pills-4"
-                                aria-selected="false"
-                              >
-                                Not Ver
-                              </button>
-                            </li>
-                          </ul>
-                        </div>
-                        {/* Tabs END */}
+            {/* SAĞ: Özet + Sekmeler */}
+            <div className="col-lg-10 col-xl-10">
+              {/* Özeti */}
+              <div className="card border-0 shadow-sm rounded-3 mb-3">
+                <div className="card-body p-3 p-md-4">
+                  <div className="d-flex align-items-center justify-content-between mb-2">
+                    <h5 className="mb-0">Ders Sonu Raporu Özeti</h5>
+                    {fetching && <span className="badge bg-secondary">Yükleniyor</span>}
+                  </div>
 
-                        {/* Tab contents START */}
-                        <div className="card-body p-sm-4">
-                          <div className="tab-content" id="course-pills-tabContent">
-                            {/* Content START */}
-                            <div
-                              className="tab-pane fade show active"
-                              id="course-pills-1"
-                              role="tabpanel"
-                              aria-labelledby="course-pills-tab-1"
-                            >
-                              {/* Accordion START */}
-                              <div className="accordion accordion-icon accordion-border" id="accordionExample2">
-                                <div className="progress mb-3">
-                                  <div
-                                    className="progress-bar"
-                                    role="progressbar"
-                                    style={{ width: `${completionPercentage}%` }}
-                                    aria-valuenow={completionPercentage}
-                                    aria-valuemin={0}
-                                    aria-valuemax={100}
-                                  >
-                                    {completionPercentage}%
-                                  </div>
+                  <div className="small text-muted mb-3">
+                    {detail?.derssonuraporu?.title || detail?.title || "—"}
+                  </div>
+
+                  <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <span className="small fw-semibold">Tamamlama</span>
+                      <span className="small fw-bold">{completionPercentage}%</span>
+                    </div>
+                    <div className="progress" style={{ height: 10 }}>
+                      <div
+                        className="progress-bar"
+                        role="progressbar"
+                        style={{ width: `${completionPercentage}%` }}
+                        aria-valuenow={completionPercentage}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row text-center g-2">
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Bölüm</div>
+                        <div className="fw-bold">{totalCounts.variants}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Ders</div>
+                        <div className="fw-bold">{totalCounts.lessons}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Not</div>
+                        <div className="fw-bold">{totalCounts.notes}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Konuşma</div>
+                        <div className="fw-bold">{totalCounts.questions}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sekmeler */}
+              <div className="card shadow rounded-3 border-0">
+                <div className="card-header bg-white border-0 px-3 px-md-4 pt-3 pb-0">
+                  <ul className="nav nav-pills gap-2 flex-wrap" role="tablist">
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link active" data-bs-toggle="pill" data-bs-target="#dsr-1" type="button">
+                        Bölümler
+                      </button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link" data-bs-toggle="pill" data-bs-target="#dsr-2" type="button">
+                        Notlar
+                      </button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link" data-bs-toggle="pill" data-bs-target="#dsr-3" type="button">
+                        Konuşma
+                      </button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                      <button className="nav-link" data-bs-toggle="pill" data-bs-target="#dsr-4" type="button">
+                        Not Ver
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="card-body p-3 p-md-4">
+                  <div className="tab-content">
+                    {/* Bölümler */}
+                    <div className="tab-pane fade show active" id="dsr-1">
+                      {fetching ? (
+                        <SkeletonCurriculum />
+                      ) : (
+                        <div className="accordion" id="accDsr">
+                          {(detail?.lectures || []).length > 0 && (
+                            <div className="mb-3">
+                              <h6 className="text-uppercase text-muted small mb-2">Dersler</h6>
+                              {(detail?.lectures || []).map((c, i) => (
+                                <div key={i} className="p-3 border rounded-3 mb-2 bg-white d-flex justify-content-between">
+                                  <span className="fw-semibold">{c?.name}</span>
+                                  <span className="badge bg-light text-dark">{c?.content_duration || "0m 0s"}</span>
                                 </div>
-
-                                {/* (Opsiyonel) Flat lectures listesi */}
-                                {proje?.lectures?.map((c, index) => (
-                                  <div key={index}>
-                                    <h3>{c.title}</h3>
-                                  </div>
-                                ))}
-
-                                {proje?.curriculum?.map((c, index) => (
-                                  <div className="accordion-item mb-3 p-3 bg-light" key={index}>
-                                    <h6 className="accordion-header font-base" id={`heading-${index}`}>
-                                      <button
-                                        className="accordion-button p-3 w-100 bg-light btn border fw-bold rounded d-sm-flex d-inline-block collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target={`#collapse-${c.variant_id}`}
-                                        aria-expanded="true"
-                                        aria-controls={`collapse-${c.variant_id}`}
-                                      >
-                                        {c.title}
-                                        <span className="small ms-0 ms-sm-2">
-                                          ({c.variant_items?.length} Ders{c.variant_items?.length > 1 && "s"})
-                                        </span>
-                                      </button>
-                                    </h6>
-
-                                    <div
-                                      id={`collapse-${c.variant_id}`}
-                                      className="accordion-collapse collapse show"
-                                      aria-labelledby={`heading-${index}`}
-                                      data-bs-parent="#accordionExample2"
-                                    >
-                                      <div className="accordion-body mt-3">
-                                        {c.variant_items?.map((l, idx) => (
-                                          <div key={idx}>
-                                            <div className="d-flex justify-content-between align-items-center">
-                                              <div className="position-relative d-flex align-items-center">
-                                                {l.file ? (
-                                                  <a
-                                                    href={l.file}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="btn btn-primary-soft btn-round btn-sm mb-0 stretched-link position-static"
-                                                  >
-                                                    <i className="fas fa-file-pdf me-1" /> PDF'yi Görüntüle
-                                                  </a>
-                                                ) : (
-                                                  <span className="text-muted">PDF mevcut değil</span>
-                                                )}
-                                              </div>
-                                              <div className="d-flex">
-                                                <p className="mb-0">{l.content_duration || "0m 0s"}</p>
-                                                <input
-                                                  type="checkbox"
-                                                  className="form-check-input ms-2"
-                                                  onChange={() => handleMarkLessonAsCompleted(l.variant_item_id)}
-                                                  checked={proje.completed_lesson?.some(
-                                                    (cl) => cl.variant_item?.id === l.id
-                                                  )}
-                                                />
-                                              </div>
-                                            </div>
-                                            <hr />
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                              {/* Accordion END */}
+                              ))}
                             </div>
+                          )}
 
-                            <div className="tab-pane fade" id="course-pills-2" role="tabpanel" aria-labelledby="course-pills-tab-2">
-                              <div className="card">
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  <div className="d-sm-flex justify-content-between align-items-center">
-                                    <h4 className="mb-0 p-3">Tüm Notlar</h4>
-                                    {/* Not Ekle Modal */}
-                                    <button
-                                      type="button"
-                                      className="btn btn-primary me-3"
-                                      data-bs-toggle="modal"
-                                      data-bs-target="#exampleModal"
-                                    >
-                                      Not Ekle <i className="fas fa-pen"></i>
-                                    </button>
-                                    <div className="modal fade" id="exampleModal" tabIndex={-1} aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                      <div className="modal-dialog modal-dialog-centered">
-                                        <div className="modal-content">
-                                          <div className="modal-header">
-                                            <h5 className="modal-title" id="exampleModalLabel">
-                                              Yeni Not Ekle <i className="fas fa-pen"></i>
-                                            </h5>
-                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Kapat" />
-                                          </div>
-                                          <div className="modal-body">
-                                            <form onSubmit={handleSubmitCreateNote}>
-                                              <div className="mb-3">
-                                                <label htmlFor="noteTitle" className="form-label">
-                                                  Not Başlığı
-                                                </label>
-                                                <input type="text" className="form-control" id="noteTitle" name="title" onChange={handleNoteChange} />
-                                              </div>
-                                              <div className="mb-3">
-                                                <label htmlFor="noteContent" className="form-label">
-                                                  İçerik
-                                                </label>
-                                                <textarea
-                                                  className="form-control"
-                                                  id="noteContent"
-                                                  cols="30"
-                                                  rows="10"
-                                                  name="note"
-                                                  onChange={handleNoteChange}
-                                                ></textarea>
-                                              </div>
-                                              <button type="button" className="btn btn-secondary me-2" data-bs-dismiss="modal">
-                                                <i className="fas fa-arrow-left"></i> Kapat
-                                              </button>
-                                              <button type="submit" className="btn btn-primary">
-                                                Notu Kaydet <i className="fas fa-check-circle"></i>
-                                              </button>
-                                            </form>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
+                          {(detail?.curriculum || []).map((c, index) => (
+                            <div className="accordion-item border rounded-3 overflow-hidden mb-3" key={index}>
+                              <h2 className="accordion-header" id={`h-${index}`}>
+                                <button
+                                  className="accordion-button collapsed bg-white fw-semibold"
+                                  type="button"
+                                  data-bs-toggle="collapse"
+                                  data-bs-target={`#col-${c?.variant_id}`}
+                                >
+                                  <div className="d-flex align-items-center w-100">
+                                    <span className="me-2">{c?.title}</span>
+                                    <span className="badge bg-secondary-subtle text-dark ms-auto">
+                                      {c?.variant_items?.length || 0} Ders
+                                    </span>
                                   </div>
-                                </div>
+                                </button>
+                              </h2>
+                              <div id={`col-${c?.variant_id}`} className="accordion-collapse collapse" data-bs-parent="#accDsr">
+                                <div className="accordion-body bg-light">
+                                  {(c?.variant_items || []).map((l, idx) => {
+                                    const itemId = l?.id ?? l?.variant_item_id;
+                                    const completed = isItemCompleted(l);
+                                    return (
+                                      <div key={idx} className="p-3 bg-white rounded-3 mb-2 border">
+                                        <div className="d-flex justify-content-between align-items-center gap-3">
+                                          <div className="d-flex align-items-center gap-2 flex-wrap">
+                                            <span className={`badge ${completed ? "bg-success" : "bg-light text-dark"}`}>
+                                              {completed ? "Tamamlandı" : "Bekliyor"}
+                                            </span>
 
-                                <div className="card-body p-0 pt-3">
-                                  {/* Note item start */}
-                                  {proje?.notes?.map((n, index) => (
-                                    <div className="row g-4 p-3" key={n.id || index}>
-                                      <div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
-                                        <h5>{n.title}</h5>
-                                        <p>{n.notes || n.note}</p>
-                                        {/* Buttons */}
-                                        <div className="hstack gap-3 flex-wrap">
-                                          <button onClick={() => handleNoteShow(n)} className="btn btn-success mb-0">
-                                            <i className="bi bi-pencil-square me-2" /> Düzenle
-                                          </button>
-                                          <button onClick={() => handleDeleteNote(n.id)} className="btn btn-danger mb-0">
-                                            <i className="bi bi-trash me-2" /> Sil
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
+                                            {l?.file ? (
+                                              <a
+                                                href={l.file}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-outline-primary btn-sm"
+                                              >
+                                                <i className="fas fa-file-pdf me-1" /> PDF'yi Görüntüle
+                                              </a>
+                                            ) : (
+                                              <span className="text-muted small">PDF yok</span>
+                                            )}
 
-                                  {(proje?.notes?.length || 0) < 1 && <p className="mt-3 p-3">Not Bulunamadı</p>}
-                                  <hr />
-                                </div>
-                              </div>
-                            </div>
+                                            {l?.video_url && (
+                                              <button
+                                                type="button"
+                                                className="btn btn-outline-secondary btn-sm"
+                                                onClick={() => handleShow(l)}
+                                              >
+                                                <i className="fas fa-play me-1" /> Videoyu Aç
+                                              </button>
+                                            )}
+                                          </div>
 
-                            <div className="tab-pane fade" id="course-pills-3" role="tabpanel" aria-labelledby="course-pills-tab-3">
-                              <div className="card">
-                                {/* Card header */}
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  {/* Title */}
-                                  <h4 className="mb-3 p-3">Konuşma</h4>
-                                  <form className="row g-4 p-3">
-                                    {/* Search */}
-                                    <div className="col-sm-6 col-lg-9">
-                                      <div className="position-relative">
-                                        <input
-                                          className="form-control pe-5 bg-transparent"
-                                          type="search"
-                                          placeholder="Ara"
-                                          aria-label="Ara"
-                                          onChange={handleSearchQuestion}
-                                        />
-                                        <button
-                                          className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
-                                          type="button"
-                                        >
-                                          <i className="fas fa-search fs-6 " />
-                                        </button>
-                                      </div>
-                                    </div>
-                                    <div className="col-sm-6 col-lg-3">
-                                      <button
-                                        onClick={handleQuestionShow}
-                                        className="btn btn-primary mb-0 w-100"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalCreatePost"
-                                        type="button"
-                                      >
-                                        Soru Sor
-                                      </button>
-                                    </div>
-                                  </form>
-                                </div>
-                                {/* Card body */}
-                                <div className="card-body p-0 pt-3">
-                                  <div className="vstack gap-3 p-3">
-                                    {/* Question item START */}
-                                    {questions?.map((q, index) => (
-                                      <div className="shadow rounded-3 p-3" key={q.id || index}>
-                                        <div className="d-sm-flex justify-content-sm-between mb-3">
-                                          <div className="d-flex align-items-center">
-                                            <div className="avatar avatar-sm flex-shrink-0">
-                                              <img
-                                                src={q.profile?.image}
-                                                className="avatar-img rounded-circle"
-                                                alt="avatar"
-                                                style={{
-                                                  width: "60px",
-                                                  height: "60px",
-                                                  borderRadius: "50%",
-                                                  objectFit: "cover",
-                                                }}
+                                          <div className="d-flex align-items-center gap-2">
+                                            <span className="text-muted small">{l?.content_duration || "0m 0s"}</span>
+                                            <div className="form-check">
+                                              <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                onChange={() => handleMarkLessonAsCompleted(itemId)}
+                                                checked={completed}
                                               />
                                             </div>
-                                            <div className="ms-2">
-                                              <h6 className="mb-0">
-                                                <span className="text-decoration-none text-dark">
-                                                  {q.profile?.full_name}
-                                                </span>
-                                              </h6>
-                                              <small>{moment(q.date).format("DD MMM, YYYY")}</small>
-                                            </div>
                                           </div>
                                         </div>
-                                        <h5>{q.title}</h5>
-                                        <button className="btn btn-primary btn-sm mb-3 mt-3" onClick={() => handleConversationShow(q)}>
-                                          Konuşmaya Katıl <i className="fas fa-arrow-right"></i>
-                                        </button>
                                       </div>
-                                    ))}
-                                  </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </div>
+                          ))}
 
-                            <div className="tab-pane fade" id="course-pills-4" role="tabpanel" aria-labelledby="course-pills-tab-4">
-                              <div className="card">
-                                {/* Card header */}
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  <h4 className="mb-3 p-3">
-                                    {studentReview?.rating && <span>Not Ver {studentReview.rating}</span>}
-                                  </h4>
-                                  <div className="mt-2">
-                                    {!studentReview && (
-                                      <form className="row g-3 p-3" onSubmit={handleCreateReviewSubmit}>
-                                        {/* Rating */}
-                                        <div className="col-12 bg-light-input">
-                                          <select
-                                            id="inputState2"
-                                            className="form-select js-choice"
-                                            onChange={handleReviewChange}
-                                            name="rating"
-                                            defaultValue={studentReview?.rating || 1}
-                                          >
-                                            <option value={1}>★☆☆☆☆ (1/5)</option>
-                                            <option value={2}>★★☆☆☆ (2/5)</option>
-                                            <option value={3}>★★★☆☆ (3/5)</option>
-                                            <option value={4}>★★★★☆ (4/5)</option>
-                                            <option value={5}>★★★★★ (5/5)</option>
-                                          </select>
-                                        </div>
-                                        {/* Message */}
-                                        <div className="col-12 bg-light-input">
-                                          <textarea
-                                            className="form-control"
-                                            placeholder="Yorumun"
-                                            rows={3}
-                                            onChange={handleReviewChange}
-                                            name="review"
-                                            defaultValue={createReview?.review}
-                                          />
-                                        </div>
-                                        {/* Button */}
-                                        <div className="col-12">
-                                          <button type="submit" className="btn btn-primary mb-0">
-                                            Not Ver
-                                          </button>
-                                        </div>
-                                      </form>
-                                    )}
+                          {(detail?.curriculum?.length || 0) < 1 &&
+                            (detail?.lectures?.length || 0) < 1 && (
+                              <EmptyState title="İçerik Bulunamadı" subtitle="Henüz ders veya müfredat eklenmemiş." />
+                            )}
+                        </div>
+                      )}
+                    </div>
 
-                                    {studentReview && (
-                                      <form className="row g-3 p-3" onSubmit={handleUpdateReviewSubmit}>
-                                        {/* Rating */}
-                                        <div className="col-12 bg-light-input">
-                                          <select
-                                            id="inputState2"
-                                            className="form-select js-choice"
-                                            onChange={handleReviewChange}
-                                            name="rating"
-                                            defaultValue={studentReview?.rating || 1}
-                                          >
-                                            <option value={1}>★☆☆☆☆ (1/5)</option>
-                                            <option value={2}>★★☆☆☆ (2/5)</option>
-                                            <option value={3}>★★★☆☆ (3/5)</option>
-                                            <option value={4}>★★★★☆ (4/5)</option>
-                                            <option value={5}>★★★★★ (5/5)</option>
-                                          </select>
-                                        </div>
-                                        {/* Message */}
-                                        <div className="col-12 bg-light-input">
-                                          <textarea
-                                            className="form-control"
-                                            placeholder="Yorumun"
-                                            rows={3}
-                                            onChange={handleReviewChange}
-                                            name="review"
-                                            defaultValue={studentReview?.review}
-                                          />
-                                        </div>
-                                        {/* Button */}
-                                        <div className="col-12">
-                                          <button type="submit" className="btn btn-primary mb-0">
-                                            Yorumu Güncelle
-                                          </button>
-                                        </div>
-                                      </form>
-                                    )}
-                                  </div>
+                    {/* Notlar */}
+                    <div className="tab-pane fade" id="dsr-2">
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="mb-0">Notlar</h5>
+                        <Button className="btn btn-primary" onClick={() => handleNoteShow()}>
+                          Not Ekle <i className="fas fa-pen" />
+                        </Button>
+                      </div>
+
+                      {fetching ? (
+                        <SkeletonNotes />
+                      ) : (
+                        <div className="vstack gap-3">
+                          {(detail?.notes || []).map((n) => (
+                            <div key={n?.id} className="border rounded-3 p-3 bg-white shadow-sm">
+                              <div className="d-flex justify-content-between align-items-start">
+                                <div>
+                                  <h6 className="mb-1">{n?.title}</h6>
+                                  <p className="mb-0 text-muted">{n?.note || n?.notes}</p>
                                 </div>
+                                <div className="ms-3 d-flex gap-2">
+                                  <button type="button" onClick={() => handleNoteShow(n)} className="btn btn-sm btn-outline-success">
+                                    <i className="bi bi-pencil-square me-1" /> Düzenle
+                                  </button>
+                                  <button type="button" onClick={() => handleDeleteNote(n?.id)} className="btn btn-sm btn-outline-danger">
+                                    <i className="bi bi-trash me-1" /> Sil
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {(detail?.notes?.length || 0) < 1 && (
+                            <EmptyState title="Not Bulunamadı" subtitle="Henüz not eklenmemiş." />
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Konuşma */}
+                    <div className="tab-pane fade" id="dsr-3">
+                      <div className="row g-3">
+                        {/* Sol: liste */}
+                        <div className="col-lg-5">
+                          <div className="card border-0 shadow-sm">
+                            <div className="card-body">
+                              <div className="input-group mb-3">
+                                <input className="form-control" type="search" placeholder="Konuşmalarda ara" onChange={handleSearchQuestion} />
+                                <button className="btn btn-outline-primary" type="button" onClick={() => handleNoteShow()}>
+                                  Soru Sor
+                                </button>
+                              </div>
+                              <div className="vstack gap-2" style={{ maxHeight: 480, overflowY: "auto" }}>
+                                {(questions || []).map((q) => (
+                                  <button
+                                    key={q?.id}
+                                    className={`text-start p-3 rounded-3 border ${
+                                      selectedConversation?.id === q?.id ? "bg-primary text-white" : "bg-white"
+                                    }`}
+                                    onClick={() => (setSelectedConversation(q), refreshConversation(q.id))}
+                                  >
+                                    <div className="d-flex align-items-center gap-2">
+                                      <img
+                                        src={q?.profile?.image}
+                                        alt="avatar"
+                                        className="rounded-circle"
+                                        style={{ width: 40, height: 40, objectFit: "cover" }}
+                                      />
+                                      <div>
+                                        <div className="fw-semibold small mb-1">{q?.profile?.full_name}</div>
+                                        <div className="small text-truncate" style={{ maxWidth: 220 }}>
+                                          {q?.title}
+                                        </div>
+                                        <div className="small opacity-75">{moment(q?.date).format("DD MMM, YYYY")}</div>
+                                      </div>
+                                    </div>
+                                  </button>
+                                ))}
+                                {(questions?.length || 0) < 1 && (
+                                  <EmptyState title="Konuşma yok" subtitle="Yeni bir soru oluşturarak başlayın." />
+                                )}
                               </div>
                             </div>
                           </div>
                         </div>
-                        {/* Tab contents END */}
+
+                        {/* Sağ: mesajlar */}
+                        <div className="col-lg-7">
+                          <div className="card border-0 shadow-sm">
+                            <div className="card-body">
+                              {selectedConversation ? (
+                                <>
+                                  <div className="d-flex align-items-center justify-content-between mb-3">
+                                    <h6 className="mb-0">{selectedConversation?.title}</h6>
+                                    <span className="badge bg-light text-dark">
+                                      {selectedConversation?.messages?.length || 0} mesaj
+                                    </span>
+                                  </div>
+                                  <div className="border rounded-3" style={{ height: 420, overflowY: "auto" }}>
+                                    {conversationLoading ? (
+                                      <div className="text-center py-5">Yükleniyor…</div>
+                                    ) : (
+                                      <div className="p-3">
+                                        {(selectedConversation?.messages || []).map((m, i) => (
+                                          <div key={m?.id || i} className="d-flex gap-2 mb-3">
+                                            <img
+                                              className="rounded-circle mt-1"
+                                              src={
+                                                m?.profile?.image?.startsWith("http://127.0.0.1:8000")
+                                                  ? m?.profile?.image
+                                                  : `http://127.0.0.1:8000${m?.profile?.image || ""}`
+                                              }
+                                              style={{ width: 36, height: 36, objectFit: "cover" }}
+                                              alt="user"
+                                            />
+                                            <div className="bg-light p-2 px-3 rounded-3 w-100">
+                                              <div className="d-flex justify-content-between align-items-center">
+                                                <div className="fw-semibold small">{m?.profile?.full_name}</div>
+                                                <div className="small text-muted">{moment(m?.date).format("DD MMM, YYYY")}</div>
+                                              </div>
+                                              <div className="mt-2">{m?.message}</div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                        <div ref={lastElementRef} />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <form className="d-flex gap-2 mt-3" onSubmit={sendNewMessage}>
+                                    <textarea
+                                      name="message"
+                                      className="form-control bg-light"
+                                      rows={2}
+                                      onChange={handleMessageChange}
+                                      placeholder="Mesaj yazın"
+                                      value={createMessage.message}
+                                      required
+                                    />
+                                    <button className="btn btn-primary" type="submit">
+                                      Gönder <i className="fas fa-paper-plane" />
+                                    </button>
+                                  </form>
+                                </>
+                              ) : (
+                                <EmptyState title="Konuşma seçilmedi" subtitle="Soldan bir konuşma seçin veya yeni bir soru oluşturun." />
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    {/* Main content END */}
+
+                    {/* Not Ver */}
+                    <div className="tab-pane fade" id="dsr-4">
+                      <div className="card border-0">
+                        <div className="card-body p-0">
+                          <div className="d-flex align-items-center justify-content-between mb-3">
+                            <h5 className="mb-0">
+                              {studentReview?.rating ? `Notunuz: ${studentReview.rating}/5` : "Not Ver"}
+                            </h5>
+                          </div>
+
+                          {!studentReview ? (
+                            <form className="row g-3" onSubmit={handleCreateReviewSubmit}>
+                              <div className="col-12">
+                                <label className="form-label">Puan</label>
+                                <select className="form-select" onChange={handleReviewChange} name="rating" defaultValue={1}>
+                                  <option value={1}>★☆☆☆☆ (1/5)</option>
+                                  <option value={2}>★★☆☆☆ (2/5)</option>
+                                  <option value={3}>★★★☆☆ (3/5)</option>
+                                  <option value={4}>★★★★☆ (4/5)</option>
+                                  <option value={5}>★★★★★ (5/5)</option>
+                                </select>
+                              </div>
+                              <div className="col-12">
+                                <label className="form-label">Yorum</label>
+                                <textarea className="form-control" rows={3} onChange={handleReviewChange} name="review" />
+                              </div>
+                              <div className="col-12 d-flex justify-content-end">
+                                <button type="submit" className="btn btn-primary">Not Ver</button>
+                              </div>
+                            </form>
+                          ) : (
+                            <form className="row g-3" onSubmit={handleUpdateReviewSubmit}>
+                              <div className="col-12">
+                                <label className="form-label">Puan</label>
+                                <select className="form-select" onChange={handleReviewChange} name="rating" defaultValue={studentReview?.rating}>
+                                  <option value={1}>★☆☆☆☆ (1/5)</option>
+                                  <option value={2}>★★☆☆☆ (2/5)</option>
+                                  <option value={3}>★★★☆☆ (3/5)</option>
+                                  <option value={4}>★★★★☆ (4/5)</option>
+                                  <option value={5}>★★★★★ (5/5)</option>
+                                </select>
+                              </div>
+                              <div className="col-12">
+                                <label className="form-label">Yorum</label>
+                                <textarea className="form-control" rows={3} onChange={handleReviewChange} name="review" defaultValue={studentReview?.review} />
+                              </div>
+                              <div className="col-12 d-flex justify-content-end">
+                                <button type="submit" className="btn btn-primary">Yorumu Güncelle</button>
+                              </div>
+                            </form>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {/* /Not Ver */}
                   </div>
                 </div>
-              </section>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Ders Silindi Modal */}
-      <Modal show={show} size="lg" onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
-        </Modal.Header>
+      {/* Video Modal */}
+      <Modal show={show} size="lg" onHide={handleClose} centered>
+        <Modal.Header closeButton><Modal.Title>Ders: {variantItem?.title}</Modal.Title></Modal.Header>
         <Modal.Body>
-          <ReactPlayer url={variantItem?.file} controls width={"100%"} height={"100%"} />
+          <ReactPlayer url={variantItem?.file || variantItem?.video_url} controls width="100%" height="100%" />
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Kapat
-          </Button>
-        </Modal.Footer>
+        <Modal.Footer><Button variant="secondary" onClick={handleClose}>Kapat</Button></Modal.Footer>
       </Modal>
 
-      {/* Note Edit Modal */}
-      <Modal show={noteShow} size="lg" onHide={handleNoteClose}>
+      {/* Note Modal */}
+      <Modal show={noteShow} size="lg" onHide={handleNoteClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Not: {selectedNote?.title}</Modal.Title>
+          <Modal.Title>{selectedNote?.id ? `Notu Düzenle: ${selectedNote.title}` : "Yeni Not Ekle"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form onSubmit={(e) => handleSubmitEditNote(e, selectedNote?.id)}>
+          <form onSubmit={handleSubmitNote}>
             <div className="mb-3">
               <label className="form-label">Not Başlığı</label>
-              <input
-                defaultValue={selectedNote?.title}
-                name="title"
-                onChange={handleNoteChange}
-                type="text"
-                className="form-control"
-              />
+              <input value={createNote.title} name="title" onChange={handleNoteChange} type="text" className="form-control" required />
             </div>
             <div className="mb-3">
               <label className="form-label">İçerik</label>
-              <textarea
-                defaultValue={selectedNote?.note}
-                name="note"
-                onChange={handleNoteChange}
-                className="form-control"
-                cols="30"
-                rows="10"
-              ></textarea>
+              <textarea value={createNote.note} name="note" onChange={handleNoteChange} className="form-control" rows={8} required />
             </div>
-            <button type="button" className="btn btn-secondary me-2" onClick={handleNoteClose}>
-              <i className="fas fa-arrow-left"></i> Kapat
-            </button>
-            <button type="submit" className="btn btn-primary">
-              Kaydet <i className="fas fa-check-circle"></i>
-            </button>
-          </form>
-        </Modal.Body>
-      </Modal>
-
-      {/* Conversation Modal */}
-      <Modal show={ConversationShow} size="lg" onHide={handleConversationClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Ders: {selectedConversation?.title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="border p-2 p-sm-4 rounded-3">
-            <ul className="list-unstyled mb-0" style={{ overflowY: "scroll", height: "500px" }}>
-              {selectedConversation?.messages?.map((m, index) => (
-                <li className="comment-item mb-3" key={m.id || index}>
-                  <div className="d-flex">
-                    <div className="avatar avatar-sm flex-shrink-0">
-                      <img
-                        className="avatar-img rounded-circle"
-                        src={
-                          m.profile?.image?.startsWith("http://127.0.0.1:8000")
-                            ? m.profile.image
-                            : m.profile?.image
-                            ? `http://127.0.0.1:8000${m.profile.image}`
-                            : ""
-                        }
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                        }}
-                        alt="profile"
-                      />
-                    </div>
-                    <div className="ms-2">
-                      <div className="bg-light p-3 rounded w-100">
-                        <div className="d-flex w-100 justify-content-center">
-                          <div className="me-2 ">
-                            <h6 className="mb-1 lead fw-bold">
-                              <span className="text-decoration-none text-dark">
-                                {m.profile?.full_name}
-                              </span>
-                              <br />
-                              <span style={{ fontSize: "12px", color: "gray" }}>
-                                {moment(m.date).format("DD MMM, YYYY")}
-                              </span>
-                            </h6>
-                            <p className="mb-0 mt-3">{m.message}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              ))}
-
-              <div ref={lastElementRef}></div>
-            </ul>
-
-            <form className="w-100 d-flex" onSubmit={sendNewMessage}>
-              <textarea
-                name="message"
-                className="one form-control pe-4 bg-light w-75"
-                rows="2"
-                onChange={handleMessageChange}
-                placeholder="Sorunuz Nedir?"
-              ></textarea>
-              <button className="btn btn-primary ms-2 mb-0 w-25" type="submit">
-                Gönder <i className="fas fa-paper-plane"></i>
-              </button>
-            </form>
-          </div>
-        </Modal.Body>
-      </Modal>
-
-      {/* Soru Sor Modal */}
-      <Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Soru Sor</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form onSubmit={handleSaveQuestion}>
-            <div className="mb-3">
-              <label className="form-label">Soru Başlığı</label>
-              <input
-                value={createMessage.title}
-                name="title"
-                onChange={handleMessageChange}
-                type="text"
-                className="form-control"
-              />
+            <div className="d-flex justify-content-end gap-2">
+              <button type="button" className="btn btn-outline-secondary" onClick={handleNoteClose}>Kapat</button>
+              <button type="submit" className="btn btn-primary">{selectedNote?.id ? "Güncelle" : "Kaydet"}</button>
             </div>
-            <div className="mb-3">
-              <label className="form-label">Mesaj</label>
-              <textarea
-                value={createMessage.message}
-                name="message"
-                onChange={handleMessageChange}
-                className="form-control"
-                cols="30"
-                rows="10"
-              ></textarea>
-            </div>
-            <button type="button" className="btn btn-secondary me-2" onClick={handleQuestionClose}>
-              <i className="fas fa-arrow-left"></i> Kapat
-            </button>
-            <button type="submit" className="btn btn-primary">
-              Mesaj Gönder <i className="fas fa-check-circle"></i>
-            </button>
           </form>
         </Modal.Body>
       </Modal>
@@ -876,4 +736,49 @@ function ProjeDetail() {
   );
 }
 
-export default ProjeDetail;
+export default DersSonuRaporuDetail;
+
+function EmptyState({ title = "Kayıt bulunamadı", subtitle = "" }) {
+  return (
+    <div className="text-center p-4 border rounded-3 bg-white">
+      <div className="display-6 mb-2">🗂️</div>
+      <h6 className="mb-1">{title}</h6>
+      {subtitle && <div className="text-muted small">{subtitle}</div>}
+    </div>
+  );
+}
+
+function SkeletonCurriculum() {
+  return (
+    <div className="vstack gap-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="p-3 bg-white border rounded-3">
+          <div className="placeholder-glow">
+            <span className="placeholder col-6"></span>
+            <span className="placeholder col-4 ms-2"></span>
+          </div>
+          <div className="mt-2 placeholder-glow">
+            <span className="placeholder col-12"></span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SkeletonNotes() {
+  return (
+    <div className="vstack gap-2">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="p-3 bg-white border rounded-3">
+          <div className="placeholder-glow">
+            <span className="placeholder col-5"></span>
+          </div>
+          <div className="mt-2 placeholder-glow">
+            <span className="placeholder col-9"></span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

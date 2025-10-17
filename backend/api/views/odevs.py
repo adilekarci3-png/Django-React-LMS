@@ -5,7 +5,9 @@ from django.contrib.auth import get_user_model
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import serializers
 
-from utils.permissions import IsEskepKoordinatorOrTeacher
+from api.views.utils import KoordinatorLookupMixin
+from api.views.permissions import IsEskepKoordinatorOrTeacher
+
 # from api import serializers as api_serializer
 from .base import BaseListAPIView, BaseCreateAPIView, BaseUpdateAPIView,BaseDestroyAPIView 
 # from api import models as api_models
@@ -15,16 +17,17 @@ from .. import models as api_models, serializers as api_serializer
 from rest_framework.response import Response
 User = get_user_model()
 
-class EskepInstructorOdevListAPIView(BaseListAPIView):
+class EskepInstructorOdevListAPIView(KoordinatorLookupMixin, BaseListAPIView):
     serializer_class   = api_serializer.OdevListSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user_id = self.kwargs.get("user_id")
-        try:
-            koordinator = api_models.Koordinator.objects.select_related("user").get(user__id=user_id)
-        except api_models.Koordinator.DoesNotExist:
+        koordinator = self.get_koordinator()
+        if not koordinator:
             return api_models.Odev.objects.none()
+
+        base_qs = api_models.Odev.objects.all() if self.is_genel_koordinator(koordinator) \
+                  else api_models.Odev.objects.filter(koordinator=koordinator)
 
         prefetch_items = Prefetch(
             "variantodev_set__variantOdev_items",
@@ -32,19 +35,15 @@ class EskepInstructorOdevListAPIView(BaseListAPIView):
         )
 
         return (
-            api_models.Odev.objects
-            .filter(
-                Q(inserteduser__stajer__instructor=koordinator) |
-                Q(inserteduser__ogrenci__instructor=koordinator) |
-                Q(koordinator=koordinator)
+            base_qs
+            .select_related(
+                "inserteduser", "koordinator", "koordinator__user", "category",
+                "inserteduser__stajer", "inserteduser__ogrenci"
             )
-            .select_related("inserteduser", "koordinator", "koordinator__user", "category",
-                            "inserteduser__stajer", "inserteduser__ogrenci")
             .prefetch_related("variantodev_set", prefetch_items)
             .order_by("-date", "-id")
             .distinct()
         )
-
 
 class EskepStajerOdevListAPIView(BaseListAPIView):
     serializer_class = api_serializer.OdevSerializer

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
 import useAxios from "../../utils/useAxios";
+import "./css/HDMGirisPage.css";
 
 // Menü parçaları
 import KoordinatorMenu from "../partials/menus/CoordinatorMenu";
@@ -14,85 +15,78 @@ function ESKEPBaseHeader() {
   const navigate = useNavigate();
   const api = useAxios();
 
-  const rehydrated = useAuthStore((state) => state.rehydrated);
-  const [isLoggedIn, hasBaseRole, hasSubRole, hasAnySubRole] = useAuthStore(
-    (state) => [
-      state.isLoggedIn,
-      state.hasBaseRole,
-      state.hasSubRole,
-      state.hasAnySubRole,
-    ]
-  );
+  const rehydrated  = useAuthStore((s) => s.rehydrated);
+  const isLoggedIn  = useAuthStore((s) => s.isLoggedIn);
+  const hasBaseRole = useAuthStore((s) => s.hasBaseRole);
+  const hasSubRole  = useAuthStore((s) => s.hasSubRole);
+  const hasAnySubRole = useAuthStore((s) => s.hasAnySubRole);
+  const setRoleData = useAuthStore((s) => s.setRoleData);
+
+  // Mobilde bir linke tıklanınca menüyü kapat
+  const closeMobileMenu = useCallback(() => {
+    const el = document.getElementById("eskepNav");
+    if (el?.classList?.contains("show")) {
+      const bsCollapse = window.bootstrap?.Collapse?.getOrCreateInstance(el);
+      bsCollapse?.hide();
+    }
+  }, []);
 
   useEffect(() => {
     if (!rehydrated) return;
-
-    const loggedIn = isLoggedIn?.();
-
-    if (!loggedIn) {
+    if (!isLoggedIn?.()) {
       navigate("/login/");
       return;
     }
-
-    // Roller yüklenmemişse getir
     api
-      .get(`user-role-detail/`)
-      .then((res) => {
-        useAuthStore.getState().setRoleData(res.data);
-      })
-      .catch((err) => {
-        console.error("Rol alınamadı:", err);
-      });
-  }, [rehydrated, isLoggedIn]);
+      .get("user-role-detail/")
+      .then((res) => setRoleData(res.data))
+      .catch((err) => console.error("Rol alınamadı:", err));
+  }, [rehydrated, isLoggedIn, api, navigate, setRoleData]);
 
-  const handleSearchSubmit = () => {
-    if (searchQuery.trim()) {
-      navigate(`/search/?search=${searchQuery}`);
-    }
+  const onSubmitSearch = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) navigate(`/search/?search=${encodeURIComponent(q)}`);
   };
 
   if (!rehydrated) return null;
 
-  const styles = {
-    section: {
-      fontSize: "16px",
-      fontWeight: "500",
-      color: "#ffffff",
-      background: "linear-gradient(135deg, #5bc0de, #ff7f50)",
-      borderBottom: "4px solid #ffb6b9",
-    },
-  };
-
   return (
-    <div style={styles.section}>
-      <nav className="navbar navbar-expand-lg py-2 px-3">
-        <div className="container">
-          <Link className="navbar-brand text-white fw-bold" to="/">
-            EHAD
+    <header className="hdm-min-header eskep-theme eskep-theme--sage">
+      <nav className="navbar navbar-expand-lg" aria-label="ESKEP üst menü">
+        <div className="container-fluid px-3 px-lg-4">
+          <Link
+            className="navbar-brand fw-semibold text-white d-flex align-items-center"
+            to="/"
+            onClick={closeMobileMenu}
+          >
+            <span className="hdm-logo-dot me-2" />
+            ESKEP
           </Link>
+
           <button
-            className="navbar-toggler"
+            className="navbar-toggler border-0 text-white"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
+            data-bs-target="#eskepNav"
+            aria-controls="eskepNav"
+            aria-expanded="false"
+            aria-label="Menüyü Aç/Kapat"
           >
-            <span className="navbar-toggler-icon" />
+            <span className="hdm-burger" />
           </button>
 
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+          <div className="collapse navbar-collapse" id="eskepNav">
+            <ul className="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-1">
               <li className="nav-item">
-                <Link className="nav-link text-white" to="/about-eskep">
-                  <i className="fas fa-address-card"></i> Hakkımızda
-                </Link>
+                <NavLink className="nav-link hdm-link" to="/about-eskep" onClick={closeMobileMenu}>
+                  <i className="fas fa-address-card me-1" /> Hakkımızda
+                </NavLink>
               </li>
               <li className="nav-item">
-                <Link
-                  className="nav-link text-white"
-                  to="/org-chart"
-                >
-                  <i className="fas fa-sitemap"></i> Organizasyon Şemaları
-                </Link>
+                <NavLink className="nav-link hdm-link" to="/org-chart" onClick={closeMobileMenu}>
+                  <i className="fas fa-sitemap me-1" /> Organizasyon Şemaları
+                </NavLink>
               </li>
 
               {hasBaseRole("Koordinator") &&
@@ -103,12 +97,9 @@ function ESKEPBaseHeader() {
                   "ESKEPKoordinator",
                 ]) && (
                   <li className="nav-item">
-                    <Link
-                      className="nav-link text-white"
-                      to="/eskep/egitim-takvimi/"
-                    >
-                      <i className="fas fa-calendar-alt"></i> Genel Eğitim Takvimi
-                    </Link>
+                    <NavLink className="nav-link hdm-link" to="/eskep/egitim-takvimi/" onClick={closeMobileMenu}>
+                      <i className="fas fa-calendar-alt me-1" /> Genel Eğitim Takvimi
+                    </NavLink>
                   </li>
                 )}
 
@@ -122,53 +113,50 @@ function ESKEPBaseHeader() {
               ]) && (
                 <>
                   {hasBaseRole("Koordinator") && <KoordinatorMenu />}
-                  {hasBaseRole("Stajer") && hasSubRole("ESKEPStajer") && (
-                    <StajerMenu />
-                  )}
-                  {hasBaseRole("Ogrenci") && hasSubRole("ESKEPOgrenci") && (
-                    <OgrenciMenu />
-                  )}
-                  {hasBaseRole("Teacher") && hasSubRole("ESKEPEgitmen") && (
-                    <EgitmenMenu />
-                  )}
+                  {hasBaseRole("Stajer") && hasSubRole("ESKEPStajer") && <StajerMenu />}
+                  {hasBaseRole("Ogrenci") && hasSubRole("ESKEPOgrenci") && <OgrenciMenu />}
+                  {hasBaseRole("Teacher") && hasSubRole("ESKEPEgitmen") && <EgitmenMenu />}
                 </>
               )}
             </ul>
 
-            {/* Arama ve Giriş/Çıkış butonları */}
-            <div className="d-flex align-items-center">
+            {/* Arama + Auth */}
+            <form className="d-flex align-items-center" onSubmit={onSubmitSearch} role="search" aria-label="Site içi arama">
               <input
-                className="form-control me-2"
+                className="form-control form-control-sm bg-transparent text-white border-light me-2"
                 type="search"
                 placeholder="Ara"
+                value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Arama"
+                style={{ minWidth: 160 }}
               />
-              <button
-                className="btn btn-outline-light me-2"
-                onClick={handleSearchSubmit}
-              >
-                <i className="fas fa-search"></i>
+              <button className="btn btn-outline-light btn-sm me-2" type="submit">
+                <i className="fas fa-search" />
               </button>
 
-              {isLoggedIn() ? (
-                <Link to="/logout/" className="btn btn-danger ms-2">
-                  <i className="fas fa-sign-out-alt"></i> Çıkış
+              {isLoggedIn?.() ? (
+                <Link to="/logout/" className="btn btn-outline-light btn-sm" onClick={closeMobileMenu}>
+                  <i className="fas fa-sign-out-alt me-1" />
+                  Çıkış
                 </Link>
               ) : (
                 <>
-                  <Link to="/login/" className="btn btn-outline-light ms-2">
-                    <i className="fas fa-sign-in-alt"></i> Giriş
+                  <Link to="/login/" className="btn btn-outline-light btn-sm me-2" onClick={closeMobileMenu}>
+                    <i className="fas fa-sign-in-alt me-1" />
+                    Giriş
                   </Link>
-                  <Link to="/register/" className="btn btn-light ms-2">
-                    <i className="fas fa-user-plus"></i> Kayıt
+                  <Link to="/register/" className="btn btn-cta btn-sm" onClick={closeMobileMenu}>
+                    <i className="fas fa-user-plus me-1" />
+                    Kayıt
                   </Link>
                 </>
               )}
-            </div>
+            </form>
           </div>
         </div>
       </nav>
-    </div>
+    </header>
   );
 }
 

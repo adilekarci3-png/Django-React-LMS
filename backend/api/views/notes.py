@@ -1,5 +1,6 @@
 # api/views/notes.py
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -8,6 +9,8 @@ from api import models as api_models
 from api import serializers as api_serializer
 
 from django.contrib.auth import get_user_model
+
+from api.views.utils import KoordinatorLookupMixin
 
 User = get_user_model()
 
@@ -202,44 +205,48 @@ class EskepInstructorDersSonuRaporuNoteDetailAPIView(generics.RetrieveUpdateDest
         return get_object_or_404(api_models.NoteDersSonuRaporu, koordinator=koordinator, derssonuraporu=dsr, id=note_id)
 
 
-class EskepInstructorKitapTahliliNoteCreateAPIView(generics.ListCreateAPIView):
-    """
-    GET/POST /eskepinstructor/kitaptahlili-note/<kitaptahlili_id>/<koordinator_id>/
-    """
-    serializer_class = api_serializer.NoteKitapTahliliSerializer
+class EskepInstructorKitapTahliliNoteCreateAPIView(KoordinatorLookupMixin,
+                                                    generics.CreateAPIView):
+    serializer_class   = api_serializer.NoteKitapTahliliSerializer
     permission_classes = [AllowAny]
 
-    def get_queryset(self):
-        koordinator_id = self.kwargs["koordinator_id"]
+    def perform_create(self, serializer):
         kitaptahlili_id = self.kwargs["kitaptahlili_id"]
-        koordinator = get_object_or_404(api_models.Koordinator, user_id=koordinator_id)
-        kt = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
-        return api_models.NoteKitapTahlili.objects.filter(koordinator=koordinator, kitaptahlili=kt)
+        user_id         = self.kwargs["user_id"]
+        koordinator     = self.get_koordinator_by_user_id(user_id)
 
-    def create(self, request, *args, **kwargs):
-        kitaptahlili_id = self.kwargs["kitaptahlili_id"]
-        koordinator_id = self.kwargs["koordinator_id"]
-        title = request.data.get("title")
-        note = request.data.get("note")
-        koordinator = get_object_or_404(api_models.Koordinator, user_id=koordinator_id)
-        kt = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
-        api_models.NoteKitapTahlili.objects.create(kitaptahlili=kt, koordinator=koordinator, title=title, note=note)
-        return Response({"message": "Not başarılı bir şekilde oluşturuldu"}, status=status.HTTP_201_CREATED)
+        serializer.save(
+            kitaptahlili_id=kitaptahlili_id,
+            koordinator=koordinator
+        )
 
 
-class EskepInstructorKitapTahliliNoteDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = api_serializer.NoteKitapTahliliSerializer
-    permission_classes = [AllowAny]
+class EskepInstructorKitapTahliliNoteDetailAPIView(
+    KoordinatorLookupMixin, generics.RetrieveUpdateDestroyAPIView
+):
+    serializer_class   = api_serializer.NoteKitapTahliliSerializer
+    permission_classes = [IsAuthenticated]  # AllowAny ise kalsın ama güvenlik için bu daha iyi
 
     def get_object(self):
-        kitaptahlili_id = self.kwargs['kitaptahlili_id']
-        koordinator_id = self.kwargs['koordinator_id']
-        note_id = self.kwargs['note_id']
-        koordinator = get_object_or_404(api_models.Koordinator, id=koordinator_id)
-        kt = get_object_or_404(api_models.KitapTahlili, id=kitaptahlili_id)
-        return get_object_or_404(api_models.NoteKitapTahlili, koordinator=koordinator, kitaptahlili=kt, id=note_id)
+        kitaptahlili_id = self.kwargs["kitaptahlili_id"]
+        note_id         = self.kwargs["note_id"]
 
+        koordinator = self.get_koordinator()
+        # 👇 Teşhis için bir kez logla (gerekirse)
+        # print("Resolved koordinator:", getattr(koordinator, "id", None), getattr(getattr(koordinator, "user", None), "id", None))
 
+        base_filter = {
+            "id": note_id,
+            "kitaptahlili_id": kitaptahlili_id,
+        }
+
+        # Genel Koordinatör HER notu görebilir/silebilir
+        if not self.is_genel_koordinator(koordinator):
+            # Normal koordinator sadece kendi notu
+            base_filter["koordinator"] = koordinator
+
+        return get_object_or_404(api_models.NoteKitapTahlili, **base_filter)
+    
 # ---- Create/Update/Delete not endpoints (stajer tarafı) ----
 
 class DersSonuRaporuCreateOrUpdateNoteAPIView(generics.GenericAPIView):

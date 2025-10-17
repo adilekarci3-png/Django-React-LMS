@@ -1,65 +1,112 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { NavLink } from "react-router-dom";
 
 function Sidebar() {
   return (
     <nav
-      className="navbar navbar-expand-md shadow-sm sidenav bg-white rounded-3 p-3 w-100"
-      style={{ minWidth: '250px' }}
+      className="shadow-sm bg-white rounded-3 p-3 w-100"
+      style={{ minWidth: 250 }}
     >
-      <a
-        className="d-xl-none d-lg-none d-md-none text-inherit fw-bold text-decoration-none text-dark mb-3 d-block"
-        href="#"
-      >
-        Menü
-      </a>
-      <button
-        className="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light mb-3"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#sidenav"
-        aria-controls="sidenav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span className="bi bi-grid" />
-      </button>
-      <div className="collapse navbar-collapse" id="sidenav">
-        <div className="navbar-nav flex-column w-100">
+      {/* Başlık + toggler (md ve altı için) */}
+      <div className="d-flex d-md-none align-items-center justify-content-between mb-2">
+        <span className="fw-bold text-dark">Menü</span>
+        <button
+          className="navbar-toggler icon-shape icon-sm rounded bg-primary text-light"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#student-sidenav"
+          aria-controls="student-sidenav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <i className="bi bi-list" />
+        </button>
+      </div>
+
+      <div className="collapse d-md-block" id="student-sidenav">
+        <div className="nav flex-column w-100">
+
           <ul className="list-unstyled mb-4">
-            <li className="nav-item mb-2">
-              <Link className="nav-link" to="/student/dashboard">
-                <i className="bi bi-grid-fill me-2 text-primary"></i> Panel
-              </Link>
+            <li className="mb-1">
+              <NavLink
+                to="/student/dashboard"
+                className={({ isActive }) =>
+                  "nav-link d-flex align-items-center gap-2 px-0 " +
+                  (isActive ? "active fw-semibold text-primary" : "text-body")
+                }
+              >
+                <i className="bi bi-grid-fill text-primary" />
+                <span>Panel</span>
+              </NavLink>
             </li>
-            <li className="nav-item mb-2">
-              <Link className="nav-link" to="/student/courses">
-                <i className="fas fa-chalkboard-user me-2 text-success"></i> Görevlerim
-              </Link>
+
+            <li className="mb-1">
+              <NavLink
+                to="/student/courses"
+                className={({ isActive }) =>
+                  "nav-link d-flex align-items-center gap-2 px-0 " +
+                  (isActive ? "active fw-semibold text-primary" : "text-body")
+                }
+              >
+                <i className="bi bi-clipboard-check-fill text-success" />
+                <span>Görevlerim</span>
+              </NavLink>
             </li>
-            <li className="nav-item mb-2">
-              <Link className="nav-link" to="/student/wishlist">
-                <i className="fas fa-heart me-2 text-danger"></i> İstekler
-              </Link>
+
+            <li className="mb-1">
+              <NavLink
+                to="/student/wishlist"
+                className={({ isActive }) =>
+                  "nav-link d-flex align-items-center gap-2 px-0 " +
+                  (isActive ? "active fw-semibold text-primary" : "text-body")
+                }
+              >
+                <i className="bi bi-heart-fill text-danger" />
+                <span>İstekler</span>
+              </NavLink>
             </li>
           </ul>
 
-          <span className="navbar-header mb-2 text-muted">Hesap Ayarları</span>
+          <div className="text-muted small mb-2">Hesap Ayarları</div>
+
           <ul className="list-unstyled">
-            <li className="nav-item mb-2">
-              <Link className="nav-link" to="/student/profile">
-                <i className="fas fa-edit me-2 text-info"></i> Profil Düzenle
-              </Link>
+            <li className="mb-1">
+              <NavLink
+                to="/student/profile"
+                className={({ isActive }) =>
+                  "nav-link d-flex align-items-center gap-2 px-0 " +
+                  (isActive ? "active fw-semibold text-primary" : "text-body")
+                }
+              >
+                <i className="bi bi-pencil-square text-info" />
+                <span>Profil Düzenle</span>
+              </NavLink>
             </li>
-            <li className="nav-item mb-2">
-              <Link className="nav-link" to="/student/change-password">
-                <i className="fas fa-lock me-2 text-warning"></i> Şifre Değiştir
-              </Link>
+
+            <li className="mb-1">
+              <NavLink
+                to="/student/change-password"
+                className={({ isActive }) =>
+                  "nav-link d-flex align-items-center gap-2 px-0 " +
+                  (isActive ? "active fw-semibold text-primary" : "text-body")
+                }
+              >
+                <i className="bi bi-shield-lock-fill text-warning" />
+                <span>Şifre Değiştir</span>
+              </NavLink>
             </li>
-            <li className="nav-item mb-2">
-              <Link className="nav-link" to="/login">
-                <i className="fas fa-sign-out-alt me-2 text-danger"></i> Çıkış Yap
-              </Link>
+
+            <li className="mb-1">
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  "nav-link d-flex align-items-center gap-2 px-0 " +
+                  (isActive ? "active fw-semibold text-primary" : "text-body")
+                }
+              >
+                <i className="bi bi-box-arrow-right text-danger" />
+                <span>Çıkış Yap</span>
+              </NavLink>
             </li>
           </ul>
         </div>

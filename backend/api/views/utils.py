@@ -1,4 +1,6 @@
 from django.http import JsonResponse
+from api import models as api_models
+from django.db.models import Q
 
 def get_user_role(user_id):
     """
@@ -44,3 +46,25 @@ def abs_url(request, f_or_url):
     if request and isinstance(url, str) and url.startswith("/"):
         return request.build_absolute_uri(url)
     return url
+
+class KoordinatorLookupMixin:
+    """
+    URL: .../<kitaptahlili_id>/<user_id>/<note_id>/
+    Buradaki user_id, ya Koordinator.pk ya da User.pk olabilir.
+    """
+    def get_koordinator(self):
+        raw = self.kwargs.get("user_id") or getattr(self.request.user, "id", None)
+        if raw is None:
+            return None
+        # Hem Koordinator.id hem Koordinator.user_id kabul et
+        try:
+            return api_models.Koordinator.objects.select_related("user").get(
+                Q(id=raw) | Q(user__id=raw)
+            )
+        except api_models.Koordinator.DoesNotExist:
+            return None
+
+    def is_genel_koordinator(self, koordinator) -> bool:
+        if koordinator is None:
+            return False
+        return koordinator.roles.filter(name="ESKEPGenelKoordinator").exists()

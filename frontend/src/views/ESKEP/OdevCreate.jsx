@@ -1,3 +1,4 @@
+// OdevCreate.jsx
 import { useState, useEffect, useMemo } from "react";
 import { FiSave, FiPlus, FiTrash2, FiUpload, FiImage } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
@@ -18,37 +19,51 @@ const mdParser = new MarkdownIt();
 
 function OdevCreate() {
   const api = useAxios();
-  const user = UserData();
+
+  // Hem hook hem fallback kullan (ortamına göre biri boş olabilir)
+  const userHook = useUserData();
+  const userFallback = UserData?.() || {};
+  const user = userHook?.user_id ? userHook : userFallback;
 
   const [submitting, setSubmitting] = useState(false);
   const [category, setCategory] = useState([]);
 
+  // === Dil & Seviye (Django CHOICES ile birebir) ===
+  const LANG_MAP = useMemo(
+    () => ({ Turkce: "Türkçe", Ingilizce: "İngilizce", Arapca: "Arapça" }),
+    []
+  );
+  const LEVEL_MAP = useMemo(
+    () => ({ Baslangic: "Başlangıç", Orta: "Orta", "Ileri Seviye": "İleri Seviye" }),
+    []
+  );
+  const LANGUAGE_OPTIONS = useMemo(
+    () => Object.entries(LANG_MAP).map(([value, label]) => ({ value, label })),
+    [LANG_MAP]
+  );
+  const LEVEL_OPTIONS = useMemo(
+    () => Object.entries(LEVEL_MAP).map(([value, label]) => ({ value, label })),
+    [LEVEL_MAP]
+  );
+
+  const MAX_IMAGE_MB = 5;
+
   const [odev, setOdev] = useState({
     category: "",
-    image: "", // { file, preview }
+    image: null, // { file, preview }
     title: "",
     description: "",
     level: "",
     language: "",
-    inserteduser: parseInt(user?.user_id),
     odev_status: "",
   });
 
-  const [variants, setVariants] = useState([{ title: "", pdf: "" }]);
+  const [variants, setVariants] = useState([{ title: "", pdf: null }]);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     api.get(`course/category/`).then((res) => setCategory(res.data || []));
   }, [api]);
-
-  const levelOptions = useMemo(
-    () => ["Başlangic", "Orta", "Ileri Seviye"],
-    []
-  );
-  const languageOptions = useMemo(
-    () => ["Turkce", "Ingilizce"],
-    []
-  );
 
   const handleOdevInputChange = (e) => {
     const { name, value } = e.target;
@@ -63,10 +78,15 @@ function OdevCreate() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-      setErrors((er) => ({ ...er, image: "Yalnızca JPEG/PNG kabul edilir." }));
+    if (!["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type)) {
+      setErrors((er) => ({ ...er, image: "Yalnızca JPEG/PNG/WEBP kabul edilir." }));
       return;
     }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      setErrors((er) => ({ ...er, image: `En fazla ${MAX_IMAGE_MB}MB yükleyin.` }));
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setOdev((s) => ({ ...s, image: { file, preview: reader.result } }));
@@ -82,6 +102,7 @@ function OdevCreate() {
       return copy;
     });
   };
+
   const handleVariantPDF = (i, file) => {
     setVariants((arr) => {
       const copy = [...arr];
@@ -91,31 +112,51 @@ function OdevCreate() {
           [`variant_pdf_${i}`]: "Yalnızca PDF dosyaları kabul edilir.",
         }));
       } else {
-        copy[i].pdf = file || "";
+        copy[i].pdf = file || null;
         setErrors((er) => ({ ...er, [`variant_pdf_${i}`]: "" }));
       }
       return copy;
     });
   };
-  const addVariant = () =>
-    setVariants((arr) => [...arr, { title: "", pdf: "" }]);
+
+  const addVariant = () => setVariants((arr) => [...arr, { title: "", pdf: null }]);
+
   const removeVariant = (i) =>
-    setVariants((arr) => arr.filter((_, idx) => idx !== i));
+    setVariants((arr) => {
+      if (arr.length === 1) return arr; // en az 1 bölüm kalsın
+      return arr.filter((_, idx) => idx !== i);
+    });
 
   const validateForm = () => {
     const er = {};
-    if (!odev.title) er.title = "Ödev başlığı zorunludur.";
-    if (!odev.description) er.description = "Ödev açıklaması zorunludur.";
+    if (!odev.title?.trim()) er.title = "Ödev başlığı zorunludur.";
+    if (!odev.description?.trim()) er.description = "Ödev açıklaması zorunludur.";
     if (!odev.image?.file) er.image = "Kapak resmi yükleyiniz.";
     if (!odev.category) er.category = "Kategori seçiniz.";
+    if (!odev.level) er.level = "Seviye seçiniz.";
+    if (!odev.language) er.language = "Dil seçiniz.";
 
     variants.forEach((v, i) => {
-      if (!v.title) er[`variant_title_${i}`] = "Bölüm adı zorunludur.";
+      if (!v.title?.trim()) er[`variant_title_${i}`] = "Bölüm adı zorunludur.";
       if (!v.pdf) er[`variant_pdf_${i}`] = "PDF dosyası ekleyiniz.";
     });
 
     setErrors(er);
     return Object.keys(er).length === 0;
+  };
+
+  const resetForm = () => {
+    setOdev({
+      category: "",
+      image: null,
+      title: "",
+      description: "",
+      level: "",
+      language: "",
+      odev_status: "",
+    });
+    setVariants([{ title: "", pdf: null }]);
+    setErrors({});
   };
 
   const handleSubmit = async (e) => {
@@ -124,13 +165,14 @@ function OdevCreate() {
 
     const formdata = new FormData();
     formdata.append("title", odev.title);
-    formdata.append("inserteduser", parseInt(user?.user_id));
+    if (user?.user_id) formdata.append("inserteduser", parseInt(user.user_id));
     formdata.append("odev_status", odev.odev_status || "");
     formdata.append("image", odev.image.file);
     formdata.append("description", odev.description);
     formdata.append("category", odev.category);
-    formdata.append("level", odev.level || "");
-    formdata.append("language", odev.language || "");
+    // backend KEY'leri ile gönder (Baslangic/Orta/Ileri Seviye — Turkce/Ingilizce/Arapca)
+    formdata.append("level", odev.level);
+    formdata.append("language", odev.language);
 
     variants.forEach((v, i) => {
       formdata.append(`variants[${i}][title]`, v.title);
@@ -141,14 +183,15 @@ function OdevCreate() {
       setSubmitting(true);
       await api.post(`eskepstajer/odev-create/`, formdata);
       Swal.fire({ icon: "success", title: "Ödev başarıyla oluşturuldu" });
-      // istersen burada formu sıfırlayabilirsin
+      // formu sıfırla (istersen kapat)
+      resetForm();
+      // burada navigate ile listeye yönlendirebilirsin
     } catch (err) {
       Swal.fire({ icon: "error", title: "İşlem başarısız", text: "Lütfen tekrar deneyin." });
     } finally {
       setSubmitting(false);
     }
   };
-
 
   return (
     <>
@@ -172,9 +215,7 @@ function OdevCreate() {
                 <div className="card mb-4">
                   <div className="card-header">
                     <h5 className="mb-0">Genel Bilgiler</h5>
-                    <small className="text-muted">
-                      Başlık, durum ve açıklamayı doldurun.
-                    </small>
+                    <small className="text-muted">Başlık, durum ve açıklamayı doldurun.</small>
                   </div>
                   <div className="card-body">
                     <div className="row g-3">
@@ -188,9 +229,7 @@ function OdevCreate() {
                           onChange={handleOdevInputChange}
                           placeholder="Örn. Django ORM Uygulaması"
                         />
-                        {errors.title && (
-                          <div className="invalid-feedback">{errors.title}</div>
-                        )}
+                        {errors.title && <div className="invalid-feedback">{errors.title}</div>}
                       </div>
 
                       <div className="col-md-4">
@@ -203,9 +242,9 @@ function OdevCreate() {
                         >
                           <option value="">Seçiniz</option>
                           <option value="İncelemede">İncelemede</option>
+                          <option value="Taslak">Taslak</option>
                           <option value="Pasif">Pasif</option>
                           <option value="Reddedilmiş">Reddedilmiş</option>
-                          <option value="Taslak">Taslak</option>
                           <option value="Teslim Edildi">Teslim Edildi</option>
                         </select>
                       </div>
@@ -259,31 +298,39 @@ function OdevCreate() {
                       <div className="col-md-4">
                         <label className="form-label">Seviye</label>
                         <select
-                          className="form-select"
+                          className={`form-select ${errors.level ? "is-invalid" : ""}`}
                           name="level"
                           value={odev.level}
                           onChange={handleOdevInputChange}
                         >
                           <option value="">Seçiniz</option>
-                          {levelOptions.map((lv) => (
-                            <option key={lv} value={lv}>{lv}</option>
+                          {LEVEL_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
                           ))}
                         </select>
+                        {errors.level && <div className="invalid-feedback">{errors.level}</div>}
                       </div>
 
                       <div className="col-md-4">
                         <label className="form-label">Dil</label>
                         <select
-                          className="form-select"
+                          className={`form-select ${errors.language ? "is-invalid" : ""}`}
                           name="language"
                           value={odev.language}
                           onChange={handleOdevInputChange}
                         >
                           <option value="">Seçiniz</option>
-                          {languageOptions.map((lg) => (
-                            <option key={lg} value={lg}>{lg}</option>
+                          {LANGUAGE_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
                           ))}
                         </select>
+                        {errors.language && (
+                          <div className="invalid-feedback">{errors.language}</div>
+                        )}
                       </div>
 
                       <div className="col-12">
@@ -303,7 +350,8 @@ function OdevCreate() {
                             <div>
                               <div className="fw-semibold">Kapak Resmi</div>
                               <div className="text-muted small">
-                                JPEG/PNG yükleyin. Önerilen: 1200×630 px
+                                JPEG/PNG/WEBP yükleyin. En fazla {MAX_IMAGE_MB}MB. Önerilen:
+                                1200×630 px
                               </div>
                             </div>
                           </div>
@@ -314,14 +362,12 @@ function OdevCreate() {
                             <input
                               type="file"
                               className="d-none"
-                              accept="image/png,image/jpeg"
+                              accept="image/png,image/jpeg,image/webp"
                               onChange={handleOdevImageChange}
                             />
                           </label>
                         </div>
-                        {errors.image && (
-                          <div className="text-danger mt-1">{errors.image}</div>
-                        )}
+                        {errors.image && <div className="text-danger mt-1">{errors.image}</div>}
                       </div>
                     </div>
                   </div>
@@ -333,7 +379,7 @@ function OdevCreate() {
                     <div>
                       <h5 className="mb-0">Bölümler</h5>
                       <small className="text-muted">
-                        Her bölüm için ad ve PDF dosyası ekleyin.
+                        Her bölüm için ad ve PDF dosyası ekleyin (en az 1 bölüm).
                       </small>
                     </div>
                     <button
@@ -367,14 +413,21 @@ function OdevCreate() {
                                 </div>
                               )}
 
-                              <input
-                                type="file"
-                                className={`form-control mt-2 ${errors[`variant_pdf_${i}`] ? "is-invalid" : ""}`}
-                                accept="application/pdf"
-                                onChange={(e) => handleVariantPDF(i, e.target.files?.[0])}
-                              />
+                              <div className="mt-2 d-flex gap-2 align-items-center">
+                                <input
+                                  type="file"
+                                  className={`form-control ${errors[`variant_pdf_${i}`] ? "is-invalid" : ""}`}
+                                  accept="application/pdf"
+                                  onChange={(e) => handleVariantPDF(i, e.target.files?.[0])}
+                                />
+                                {v.pdf && (
+                                  <span className="small text-muted">
+                                    {v.pdf.name}
+                                  </span>
+                                )}
+                              </div>
                               {errors[`variant_pdf_${i}`] && (
-                                <div className="invalid-feedback">
+                                <div className="invalid-feedback d-block">
                                   {errors[`variant_pdf_${i}`]}
                                 </div>
                               )}
@@ -385,6 +438,7 @@ function OdevCreate() {
                               className="btn btn-outline-danger variant-remove"
                               onClick={() => removeVariant(i)}
                               title="Bölümü kaldır"
+                              disabled={variants.length === 1}
                             >
                               <FiTrash2 />
                             </button>

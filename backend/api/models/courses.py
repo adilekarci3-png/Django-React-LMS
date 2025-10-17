@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.text import slugify
 from django.apps import apps
-
+from django.utils.functional import cached_property
 from .choices import LANGUAGE, LEVEL, PLATFORM_STATUS, TEACHER_STATUS,RATING
 from shortuuid.django_fields import ShortUUIDField
 
@@ -165,12 +165,16 @@ class VariantItem(models.Model):
 
 class Question_Answer(models.Model):
     course = models.ForeignKey(
-        "api.Course", on_delete=models.CASCADE,
-        verbose_name="Kurs", related_name="qa_threads"
+        "api.Course",
+        on_delete=models.CASCADE,
+        verbose_name="Kurs",
+        related_name="qa_threads",
     )
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Kullanıcı"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name="Kullanıcı",
     )
     title = models.CharField("Soru Başlığı", max_length=1000, null=True, blank=True)
     qa_id = ShortUUIDField("Soru Cevap Numarası", unique=True, length=6, max_length=20, alphabet="1234567890")
@@ -185,34 +189,38 @@ class Question_Answer(models.Model):
         username = getattr(self.user, "username", "Anonim")
         return f"{username} - {self.course.title}"
 
+    # Eğer Question_Answer_Message aşağıdaki gibi tanımlıysa:
+    # question = ForeignKey(Question_Answer, related_name="messages", ...)
     def messages(self):
-        return Question_Answer_Message.objects.filter(question=self).order_by("date")
+        # DB'ye bir daha gitmeden, tanımlı related_name üzerinden dön
+        return self.messages.all().order_by("date")
 
+    @cached_property
     def profile(self):
-        Profile = apps.get_model("api", "Profile")
-        try:
-            return Profile.objects.get(user=self.user) if self.user else None
-        except Profile.DoesNotExist:
-            return None
+        """
+        Kullanıcının profilini güvenli şekilde getir.
+        - api.Profile yoksa/başka app'teyse LookupError olmaz.
+        - Profil yoksa None döner (serializer'da read_only alanla sorun yaratmaz).
+        """
+        u = getattr(self, "user", None)
+        # Profile OneToOne’ınızın related_name’i "profile" ise:
+        prof = getattr(u, "profile", None) if u else None
+        # Eğer sizde farklıysa (örn. related_name="user_profile"):
+        # prof = getattr(u, "user_profile", None) if u else None
+        return prof
 
 
 class Question_Answer_Message(models.Model):
-    course = models.ForeignKey(
-        "api.Course", on_delete=models.CASCADE,
-        verbose_name="Kurs", related_name="qa_messages"
-    )
-    question = models.ForeignKey(
-        "api.Question_Answer", on_delete=models.CASCADE,
-        verbose_name="Soru Başlığı", related_name="messages"
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name="Kullanıcı"
-    )
-    message = models.TextField("Mesaj", null=True, blank=True)
-    qam_id = ShortUUIDField("Soru Cevap Numarası", unique=True, length=6, max_length=20, alphabet="1234567890")
-    qa_id = ShortUUIDField("Soru Cevap Numarası", unique=True, length=6, max_length=20, alphabet="1234567890")
-    date = models.DateTimeField("Soru Sorulan Tarih", default=timezone.now)
+    course   = models.ForeignKey("api.Course", on_delete=models.CASCADE,
+                                 verbose_name="Kurs", related_name="qa_messages")
+    question = models.ForeignKey("api.Question_Answer", on_delete=models.CASCADE,
+                                 verbose_name="Soru Başlığı", related_name="messages")
+    user     = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                 null=True, blank=True, verbose_name="Kullanıcı")
+    message  = models.TextField("Mesaj", null=True, blank=True)
+    qam_id   = ShortUUIDField("Soru Cevap Numarası", unique=True, length=6, max_length=20, alphabet="1234567890")
+    qa_id    = ShortUUIDField("Soru Cevap Numarası", unique=True, length=6, max_length=20, alphabet="1234567890")
+    date     = models.DateTimeField("Soru Sorulan Tarih", default=timezone.now)
 
     class Meta:
         ordering = ["date"]
@@ -221,14 +229,17 @@ class Question_Answer_Message(models.Model):
 
     def __str__(self):
         username = getattr(self.user, "username", "Anonim")
-        return f"{username} - {self.course.title}"
+        return f"{username} - {getattr(self.course, 'title', 'Kurs')}"
 
+    @cached_property
     def profile(self):
-        Profile = apps.get_model("api", "Profile")
-        try:
-            return Profile.objects.get(user=self.user) if self.user else None
-        except Profile.DoesNotExist:
-            return None
+        """
+        Kullanıcının profilini güvenli döndürür.
+        OneToOne alanınızın related_name'i farklıysa 'profile' yerine onu yazın.
+        """
+        u = self.user
+        return getattr(u, "profile", None) if u else None
+
 
 
 class CompletedLesson(models.Model):
@@ -336,26 +347,14 @@ class Note(models.Model):
         return self.title or f"Not #{self.note_id}"
     
 class Review(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name="Kullanıcı",
-    )
-    course = models.ForeignKey(
-        "api.Course",
-        on_delete=models.CASCADE,
-        verbose_name="Kurs",
-    )
+    user   = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                               null=True, blank=True, verbose_name="Kullanıcı")
+    course = models.ForeignKey("api.Course", on_delete=models.CASCADE, verbose_name="Kurs")
     review = models.TextField("Yorum")
-    rating = models.IntegerField(
-        "Puan",
-        choices=RATING,
-        null=True, blank=True,   # default=None ile uyumlu
-    )
-    reply = models.CharField("Yanıt", max_length=1000, null=True, blank=True)
+    rating = models.IntegerField("Puan", choices=RATING, null=True, blank=True)
+    reply  = models.CharField("Yanıt", max_length=1000, null=True, blank=True)
     active = models.BooleanField("Aktif/Pasif", default=False)
-    date = models.DateTimeField("Tarih", default=timezone.now)
+    date   = models.DateTimeField("Tarih", default=timezone.now)
 
     class Meta:
         verbose_name = "Yorum"
@@ -365,11 +364,9 @@ class Review(models.Model):
     def __str__(self):
         return getattr(self.course, "title", f"Yorum #{self.pk}")
 
+    @cached_property
     def profile(self):
-        Profile = apps.get_model("api", "Profile")
-        try:
-            return Profile.objects.get(user=self.user) if self.user else None
-        except Profile.DoesNotExist:
-            return None
+        u = self.user
+        return getattr(u, "profile", None) if u else None
 
 

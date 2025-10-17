@@ -1,0 +1,240 @@
+/* ================== ORTAK (değiştirme) ================== */
+.hdm-min-header .navbar{
+  --bs-navbar-color:#fff;
+  --bs-navbar-hover-color:#fff;
+  --bs-navbar-active-color:#fff;
+  --bs-navbar-brand-color:#fff;
+  --bs-navbar-brand-hover-color:#fff;
+}
+.hdm-link{ color:#fff !important; opacity:1; font-weight:600; text-shadow:0 1px 2px rgba(0,0,0,.25); }
+.hdm-link:hover{ filter:brightness(1.06); }
+.hdm-link i, .hdm-link .bi{ color:currentColor; }
+
+/* =========================================================
+   HDM THEME  (indigo / mavi)
+   ========================================================= */
+.hdm-theme{
+  --hdm-1: 79 70 229;   /* indigo-600  #4f46e5 */
+  --hdm-2: 67 56 202;   /* indigo-700  #4338ca */
+  --hdm-3: 49 46 129;   /* indigo-900  #312e81 */
+
+  --hdm-chip: linear-gradient(135deg, #818cf8, #4f46e5);
+  --hdm-cta-from: #60a5fa; /* sky-400 */
+  --hdm-cta-to:   #3b82f6; /* blue-500 */
+  --hdm-footer-a:#0f1137; --hdm-footer-b:#0d0f2e;
+}
+
+/* Header */
+.hdm-theme.hdm-min-header .navbar{
+  background: linear-gradient(
+    100deg,
+    rgb(var(--hdm-1) / .96) 0%,
+    rgb(var(--hdm-2) / .96) 45%,
+    rgb(var(--hdm-3) / .96) 100%
+  ) !important;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 6px 18px rgba(0,0,0,.10);
+}
+
+/* Stats / Features / Callout / Footer */
+.hdm-theme .hdm-stat-icon{ background: var(--hdm-chip); color:#fff; }
+.hdm-theme .hdm-feature-icon{ background: var(--hdm-chip); color:#fff; }
+.hdm-theme .hdm-features-section{
+  background: radial-gradient(900px 400px at 15% -10%, rgba(129,140,248,.18), transparent 60%);
+}
+.hdm-theme .hdm-callout{
+  background: linear-gradient(100deg, rgba(99,102,241,.95), rgba(79,70,229,.95), rgba(49,46,129,.95));
+  border-top: 1px solid rgba(255,255,255,.16);
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+.hdm-theme .hdm-min-footer{
+  background: linear-gradient(180deg, var(--hdm-footer-a) 0%, var(--hdm-footer-b) 100%);
+}
+
+/* CTA butonu */
+.hdm-theme .btn-cta{
+  background: linear-gradient(90deg, var(--hdm-cta-from), var(--hdm-cta-to));
+  color:#0b1220 !important; border:none;
+}
+
+/* =========================================================
+   ESKEP THEME  (yeşil / mint)
+   ========================================================= */
+.eskep-theme{
+  --eskep-1: 165 232 214; /* #A5E8D6 mint-açık */
+  --eskep-2: 132 210 190; /* #84D2BE mint */
+  --eskep-3:  98 178 160; /* #62B2A0 pine-mint */
+
+  --eskep-chip: linear-gradient(135deg, #7adcc5, #40a08c);
+  --eskep-cta-from:#fb923c; /* turuncu CTA (ayrışsın) */
+  --eskep-cta-to:  #f97316;
+  --eskep-footer-a:#0f2c2a; --eskep-footer-b:#0b2422;
+}
+
+/* Header (yeşil geçişli) */
+.eskep-theme.hdm-min-header .navbar{
+  background: linear-gradient(
+    100deg,
+    rgb(14 59 46 / .98) 0%,    /* #0E3B2E  koyu çam */
+    rgb(11 107 68 / .98) 45%,  /* #0B6B44  derin yeşil */
+    rgb(6 78 59 / .98) 100%    /* #064E3B  pine/teal-800 */
+  ) !important;
+  border-bottom: 1px solid rgba(0,0,0,.18);
+  box-shadow: 0 6px 18px rgba(0,0,0,.22);
+  /* metin/ikonlar net beyaz kalsın */
+  --bs-navbar-color:#fff; --bs-navbar-hover-color:#fff;
+  --bs-navbar-active-color:#fff; --bs-navbar-brand-color:#fff;
+}
+
+/* Stats / Features / Callout / Footer */
+.eskep-theme .hdm-stat-icon{ background: var(--eskep-chip); color:#fff; }
+.eskep-theme .hdm-feature-icon{ background: linear-gradient(135deg, #34d399, #10b981); color:#fff; }
+.eskep-theme .hdm-features-section{
+  background: radial-gradient(900px 400px at 15% -10%, rgba(122,220,197,.18), transparent 60%);
+}
+/* çok duraklı geçişli bar */
+.eskep-theme .hdm-callout{
+  background:
+    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .10), transparent 60%),
+    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .10), transparent 60%),
+    linear-gradient(100deg,
+      rgb(52 182 192 / .95) 0%,
+      rgb(74 222 128 / .95) 33%,
+      rgb(110 231 183 / .95) 66%,
+      rgb(21 128 120 / .95) 100%
+    );
+  border-top: 1px solid rgba(255,255,255,.16);
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+.eskep-theme .hdm-min-footer{
+  background: linear-gradient(180deg, var(--eskep-footer-a) 0%, var(--eskep-footer-b) 100%);
+}
+
+/* CTA butonu */
+.eskep-theme .btn-cta{
+  background: linear-gradient(90deg, var(--eskep-cta-from), var(--eskep-cta-to));
+  color:#111827 !important; border:none;
+}
+
+/* ===========================
+   ESKEP — Sage (teal/slate) tema (mat görünüm)
+   =========================== */
+.eskep-theme.eskep-theme--sage{
+  /* temel renkler (doygunluğu düşük) */
+  --eskep-1: 13 148 136;  /* #0d9488 teal-600 */
+  --eskep-2: 15 118 110;  /* #0f766e teal-700 */
+  --eskep-3:  8  47  43;  /* #082f2b teal-900 */
+
+  /* metin & vurgu */
+  --eskep-ink:   #ecfdf5;
+  --eskep-muted: rgba(236,253,245,.85);
+
+  /* ikon/çip geçişi ve CTA */
+  --eskep-chip: linear-gradient(135deg,#5eead4,#14b8a6);
+  --eskep-cta-from:#eab308; /* amber-500  (sıcak ama mat) */
+  --eskep-cta-to:  #d97706; /* amber-600 */
+  --eskep-cta-fg:  #0b1f1d;
+
+  /* footer */
+  --eskep-footer-a:#071c1a;
+  --eskep-footer-b:#051513;
+}
+
+/* HEADER – mat degrade, yüksek okunabilirlik */
+.eskep-theme.eskep-theme--sage.hdm-min-header .navbar{
+  background: linear-gradient(
+    100deg,
+    rgb(var(--eskep-1) / .96) 0%,
+    rgb(var(--eskep-2) / .96) 48%,
+    rgb(var(--eskep-3) / .96) 100%
+  ) !important;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 8px 24px rgba(8,47,43,.18);
+  --bs-navbar-color:#fff; --bs-navbar-hover-color:#fff;
+  --bs-navbar-active-color:#fff; --bs-navbar-brand-color:#fff;
+}
+
+/* HERO – header’la uyumlu mat arka plan ve compact desteği */
+.page-eskep.eskep-theme--sage .asym-hero{
+  background:
+    radial-gradient(1100px 360px at -10% 10%, rgba(255,255,255,.06), transparent 60%),
+    radial-gradient(1000px 320px at 110% 120%, rgba(0,0,0,.10), transparent 60%),
+    linear-gradient(105deg,
+      rgb(var(--eskep-1) / .94) 0%,
+      rgb(var(--eskep-2) / .94) 52%,
+      rgb(var(--eskep-3) / .94) 100%
+    );
+  color: var(--eskep-ink);
+}
+.page-eskep.eskep-theme--sage .asym-hero__title{ color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.16); }
+.page-eskep.eskep-theme--sage .asym-hero__subtitle{ color:var(--eskep-muted); }
+
+/* compact mod (yükseklik kısa) */
+.page-eskep.eskep-theme--sage .asym-hero--compact,
+.page-eskep.eskep-theme--sage .asym-hero[compact]{  /* prop set ediyorsanız */
+  min-height: 46vh;
+  padding-block: 1.2rem 1.1rem;
+}
+@media (max-width: 991.98px){
+  .page-eskep.eskep-theme--sage .asym-hero--compact,
+  .page-eskep.eskep-theme--sage .asym-hero[compact]{
+    min-height: auto; padding-block: 1rem;
+  }
+}
+
+/* Chip/rozetler – yarı saydam çerçeveli */
+.page-eskep.eskep-theme--sage .asym-hero__chip{
+  color:#e7f8f4;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.22);
+  backdrop-filter: blur(3px);
+}
+
+/* Kartlar/ikonlar – siliklik yok, mat cam */
+.eskep-theme.eskep-theme--sage .hdm-stat-card,
+.eskep-theme.eskep-theme--sage .hdm-feature-card{
+  background: rgba(4,28,26,.58);
+  border: 1px solid rgba(255,255,255,.14);
+  color:#f0fdfa;
+}
+.eskep-theme.eskep-theme--sage .hdm-stat-icon,
+.eskep-theme.eskep-theme--sage .hdm-feature-icon{
+  background: var(--eskep-chip);
+  color:#0b1f1d;
+}
+
+/* Bölüm zeminleri – mat geçiş */
+.eskep-theme.eskep-theme--sage .hdm-stats-section{
+  background: linear-gradient(180deg, rgba(236,253,245,.05), rgba(13,148,136,.08));
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.eskep-theme.eskep-theme--sage .hdm-features-section{
+  background: radial-gradient(900px 400px at 15% -10%, rgba(20,184,166,.18), transparent 60%);
+}
+
+/* Callout bar – mat sage bandı */
+.eskep-theme.eskep-theme--sage .hdm-callout{
+  background:
+    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .08), transparent 60%),
+    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .10), transparent 60%),
+    linear-gradient(100deg,
+      rgb(var(--eskep-1) / .96) 0%,
+      rgb(var(--eskep-2) / .96) 50%,
+      rgb(var(--eskep-3) / .96) 100%
+    );
+  border-top: 1px solid rgba(255,255,255,.14);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  color:#ecfdf5;
+}
+
+/* CTA butonu – sıcak amber, mat */
+.eskep-theme.eskep-theme--sage .btn-cta{
+  background: linear-gradient(90deg, var(--eskep-cta-from), var(--eskep-cta-to));
+  color: var(--eskep-cta-fg) !important; border:none;
+}
+
+/* Footer – daha koyu, mat */
+.eskep-theme.eskep-theme--sage .hdm-min-footer{
+  background: linear-gradient(180deg, var(--eskep-footer-a) 0%, var(--eskep-footer-b) 100%);
+}

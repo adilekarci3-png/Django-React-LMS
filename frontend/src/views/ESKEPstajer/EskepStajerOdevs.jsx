@@ -13,7 +13,7 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 import "./css/ModalStyle.css";
-import "./css/eskep-stajer-projes.css"; // aynı görsel dil için
+import "./css/eskep-stajer-projes.css";
 
 Modal.setAppElement("#root");
 
@@ -21,39 +21,39 @@ function EskepStajerOdevs() {
   const api = useAxios();
   const user = useUserData();
 
-  // veri & görünüm durumları
-  const [allOdevs, setAllOdevs] = useState([]);
-  const [odevs, setOdevs] = useState([]);
-  const [fetching, setFetching] = useState(true);
-  const [error, setError] = useState("");
+  // === Dil & Seviye sabitleri (Django CHOICES ile aynı) ===
+  const LANG_MAP = { Turkce: "Türkçe", Ingilizce: "İngilizce", Arapca: "Arapça" };
+  const LEVEL_MAP = { Baslangic: "Başlangıç", Orta: "Orta", "Ileri Seviye": "İleri Seviye" };
 
-  // filtreler
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all"); // approved | pending | rejected | draft | all
-  const [koorFilter, setKoorFilter] = useState("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const LANG_OPTIONS = useMemo(
+    () => Object.entries(LANG_MAP).map(([value, label]) => ({ value, label })),
+    []
+  );
+  const LEVEL_OPTIONS = useMemo(
+    () => Object.entries(LEVEL_MAP).map(([value, label]) => ({ value, label })),
+    []
+  );
 
-  // sayfalama
-  const [page, setPage] = useState(1);
-  const pageSize = 8;
-
-  // modal
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const headingId = "assignment-modal-title";
-  const onClose = () => setModalIsOpen(false);
-
-  // yardımcılar
-  const safeUrl = (f) => {
-    if (!f) return "#";
-    if (typeof f === "string") return f;
-    return f?.url || f?.file || "#";
+  // Backend bazen label dönerse normalize edelim:
+  const normLang = (v) => {
+    const s = String(v || "").toLowerCase();
+    if (s === "turkce" || s === "türkçe") return "Turkce";
+    if (s === "ingilizce") return "Ingilizce";
+    if (s === "arapca" || s === "arapça") return "Arapca";
+    return "";
   };
-  const fileTitle = (f, i) => f?.variant?.title || f?.title || `Bölüm ${i + 1}`;
-  const fileName = (f) => (typeof f === "object" ? f?.filename || f?.name : undefined);
+  const normLevel = (v) => {
+    const s = String(v || "").toLowerCase();
+    if (s === "baslangic" || s === "başlangıç") return "Baslangic";
+    if (s === "orta") return "Orta";
+    if (s === "ileri seviye" || s === "ileri" || s === "ileri-seviye") return "Ileri Seviye";
+    return "";
+  };
 
-  // status normalizasyonu (TR/EN)
+  const langLabel = (v) => LANG_MAP[normLang(v)] || "—";
+  const levelLabel = (v) => LEVEL_MAP[normLevel(v)] || "—";
+
+  // === Durum normalize + rozet ===
   const normalizeStatus = (s) => {
     const t = String(s || "").toLowerCase();
     if (["approved", "onaylandı", "onaylandi", "tamamlandı", "tamamlandi", "completed"].includes(t)) return "approved";
@@ -62,7 +62,6 @@ function EskepStajerOdevs() {
     if (["draft", "taslak"].includes(t)) return "draft";
     return t || "";
   };
-
   const statusBadge = (s) => {
     const n = normalizeStatus(s);
     const map = {
@@ -75,6 +74,41 @@ function EskepStajerOdevs() {
     return <span className={cls}>{s || "—"}</span>;
   };
 
+  // === Veri & UI durumları ===
+  const [allOdevs, setAllOdevs] = useState([]);
+  const [odevs, setOdevs] = useState([]);
+  const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState("");
+
+  // Filtreler
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [koorFilter, setKoorFilter] = useState("all");
+  const [langFilter, setLangFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  // Sayfalama
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
+
+  // Modal (bölüm dosyaları)
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const headingId = "assignment-modal-title";
+  const onClose = () => setModalIsOpen(false);
+
+  // Yardımcılar
+  const safeUrl = (f) => {
+    if (!f) return "#";
+    if (typeof f === "string") return f;
+    return f?.url || f?.file || "#";
+  };
+  const fileTitle = (f, i) => f?.variant?.title || f?.title || `Bölüm ${i + 1}`;
+  const fileName = (f) => (typeof f === "object" ? f?.filename || f?.name : undefined);
+
+  // Veri çek
   const fetchData = async () => {
     if (!user?.user_id) return;
     try {
@@ -116,7 +150,7 @@ function EskepStajerOdevs() {
     searchRef.current = setTimeout(applyFilters, 300);
   };
 
-  // Filtreleri uygula
+  // Filtre uygula
   const applyFilters = () => {
     let data = [...allOdevs];
 
@@ -129,6 +163,12 @@ function EskepStajerOdevs() {
     }
     if (koorFilter !== "all") {
       data = data.filter((p) => (p?.koordinator?.full_name || "") === koorFilter);
+    }
+    if (langFilter !== "all") {
+      data = data.filter((p) => normLang(p?.language) === langFilter);
+    }
+    if (levelFilter !== "all") {
+      data = data.filter((p) => normLevel(p?.level) === levelFilter);
     }
     if (dateFrom) {
       data = data.filter((p) => p.date && moment(p.date).isSameOrAfter(moment(dateFrom)));
@@ -144,14 +184,16 @@ function EskepStajerOdevs() {
   useEffect(() => {
     applyFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, koorFilter, dateFrom, dateTo, allOdevs]);
+  }, [statusFilter, koorFilter, langFilter, levelFilter, dateFrom, dateTo, allOdevs]);
 
+  // Sayfalama verisi
   const totalPages = Math.max(1, Math.ceil((odevs?.length || 0) / pageSize));
   const pageData = useMemo(() => {
     const start = (page - 1) * pageSize;
     return (odevs || []).slice(start, start + pageSize);
   }, [page, odevs]);
 
+  // Modalı aç (curriculum -> variant_items)
   const openModal = (curriculum) => {
     const files =
       curriculum?.flatMap((item) => item?.variant_items || [])?.filter(Boolean) || [];
@@ -159,6 +201,7 @@ function EskepStajerOdevs() {
     setModalIsOpen(true);
   };
 
+  // Silme
   const onDelete = async (id) => {
     const ok = window.confirm("Bu ödevi silmek istediğinize emin misiniz?");
     if (!ok) return;
@@ -221,7 +264,7 @@ function EskepStajerOdevs() {
                 {/* Filtre Bar */}
                 <div className="card-body">
                   <div className="row g-2 align-items-end eskep-filterbar">
-                    <div className="col-12 col-md-4">
+                    <div className="col-12 col-md-3">
                       <label className="form-label">Ara</label>
                       <div className="input-group">
                         <span className="input-group-text" aria-hidden>
@@ -254,7 +297,7 @@ function EskepStajerOdevs() {
                       </select>
                     </div>
 
-                    <div className="col-6 col-md-3">
+                    <div className="col-6 col-md-2">
                       <label className="form-label">Koordinatör</label>
                       <select
                         className="form-select"
@@ -266,6 +309,40 @@ function EskepStajerOdevs() {
                         {koordinatorOptions.map((k) => (
                           <option key={k} value={k}>
                             {k}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-6 col-md-2">
+                      <label className="form-label">Dil</label>
+                      <select
+                        className="form-select"
+                        value={langFilter}
+                        onChange={(e) => setLangFilter(e.target.value)}
+                        aria-label="Dile göre filtrele"
+                      >
+                        <option value="all">Tümü</option>
+                        {LANG_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-6 col-md-2">
+                      <label className="form-label">Seviye</label>
+                      <select
+                        className="form-select"
+                        value={levelFilter}
+                        onChange={(e) => setLevelFilter(e.target.value)}
+                        aria-label="Seviyeye göre filtrele"
+                      >
+                        <option value="all">Tümü</option>
+                        {LEVEL_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
                           </option>
                         ))}
                       </select>
@@ -300,6 +377,8 @@ function EskepStajerOdevs() {
                           setQ("");
                           setStatusFilter("all");
                           setKoorFilter("all");
+                          setLangFilter("all");
+                          setLevelFilter("all");
                           setDateFrom("");
                           setDateTo("");
                           setOdevs(allOdevs);
@@ -360,7 +439,7 @@ function EskepStajerOdevs() {
                                 <div className="ms-3">
                                   <h6 className="mb-1">{c.title}</h6>
                                   <div className="text-muted small">
-                                    {(c.language || "—")} · {(c.level || "—")}
+                                    {langLabel(c.language)} · {levelLabel(c.level)}
                                   </div>
                                 </div>
                               </div>

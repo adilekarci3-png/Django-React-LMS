@@ -4,6 +4,8 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from api.views.about_views import AboutPageDetailAPIView
+from api.views.students import student_my_works
+from api.views.permissions import IsAgent
 from . import views as api_views
 from api.views.people import TeacherViewSet
 # Paketle birlikte export edilen sınıflar (bölüp modülerleştirdiklerimiz)
@@ -153,7 +155,7 @@ urlpatterns = [
     path("agent/summary/<agent_id>/", api_views.AgentSummaryAPIView.as_view()),
     path("agent/course-list/<user_id>/", api_views.StudentCourseListAPIView.as_view()),
     path("agent/hafiz-list/<int:agent_id>/", api_views.HafizAgentListAPIView.as_view(), name="agent-hafiz-list"),
-    path("agent/<user_id>/", api_views.IsAgent),
+    path("agent/<user_id>/", IsAgent),
     path("agent/hafizbilgi-update/<agent_id>/<hafizbilgi_id>/", api_views.HafizBilgiUpdateAPIView.as_view()),
     path("agent/hafizbilgi-create/", api_views.HafizBilgiCreateAPIView.as_view()),
     path("agent/dashboard/summary/", api_views.HBSTemsilciDashboardView.as_view(), name="hbstem_dashboard_summary"),
@@ -208,7 +210,8 @@ urlpatterns = [
     path("eskepstajer/odev-note-detail/<int:koordinator_id>/<int:odev_id>/<int:id>/", api_views.OdevCreateOrUpdateNoteAPIView.as_view()),
 
     # Eskep Student
-    path("eskepstudent/odev-create/", api_views.EskepOdevCreateAPIView.as_view()),
+    path("eskepstudent/odev-create/", api_views.EskepOdevCreateAPIView.as_view()),    
+    path("eskepstudent/dashboard/", student_my_works, name="student-my-works"),
     path("eskepogrenci/odev-list/<ogrenci_id>/", api_views.EskepOgrenciOdevListAPIView.as_view()),
     path("eskepstudent/odev-detail/<user_id>/<enrollment_id>/", api_views.EskepStajerOdevDetailAPIView.as_view()),
     path("eskepstudent/kitaptahlili-create/", api_views.EskepKitapTahliliCreateAPIView.as_view()),
@@ -250,7 +253,11 @@ urlpatterns = [
     path("eskepinstructor/kitaptahlili-list/<user_id>/", api_views.EskepInstructorKitapTahliliListAPIView.as_view()),
     path("eskepinstructor/kitaptahlili-detail/<int:koordinator_id>/<int:kitaptahlili_id>/", api_views.EskepInstructorKitapTahliliDetailAPIView.as_view()),
     path("eskepinstructor/kitaptahlili-note/<int:kitaptahlili_id>/<int:koordinator_id>/", api_views.EskepInstructorKitapTahliliNoteCreateAPIView.as_view(), name="kitaptahlili-note-create"),
-    path("eskepinstructor/kitaptahlili-note-detail/<kitaptahlili_id>/<koordinator_id>/<note_id>/", api_views.EskepInstructorKitapTahliliNoteDetailAPIView.as_view()),
+      path(
+        "eskepinstructor/kitaptahlili-note-detail/<int:kitaptahlili_id>/<int:user_id>/<int:note_id>/",
+        api_views.EskepInstructorKitapTahliliNoteDetailAPIView.as_view(),
+        name="eskep_kitaptahlili_note_detail",
+    ),
     path("eskepinstructor/rate-kitaptahlili/", api_views.InstructorRateCourseCreateAPIView.as_view()),
     path("eskepinstructor/question-answer-list-create/<kitaptahlili_id>/", api_views.OdevQuestionAnswerListCreateAPIView.as_view()),
     path("eskepinstructor/proje-list/<user_id>/", api_views.EskepInstructorProjeListAPIView.as_view()),

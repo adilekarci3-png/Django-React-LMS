@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.apps import apps
 from .choices import LANGUAGE, LEVEL, STATUS, KOORDINATOR_STATUS,RATING
 from shortuuid.django_fields import ShortUUIDField
+from django.utils.functional import cached_property
 
 class KitapTahlili(models.Model):
     category = models.ForeignKey("api.Category", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Kategori")
@@ -103,18 +104,21 @@ class Question_AnswerKitapTahlili(models.Model):
 
     @property
     def messages(self):
-        return Question_Answer_MessageKitapTahlili.objects.filter(question=self).order_by("date")
+        # İsterseniz, mesaj modelinde ForeignKey'e related_name="messages" verip
+        # burada self.messages.order_by("date") da kullanabilirsiniz.
+        return Question_Answer_MessageKitapTahlili.objects.filter(
+            question=self
+        ).order_by("date")
 
-    @property
+    @cached_property
     def profile(self):
-        if not self.mesajiGonderen:
-            return None
-        Profile = apps.get_model("api", "Profile")
-        try:
-            return Profile.objects.get(user=self.mesajiGonderen)
-        except Profile.DoesNotExist:
-            return None
-
+        """
+        Mesajı gönderen kullanıcının profilini güvenli getirir.
+        OneToOne alanınızın related_name'i 'profile' değilse aşağıdaki 'profile'
+        yerine kendi related_name'inizi yazın (örn. 'user_profile').
+        """
+        u = self.mesajiGonderen
+        return getattr(u, "profile", None) if u else None
 
 class Question_Answer_MessageKitapTahlili(models.Model):
     kitaptahlili = models.ForeignKey(
@@ -209,9 +213,17 @@ class NoteKitapTahlili(models.Model):
 
 
 class ReviewKitapTahlili(models.Model):
-    ogrenciStajer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Öğrenci/Stajyer")
-    koordinator = models.ForeignKey("api.Koordinator", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Koordinatör")
-    kitaptahlili = models.ForeignKey("api.KitapTahlili", on_delete=models.CASCADE, verbose_name="Kitap Tahlili")
+    ogrenciStajer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name="Öğrenci/Stajyer"
+    )
+    koordinator = models.ForeignKey(
+        "api.Koordinator", on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name="Koordinatör"
+    )
+    kitaptahlili = models.ForeignKey(
+        "api.KitapTahlili", on_delete=models.CASCADE, verbose_name="Kitap Tahlili"
+    )
     review = models.TextField("Yorum")
     rating = models.IntegerField("Puan", choices=RATING, default=None)
     reply = models.CharField("Yanıt", null=True, blank=True, max_length=1000)
@@ -225,9 +237,11 @@ class ReviewKitapTahlili(models.Model):
     def __str__(self):
         return self.kitaptahlili.title
 
+    @cached_property
     def profile(self):
-        Profile = apps.get_model("api", "Profile")
-        try:
-            return Profile.objects.get(ogrenciStajer=self.ogrenciStajer)
-        except Profile.DoesNotExist:
-            return None
+        """
+        Öğrenci/Stajyer kullanıcının profilini güvenli getirir.
+        OneToOne related_name'iniz farklıysa 'profile'ı değiştirin.
+        """
+        u = self.ogrenciStajer
+        return getattr(u, "profile", None) if u else None

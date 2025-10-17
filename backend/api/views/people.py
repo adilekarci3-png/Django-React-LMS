@@ -8,10 +8,12 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView,CreateAPIView # <-- EKLENDİ
+from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView,CreateAPIView
+
+from api.views.permissions import IsGeneralKoordinator # <-- EKLENDİ
 
 from .. import models as api_models, serializers as api_serializer
-from ..permissions import IsGeneralKoordinator  # Bu sınıfı permissions.py'ye ekledim (aşağıda)
+
 from .utils import abs_url
 
 User = get_user_model()

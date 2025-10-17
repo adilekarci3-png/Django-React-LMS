@@ -9,7 +9,8 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from utils.permissions import IsEskepKoordinatorOrTeacher
+from api.views.utils import KoordinatorLookupMixin
+from api.views.permissions import IsEskepKoordinatorOrTeacher
 from .. import models as api_models, serializers as api_serializer
 
 from rest_framework.exceptions import NotFound
@@ -17,33 +18,24 @@ from .base import BaseListAPIView, BaseDestroyAPIView
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-class EskepInstructorKitapTahliliListAPIView(BaseListAPIView):
-    serializer_class   = api_serializer.KitapTahliliSerializer
-    permission_classes = [IsAuthenticated]
+class EskepInstructorKitapTahliliListAPIView(KoordinatorLookupMixin, BaseListAPIView):
+    serializer_class    = api_serializer.KitapTahliliSerializer
+    permission_classes  = [IsAuthenticated]
 
     def get_queryset(self):
-        user_id = self.kwargs.get("user_id") or getattr(self.request.user, "id", None)
-        if not user_id:
+        koordinator = self.get_koordinator()
+        if not koordinator:
             return api_models.KitapTahlili.objects.none()
 
-        try:
-            koordinator = api_models.Koordinator.objects.select_related("user").get(user__id=user_id)
-        except api_models.Koordinator.DoesNotExist:
-            return api_models.KitapTahlili.objects.none()
-
-        # İstersen rol sınırı koyabilirsin
-        if not koordinator.roles.filter(name="ESKEPStajerKoordinator").exists():
-            return api_models.KitapTahlili.objects.none()
+        base_qs = api_models.KitapTahlili.objects.all() if self.is_genel_koordinator(koordinator) \
+                  else api_models.KitapTahlili.objects.filter(koordinator=koordinator)
 
         return (
-            api_models.KitapTahlili.objects
-            .filter(
-                Q(inserteduser__stajer__instructor=koordinator) |
-                Q(inserteduser__ogrenci__instructor=koordinator) |
-                Q(koordinator=koordinator)
+            base_qs
+            .select_related(
+                "inserteduser", "koordinator", "koordinator__user", "category",
+                "inserteduser__stajer", "inserteduser__ogrenci"
             )
-            .select_related("inserteduser", "koordinator", "koordinator__user", "category",
-                            "inserteduser__stajer", "inserteduser__ogrenci")
             .order_by("-date", "-id")
             .distinct()
         )
@@ -228,36 +220,6 @@ class EskepKitapTahliliDestroyAPIView(BaseDestroyAPIView):
 
 
 # --- ROLE-BASED LISTS (zaten varsa tekrar eklemeye gerek yok) ---
-
-class EskepInstructorKitapTahliliListAPIView(BaseListAPIView):
-    serializer_class = api_serializer.KitapTahliliSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user_id = self.kwargs.get("user_id") or getattr(self.request.user, "id", None)
-        if not user_id:
-            return api_models.KitapTahlili.objects.none()
-        try:
-            koordinator = api_models.Koordinator.objects.select_related("user").get(user__id=user_id)
-        except api_models.Koordinator.DoesNotExist:
-            return api_models.KitapTahlili.objects.none()
-
-        if not koordinator.roles.filter(name="ESKEPStajerKoordinator").exists():
-            return api_models.KitapTahlili.objects.none()
-
-        return (
-            api_models.KitapTahlili.objects
-            .filter(
-                Q(inserteduser__stajer__instructor=koordinator) |
-                Q(inserteduser__ogrenci__instructor=koordinator) |
-                Q(koordinator=koordinator)
-            )
-            .select_related("inserteduser", "koordinator", "koordinator__user", "category",
-                            "inserteduser__stajer", "inserteduser__ogrenci")
-            .order_by("-date", "-id")
-            .distinct()
-        )
-
 
 class EskepStajerKitapTahliliListAPIView(BaseListAPIView):
     serializer_class = api_serializer.KitapTahliliSerializer
