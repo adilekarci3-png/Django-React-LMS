@@ -39,7 +39,7 @@ function KitapTahliliDetail() {
   const [addQuestionShow, setAddQuestionShow] = useState(false);
 
   const userData = useUserData();
-  const { kitaptahlili_id } = useParams();
+  const { kitaptahlili_id, koordinator_id } = useParams();
   const api = useAxios();
   const lastElementRef = useRef(null);
 
@@ -78,7 +78,7 @@ function KitapTahliliDetail() {
       setFetching(true);
       setError("");
       const res = await api.get(
-        `eskepinstructor/kitaptahlili-detail/${userData.user_id}/${kitaptahlili_id}/`
+        `eskepinstructor/kitaptahlili-detail/${koordinator_id}/${kitaptahlili_id}/`
       );
       const data = res.data;
       setKitapTahlili(data);

@@ -253,29 +253,76 @@ class EskepInstructorOdevDetailAPIView(generics.RetrieveAPIView):
         except (TypeError, ValueError):
             raise NotFound("Geçersiz odev_id")
 
-        return generics.get_object_or_404(self.get_queryset(), pk=odev_id)
-    
+        return generics.get_object_or_404(self.get_queryset(), pk=odev_id)   
+
+
+
 class EskepInstructorOdevDetailAPIView(generics.RetrieveAPIView):
     """
-    /eskepinstructor/odev-detail/<int:odev_id>/<int:koordinator_id>/
+    GET /api/v1/eskepinstructor/odev-detail/<int:odev_id>/<int:koordinator_id>/
+    URL'deki koordinator_id'yi BİLEREK kullanmıyoruz.
+    Giriş yapan kullanıcının user_id'sinden koordinator kaydını buluyoruz.
     """
     serializer_class = api_serializer.OdevSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]     # çünkü request.user lazım
     lookup_url_kwarg = "odev_id"
 
-    def get_queryset(self):
+    def _get_koordinator_for_user(self, user):
+        """
+        Giriş yapan kullanıcıya ait koordinator kaydını bul.
+        Burada tablo adın nasıl ise onu kullan.
+        """
+        # 1) En yaygın senaryo: Koordinator tablosu user=FK
         try:
-            koordinator_id = int(self.kwargs.get("koordinator_id"))
-        except (TypeError, ValueError):
-            raise NotFound("Geçersiz koordinator_id")
-        return api_models.Odev.objects.filter(koordinator_id=koordinator_id)
+            return api_models.Koordinator.objects.get(user=user)
+        except (api_models.Koordinator.DoesNotExist, AttributeError):
+            pass
+
+        # 2) Eğer modelin adı farklıysa (ör: EskepKoordinator)
+        # from . import models as api_models
+        # try:
+        #     return api_models.EskepKoordinator.objects.get(user=user)
+        # except api_models.EskepKoordinator.DoesNotExist:
+        #     pass
+
+        # 3) Eğer tabloda field adı user değil de user_id ise:
+        # try:
+        #     return api_models.Koordinator.objects.get(user_id=user.id)
+        # except api_models.Koordinator.DoesNotExist:
+        #     pass
+
+        raise NotFound("Bu kullanıcıya ait koordinatör kaydı bulunamadı.")
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            raise NotFound("Oturum bulunamadı.")
+
+        koordinator = self._get_koordinator_for_user(user)
+
+        # Odev modelinde alan adı nasıl?
+        qs = api_models.Odev.objects.all()
+
+        # 1) Eğer Odev modelinde 'koordinator' diye FK varsa:
+        if hasattr(api_models.Odev, "koordinator"):
+            qs = qs.filter(koordinator=koordinator)
+
+        # 2) Eğer 'koordinator_id' kolon ise:
+        elif hasattr(api_models.Odev, "koordinator_id"):
+            qs = qs.filter(koordinator_id=koordinator.id)
+
+        # değilse, en azından odev_id ile bulacağız
+        return qs
 
     def get_object(self):
+        # URL’den gelen odev_id
         try:
             odev_id = int(self.kwargs.get(self.lookup_url_kwarg))
         except (TypeError, ValueError):
             raise NotFound("Geçersiz odev_id")
-        return get_object_or_404(self.get_queryset(), pk=odev_id)
+
+        qs = self.get_queryset()
+        return get_object_or_404(qs, pk=odev_id)
 
 
 class EskepStajerOdevDetailAPIView(generics.RetrieveAPIView):

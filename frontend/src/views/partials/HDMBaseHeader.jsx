@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
@@ -13,11 +12,27 @@ import "./css/HDMGirisPage.css";
 
 function HDMBaseHeader() {
   const [now, setNow] = useState(new Date());
+
+  // auth store'dan roller
   const [isLoggedIn] = useAuthStore((s) => [s.isLoggedIn]);
   const [baseRoles, subRoles] = useAuthStore((s) => [
     s.allUserData?.base_roles || [],
     s.allUserData?.sub_roles || [],
   ]);
+
+  // sadece HDMKoordinator olan (ve base'de de Koordinator olan) kişiler görsün
+  const isHDMKoordinator =
+    baseRoles.includes("Koordinator") && subRoles.includes("HDMKoordinator");
+
+  // diğer HDM rollerin de istersen ileride kullanırsın
+  const isHDMStajer =
+    baseRoles.includes("Stajer") && subRoles.includes("HDMStajer");
+  const isHDMOgrenci =
+    baseRoles.includes("Ogrenci") && subRoles.includes("HDMOgrenci");
+  const isHDMEgitmen =
+    baseRoles.includes("Teacher") && subRoles.includes("HDMEgitmen");
+  const isHDMHafiz =
+    baseRoles.includes("Hafiz") && subRoles.includes("HDMHafiz");
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -25,10 +40,16 @@ function HDMBaseHeader() {
   }, []);
 
   const timeTR = (d) =>
-    d.toLocaleString("tr-TR", {
-      day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit", second: "2-digit",
-    }).replace(",", "");
+    d
+      .toLocaleString("tr-TR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+      .replace(",", "");
 
   return (
     <header className="hdm-min-header">
@@ -38,8 +59,12 @@ function HDMBaseHeader() {
             <span className="hdm-logo-dot me-2" /> HDM
           </Link>
 
-          <button className="navbar-toggler border-0" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#hdmNav">
+          <button
+            className="navbar-toggler border-0"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#hdmNav"
+          >
             <span className="hdm-burger" />
           </button>
 
@@ -61,23 +86,33 @@ function HDMBaseHeader() {
                 </NavLink>
               </li>
 
+              {/* HDM ana menü */}
               <HDMMenu />
 
-              {baseRoles.includes("Koordinator") && subRoles.includes("HDMKoordinator") && <KoordinatorMenu />}
-              {baseRoles.includes("Stajer") && subRoles.includes("HDMStajer") && <StajerMenu />}
-              {baseRoles.includes("Ogrenci") && subRoles.includes("HDMOgrenci") && <OgrenciMenu />}
-              {baseRoles.includes("Teacher") && subRoles.includes("HDMEgitmen") && <EgitmenMenu />}
-              {baseRoles.includes("Hafiz") && subRoles.includes("HDMHafiz") && <HafizMenu />}
+              {/* SADECE HDM KOORDİNATÖR */}
+              {isHDMKoordinator && <KoordinatorMenu />}
+
+              {/* Dilersen ileride açarsın
+              {isHDMStajer && <StajerMenu />}
+              {isHDMOgrenci && <OgrenciMenu />}
+              {isHDMEgitmen && <EgitmenMenu />}
+              {isHDMHafiz && <HafizMenu />} */}
             </ul>
 
             <div className="d-none d-lg-flex align-items-center gap-3">
               <span className="text-white-50 small">{timeTR(now)}</span>
               {isLoggedIn() ? (
-                <Link to="/logout/" className="btn btn-outline-light btn-sm">Çıkış Yap</Link>
+                <Link to="/logout/" className="btn btn-outline-light btn-sm">
+                  Çıkış Yap
+                </Link>
               ) : (
                 <>
-                  <Link to="/login/" className="btn btn-outline-light btn-sm">Giriş Yap</Link>
-                  <Link to="/register/" className="btn btn-cta btn-sm">Kayıt Ol</Link>
+                  <Link to="/login/" className="btn btn-outline-light btn-sm">
+                    Giriş Yap
+                  </Link>
+                  <Link to="/register/" className="btn btn-cta btn-sm">
+                    Kayıt Ol
+                  </Link>
                 </>
               )}
             </div>

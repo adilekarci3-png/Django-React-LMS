@@ -74,7 +74,7 @@ function DersSonuRaporuDetail() {
   const fetchDetail = async () => {
     try {
       const res = await api.get(
-        `eskepinstructor/derssonuraporu-detail/${derssonuraporu_id}/${user?.user_id}/`
+        `eskepinstructor/derssonuraporu-detail/${user?.user_id}/${derssonuraporu_id}/`
       );
       const data = res.data;
       setDsr(data);

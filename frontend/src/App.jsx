@@ -96,6 +96,7 @@ import ProjeEdit from "./views/ESKEP/ProjeEdit";
 import DersSonuRaporuDetail from "./views/ESKEPinstructor/DersSonuRaporuDetail";
 import OdevDetail from "./views/ESKEPinstructor/OdevDetail";
 import ProjeDetail from "./views/ESKEPinstructor/ProjeDetail";
+import ESKEPContactMessages from "./views/base/ContactMessages";
 
 //Eskep Instructor Pages
 import ESKEPinstructorCourseCreate from "./views/ESKEPinstructor/EskepInstructorCourseCreate";
@@ -112,8 +113,8 @@ import EskepInstructorStudents from "./views/ESKEPinstructor/EskepInstructorStud
 import EskepInstructorProfile from "./views/ESKEPinstructor/EskepInstructorProfile";
 import EskepInstructorStudentStajerList from "./views/ESKEPinstructor/EskepInstructorStudentStajerList";
 import ESKEPChangePassword from "./views/ESKEPinstructor/ChangePassword";
-import StajerListesi from "./views/ESKEPinstructor/StajerListesi";
-import OgrenciListesi from "./views/ESKEPinstructor/OgrenciListesi";
+import StajerListesi from "./views/ESKEPinstructor/EskepKoordinatorStajers";
+import OgrenciListesi from "./views/ESKEPinstructor/EskepKoordinatorStudents";
 import StajerDetay from "./views/ESKEPinstructor/StajerDetay";
 import StajerDuzenle from "./views/ESKEPinstructor/StajerDuzenle";
 import EskepInstructorCourseDetail from "./views/ESKEPinstructor/EskepInstructorCourseDetail";
@@ -197,6 +198,12 @@ import Eskephakkimizda from "./views/ESKEP/Eskephakkimizda";
 import HDMHakkimizda from "./views/HDM/HDMHakkimizda";
 import HBSHakkimizda from "./views/hafizbilgi/HBSHakkimizda";
 import Akademihakkimizda from "./views/Akademi/Akademihakkimizda";
+import EskepStajerCalendar from "./views/ESKEPstajer/EskepStajerCalendar";
+import ProjeDraftCreate from "./views/ESKEPstajer/ProjeDraftCreate";
+import ProjeWeeklyUpload from "./views/ESKEPstajer/ProjeWeeklyUpload";
+import EskepApplication from "./views/ESKEP/EskepApplication";
+import KadinlarOrgChart from "./views/base/KadinlarOrgChart";
+import ErkeklerOrgChart from "./views/base/ErkeklerOrgChart";
 
 
 const BASENAME = import.meta.env.VITE_BASENAME || "/test.akademi.ehad.org.tr";
@@ -241,6 +248,8 @@ function App() {
             <Route path="/login/" element={<Login />} />
             <Route path="/logout/" element={<Logout />} />
             <Route path="/forgot-password/" element={<ForgotPassword />} />
+            <Route path="/org/kadinlar/" element={<KadinlarOrgChart />} />
+            <Route path="/org/erkekler/" element={<ErkeklerOrgChart />} />
             <Route
               path="/create-new-password/"
               element={<CreateNewPassword />}
@@ -719,6 +728,14 @@ function App() {
               }
             />
             <Route
+              path="/eskep/contact-messages/"
+              element={
+                <PrivateRoute>
+                  <ESKEPContactMessages />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/eskep/ogrenci/"
               element={
                 <PrivateRoute>
@@ -790,6 +807,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/eskep/stajer-takvim" element={<EskepStajerCalendar />} />
             <Route
               path="/eskep/edit-proje/:id"
               element={
@@ -856,7 +874,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/odevs/:koordinator_id/:odev_id/"
+              path="/eskepinstructor/odevs/:odev_id/:koordinator_id/"
               element={
                 <PrivateRoute>
                   <ESKEPinstructorOdevDetail />
@@ -872,7 +890,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/dersSonuRaporus/:derssonuraporu_id/:koordinator_id/"
+              path="/eskepinstructor/dersSonuRaporus/:dersSonuRaporu_id/:koordinator_id/"
               element={
                 <PrivateRoute>
                   <DersSonuRaporuDetail />
@@ -888,7 +906,7 @@ function App() {
               }
             />
             <Route
-              path="/eskepinstructor/kitaptahlileris/:kitaptahlili_id/:koordinator_id/"
+              path="/eskepinstructor/kitaptahlils/:kitaptahlili_id/:koordinator_id/"
               element={
                 <PrivateRoute>
                   <ESKEPinstructorKitapTahliliDetail />
@@ -1073,6 +1091,12 @@ function App() {
                 </PrivateRoute>
               }
             />
+             {/* 1. adım: ön taslak */}
+  <Route path="/eskep/create-proje-draft" element={<ProjeDraftCreate />} />
+
+  {/* 2. adım: haftalık içerik (proje id ile) */}
+  <Route path="/eskep/proje-weekly/:id" element={<ProjeWeeklyUpload />} />
+  <Route path="/eskep/apply" element={<EskepApplication />} />
             <Route
               path="/eskepstajer/dashboard/"
               element={

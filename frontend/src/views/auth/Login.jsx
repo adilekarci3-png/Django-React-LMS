@@ -3,8 +3,9 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 
 import { useAuthStore } from "../../store/auth";
 import { login } from "../../utils/auth";
-import AkademiBaseHeader from "../partials/AkademiBaseHeader";
-import AkademiBaseFooter from "../partials/AkademiBaseFooter";
+import HomeHeader from "../partials/HomeHeader";
+import HomeFooter from "../partials/HomeFooter";
+
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -50,8 +51,8 @@ function Login() {
 
   return (
     <>
-      <AkademiBaseHeader />
-
+      
+<HomeHeader />
       <section className="vh-100 d-flex align-items-center justify-content-center bg-light">
         <div className="container">
           <div className="row justify-content-center">
@@ -144,7 +145,7 @@ function Login() {
         </div>
       </section>
 
-      <AkademiBaseFooter />
+      <HomeFooter />
     </>
   );
 }

@@ -1,3 +1,4 @@
+// src/views/ESKEPinstructor/EskepInstructorKitapTahlils.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
@@ -36,9 +37,10 @@ function EskepInstructorKitapTahlils() {
     abortRef.current = controller;
 
     try {
-      const res = await api.get(`eskepinstructor/kitaptahlili-list/${userId}/`, {
-        signal: controller.signal,
-      });
+      const res = await api.get(
+        `eskepinstructor/kitaptahlili-list/${userId}/`,
+        { signal: controller.signal }
+      );
       const arr = Array.isArray(res.data) ? res.data : [];
       setItems(arr);
     } catch (e) {
@@ -53,13 +55,15 @@ function EskepInstructorKitapTahlils() {
   useEffect(() => {
     if (userData?.user_id) fetchData(userData.user_id);
     return () => abortRef.current?.abort?.();
-  }, [userData?.user_id]); // ❗️ ikinci, boş fetch kaldırıldı
+  }, [userData?.user_id]);
 
+  // seviye listesi
   const levels = useMemo(() => {
     const set = new Set(items.map((x) => x.level).filter(Boolean));
     return ["all", ...Array.from(set)];
   }, [items]);
 
+  // filtre + sıralama
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     let list = items.filter((it) => {
@@ -68,21 +72,35 @@ function EskepInstructorKitapTahlils() {
         it.title?.toLowerCase().includes(q) ||
         it.koordinator?.full_name?.toLowerCase?.().includes(q) ||
         it.inserteduser?.full_name?.toLowerCase?.().includes(q);
+
       const matchesLevel =
-        level === "all" || String(it.level || "").toLowerCase() === String(level).toLowerCase();
+        level === "all" ||
+        String(it.level || "").toLowerCase() === String(level).toLowerCase();
+
       return matchesQ && matchesLevel;
     });
 
     const dir = sort.dir === "asc" ? 1 : -1;
     list.sort((a, b) => {
+      const ad =
+        a.date || a.created_at || a.inserteddate || a.inserted_at || "";
+      const bd =
+        b.date || b.created_at || b.inserteddate || b.inserted_at || "";
+
       switch (sort.key) {
         case "title":
-          return dir * String(a.title || "").localeCompare(String(b.title || ""), "tr");
+          return (
+            dir *
+            String(a.title || "").localeCompare(String(b.title || ""), "tr")
+          );
         case "level":
-          return dir * String(a.level || "").localeCompare(String(b.level || ""), "tr");
+          return (
+            dir *
+            String(a.level || "").localeCompare(String(b.level || ""), "tr")
+          );
         case "date":
         default:
-          return dir * (new Date(a.date).getTime() - new Date(b.date).getTime());
+          return dir * (new Date(ad).getTime() - new Date(bd).getTime());
       }
     });
 
@@ -90,16 +108,21 @@ function EskepInstructorKitapTahlils() {
   }, [items, search, level, sort]);
 
   const onSort = (key) => {
-    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
+    setSort((s) =>
+      s.key === key
+        ? { key, dir: s.dir === "asc" ? "desc" : "asc" }
+        : { key, dir: "asc" }
+    );
   };
 
   const SortIcon = ({ col }) => {
-    if (sort.key !== col) return <i className="fas fa-sort ms-1 text-muted" />;
-    return sort.dir === "asc" ? <i className="fas fa-sort-up ms-1" /> : <i className="fas fa-sort-down ms-1" />;
-  };
-
-  const imgFallback = (e) => {
-    e.currentTarget.src = "https://via.placeholder.com/160x120.png?text=Kitap";
+    if (sort.key !== col)
+      return <i className="fas fa-sort ms-1 text-muted" />;
+    return sort.dir === "asc" ? (
+      <i className="fas fa-sort-up ms-1" />
+    ) : (
+      <i className="fas fa-sort-down ms-1" />
+    );
   };
 
   const onSearch = (e) => {
@@ -108,26 +131,50 @@ function EskepInstructorKitapTahlils() {
     debounceRef.current = setTimeout(() => setSearch(v), 180);
   };
 
+  const imgFallback = (e) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = "http://127.0.0.1:8000/static/img/placeholder.png";
+  };
+
   return (
     <>
       <ESKEPBaseHeader />
-      <section className="pt-5 pb-5 bg-light">
+
+      <section
+        className="pt-5 pb-5 bg-light min-vh-100"
+        style={{ paddingTop: "6rem" }}
+      >
+        {/* daha geniş container */}
         <div className="container-xxl">
           <Header />
-          <div className="row mt-0 mt-md-4 g-4">
-            <div className="col-lg-3 col-md-4 col-12">
+
+          {/* FLEX LAYOUT: sidebar sabit, içerik geniş */}
+          <div
+            className="d-lg-flex gap-4 mt-4 align-items-start"
+            style={{ minHeight: "65vh" }}
+          >
+            {/* SOL MENÜ */}
+            <div
+              className="flex-shrink-0 mb-4 mb-lg-0"
+              style={{ width: 270, minWidth: 250 }}
+            >
               <Sidebar />
             </div>
 
-            <div className="col-lg-9 col-md-8 col-12">
-              <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            {/* SAĞ İÇERİK */}
+            <div className="flex-grow-1 d-flex flex-column gap-3">
+              {/* üst bar */}
+              <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
                 <h4 className="mb-0 d-flex align-items-center">
-                  <i className="fas fa-book-open text-success me-2" style={{ fontSize: "1.4rem" }} />
+                  <i
+                    className="fas fa-book-open text-success me-2"
+                    style={{ fontSize: "1.4rem" }}
+                  />
                   Gönderilen Kitap Tahlilleri
                 </h4>
 
-                <div className="d-flex gap-2">
-                  <div className="input-group">
+                <div className="d-flex gap-2 flex-wrap">
+                  <div className="input-group" style={{ minWidth: 280 }}>
                     <span className="input-group-text">
                       <i className="fas fa-search" />
                     </span>
@@ -153,32 +200,56 @@ function EskepInstructorKitapTahlils() {
                 </div>
               </div>
 
+              {/* tablo kartı */}
               <div className="card mb-4 shadow-sm">
                 <div className="card-header bg-white">
                   <div className="d-flex align-items-center justify-content-between">
                     <div>
                       <h5 className="mb-0">Kitap Tahlilleri</h5>
                       <small className="text-muted">
-                        Toplam <strong>{items.length}</strong> • Filtrelenen <strong>{filtered.length}</strong>
+                        Toplam <strong>{items.length}</strong> • Filtrelenen{" "}
+                        <strong>{filtered.length}</strong>
                       </small>
                     </div>
-                    {fetching && <span className="badge bg-secondary">Yükleniyor</span>}
-                    {error && <span className="badge bg-danger">{error}</span>}
+                    <div className="d-flex gap-2 align-items-center">
+                      {fetching && (
+                        <span className="badge bg-secondary">Yükleniyor</span>
+                      )}
+                      {error && <span className="badge bg-danger">{error}</span>}
+                    </div>
                   </div>
                 </div>
 
-                <div className="table-responsive" style={{ maxHeight: 540 }}>
+                <div
+                  className="table-responsive"
+                  style={{ maxHeight: "70vh", position: "relative" }}
+                >
                   <table className="table mb-0 text-nowrap table-hover align-middle">
-                    <thead className="table-light sticky-top" style={{ top: 0, zIndex: 1 }}>
+                    <thead
+                      className="table-light sticky-top"
+                      style={{ top: 0, zIndex: 1 }}
+                    >
                       <tr>
-                        <th role="button" onClick={() => onSort("title")} className="text-nowrap">
+                        <th
+                          role="button"
+                          onClick={() => onSort("title")}
+                          className="text-nowrap"
+                        >
                           Kitap Tahlili <SortIcon col="title" />
                         </th>
-                        <th role="button" onClick={() => onSort("date")} className="text-nowrap">
+                        <th
+                          role="button"
+                          onClick={() => onSort("date")}
+                          className="text-nowrap"
+                        >
                           Kayıt Tarihi <SortIcon col="date" />
                         </th>
-                        <th className="text-nowrap">Ders Sayısı</th>
-                        <th role="button" onClick={() => onSort("level")} className="text-nowrap">
+                        <th className="text-nowrap">Ders/İçerik</th>
+                        <th
+                          role="button"
+                          onClick={() => onSort("level")}
+                          className="text-nowrap"
+                        >
                           Seviye <SortIcon col="level" />
                         </th>
                         <th className="text-nowrap">Koordinatör</th>
@@ -188,28 +259,35 @@ function EskepInstructorKitapTahlils() {
                     </thead>
 
                     <tbody>
-                      {fetching && (
-                        <>
-                          {Array.from({ length: 6 }).map((_, i) => (
-                            <tr key={`sk-${i}`}>
-                              <td colSpan="7" className="p-0">
-                                <div
-                                  className="placeholder-wave"
-                                  style={{ height: 64, display: "flex", alignItems: "center", padding: "0.75rem" }}
-                                >
-                                  <span className="placeholder col-1 me-3" style={{ height: 48 }} />
-                                  <span className="placeholder col-3 me-2" />
-                                  <span className="placeholder col-2 me-2" />
-                                  <span className="placeholder col-1 me-2" />
-                                  <span className="placeholder col-2 me-2" />
-                                  <span className="placeholder col-2" />
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </>
-                      )}
+                      {/* skeleton */}
+                      {fetching &&
+                        Array.from({ length: 6 }).map((_, i) => (
+                          <tr key={`sk-${i}`}>
+                            <td colSpan="7" className="p-0">
+                              <div
+                                className="placeholder-wave"
+                                style={{
+                                  height: 64,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  padding: "0.75rem",
+                                }}
+                              >
+                                <span
+                                  className="placeholder col-1 me-3"
+                                  style={{ height: 48 }}
+                                />
+                                <span className="placeholder col-3 me-2" />
+                                <span className="placeholder col-2 me-2" />
+                                <span className="placeholder col-1 me-2" />
+                                <span className="placeholder col-2 me-2" />
+                                <span className="placeholder col-2" />
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
 
+                      {/* boş */}
                       {!fetching && !error && filtered.length === 0 && (
                         <tr>
                           <td colSpan="7" className="text-center p-5">
@@ -221,6 +299,7 @@ function EskepInstructorKitapTahlils() {
                         </tr>
                       )}
 
+                      {/* veri */}
                       {!fetching &&
                         !error &&
                         filtered.map((c) => (
@@ -228,33 +307,52 @@ function EskepInstructorKitapTahlils() {
                             <td>
                               <div className="d-flex align-items-center">
                                 <img
-                                  src={c.image}
+                                  src={
+                                    c.image ||
+                                    "http://127.0.0.1:8000/static/img/placeholder.png"
+                                  }
                                   onError={imgFallback}
                                   alt={c.title}
                                   className="rounded"
                                   style={{
-                                    width: 80,
-                                    height: 60,
+                                    width: 90,
+                                    height: 64,
                                     objectFit: "cover",
                                     borderRadius: 8,
                                   }}
                                 />
                                 <div className="ms-3">
-                                  <h6 className="mb-1 text-dark">{c.title}</h6>
+                                  <h6 className="mb-1 text-dark">
+                                    {c.title || "Başlıksız Tahlil"}
+                                  </h6>
                                   {c.category_name && (
-                                    <span className="badge bg-light text-dark border">{c.category_name}</span>
+                                    <span className="badge bg-light text-dark border">
+                                      {c.category_name}
+                                    </span>
                                   )}
                                 </div>
                               </div>
                             </td>
-                            <td className="text-nowrap">{moment(c.date).format("D MMM YYYY")}</td>
+                            <td className="text-nowrap">
+                              {moment(
+                                c.date ||
+                                  c.created_at ||
+                                  c.inserteddate ||
+                                  c.inserted_at
+                              ).format("D MMM YYYY")}
+                            </td>
                             <td>
                               <span className="badge bg-secondary-subtle text-secondary border">
-                                {c.lectures?.length || 0}
+                                {c.lectures?.length ||
+                                  c.sections?.length ||
+                                  c.items?.length ||
+                                  0}
                               </span>
                             </td>
                             <td>
-                              <span className="badge bg-primary-subtle text-primary border">{c.level || "-"}</span>
+                              <span className="badge bg-primary-subtle text-primary border">
+                                {c.level || "-"}
+                              </span>
                             </td>
                             <td className="text-nowrap">
                               {c.koordinator?.full_name ? (
@@ -265,17 +363,29 @@ function EskepInstructorKitapTahlils() {
                                 <span className="text-muted">Bilinmiyor</span>
                               )}
                             </td>
-                            <td className="text-nowrap">{c.inserteduser?.full_name || <span className="text-muted">Bilinmiyor</span>}</td>
                             <td className="text-nowrap">
-                              {c.koordinator?.id ? (
+                              {c.inserteduser?.full_name ? (
+                                c.inserteduser.full_name
+                              ) : (
+                                <span className="text-muted">Bilinmiyor</span>
+                              )}
+                            </td>
+                            <td className="text-nowrap">
+                              {(c.koordinator?.id || userData?.user_id) ? (
                                 <Link
-                                  to={`/eskepinstructor/kitaptahlileris/${c.id}/${c.koordinator.id}/`}
-                                  className="btn btn-success btn-sm"
+                                  to={`/eskepinstructor/kitaptahlils/${c.id}/${
+                                    c.koordinator?.id || userData?.user_id
+                                  }/`}
+                                  className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2"
+                                  style={{ borderRadius: 20 }}
                                 >
-                                  İncele <i className="fas fa-arrow-right ms-2" />
+                                  <i className="fas fa-eye" /> İncele
                                 </Link>
                               ) : (
-                                <button className="btn btn-secondary btn-sm" disabled>
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  disabled
+                                >
                                   Koordinatör Yok
                                 </button>
                               )}
@@ -287,27 +397,18 @@ function EskepInstructorKitapTahlils() {
                 </div>
               </div>
 
-              {/* küçük özet kutuları */}
+              {/* alt istatistik kutuları */}
               {!fetching && !error && (
                 <div className="d-flex gap-3 flex-wrap">
-                  <div className="card border-0 shadow-sm">
-                    <div className="card-body">
-                      <div className="fw-semibold text-muted">Toplam</div>
-                      <div className="fs-4">{items.length}</div>
-                    </div>
-                  </div>
-                  <div className="card border-0 shadow-sm">
-                    <div className="card-body">
-                      <div className="fw-semibold text-muted">Filtrelenen</div>
-                      <div className="fs-4">{filtered.length}</div>
-                    </div>
-                  </div>
+                  <MiniStat label="Toplam" value={items.length} />
+                  <MiniStat label="Filtrelenen" value={filtered.length} />
                 </div>
               )}
             </div>
           </div>
         </div>
       </section>
+
       <ESKEPBaseFooter />
     </>
   );
@@ -315,7 +416,18 @@ function EskepInstructorKitapTahlils() {
 
 export default EskepInstructorKitapTahlils;
 
-// ————————————————————————
+// --------------------------------------------------
+
+function MiniStat({ label, value }) {
+  return (
+    <div className="card border-0 shadow-sm">
+      <div className="card-body">
+        <div className="fw-semibold text-muted">{label}</div>
+        <div className="fs-4">{value}</div>
+      </div>
+    </div>
+  );
+}
 
 function EmptyState({ title = "Kayıt bulunamadı", subtitle = "" }) {
   return (

@@ -3,9 +3,13 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from api.views.about_views import AboutPageDetailAPIView
+from api.views.about_views import AboutPageDetailAPIView, EskepPageViewSet
 from api.views.students import student_my_works
 from api.views.permissions import IsAgent
+from api.views.saved_video_combined import MeSavedVideosDeleteView, MeSavedVideosListCreateView
+from api.views.teachers import EskepKoordinatorStajersListAPIView, EskepKoordinatorStudentsListAPIView
+from api.views.contact import BlockIPAPIView, ContactMessageCreateAPIView, ContactMessageListAPIView, ContactSubjectListAPIView, ReplyContactMessageAPIView
+from api.views.organization import OrgChartByNameAPIView
 from . import views as api_views
 from api.views.people import TeacherViewSet
 # Paketle birlikte export edilen sınıflar (bölüp modülerleştirdiklerimiz)
@@ -266,7 +270,7 @@ urlpatterns = [
     path("eskepinstructor/derssonuraporu-detail/<derssonuraporu_id>/<koordinator_id>/", api_views.EskepInstructorDersSonuRaporuDetailAPIView.as_view()),
     path("eskep/assign-role/", api_views.CoordinatorYetkiAtaAPIView.as_view()),
     path("eskepinstructor/create-educator/", api_views.EducatorCreateAPIView.as_view()),
-    path("eskepinstructor/student-lists/<user_id>/", api_views.EskepInstructorStudentsStajersListAPIView.as_view({'get': 'list'})),
+    # path("eskepinstructor/student-lists/<user_id>/", api_views.EskepInstructorStudentsStajersListAPIView.as_view({'get': 'list'})),
     path("eskepinstructor/<int:user_id>/kisisel-liste/", api_views.koordinator_students_stajers, name='koordinator-student-stajer-list'),
     path("eskepinstructor/koordinatorler/by-role/", api_views.KoordinatorByRoleAPIView.as_view()),
     path("eskepinstructor/course-list/<user_id>/", api_views.MyCourseListAPIView.as_view()),
@@ -314,7 +318,11 @@ urlpatterns = [
     path("eskep/create-student", api_views.EgitmenListAPIView.as_view()),
     path("eskep/create-intern", api_views.EgitmenListAPIView.as_view()),
     path("eskep/update_coordinator_role", api_views.UpdateCoordinatorRole.as_view()),
-
+    path("eskep/about/<slug:slug>/", EskepPageViewSet.as_view({"get": "retrieve"}), name="eskep-about-detail"),
+    path("eskep/koordinator/students/<int:user_id>/", EskepKoordinatorStudentsListAPIView.as_view({'get': 'list'})),
+    path("eskep/koordinator/stajers/<int:user_id>/", EskepKoordinatorStajersListAPIView.as_view({'get': 'list'})),
+    path("me/saved-videos/", MeSavedVideosListCreateView.as_view(), name="me-saved-videos"),
+    path("me/saved-videos/<int:saved_id>/delete/", MeSavedVideosDeleteView.as_view(), name="me-saved-videos-delete"),
     # HBS — Hafız ve Dersler
     path("egitmen/<int:egitmen_id>/detay/", api_views.egitmen_detay),
     path("hafiz/<int:hafiz_id>/detay/", api_views.hafiz_detay),
@@ -325,4 +333,12 @@ urlpatterns = [
 
     # Sayfalar
     path("about/<slug:slug>/", AboutPageDetailAPIView.as_view(), name="about-detail"),
+    
+    # İletişim
+    path("contact/", ContactMessageCreateAPIView.as_view(), name="contact-create"),
+    path("contact/messages/", ContactMessageListAPIView.as_view(), name="contact-list"),
+    path("contact/messages/<int:pk>/block-ip/", BlockIPAPIView.as_view(), name="contact-block-ip"),
+    path("contact/messages/<int:pk>/reply/", ReplyContactMessageAPIView.as_view(), name="contact-reply"),
+    path("contact/subjects/", ContactSubjectListAPIView.as_view(), name="contact-subjects"),
+    path("orgchart/<slug:slug>/", OrgChartByNameAPIView.as_view(), name="orgchart-by-name"),
 ]

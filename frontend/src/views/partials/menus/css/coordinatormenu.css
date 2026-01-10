@@ -1,0 +1,103 @@
+/* === YANA DOĞRU GENİŞLEYEN MEGA MENÜ (ORTAK) === */
+
+/* Taban: kapalı */
+.dropdown.position-static > .dropdown-menu.coordinator-mega,
+.dropdown.position-static > .dropdown-menu.student-mega {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 720px;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+  max-height: 70vh;
+  overflow-y: auto;
+  display: none;
+  z-index: 1050;
+}
+
+/* 1) Bootstrap JS ile açılırsa */
+.dropdown-menu.coordinator-mega.show,
+.dropdown-menu.student-mega.show {
+  display: block !important;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 2) JS olmasa bile hover ile aç */
+.coordinator-dropdown:hover > .dropdown-menu.coordinator-mega,
+.coordinator-dropdown:focus-within > .dropdown-menu.coordinator-mega {
+  display: block;
+}
+
+/* İçerik yatayda dursun */
+.coordinator-mega .d-flex,
+.student-mega .d-flex {
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+/* Sütunlar */
+.coordinator-mega .coordinator-col,
+.student-mega .student-col {
+  min-width: 210px;
+  max-width: 240px;
+}
+
+/* Item'lar */
+.coordinator-mega .dropdown-item,
+.student-mega .dropdown-item {
+  white-space: nowrap;
+  padding-left: 0;
+  padding-right: 0;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+/* Header'lar */
+.coordinator-mega .dropdown-header,
+.student-mega .dropdown-header {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: #64748b;
+  margin-bottom: .35rem;
+}
+
+/* Scroll */
+.coordinator-mega,
+.student-mega {
+  scrollbar-width: thin;
+}
+.coordinator-mega::-webkit-scrollbar,
+.student-mega::-webkit-scrollbar {
+  width: 6px;
+}
+.coordinator-mega::-webkit-scrollbar-thumb,
+.student-mega::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
+  border-radius: 9999px;
+}
+
+/* Küçük ekranlarda dikey */
+@media (max-width: 991.98px) {
+  .dropdown.position-static > .dropdown-menu.coordinator-mega,
+  .dropdown.position-static > .dropdown-menu.student-mega {
+    min-width: 100vw;
+    left: 0;
+    right: 0;
+    max-height: 75vh;
+  }
+
+  .coordinator-mega .d-flex,
+  .student-mega .d-flex {
+    flex-direction: column;
+  }
+
+  .coordinator-mega .coordinator-col,
+  .student-mega .student-col {
+    max-width: 100%;
+  }
+}

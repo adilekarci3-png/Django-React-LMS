@@ -1,4 +1,9 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Modal from "react-modal";
@@ -10,7 +15,10 @@ import {
   FiTrash2,
   FiEdit3,
   FiFolder,
-  FiSearch
+  FiSearch,
+  FiPlus,
+  FiCheckCircle,
+  FiAlertTriangle,
 } from "react-icons/fi";
 
 import Sidebar from "./Partials/Sidebar";
@@ -22,7 +30,10 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 import "./css/ModalStyle.css";
-import "./css/eskep-stajer-projes.css"; // yeni küçük eklemeler (aşağıda)
+import "./css/eskep-stajer-projes.css";
+
+// react-modal global ayar (sayfanda yoksa ekle)
+Modal.setAppElement("#root");
 
 function EskepStajerProjes() {
   const api = useAxios();
@@ -43,16 +54,34 @@ function EskepStajerProjes() {
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
-  // modal
+  // “Bölümler” (mevcut) modalı
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const headingId = "assignment-modal-title";
   const onClose = useCallback(() => setModalIsOpen(false), []);
 
+  // Haftalık içerik modalı (YENİ)
+  const [weeklyModalOpen, setWeeklyModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [weeklyWorking, setWeeklyWorking] = useState(false);
+  const [selectedWeekNo, setSelectedWeekNo] = useState(null);
+  // yükleme formu (YENİ)
+  const [weekForm, setWeekForm] = useState({
+    youtube_videos: [""],
+    reels_videos: [""],
+    instagram_square_images: [""],
+    youtube_horizontal_images: [""],
+  });
+
   // yardımcılar
-  const safeUrl = (f) => (typeof f === "string" ? f : f?.url ?? f?.file ?? "#");
+  const safeUrl = (f) =>
+    typeof f === "string" ? f : f?.url ?? f?.file ?? "#";
   const fileTitle = (f, i) =>
-    f?.title ? f.title : f?.variant?.title ? f.variant.title : `Bölüm ${i + 1}`;
+    f?.title
+      ? f.title
+      : f?.variant?.title
+      ? f.variant.title
+      : `Bölüm ${i + 1}`;
   const fileName = (f) =>
     (typeof f === "object" && (f?.filename || f?.name)) || undefined;
 
@@ -93,7 +122,7 @@ function EskepStajerProjes() {
     return Array.from(set);
   }, [allProjeler]);
 
-  // arama + filtreleri tek noktada uygula (debounce benzeri)
+  // arama + filtreleri tek noktada uygula
   useEffect(() => {
     let data = [...allProjeler];
 
@@ -104,23 +133,37 @@ function EskepStajerProjes() {
       );
     }
     if (statusFilter !== "all") {
-      data = data.filter((p) => (p.eskepProje_status || "").toLowerCase() === statusFilter);
+      data = data.filter(
+        (p) =>
+          (p.eskepProje_status || "")
+            .toLowerCase()
+            .replace(" ", "") === statusFilter
+      );
     }
     if (koorFilter !== "all") {
-      data = data.filter((p) => (p.koordinator?.full_name || "") === koorFilter);
+      data = data.filter(
+        (p) => (p.koordinator?.full_name || "") === koorFilter
+      );
     }
     if (dateFrom) {
-      data = data.filter((p) => p.date && moment(p.date).isSameOrAfter(moment(dateFrom)));
+      data = data.filter(
+        (p) => p.date && moment(p.date).isSameOrAfter(moment(dateFrom))
+      );
     }
     if (dateTo) {
-      data = data.filter((p) => p.date && moment(p.date).isSameOrBefore(moment(dateTo)));
+      data = data.filter(
+        (p) => p.date && moment(p.date).isSameOrBefore(moment(dateTo))
+      );
     }
 
     setProjeler(data);
     setPage(1);
   }, [q, statusFilter, koorFilter, dateFrom, dateTo, allProjeler]);
 
-  const totalPages = Math.max(1, Math.ceil((projeler?.length || 0) / pageSize));
+  const totalPages = Math.max(
+    1,
+    Math.ceil((projeler?.length || 0) / pageSize)
+  );
   const pageData = useMemo(() => {
     const start = (page - 1) * pageSize;
     return (projeler || []).slice(start, start + pageSize);
@@ -132,13 +175,16 @@ function EskepStajerProjes() {
           Array.isArray(sec?.variant_items) ? sec.variant_items : []
         )
       : [];
-    const fromTopLectures = Array.isArray(proje?.lectures) ? proje.lectures : [];
+    const fromTopLectures = Array.isArray(proje?.lectures)
+      ? proje.lectures
+      : [];
     setSelectedFiles([...fromCurriculum, ...fromTopLectures]);
     setModalIsOpen(true);
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm("Bu projeyi silmek istediğinize emin misiniz?")) return;
+    if (!window.confirm("Bu projeyi silmek istediğinize emin misiniz?"))
+      return;
     api.delete(`/eskepstajer/proje/${id}/`).then(() => fetchData());
   };
 
@@ -154,6 +200,125 @@ function EskepStajerProjes() {
   const filesExist = (p) =>
     (Array.isArray(p?.curriculum) && p.curriculum.length > 0) ||
     (Array.isArray(p?.lectures) && p.lectures.length > 0);
+
+  // ---- YENİ: Haftalık içerik modalını aç ----
+  const openWeeklyModal = (proje) => {
+    setSelectedProject(proje);
+    setSelectedWeekNo(null); // ilk açılışta haftaya girmesin
+    // formu resetle
+    setWeekForm({
+      youtube_videos: [""],
+      reels_videos: [""],
+      instagram_square_images: [""],
+      youtube_horizontal_images: [""],
+    });
+    setWeeklyModalOpen(true);
+  };
+
+  const closeWeeklyModal = () => {
+    setWeeklyModalOpen(false);
+    setSelectedProject(null);
+    setSelectedWeekNo(null);
+  };
+
+  // haftayı seçince formu sıfırla
+  const handleSelectWeek = (weekNo) => {
+    setSelectedWeekNo(weekNo);
+    setWeekForm({
+      youtube_videos: [""],
+      reels_videos: [""],
+      instagram_square_images: [""],
+      youtube_horizontal_images: [""],
+    });
+  };
+
+  // dinamik input ekleme
+  const pushToArray = (field) => {
+    setWeekForm((prev) => ({
+      ...prev,
+      [field]: [...(prev[field] || []), ""],
+    }));
+  };
+
+  const changeArrayItem = (field, idx, value) => {
+    setWeekForm((prev) => {
+      const arr = [...(prev[field] || [])];
+      arr[idx] = value;
+      return { ...prev, [field]: arr };
+    });
+  };
+
+  // formu gönder (bu senin backend'e göre değişir)
+  const handleWeekSubmit = async () => {
+    if (!selectedProject || !selectedWeekNo) return;
+    // min 3 kontrolü
+    const mustBe3 = [
+      "youtube_videos",
+      "reels_videos",
+      "instagram_square_images",
+      "youtube_horizontal_images",
+    ];
+    for (const key of mustBe3) {
+      const validCount = (weekForm[key] || []).filter(
+        (x) => x && x.trim()
+      ).length;
+      if (validCount < 3) {
+        alert(
+          "Her kategoriden en az 3 içerik girmelisiniz. Eksik alan: " +
+            key
+        );
+        return;
+      }
+    }
+
+    try {
+      setWeeklyWorking(true);
+      // burada backend'ine uygun endpoint'i kullan
+      // ör: POST /eskepstajer/proje/{id}/week/{weekNo}/
+      await api.post(
+        `/eskepstajer/proje/${selectedProject.id}/week/${selectedWeekNo}/`,
+        {
+          week_no: selectedWeekNo,
+          ...weekForm,
+        }
+      );
+      // kayıttan sonra sayfayı güncelle
+      fetchData();
+      alert("Haftalık içerik kaydedildi.");
+      // aynı projenin güncel halini yakalamak için tekrar fetch et
+      setSelectedWeekNo(null);
+    } catch (err) {
+      console.error(err);
+      alert("Kayıt sırasında hata oluştu.");
+    } finally {
+      setWeeklyWorking(false);
+    }
+  };
+
+  // bir haftanın tamamlanmış sayılıp sayılmadığını hesapla
+  const isWeekComplete = (p, weekNo) => {
+    const weeks = Array.isArray(p?.weeks) ? p.weeks : [];
+    const w = weeks.find((x) => x.week_no === weekNo);
+    if (!w) return false;
+    const ok1 = (w.youtube_videos || 0) >= 3;
+    const ok2 = (w.reels_videos || 0) >= 3;
+    const ok3 = (w.instagram_square_images || 0) >= 3;
+    const ok4 = (w.youtube_horizontal_images || 0) >= 3;
+    return ok1 && ok2 && ok3 && ok4;
+  };
+
+  // proje genel olarak eksik mi?
+  const isProjectWeeklyIncomplete = (p) => {
+    const planCount = p?.plan_week_count || 5;
+    for (let i = 1; i <= planCount; i++) {
+      if (!isWeekComplete(p, i)) return true;
+    }
+    return false;
+  };
+
+  // taslak var mı?
+  const hasDraft = (p) => !!p?.initial_draft_url;
+  const draftStatus = (p) => p?.initial_draft_status || "Yok";
 
   return (
     <>
@@ -219,10 +384,10 @@ function EskepStajerProjes() {
                         aria-label="Duruma göre filtrele"
                       >
                         <option value="all">Tümü</option>
-                        <option value="approved">Approved</option>
-                        <option value="pending">Pending</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="draft">Draft</option>
+                        <option value="approved">approved</option>
+                        <option value="pending">pending</option>
+                        <option value="rejected">rejected</option>
+                        <option value="draft">draft</option>
                       </select>
                     </div>
                     <div className="col-6 col-md-3">
@@ -288,7 +453,8 @@ function EskepStajerProjes() {
                       <tr>
                         <th>Proje</th>
                         <th>Kayıt Tarihi</th>
-                        <th>Bölümler</th>
+                        <th>Ön Taslak</th>
+                        <th>Haftalar</th>
                         <th>Durum</th>
                         <th>Koordinatör</th>
                         <th>Koordinatördeki Durumu</th>
@@ -300,108 +466,172 @@ function EskepStajerProjes() {
                       {fetching &&
                         Array.from({ length: 5 }).map((_, i) => (
                           <tr key={`sk-${i}`}>
-                            <td colSpan="7">
+                            <td colSpan="8">
                               <div className="skeleton-row" />
                             </td>
                           </tr>
                         ))}
 
                       {!fetching &&
-                        pageData.map((p) => (
-                          <tr key={p.id}>
-                            <td data-label="Proje">
-                              <div className="d-flex align-items-center">
-                                <img
-                                  src={p.image}
-                                  onError={onImgError}
-                                  alt={`${p.title || "proje"} görseli`}
-                                  className="rounded eskep-thumb"
-                                />
-                                <div className="ms-3">
-                                  <h6 className="mb-1">{p.title}</h6>
-                                  <div className="text-muted small">
-                                    {(p.language || "-")} · {(p.level || "-")}
+                        pageData.map((p) => {
+                          const planWeeks = p?.plan_week_count || 5;
+                          const weeklyIncomplete =
+                            p?.eskepProje_status?.toLowerCase() ===
+                              "approved" && isProjectWeeklyIncomplete(p);
+
+                          return (
+                            <tr key={p.id}>
+                              <td data-label="Proje">
+                                <div className="d-flex align-items-center">
+                                  <img
+                                    src={p.image}
+                                    onError={onImgError}
+                                    alt={`${p.title || "proje"} görseli`}
+                                    className="rounded eskep-thumb"
+                                  />
+                                  <div className="ms-3">
+                                    <h6 className="mb-1">{p.title}</h6>
+                                    <div className="text-muted small">
+                                      {(p.language || "-")} · {(p.level || "-")}
+                                    </div>
+                                    {/* Eksik uyarısı */}
+                                    {weeklyIncomplete && (
+                                      <div className="text-danger small mt-1 d-flex align-items-center gap-1">
+                                        <FiAlertTriangle className="me-1" />
+                                        Haftalık içerikler eksik
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
-                              </div>
-                            </td>
+                              </td>
 
-                            <td data-label="Kayıt">
-                              {p.date ? moment(p.date).format("D MMM YYYY") : "-"}
-                            </td>
+                              <td data-label="Kayıt">
+                                {p.date
+                                  ? moment(p.date).format("D MMM YYYY")
+                                  : "-"}
+                              </td>
 
-                            <td data-label="Bölümler">
-                              {Array.isArray(p?.curriculum)
-                                ? p.curriculum.length
-                                : Array.isArray(p?.lectures)
-                                ? p.lectures.length
-                                : "-"}
-                            </td>
-
-                            <td data-label="Durum">
-                              <span className={statusBadge(p.eskepProje_status)}>
-                                {p.eskepProje_status || "—"}
-                              </span>
-                            </td>
-
-                            <td data-label="Koordinatör">
-                              <div className="d-flex align-items-center">
-                                <div className="eskep-avatar">
-                                  {(p?.koordinator?.full_name || "?")
-                                    .slice(0, 2)
-                                    .toUpperCase()}
-                                </div>
-                                <span className="ms-2">
-                                  {p.koordinator?.full_name || "-"}
-                                </span>
-                              </div>
-                            </td>
-
-                            <td data-label="Koordinatör Durumu">
-                              {p.koordinator_eskepProje_status || "-"}
-                            </td>
-
-                            <td className="text-end" data-label="İşlemler">
-                              <div className="btn-group" role="group" aria-label="İşlemler">
-                                <Link
-                                  to={`/eskep/edit-proje/${p.id}`}
-                                  className="btn btn-sm btn-outline-warning"
-                                  title="Düzenle"
-                                >
-                                  <FiEdit3 className="me-1" />
-                                  Düzenle
-                                </Link>
-
-                                <button
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleDelete(p.id)}
-                                  title="Sil"
-                                >
-                                  <FiTrash2 className="me-1" />
-                                  Sil
-                                </button>
-
-                                {filesExist(p) && (
-                                  <button
-                                    className="btn btn-sm btn-outline-info"
-                                    onClick={() => openModal(p)}
-                                    title="Bölümleri Görüntüle"
-                                  >
-                                    <FiFolder className="me-1" />
-                                    Bölümler
-                                  </button>
+                              {/* Ön Taslak */}
+                              <td data-label="Ön Taslak">
+                                {hasDraft(p) ? (
+                                  <div className="d-flex flex-column">
+                                    <span className="badge bg-success mb-1">
+                                      Gönderildi
+                                    </span>
+                                    <a
+                                      href={p.initial_draft_url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="small"
+                                    >
+                                      Ön taslağı aç
+                                    </a>
+                                    <span className="small text-muted">
+                                      {draftStatus(p)}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="badge bg-secondary">
+                                    Gönderilmedi
+                                  </span>
                                 )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+
+                              {/* Haftalar */}
+                              <td data-label="Haftalar">
+                                <span className="badge bg-light text-dark">
+                                  {planWeeks} hafta
+                                </span>
+                              </td>
+
+                              <td data-label="Durum">
+                                <span
+                                  className={statusBadge(
+                                    p.eskepProje_status
+                                  )}
+                                >
+                                  {p.eskepProje_status || "—"}
+                                </span>
+                              </td>
+
+                              <td data-label="Koordinatör">
+                                <div className="d-flex align-items-center">
+                                  <div className="eskep-avatar">
+                                    {(p?.koordinator?.full_name || "?")
+                                      .slice(0, 2)
+                                      .toUpperCase()}
+                                  </div>
+                                  <span className="ms-2">
+                                    {p.koordinator?.full_name || "-"}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td data-label="Koordinatör Durumu">
+                                {p.koordinator_eskepProje_status || "-"}
+                              </td>
+
+                              <td className="text-end" data-label="İşlemler">
+                                <div
+                                  className="btn-group"
+                                  role="group"
+                                  aria-label="İşlemler"
+                                >
+                                  <Link
+                                    to={`/eskep/edit-proje/${p.id}`}
+                                    className="btn btn-sm btn-outline-warning"
+                                    title="Düzenle"
+                                  >
+                                    <FiEdit3 className="me-1" />
+                                    Düzenle
+                                  </Link>
+
+                                  <button
+                                    className="btn btn-sm btn-outline-danger"
+                                    onClick={() => handleDelete(p.id)}
+                                    title="Sil"
+                                  >
+                                    <FiTrash2 className="me-1" />
+                                    Sil
+                                  </button>
+
+                                  {filesExist(p) && (
+                                    <button
+                                      className="btn btn-sm btn-outline-info"
+                                      onClick={() => openModal(p)}
+                                      title="Bölümleri Görüntüle"
+                                    >
+                                      <FiFolder className="me-1" />
+                                      Bölümler
+                                    </button>
+                                  )}
+
+                                  {/* YENİ: sadece onaylanmış projelerde haftalık içerik butonu */}
+                                  {p?.eskepProje_status?.toLowerCase() ===
+                                    "approved" && (
+                                    <button
+                                      className="btn btn-sm btn-outline-primary"
+                                      onClick={() => openWeeklyModal(p)}
+                                      title="Haftalık İçerik"
+                                    >
+                                      <FiFileText className="me-1" />
+                                      Haftalık
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
 
                       {!fetching && pageData.length < 1 && (
                         <tr>
-                          <td colSpan="7" className="text-center py-5">
+                          <td colSpan="8" className="text-center py-5">
                             <div className="empty-state">
                               <FiFolder size={28} className="mb-2" />
-                              <div className="fw-semibold">Proje bulunamadı</div>
+                              <div className="fw-semibold">
+                                Proje bulunamadı
+                              </div>
                               <div className="text-muted small">
                                 Filtreleri temizleyip tekrar deneyin.
                               </div>
@@ -423,14 +653,18 @@ function EskepStajerProjes() {
                       <button
                         className="btn btn-outline-secondary"
                         disabled={page <= 1}
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        onClick={() =>
+                          setPage((p) => Math.max(1, p - 1))
+                        }
                       >
                         Önceki
                       </button>
                       <button
                         className="btn btn-outline-secondary"
                         disabled={page >= totalPages}
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                          setPage((p) => Math.min(totalPages, p + 1))
+                        }
                       >
                         Sonraki
                       </button>
@@ -444,7 +678,7 @@ function EskepStajerProjes() {
       </section>
       <ESKEPBaseFooter />
 
-      {/* Modal */}
+      {/* Mevcut "Bölüm" Modalı */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={onClose}
@@ -516,6 +750,250 @@ function EskepStajerProjes() {
           <button className="btn outline" onClick={onClose}>
             Kapat
           </button>
+        </div>
+      </Modal>
+
+      {/* YENİ: Haftalık içerik modalı */}
+      <Modal
+        isOpen={weeklyModalOpen}
+        onRequestClose={closeWeeklyModal}
+        overlayClassName="modalOverlay"
+        className="modalContent modalContent-lg"
+        shouldCloseOnOverlayClick
+        aria={{ labelledby: "weekly-modal-title" }}
+      >
+        <div className="modalHeader">
+          <h3 id="weekly-modal-title" className="modalTitle">
+            Haftalık İçerik {selectedProject ? `– ${selectedProject.title}` : ""}
+          </h3>
+          <button
+            className="iconBtn"
+            aria-label="Kapat"
+            onClick={closeWeeklyModal}
+            title="Kapat"
+          >
+            <FiX />
+          </button>
+        </div>
+
+        <div className="modalBody">
+          {!selectedProject ? (
+            <div>Proje seçimi yok.</div>
+          ) : (
+            <>
+              <p className="text-muted mb-3">
+                Onaylanmış projeler 5 veya 7 haftalık içerik yüklemelidir. Her
+                hafta <strong>en az 3</strong> adet:
+                <br />
+                1) YouTube formatında video · 2) Reels/dik video · 3) Instagram
+                kare görsel · 4) YouTube yatay görsel
+              </p>
+
+              {/* Haftalar listesi */}
+              <div className="row g-2 mb-4">
+                {Array.from({
+                  length: selectedProject?.plan_week_count || 5,
+                }).map((_, i) => {
+                  const weekNo = i + 1;
+                  const complete = isWeekComplete(selectedProject, weekNo);
+                  const weekData = Array.isArray(selectedProject?.weeks)
+                    ? selectedProject.weeks.find((w) => w.week_no === weekNo)
+                    : null;
+                  return (
+                    <div className="col-6 col-md-3" key={weekNo}>
+                      <button
+                        type="button"
+                        className={`w-100 btn ${
+                          selectedWeekNo === weekNo
+                            ? "btn-primary"
+                            : complete
+                            ? "btn-success"
+                            : "btn-outline-secondary"
+                        } d-flex flex-column gap-1 py-3`}
+                        onClick={() => handleSelectWeek(weekNo)}
+                      >
+                        <span>Hafta {weekNo}</span>
+                        {complete ? (
+                          <span className="small d-flex align-items-center justify-content-center gap-1">
+                            <FiCheckCircle />
+                            Tamamlandı
+                          </span>
+                        ) : (
+                          <span className="small d-flex align-items-center justify-content-center gap-1">
+                            <FiAlertTriangle />
+                            Eksik
+                          </span>
+                        )}
+                        {weekData && (
+                          <span className="small text-white-50">
+                            YT:{weekData.youtube_videos || 0} · Reels:
+                            {weekData.reels_videos || 0}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Seçili haftanın formu */}
+              {!selectedWeekNo ? (
+                <div className="alert alert-info">
+                  Düzenlemek için bir hafta seçin.
+                </div>
+              ) : (
+                <div className="weekly-form">
+                  <h5 className="mb-3">Hafta {selectedWeekNo} İçerikleri</h5>
+
+                  {/* YouTube Video Linkleri */}
+                  <div className="mb-3">
+                    <label className="form-label">
+                      YouTube formatında video linkleri (min 3)
+                    </label>
+                    {weekForm.youtube_videos.map((val, idx) => (
+                      <input
+                        key={idx}
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="https://youtube.com/..."
+                        value={val}
+                        onChange={(e) =>
+                          changeArrayItem(
+                            "youtube_videos",
+                            idx,
+                            e.target.value
+                          )
+                        }
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => pushToArray("youtube_videos")}
+                    >
+                      <FiPlus className="me-1" />
+                      Yeni link
+                    </button>
+                  </div>
+
+                  {/* Reels / dik video */}
+                  <div className="mb-3">
+                    <label className="form-label">
+                      Reels / dik video (min 3)
+                    </label>
+                    {weekForm.reels_videos.map((val, idx) => (
+                      <input
+                        key={idx}
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="https://instagram.com/reel/..."
+                        value={val}
+                        onChange={(e) =>
+                          changeArrayItem(
+                            "reels_videos",
+                            idx,
+                            e.target.value
+                          )
+                        }
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => pushToArray("reels_videos")}
+                    >
+                      <FiPlus className="me-1" />
+                      Yeni link
+                    </button>
+                  </div>
+
+                  {/* Instagram kare görsel */}
+                  <div className="mb-3">
+                    <label className="form-label">
+                      Instagram kare görsel (min 3)
+                    </label>
+                    {weekForm.instagram_square_images.map((val, idx) => (
+                      <input
+                        key={idx}
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="Görsel linki / dosya yolu"
+                        value={val}
+                        onChange={(e) =>
+                          changeArrayItem(
+                            "instagram_square_images",
+                            idx,
+                            e.target.value
+                          )
+                        }
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() =>
+                        pushToArray("instagram_square_images")
+                      }
+                    >
+                      <FiPlus className="me-1" />
+                      Yeni görsel
+                    </button>
+                  </div>
+
+                  {/* YouTube yatay görsel */}
+                  <div className="mb-3">
+                    <label className="form-label">
+                      YouTube yatay görsel / kapak (min 3)
+                    </label>
+                    {weekForm.youtube_horizontal_images.map((val, idx) => (
+                      <input
+                        key={idx}
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="Görsel linki / dosya yolu"
+                        value={val}
+                        onChange={(e) =>
+                          changeArrayItem(
+                            "youtube_horizontal_images",
+                            idx,
+                            e.target.value
+                          )
+                        }
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() =>
+                        pushToArray("youtube_horizontal_images")
+                      }
+                    >
+                      <FiPlus className="me-1" />
+                      Yeni görsel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="modalFooter d-flex justify-content-between align-items-center">
+          <div className="text-muted small">
+            Eksik kalan haftalar kırmızı olarak işaretlenir.
+          </div>
+          <div className="d-flex gap-2">
+            <button className="btn outline" onClick={closeWeeklyModal}>
+              Kapat
+            </button>
+            <button
+              className="btn btn-primary"
+              disabled={!selectedWeekNo || weeklyWorking}
+              onClick={handleWeekSubmit}
+            >
+              {weeklyWorking ? "Kaydediliyor..." : "Haftayı Kaydet"}
+            </button>
+          </div>
         </div>
       </Modal>
     </>

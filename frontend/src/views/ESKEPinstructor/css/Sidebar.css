@@ -52,3 +52,13 @@
     overflow-y: auto;
   }
 }
+.eskep-detail-layout .sidenav {
+  min-width: 220px;     /* ikon-only modunu boz */
+  width: 100%;
+  background: transparent;
+  box-shadow: none;
+}
+.eskep-detail-layout .sidenav .card {
+  box-shadow: none;
+  background: transparent;
+}

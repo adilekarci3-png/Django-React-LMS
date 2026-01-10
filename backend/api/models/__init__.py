@@ -16,6 +16,9 @@ from .common import (
 # ---- coğrafi ----
 from .geo import Country, City, District
 
+# ---- iletişim ----
+from .contact import ContactMessage, ContactSubject, BlockedIP
+
 # ---- roller ----
 from .roles import (
     TeacherRole, StajerRole, AgentRole, OgrenciRole, HafizRole, KoordinatorRole
@@ -28,6 +31,7 @@ from .people import Koordinator, Hafiz, Agent, Stajer, Ogrenci
 # ---- ilişkiler ----
 from .relations import TeacherStudent
 
+# from .saved_video import SavedVideo
 # ---- içerik: kurslar ve varyantlar + Soru-Cevap (Kurs) ----
 from .courses import (
     Category, Course, Variant, VariantItem,
@@ -80,7 +84,7 @@ from .realtime import (
 )
 # ---- medya ----
 from .media import (
-    EducatorVideoLink, SavedVideo, EducatorVideo,
+    EducatorVideoLink, EducatorVideo,SavedVideo,
     EducatorDocument, VideoPurchase, VideoEnrollment
 )
 
@@ -108,7 +112,7 @@ __all__ = [
     "Category", "Course", "Variant", "VariantItem",
     "Question_Answer", "Question_Answer_Message",
     "CompletedLesson", "EnrolledCourse", "Note","Review"
-
+ 
     # odevs
     "Odev", "VariantOdev", "VariantOdevItem",
     "Question_AnswerOdev", "Question_Answer_MessageOdev",
@@ -133,10 +137,13 @@ __all__ = [
     "Cart", "CartOrder", "CartOrderItem", "Coupon", "Wishlist", "WishlistOdev", "Certificate", "Notification",
 
     # media
-    "EducatorVideoLink", "SavedVideo", "EducatorVideo", "EducatorDocument", "VideoPurchase", "VideoEnrollment",
+    "EducatorVideoLink", "SavedVideo","EducatorVideo", "EducatorDocument", "VideoPurchase", "VideoEnrollment",
 
     # organization
     "OrganizationMember", "Designation", "Proje", "Departman", "Uye",
+    
+    # iletişim
+    "ContactMessage","ContactSubject", "BlockedIP",
 
     # lessons & quran
     "ESKEPEvent", "DersAtamasi", "Ders", "QuranAnnotation", "QuranPage", "Annotation", "HataNotu", "PeerID",

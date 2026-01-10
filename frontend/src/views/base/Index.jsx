@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 
 import GetCurrentAddress from "../plugin/UserCountry";
@@ -13,45 +13,48 @@ import HomeFooter from "../partials/HomeFooter";
 function Index() {
   const [projelist, setProjeList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [cartCount, setCartCount] = useContext(CartContext);
-  const rehydrated = useAuthStore((state) => state.rehydrated);
-  const country = GetCurrentAddress().country;
-  const userId = useUserData()?.user_id;
 
-  if (!rehydrated) return null;
+  const rehydrated = useAuthStore((state) => state.rehydrated);
+
+  // (Kullanacaksan dursun, değilse kaldırabilirsin)
+  const country = GetCurrentAddress().country; // eslint-disable-line
+  const userId = useUserData()?.user_id;      // eslint-disable-line
 
   useEffect(() => {
-    debugger;
+    if (!rehydrated) return;
     const fetchProjelist = async () => {
       setIsLoading(true);
       try {
-        debugger;
         const res = await apiInstance.get("proje/list/");
-        setProjeList(res.data);
+        setProjeList(res.data || []);
       } catch (error) {
         console.error("Error fetching projects:", error);
-        Toast().fire({
-          title: "Projeler yüklenemedi",
-          icon: "error",
-        });
+        Toast().fire({ title: "Projeler yüklenemedi", icon: "error" });
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchProjelist();
-  }, []);
+  }, [rehydrated]);
 
+  // ——— Sayfalandırma ———
   const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil((projelist?.length || 0) / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
   const currentItems = useMemo(() => {
     return projelist.slice(indexOfFirstItem, indexOfLastItem);
-  }, [projelist, currentPage]);
+  }, [projelist, indexOfFirstItem, indexOfLastItem]);
 
-  // Modül açıklamaları
+  const goToPage = (page) => {
+    const p = Math.min(Math.max(page, 1), totalPages);
+    setCurrentPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ——— Açıklamalar ———
   const getModuleDescription = (name) => {
     switch (name) {
       case "Hafızlık Bilgi Sistemi":
@@ -67,7 +70,7 @@ function Index() {
     }
   };
 
-  // Modül yönlendirmeleri
+  // ——— Linkler ———
   const getButtonLabelAndLink = (name) => {
     switch (name) {
       case "Hafızlık Bilgi Sistemi":
@@ -83,43 +86,125 @@ function Index() {
     }
   };
 
+  if (!rehydrated) return null;
+
+  // (İsteğe bağlı) görsel yolu absolute değilse backend origin’i ekle
+  const API_BASE = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8000";
+  const buildImgSrc = (url) => (url?.startsWith("http") ? url : `${API_BASE}${url || ""}`);
+
   return (
     <>
       <HomeHeader />
-      <div className="index-container">
-        <div className="index-heading">
-          <h2 className="main-title">İZEM – Hafızların Dijital Kapısı</h2>
-          <p className="sub-title">Akıllı Altyapı, Entegre Sistem</p>
+
+      {/* Basit başlık alanı */}
+      <section className="ix-hero">
+        <div className="ix-container">
+          <h1 className="ix-title">İZEM – Hafızların Dijital Kapısı</h1>
+          <p className="ix-subtitle">Akıllı Altyapı, Entegre Sistem</p>
         </div>
+      </section>
 
-        <div className="index-grid">
-          {currentItems.map((s, index) => {
-            const route = getButtonLabelAndLink(s.name);
-            const description = getModuleDescription(s.name);
+      {/* İçerik */}
+      <section className="ix-section">
+        <div className="ix-container">
+          {isLoading ? (
+            <div className="ix-grid">
+              {[1, 2, 3, 4].map((i) => (
+                <article key={i} className="ix-card skeleton">
+                  <div className="ix-cover skeleton-box" />
+                  <div className="ix-body">
+                    <div className="sk-line w-60" />
+                    <div className="sk-line w-90" />
+                    <div className="sk-pill w-40" />
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="ix-grid">
+                {currentItems.map((s, index) => {
+                  const route = getButtonLabelAndLink(s.name);
+                  const description = getModuleDescription(s.name);
+                  const imgSrc = buildImgSrc(s.image);
 
-            return (
-              <div className="index-card" key={index}>
-                <div className="index-image-container">
-                  <img src={s.image} alt={s.name} className="index-image" />
-                </div>
-                <div className="index-card-body">
-                  <h3 className="index-card-title">{s.name}</h3>
-                  <p className="index-desc">{description}</p>
-                  {route ? (
-                    <Link to={route.to}>
-                      <button className="index-btn">{route.label}</button>
-                    </Link>
-                  ) : (
-                    <button disabled className="index-btn-disabled">
-                      Yakında
-                    </button>
-                  )}
-                </div>
+                  return (
+                    <article className="ix-card" key={`${s.id || index}-${s.name}`}>
+                      <div className="ix-cover">
+                        <img
+                          src={imgSrc}
+                          alt={s.name}
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder-module.png";
+                            e.currentTarget.style.objectFit = "contain";
+                            e.currentTarget.style.background = "#f3f5f7";
+                          }}
+                        />
+                      </div>
+                      <div className="ix-body">
+                        <h3 className="ix-name">{s.name}</h3>
+                        <p className="ix-desc">{description}</p>
+                        <div className="ix-actions">
+                          {route ? (
+                            <Link to={route.to} className="ix-btn">
+                              {route.label}
+                            </Link>
+                          ) : (
+                            <button className="ix-btn disabled" disabled>
+                              Yakında
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
-            );
-          })}
+
+              {/* Pager */}
+              {totalPages > 1 && (
+                <nav className="ix-pager" aria-label="Sayfalandırma">
+                  <button
+                    className="ix-pager-btn"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    ‹ Önceki
+                  </button>
+
+                  <ul className="ix-pager-pages" role="list">
+                    {Array.from({ length: totalPages }).map((_, i) => {
+                      const page = i + 1;
+                      const active = page === currentPage;
+                      return (
+                        <li key={page}>
+                          <button
+                            className={`ix-page${active ? " active" : ""}`}
+                            aria-current={active ? "page" : undefined}
+                            onClick={() => goToPage(page)}
+                          >
+                            {page}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <button
+                    className="ix-pager-btn"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sonraki ›
+                  </button>
+                </nav>
+              )}
+            </>
+          )}
         </div>
-      </div>
+      </section>
+
       <HomeFooter />
     </>
   );

@@ -4,7 +4,8 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 
 from api import models
-from api.models.about import AboutCard, AboutGalleryImage, AboutMilestone, AboutPage, AboutStat, AboutType
+from api.models.about import AboutCard, AboutGalleryImage, AboutMilestone, AboutPage, AboutStat, AboutType, EskepCard, EskepGalleryItem, EskepPage, EskepStat
+from api.models.contact import BlockedIP, ContactMessage, ContactSubject
 
 User = get_user_model()
 
@@ -179,6 +180,133 @@ class VideoPurchaseAdmin(admin.ModelAdmin):
     search_fields = ("user__email", "user__full_name")
     autocomplete_fields = ("user",)
 
+@admin.register(BlockedIP)
+class BlockedIPAdmin(admin.ModelAdmin):
+    verbose_name = "Engelli IP"
+    verbose_name_plural = "Engelli IP'ler"
+
+    list_display = ("ip_address", "reason_tr", "created_at_tr")
+    search_fields = ("ip_address", "reason")
+    list_filter = ("created_at",)
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at",)
+
+    # list_display içinde Türkçe görünen alanlar için küçük getter'lar
+    @admin.display(description="IP Adresi")
+    def ip_address_tr(self, obj):
+        return obj.ip_address
+
+    @admin.display(description="Sebep")
+    def reason_tr(self, obj):
+        return obj.reason
+
+    @admin.display(description="Oluşturulma")
+    def created_at_tr(self, obj):
+        return obj.created_at
+
+
+class ContactMessageInline(admin.TabularInline):
+    model = ContactMessage
+    extra = 0
+    fields = ("name", "email", "created_at", "is_read", "replied")
+    readonly_fields = ("name", "email", "created_at", "is_read", "replied")
+    can_delete = False
+    show_change_link = True
+    verbose_name = "Mesaj"
+    verbose_name_plural = "Bu konuya gelen mesajlar"
+
+
+@admin.register(ContactSubject)
+class ContactSubjectAdmin(admin.ModelAdmin):
+    verbose_name = "İletişim Konusu"
+    verbose_name_plural = "İletişim Konuları"
+
+    list_display = ("name_tr", "slug", "is_active_tr")
+    list_filter = ("is_active",)
+    search_fields = ("name", "slug")
+    prepopulated_fields = {"slug": ("name",)}
+    inlines = [ContactMessageInline]
+
+    @admin.display(description="Konu Adı")
+    def name_tr(self, obj):
+      return obj.name
+
+    @admin.display(description="Aktif mi?")
+    def is_active_tr(self, obj):
+      return "Evet" if obj.is_active else "Hayır"
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    verbose_name = "İletişim Mesajı"
+    verbose_name_plural = "İletişim Mesajları"
+
+    list_display = (
+        "name_tr",
+        "email_tr",
+        "subject_tr",
+        "ip_address_tr",
+        "created_at_tr",
+        "is_read_tr",
+        "replied_tr",
+    )
+    list_filter = (
+        "subject",
+        "is_read",
+        "replied",
+        "created_at",
+    )
+    search_fields = (
+        "name",
+        "email",
+        "phone",
+        "message",
+        "ip_address",
+    )
+    date_hierarchy = "created_at"
+    readonly_fields = (
+        "name",
+        "email",
+        "phone",
+        "message",
+        "ip_address",
+        "user_agent",
+        "created_at",
+    )
+    ordering = ("-created_at",)
+
+    # panelden elle mesaj eklenmesin
+    def has_add_permission(self, request):
+        return False
+
+    # ---- Türkçe görünen sütunlar ----
+    @admin.display(description="Ad Soyad")
+    def name_tr(self, obj):
+        return obj.name
+
+    @admin.display(description="E-posta")
+    def email_tr(self, obj):
+        return obj.email
+
+    @admin.display(description="Konu")
+    def subject_tr(self, obj):
+        return obj.subject.name if obj.subject else "—"
+
+    @admin.display(description="IP Adresi")
+    def ip_address_tr(self, obj):
+        return obj.ip_address or "—"
+
+    @admin.display(description="Gönderim Tarihi")
+    def created_at_tr(self, obj):
+        return obj.created_at
+
+    @admin.display(description="Okundu mu?")
+    def is_read_tr(self, obj):
+        return "Evet" if obj.is_read else "Hayır"
+
+    @admin.display(description="Cevaplandı mı?")
+    def replied_tr(self, obj):
+        return "Evet" if obj.replied else "Hayır"
 
 @admin.register(models.VideoEnrollment)
 class VideoEnrollmentAdmin(admin.ModelAdmin):
@@ -254,6 +382,54 @@ class AboutPageAdmin(admin.ModelAdmin):
     # Milestone’u ekle (tablı admin kullanıyorsan yeni bir TAB olarak görünecek)
     inlines = [AboutMilestoneInline, AboutCardInline, AboutStatInline, AboutGalleryImageInline]
 
+class EskepCardInline(admin.TabularInline):
+    model = EskepCard
+    extra = 1
+    fields = ("title", "order", "lead", "bullets", "pills")
+    ordering = ("order",)
+
+
+class EskepGalleryInline(admin.TabularInline):
+    model = EskepGalleryItem
+    extra = 1
+    fields = ("image_url", "alt_text", "order")
+    ordering = ("order",)
+
+
+class EskepStatInline(admin.TabularInline):
+    model = EskepStat
+    extra = 1
+    fields = ("value", "label", "order")
+    ordering = ("order",)
+
+
+@admin.register(EskepPage)
+class EskepPageAdmin(admin.ModelAdmin):
+    list_display = ("title", "slug")
+    search_fields = ("title", "slug")
+    prepopulated_fields = {"slug": ("title",)}
+    inlines = [EskepCardInline, EskepGalleryInline, EskepStatInline]
+
+
+@admin.register(EskepCard)
+class EskepCardAdmin(admin.ModelAdmin):
+    list_display = ("title", "page", "order")
+    list_filter = ("page",)
+    ordering = ("page", "order")
+
+
+@admin.register(EskepGalleryItem)
+class EskepGalleryItemAdmin(admin.ModelAdmin):
+    list_display = ("page", "image_url", "order")
+    list_filter = ("page",)
+    ordering = ("page", "order")
+
+
+@admin.register(EskepStat)
+class EskepStatAdmin(admin.ModelAdmin):
+    list_display = ("page", "value", "label", "order")
+    list_filter = ("page",)
+    ordering = ("page", "order")
 # -------------------------------------------------
 # Diğer modeller (basit kayıt)
 # -------------------------------------------------

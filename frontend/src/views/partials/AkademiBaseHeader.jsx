@@ -21,8 +21,15 @@ function AkademiBaseHeader() {
     if (!rehydrated || !isLoggedIn || !user?.user_id || fetchedRef.current) return;
     fetchedRef.current = true;
 
-    api.get(`user/profile/${user.user_id}/`).then(r => setProfile(r.data)).catch(() => {});
-    api.get(`user-role-detail/`).then(r => setRoleData(r.data)).catch(() => {});
+    api
+      .get(`user/profile/${user.user_id}/`)
+      .then((r) => setProfile(r.data))
+      .catch(() => {});
+
+    api
+      .get(`user-role-detail/`)
+      .then((r) => setRoleData(r.data))
+      .catch(() => {});
   }, [rehydrated, isLoggedIn, user?.user_id, api, setProfile]);
 
   if (!rehydrated) return null;
@@ -33,7 +40,8 @@ function AkademiBaseHeader() {
     navigate(`/search/?search=${encodeURIComponent(q.trim())}`);
   };
 
-  const { base_roles = [] } = roleData;
+  // 👇 burası önemli: hem base_roles hem de sub_roles'u al
+  const { base_roles = [], sub_roles = [] } = roleData;
 
   return (
     <>
@@ -41,19 +49,28 @@ function AkademiBaseHeader() {
       <header className="akd-header sticky-top border-0">
         <nav className="navbar navbar-expand-lg navbar-dark">
           <div className="container-fluid px-3 px-lg-4">
-
             {/* Brand */}
             <Link to="/" className="navbar-brand fw-bold d-flex align-items-center gap-2">
               <span className="brand-pill">AKADEMİ</span>
-              
             </Link>
 
             {/* Right cluster (mobile first) */}
             <div className="d-flex align-items-center gap-2 d-lg-none">
-              <button className="btn btn-icon btn-outline-light" data-bs-toggle="collapse" data-bs-target="#global-search" aria-label="Ara">
+              <button
+                className="btn btn-icon btn-outline-light"
+                data-bs-toggle="collapse"
+                data-bs-target="#global-search"
+                aria-label="Ara"
+              >
                 <i className="bi bi-search"></i>
               </button>
-              <button className="navbar-toggler shadow-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#main-navbar" aria-label="Menüyü aç">
+              <button
+                className="navbar-toggler shadow-0 border-0"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#main-navbar"
+                aria-label="Menüyü aç"
+              >
                 <span className="navbar-toggler-icon"></span>
               </button>
             </div>
@@ -63,13 +80,19 @@ function AkademiBaseHeader() {
               {/* Left nav */}
               <ul className="navbar-nav me-auto align-items-lg-center">
                 <li className="nav-item">
-                  <Link className="nav-link" to="/about-akademi"><i className="bi bi-info-circle me-1"></i>Hakkımızda</Link>
+                  <Link className="nav-link" to="/about-akademi">
+                    <i className="bi bi-info-circle me-1"></i>Hakkımızda
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/contact"><i className="bi bi-telephone me-1"></i>İletişim</Link>
+                  <Link className="nav-link" to="/contact">
+                    <i className="bi bi-telephone me-1"></i>İletişim
+                  </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/org-chart"><i className="bi bi-diagram-3 me-1"></i>Organizasyon</Link>
+                  <Link className="nav-link" to="/org-chart">
+                    <i className="bi bi-diagram-3 me-1"></i>Organizasyon
+                  </Link>
                 </li>
 
                 {/* AKADEMİ */}
@@ -78,8 +101,21 @@ function AkademiBaseHeader() {
                     <i className="bi bi-mortarboard me-1"></i>Akademi
                   </a>
                   <ul className="dropdown-menu rounded-4 shadow p-2">
-                    <li><Link className="dropdown-item rounded-3" to="/akademi/courses"><i className="bi bi-book me-2"></i>Kurslar</Link></li>
-                    <li><Link className="dropdown-item rounded-3" to="/akademi/videos"><i className="bi bi-camera-video me-2"></i>Videolar</Link></li>
+                    <li>
+                      <Link className="dropdown-item rounded-3" to="/akademi/courses">
+                        <i className="bi bi-book me-2"></i>Kurslar
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item rounded-3" to="/akademi/videos">
+                        <i className="bi bi-camera-video me-2"></i>Videolar
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item rounded-3" to="/akademi/me/saved-videos">
+                        <i className="bi bi-camera-video me-2"></i>Kurslarım
+                      </Link>
+                    </li>
                   </ul>
                 </li>
 
@@ -95,10 +131,12 @@ function AkademiBaseHeader() {
                           <div className="mega-col">
                             <div className="mega-title">Genel</div>
                             <Link to="/educator/dashboard" className="mega-item">
-                              <i className="bi bi-grid-fill"></i><span>Panel</span>
+                              <i className="bi bi-grid-fill"></i>
+                              <span>Panel</span>
                             </Link>
                             <Link to="/educator/schedule" className="mega-item">
-                              <i className="bi bi-calendar3"></i><span>Programım</span>
+                              <i className="bi bi-calendar3"></i>
+                              <span>Programım</span>
                             </Link>
                           </div>
                         </div>
@@ -106,13 +144,16 @@ function AkademiBaseHeader() {
                           <div className="mega-col">
                             <div className="mega-title">Canlı & Saat</div>
                             <Link to="/educator/live-ders-listesi" className="mega-item">
-                              <i className="bi bi-broadcast"></i><span>Canlı Derslerim</span>
+                              <i className="bi bi-broadcast"></i>
+                              <span>Canlı Derslerim</span>
                             </Link>
                             <Link to="/educator/add-canli-ders" className="mega-item">
-                              <i className="bi bi-camera-reels"></i><span>Canlı Ders Ekle</span>
+                              <i className="bi bi-camera-reels"></i>
+                              <span>Canlı Ders Ekle</span>
                             </Link>
                             <Link to="/educator/add-lesson" className="mega-item">
-                              <i className="bi bi-alarm"></i><span>Ders Saati Ekle</span>
+                              <i className="bi bi-alarm"></i>
+                              <span>Ders Saati Ekle</span>
                             </Link>
                           </div>
                         </div>
@@ -120,30 +161,38 @@ function AkademiBaseHeader() {
                           <div className="mega-col">
                             <div className="mega-title">İçeriklerim</div>
                             <Link to="/educator/video-create" className="mega-item">
-                              <i className="bi bi-film"></i><span>Video Oluştur</span>
+                              <i className="bi bi-film"></i>
+                              <span>Video Oluştur</span>
                             </Link>
                             <Link to="/educator/webcam-record" className="mega-item">
-                              <i className="bi bi-webcam"></i><span>Video Ekle (Webcam)</span>
+                              <i className="bi bi-webcam"></i>
+                              <span>Video Ekle (Webcam)</span>
                             </Link>
                             <Link to="/educator/video-link-create" className="mega-item">
-                              <i className="bi bi-youtube"></i><span>YouTube Video Ekle</span>
+                              <i className="bi bi-youtube"></i>
+                              <span>YouTube Video Ekle</span>
                             </Link>
                             <div className="mega-divider"></div>
                             <Link to="/educator/video-list" className="mega-item">
-                              <i className="bi bi-collection-play"></i><span>Videolarım</span>
+                              <i className="bi bi-collection-play"></i>
+                              <span>Videolarım</span>
                             </Link>
                             <Link to="/educator/created-videos" className="mega-item">
-                              <i className="bi bi-clapperboard"></i><span>Oluşturduğum Videolar</span>
+                              <i className="bi bi-clapperboard"></i>
+                              <span>Oluşturduğum Videolar</span>
                             </Link>
                             <Link to="/educator/youtube-video-list" className="mega-item">
-                              <i className="bi bi-youtube"></i><span>YouTube Videolarım</span>
+                              <i className="bi bi-youtube"></i>
+                              <span>YouTube Videolarım</span>
                             </Link>
                             <div className="mega-divider"></div>
                             <Link to="/educator/documents" className="mega-item">
-                              <i className="bi bi-file-earmark-text"></i><span>Dökümanlarım</span>
+                              <i className="bi bi-file-earmark-text"></i>
+                              <span>Dökümanlarım</span>
                             </Link>
                             <Link to="/educator/documents/create" className="mega-item">
-                              <i className="bi bi-file-arrow-up"></i><span>Döküman Ekle</span>
+                              <i className="bi bi-file-arrow-up"></i>
+                              <span>Döküman Ekle</span>
                             </Link>
                           </div>
                         </div>
@@ -164,28 +213,43 @@ function AkademiBaseHeader() {
                           <div className="mega-col">
                             <div className="mega-title">Genel</div>
                             <Link to="/koordinator/egitmenlist" className="mega-item">
-                              <i className="bi bi-people-fill"></i><span>Eğitmen Listesi</span>
+                              <i className="bi bi-people-fill"></i>
+                              <span>Eğitmen Listesi</span>
                             </Link>
                             <Link to="/koordinator/ogrencilist" className="mega-item">
-                              <i className="bi bi-person-lines-fill"></i><span>Öğrenci Listesi</span>
+                              <i className="bi bi-person-lines-fill"></i>
+                              <span>Öğrenci Listesi</span>
                             </Link>
+
+                            {/* 🔐 Sadece ESKEPGenelKoordinator veya AkademiKoordinator alt rolünde ise */}
+                            {(sub_roles.includes("ESKEPGenelKoordinator") ||
+                              sub_roles.includes("AkademiKoordinator")) && (
+                              <Link to="/contact-messages" className="mega-item">
+                                <i className="bi bi-envelope-paper"></i>
+                                <span>İletişim Mesajları</span>
+                              </Link>
+                            )}
                           </div>
                         </div>
                         <div className="col-12 col-md-4">
                           <div className="mega-col">
                             <div className="mega-title">Videolar</div>
                             <Link to="/koordinator/youtube-videolar" className="mega-item">
-                              <i className="bi bi-youtube"></i><span>YouTube Videoları</span>
+                              <i className="bi bi-youtube"></i>
+                              <span>YouTube Videoları</span>
                             </Link>
                             <Link to="/koordinator/egitmen-videolari" className="mega-item">
-                              <i className="bi bi-collection-play"></i><span>Eğitmen Videoları</span>
+                              <i className="bi bi-collection-play"></i>
+                              <span>Eğitmen Videoları</span>
                             </Link>
                             <div className="mega-divider"></div>
                             <Link to="/koordinator/video-kayitlari" className="mega-item">
-                              <i className="bi bi-people"></i><span>Tüm Video Kayıtları</span>
+                              <i className="bi bi-people"></i>
+                              <span>Tüm Video Kayıtları</span>
                             </Link>
                             <Link to="/koordinator/satin-almalar" className="mega-item">
-                              <i className="bi bi-bag-check"></i><span>Tüm Video Satın Almalar</span>
+                              <i className="bi bi-bag-check"></i>
+                              <span>Tüm Video Satın Almalar</span>
                             </Link>
                           </div>
                         </div>
@@ -193,7 +257,8 @@ function AkademiBaseHeader() {
                           <div className="mega-col">
                             <div className="mega-title">Dökümanlar</div>
                             <Link to="/koordinator/egitmen-dokumanlari" className="mega-item">
-                              <i className="bi bi-file-earmark-text"></i><span>Eğitmen Dökümanları</span>
+                              <i className="bi bi-file-earmark-text"></i>
+                              <span>Eğitmen Dökümanları</span>
                             </Link>
                           </div>
                         </div>
@@ -209,18 +274,21 @@ function AkademiBaseHeader() {
                       <i className="bi bi-motherboard me-1"></i>Öğrenci
                     </a>
                     <ul className="dropdown-menu rounded-4 shadow p-2">
-                      <li><Link className="dropdown-item rounded-3" to="/student/dashboard/">Panel</Link></li>
-                      <li><Link className="dropdown-item rounded-3" to="/student/courses/">Kurslarım</Link></li>
+                      <li>
+                        <Link className="dropdown-item rounded-3" to="/student/dashboard/">
+                          Panel
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="dropdown-item rounded-3" to="/student/courses/">
+                          Kurslarım
+                        </Link>
+                      </li>
                     </ul>
                   </li>
                 )}
 
-                {/* TEMSİLCİ */}
-                {base_roles.includes("Agent") && (
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/temsilci/hafizbilgi/list/"><i className="bi bi-briefcase me-1"></i>Temsilci</Link>
-                  </li>
-                )}
+                               
               </ul>
 
               {/* Search (desktop) */}
@@ -234,34 +302,61 @@ function AkademiBaseHeader() {
                     onChange={(e) => setQ(e.target.value)}
                     aria-label="Ara"
                   />
-                  <button className="btn btn-sm btn-light rounded-pill" type="submit">Ara</button>
+                  <button className="btn btn-sm btn-light rounded-pill" type="submit">
+                    Ara
+                  </button>
                 </div>
               </form>
 
               {/* Auth / Profile */}
               {!isLoggedIn ? (
                 <div className="d-flex gap-2">
-                  <Link to="/login/" className="btn btn-light btn-sm rounded-pill px-3">Giriş</Link>
-                  <Link to="/register/" className="btn btn-outline-light btn-sm rounded-pill px-3">Kayıt</Link>
+                  <Link to="/login/" className="btn btn-light btn-sm rounded-pill px-3">
+                    Giriş
+                  </Link>
+                  <Link to="/register/" className="btn btn-outline-light btn-sm rounded-pill px-3">
+                    Kayıt
+                  </Link>
                 </div>
               ) : (
                 <div className="dropdown">
-                  <button className="btn btn-outline-light btn-sm rounded-pill d-flex align-items-center gap-2 px-2" data-bs-toggle="dropdown">
+                  <button
+                    className="btn btn-outline-light btn-sm rounded-pill d-flex align-items-center gap-2 px-2"
+                    data-bs-toggle="dropdown"
+                  >
                     {profile?.image ? (
                       <img src={profile.image} alt="" className="avatar" />
                     ) : (
-                      <span className="avatar placeholder">{(profile?.full_name || "U")[0]?.toUpperCase?.()}</span>
+                      <span className="avatar placeholder">
+                        {(profile?.full_name || "U")[0]?.toUpperCase?.()}
+                      </span>
                     )}
                     <span className="d-none d-sm-inline">{profile?.full_name || "Hesabım"}</span>
                     <i className="bi bi-caret-down-fill small"></i>
                   </button>
                   <ul className="dropdown-menu dropdown-menu-end rounded-4 shadow p-2">
                     <li className="px-2 py-1 small text-muted">{profile?.email || ""}</li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li><Link className="dropdown-item rounded-3" to="/profile/"><i className="bi bi-person me-2"></i>Profilim</Link></li>
-                    <li><Link className="dropdown-item rounded-3" to="/settings/"><i className="bi bi-gear me-2"></i>Ayarlar</Link></li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li><Link className="dropdown-item text-danger rounded-3" to="/logout/"><i className="bi bi-box-arrow-right me-2"></i>Çıkış</Link></li>
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
+                    <li>
+                      <Link className="dropdown-item rounded-3" to="/profile/">
+                        <i className="bi bi-person me-2"></i>Profilim
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item rounded-3" to="/settings/">
+                        <i className="bi bi-gear me-2"></i>Ayarlar
+                      </Link>
+                    </li>
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
+                    <li>
+                      <Link className="dropdown-item text-danger rounded-3" to="/logout/">
+                        <i className="bi bi-box-arrow-right me-2"></i>Çıkış
+                      </Link>
+                    </li>
                   </ul>
                 </div>
               )}
@@ -271,13 +366,21 @@ function AkademiBaseHeader() {
             <div className="collapse w-100 mt-2 d-lg-none" id="global-search">
               <form onSubmit={submitSearch}>
                 <div className="input-group input-group-sm">
-                  <span className="input-group-text bg-white border-0"><i className="bi bi-search"></i></span>
-                  <input className="form-control border-0" placeholder="Ara" value={q} onChange={(e)=>setQ(e.target.value)} />
-                  <button className="btn btn-light" type="submit">Ara</button>
+                  <span className="input-group-text bg-white border-0">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    className="form-control border-0"
+                    placeholder="Ara"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                  />
+                  <button className="btn btn-light" type="submit">
+                    Ara
+                  </button>
                 </div>
               </form>
             </div>
-
           </div>
         </nav>
       </header>

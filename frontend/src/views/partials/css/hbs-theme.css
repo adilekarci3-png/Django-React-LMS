@@ -1,0 +1,283 @@
+/* ===== HBS Tema — Mavi Palet =====
+   Yukarıdaki görsele yakın 4 ton mavi
+   400 (en açık) → 600 → 800 → 900 (en koyu)
+*/
+:root {
+  --hbs-400: #6a86d6;  /* açık mavi */
+  --hbs-600: #3c5fa8;  /* orta mavi */
+  --hbs-800: #223a70;  /* koyu mavi */
+  --hbs-900: #1c2b4d;  /* en koyu mavi */
+  --hbs-text-on-dark: #f7f9ff;
+  --hbs-text-soft: #cfdaff;
+  --hbs-border-soft: rgba(255,255,255,.18);
+  --hbs-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+  --radius-2xl: 1.25rem;
+}
+
+/* ===== Header ===== */
+.hdm-min-header.hbs-theme {
+  background: linear-gradient(180deg, var(--hbs-800) 0%, var(--hbs-900) 100%);
+  color: var(--hbs-text-on-dark);
+  box-shadow: var(--hbs-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  border-bottom: 1px solid var(--hbs-border-soft);
+}
+
+.hdm-min-header .navbar-brand {
+  letter-spacing: .5px;
+}
+.hdm-min-header .navbar-brand .hdm-logo-dot{
+  width: 10px; height:10px; border-radius:999px; display:inline-block;
+  background: radial-gradient(closest-side, var(--hbs-400), var(--hbs-600));
+  box-shadow: 0 0 0 4px rgba(106,134,214,.2);
+}
+
+/* Menü linkleri (çip stili) */
+.hbs-chip-link {
+  color: var(--hbs-text-on-dark) !important;
+  opacity: .9;
+  border-radius: 999px;
+  padding: .35rem .85rem !important;
+  transition: all .2s ease;
+}
+.hbs-chip-link:hover,
+.hbs-chip-link:focus {
+  opacity: 1;
+  background: linear-gradient(180deg, var(--hbs-600), var(--hbs-800));
+  box-shadow: 0 6px 18px rgba(58,95,168,.35);
+  color: #fff !important;
+}
+
+/* Arama kapsülü */
+.hbs-search-pill{
+  display:flex; align-items:center; gap:.5rem;
+  background: rgba(255,255,255,.08);
+  border: 1px solid var(--hbs-border-soft);
+  padding: .35rem .5rem .35rem .8rem;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.hbs-search-pill .form-control{
+  background: transparent; border:0; color:#fff;
+}
+.hbs-search-pill .form-control::placeholder{ color: rgba(255,255,255,.65); }
+.hbs-search-pill .btn{
+  background: linear-gradient(180deg, var(--hbs-400), var(--hbs-600));
+  border:0; color:#fff;
+}
+.hdm-burger, .navbar-toggler{ filter: drop-shadow(0 0 6px rgba(0,0,0,.25)); }
+
+/* Dropdown menü */
+.dropdown-menu-hbs{
+  --bs-dropdown-bg: linear-gradient(180deg, var(--hbs-600), var(--hbs-800));
+  background: var(--bs-dropdown-bg);
+  border: 1px solid var(--hbs-border-soft);
+  color: #fff;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+.dropdown-menu-hbs .dropdown-item{
+  color: #fff;
+}
+.dropdown-menu-hbs .dropdown-item:hover{
+  background: rgba(255,255,255,.08);
+}
+
+/* Header CTA / Outline düğmeler */
+.btn-cta{
+  background: linear-gradient(180deg, var(--hbs-400), var(--hbs-600));
+  border: 0; color:#fff;
+  box-shadow: 0 6px 18px rgba(58,95,168,.35);
+}
+.btn-outline-light{
+  border-color: rgba(255,255,255,.45) !important;
+  color: #fff !important;
+}
+.btn-outline-light:hover{
+  background: rgba(255,255,255,.12) !important;
+}
+
+/* ===== Footer ===== */
+.hdm-min-footer.hbs-theme{
+  background:
+    linear-gradient(180deg, var(--hbs-600) 0%, var(--hbs-800) 55%, var(--hbs-900) 100%);
+  color: var(--hbs-text-on-dark);
+  border-top: 1px solid var(--hbs-border-soft);
+}
+
+.hdm-min-footer .text-footer{
+  color: var(--hbs-text-soft);
+}
+
+.hdm-min-footer .footer-link{
+  color: var(--hbs-text-on-dark);
+  opacity: .9; text-decoration: none;
+}
+.hdm-min-footer .footer-link:hover{
+  opacity: 1; color: #fff; text-decoration: underline;
+}
+
+.hdm-min-footer h1, 
+.hdm-min-footer h4{
+  text-shadow: 0 2px 10px rgba(0,0,0,.25);
+}
+
+/* Bölüm başlıkları alt çizgi */
+.hdm-min-footer .mb-4 h4{
+  position: relative; padding-bottom: .4rem; margin-bottom: 1rem;
+}
+.hdm-min-footer .mb-4 h4::after{
+  content:""; position:absolute; left:0; bottom:0;
+  width: 48px; height: 3px; border-radius: 999px;
+  background: linear-gradient(90deg, var(--hbs-400), var(--hbs-600));
+}
+
+/* Telif satırı */
+.hdm-min-footer .border-top{
+  border-top: 1px solid var(--hbs-border-soft) !important;
+}
+
+/* ================================
+   HBS — Hero Ayrıştırma + Görseli Kapsül Yapma
+   ================================ */
+
+/* Hero zemini: header'dan daha açık mavi */
+.page-hbs .asym-hero,
+.page-hbs .hdm-hero,
+.page-hbs .hbs-hero {
+  background: linear-gradient(180deg, var(--hbs-600) 0%, var(--hbs-400) 100%);
+}
+
+/* Hero'daki kart/çerçeve/beyaz alanları tamamen kaldır */
+.asym-hero .hero-media,
+.asym-hero .hero-visual,
+.asym-hero .media-card,
+.asym-hero .hero-card,
+.asym-hero .swiper,
+.asym-hero .swiper-slide {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+/* Görseli kapsül (yanlardan daha yuvarlak) göster */
+.asym-hero .hero-media img,
+.asym-hero .hero-visual img,
+.asym-hero .media-card img,
+.asym-hero img.hbs-hero-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  /* modern kapsül */
+  clip-path: inset(0 round 32px / 120px);
+
+  /* fallback */
+  border-radius: 40px / 120px;
+
+  /* yumuşak gölge, beyaz aura yok */
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .28);
+}
+
+/* Görsel yüksekliği (isteğe göre arttır/azalt) */
+@media (min-width: 992px){
+  .asym-hero .hero-media,
+  .asym-hero .hero-visual { min-height: 420px; }
+}
+@media (max-width: 991.98px){
+  .asym-hero .hero-media,
+  .asym-hero .hero-visual { min-height: 320px; }
+}
+
+/* Stats ve Feature kartları cam efektiyle daha net */
+.hdm-card.stat.glass{
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(6px);
+}
+.hdm-card.feature.gradient{
+  background: linear-gradient(180deg, var(--hbs-600), var(--hbs-800));
+  border: 1px solid rgba(255,255,255,.16);
+}
+
+/* =========================
+   Hero'u Kompaktlaştırma
+   ========================= */
+.page-hbs .asym-hero,
+.page-hbs .hdm-hero,
+.page-hbs .hbs-hero{
+  /* header'dan ayrışsın ama daha az yüksek olsun */
+  padding-block: clamp(24px, 5vw, 56px);
+}
+
+/* Hero içindeki kolon/görsel çevresindeki ekstra boşlukları kırp */
+.asym-hero .container,
+.hdm-hero .container{
+  padding-left: clamp(12px, 2vw, 24px);
+  padding-right: clamp(12px, 2vw, 24px);
+}
+
+.asym-hero .hero-media,
+.asym-hero .hero-visual{
+  margin: 0 !important;          /* kart çevresi boşluk yok */
+}
+
+/* Başlık ve lead arasını kısalt */
+.asym-hero h1,.hbs-hero h1{ margin-bottom: .5rem; }
+.asym-hero p.lead,.hbs-hero p.lead{ margin-bottom: .75rem; }
+
+/* Görsel yüksekliğini daha kompakt yap */
+@media (min-width: 992px){
+  .asym-hero .hero-media,
+  .asym-hero .hero-visual{ min-height: 360px; }
+}
+@media (max-width: 991.98px){
+  .asym-hero .hero-media,
+  .asym-hero .hero-visual{ min-height: 260px; }
+}
+
+/* =========================
+   Bölümleri Hero'ya "yapıştır"
+   ========================= */
+/* Büyük ekran: 56–80px yukarı çek */
+.stack-up{
+  margin-top: clamp(-80px, -7vw, -56px);
+  position: relative;
+  z-index: 2; /* hero'nun üstünde kalsın */
+}
+/* Orta/küçükte daha nazik çekiş */
+@media (max-width: 991.98px){ .stack-up{ margin-top: -32px; } }
+
+/* CTA için hafif çekiş */
+.stack-up-sm{ margin-top: -16px; }
+@media (min-width: 992px){ .stack-up-sm{ margin-top: -24px; } }
+
+/* Bölüm iç dikey boşluklarını da incelt */
+.hdm-section{ padding-block: clamp(16px, 3.5vw, 32px); }
+
+/* Kart ızgaralarındaki satır aralıklarını azalt */
+.row.g-3{ --bs-gutter-y: .75rem; }
+@media (min-width: 768px){ .row.g-md-4{ --bs-gutter-y: 1rem; } }
+
+/* Stats kartları daha ince dursun */
+.hdm-card.stat{ padding: .85rem 1rem; }
+.hdm-card.stat .value{ font-size: 1.25rem; }
+.hdm-card.stat .label{ font-size: .9rem; opacity: .9; }
+
+/* Feature kartlarının iç boşluğu */
+.hdm-card.feature{ padding: 1rem; }
+
+/* Hero görsel kapsülünü koru (önceki öneriyle uyumlu) */
+.asym-hero .hero-media img,
+.asym-hero .hero-visual img{
+  clip-path: inset(0 round 32px / 120px);
+  border-radius: 40px / 120px;
+  object-fit: cover;
+  width: 100%; height: 100%;
+  box-shadow: 0 16px 36px rgba(0,0,0,.26);
+}

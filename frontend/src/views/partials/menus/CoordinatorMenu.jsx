@@ -1,127 +1,162 @@
-import { Link } from 'react-router-dom';
+// CoordinatorMenu.jsx
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuthStore } from "../../../store/auth"; // yolu projene göre düzelt
+import "./css/coordinatormenu.css";
 
 const CoordinatorMenu = () => {
+  // store'dan roller
+  const [baseRoles, subRoles] = useAuthStore((state) => [
+    state.allUserData?.base_roles || [],
+    state.allUserData?.sub_roles || [],
+  ]);
+
+  // bu menünün genel olarak görünmesi için koşul
+  const canSee =
+    baseRoles.includes("Koordinator") &&
+    (
+      subRoles.includes("ESKEPOgrenciKoordinator") ||
+      subRoles.includes("ESKEPStajerKoordinator") ||
+      subRoles.includes("ESKEPGenelKoordinator")
+    );
+
+  // sadece ESKEPGenelKoordinator'a özel link
+  const isEskepGenel = subRoles.includes("ESKEPGenelKoordinator");
+
+  if (!canSee) return null;
+
   return (
-    <li className="nav-item dropdown">
+    <li className="nav-item dropdown coordinator-dropdown position-static">
       <a
         className="nav-link dropdown-toggle"
         href="#"
         role="button"
         data-bs-toggle="dropdown"
         aria-expanded="false"
+        onClick={(e) => e.preventDefault()}
       >
         <i className="fas fa-chalkboard-user"></i> Koordinatör
       </a>
-      <ul className="dropdown-menu">
 
-        {/* 1. Kurs Yönetimi */}
-        <li className="dropdown-header">📚 Kurs Yönetimi</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/dashboard/`}>
-            <i className="bi bi-grid-fill"></i> Panel
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/course-create/`}>
-            <i className="fas fa-plus-circle"></i> Kurs Oluştur
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/assingcourses/`}>
-            <i className="fas fa-list-alt"></i> Oluşturduğum Kurslarım
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/courses/`}>
-            <i className="fas fa-graduation-cap"></i> Eğitim Aldığım Kurslarım
-          </Link>
-        </li>
+      {/* YANA DOĞRU MENÜ */}
+      <div className="dropdown-menu coordinator-mega shadow-lg border-0 mt-0">
+        <div className="d-flex flex-wrap gap-3">
+          {/* 1. SÜTUN - Kurs + İçerik */}
+          <div className="coordinator-col">
+            <h6 className="dropdown-header px-0">📚 Yönetim</h6>
+            <Link className="dropdown-item px-0" to={`/eskepinstructor/dashboard/`}>
+              <i className="bi bi-grid-fill me-2"></i> Panel
+            </Link>          
 
-        {/* 2. Gönderilen Dosyalar */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">🗂 Gönderilen Dosyalar</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/odevs/`}>
-            <i className="fas fa-tasks"></i> Ödevler
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/kitaptahlileris/`}>
-            <i className="fas fa-book"></i> Kitap Tahlilleri
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/dersSonuRaporus/`}>
-            <i className="fas fa-file-alt"></i> Ders Sonu Raporları
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/projes/`}>
-            <i className="fas fa-folder"></i> Proje Dosyaları
-          </Link>
-        </li>
+            <hr className="my-2" />
 
-        {/* 3. Kullanıcı Yönetimi */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">👥 Kullanıcı Yönetimi</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/egitmen-ekle/`}>
-            <i className="fas fa-user-plus"></i> Eğitmen Ekle
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepinstructor/ogrenci-stajer/`}>
-            <i className="fas fa-users"></i> Öğrenci/Stajyer Listesi
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskep/eğitmenler/`}>
-            <i className="fas fa-chalkboard-teacher"></i> Eğitmen Listesi
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/instructor/students/`}>
-            <i className="fas fa-user-graduate"></i> Öğrenciler
-          </Link>
-        </li>
+            <h6 className="dropdown-header px-0">➕ İçerik Ekle</h6>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/canli-ders-ekle/`}>
+              <i className="fa-solid fa-video me-2 text-danger"></i> Canlı Ders Ekle
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/youtube-video-ekle/`}>
+              <i className="fa-brands fa-youtube me-2 text-danger"></i> YouTube Video Ekle
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/ders-saat-ekle/`}>
+              <i className="fa-regular fa-clock me-2 text-success"></i> Ders Saati Ekle
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/video-olustur/`}>
+              <i className="fa-solid fa-film me-2 text-warning"></i> Video Oluştur
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/video-ekle/`}>
+              <i className="fa-solid fa-upload me-2 text-info"></i> Video Ekle
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/dokuman-ekle/`}>
+              <i className="fa-solid fa-file-arrow-up me-2 text-secondary"></i> Döküman Ekle
+            </Link>
+          </div>
 
-        {/* 4. Zamanlama & Organizasyon */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">📅 Organizasyon</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskep/egitim-takvimi/`}>
-            <i className="fas fa-calendar-alt"></i> Genel Takvim
-          </Link>
-        </li>
+          {/* 2. SÜTUN - Gönderilenler + Listelerim */}
+          <div className="coordinator-col">
+            <h6 className="dropdown-header px-0">🗂 Gönderilen Dosyalar</h6>
+            <Link className="dropdown-item px-0" to={`/eskepinstructor/odevs/`}>
+              <i className="fas fa-tasks me-2"></i> Ödevler
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepinstructor/kitaptahlileris/`}>
+              <i className="fas fa-book me-2"></i> Kitap Tahlilleri
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepinstructor/dersSonuRaporus/`}>
+              <i className="fas fa-file-alt me-2"></i> Ders Sonu Raporları
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepinstructor/projes/`}>
+              <i className="fas fa-folder me-2"></i> Proje Dosyaları
+            </Link>
 
-        {/* 5. İletişim ve Etkileşim */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">💬 Etkileşim</li>
-        <li>
-          <Link className="dropdown-item" to={`/instructor/reviews/`}>
-            <i className="fas fa-star"></i> Yorumlar
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/instructor/question-answer/`}>
-            <i className="fas fa-envelope"></i> Soru / Cevap
-          </Link>
-        </li>
+            <hr className="my-2" />
 
-        {/* 6. Ayarlar */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">⚙️ Ayarlar</li>
-        <li>
-          <Link className="dropdown-item" to={`/instructor/earning/`}>
-            <i className="fas fa-turkish-lira-sign"></i> Bağış
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/instructor/profile/`}>
-            <i className="fas fa-gear"></i> Profil & Ayarlar
-          </Link>
-        </li>
-      </ul>
+            <h6 className="dropdown-header px-0">📚 Listelerim</h6>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/live-lessons/`}>
+              <i className="fa-solid fa-video me-2 text-success"></i> Canlı Derslerim
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/youtube-video-list/`}>
+              <i className="fa-brands fa-youtube me-2 text-danger"></i> YouTube Videolarım
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/video-list/`}>
+              <i className="fa-solid fa-photo-film me-2 text-info"></i> Videolarım
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/created-videos/`}>
+              <i className="fa-solid fa-clapperboard me-2 text-warning"></i> Oluşturduğum Videolarım
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/documents/`}>
+              <i className="fa-regular fa-file-lines me-2 text-secondary"></i> Dökümanlarım
+            </Link>
+          </div>
+
+          {/* 3. SÜTUN - Kullanıcı + Organizasyon + Etkileşim + Ayarlar + (Genel ise) İletişim */}
+          <div className="coordinator-col">
+            <h6 className="dropdown-header px-0">👥 Kullanıcı</h6>
+            <Link className="dropdown-item px-0" to={`/eskepinstructor/ogrenci-list/`}>
+              <i className="fas fa-user-graduate me-2"></i> Koordinatör Öğrencileri
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepinstructor/stajer-list/`}>
+              <i className="fas fa-user-clock me-2"></i> Koordinatör Stajerleri
+            </Link>
+
+            <hr className="my-2" />
+
+            <h6 className="dropdown-header px-0">📅 Organizasyon</h6>
+            <Link className="dropdown-item px-0" to={`/eskep/egitim-takvimi/`}>
+              <i className="fas fa-calendar-alt me-2"></i> Genel Takvim
+            </Link>
+
+            <hr className="my-2" />
+
+            <h6 className="dropdown-header px-0">💬 Etkileşim</h6>
+            <Link className="dropdown-item px-0" to={`/instructor/reviews/`}>
+              <i className="fas fa-star me-2"></i> Yorumlar
+            </Link>
+            <Link className="dropdown-item px-0" to={`/instructor/question-answer/`}>
+              <i className="fas fa-envelope me-2"></i> Soru / Cevap
+            </Link>
+
+            <hr className="my-2" />
+
+            <h6 className="dropdown-header px-0">⚙️ Ayarlar</h6>
+            <Link className="dropdown-item px-0" to={`/instructor/earning/`}>
+              <i className="fas fa-turkish-lira-sign me-2"></i> Bağış
+            </Link>
+            <Link className="dropdown-item px-0" to={`/instructor/profile/`}>
+              <i className="fas fa-gear me-2"></i> Profil & Ayarlar
+            </Link>
+
+            {/* 🔐 Sadece ESKEPGenelKoordinator görecek */}
+            {isEskepGenel && (
+              <>
+                <hr className="my-2" />
+                <h6 className="dropdown-header px-0">📨 İletişim</h6>
+                <Link className="dropdown-item px-0" to={`/eskep/contact-messages/`}>
+                  <i className="fas fa-inbox me-2"></i> İletişim Mesajları
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </li>
   );
 };

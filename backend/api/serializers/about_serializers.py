@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from api.models.about import (
-    AboutType, AboutPage, AboutCard, AboutStat, AboutGalleryImage, AboutMilestone
+    AboutType, AboutPage, AboutCard, AboutStat, AboutGalleryImage, AboutMilestone, EskepCard, EskepGalleryItem, EskepPage, EskepStat
 )
 
 class AboutMilestoneSerializer(serializers.ModelSerializer):
@@ -67,3 +67,58 @@ class AboutPageSerializer(serializers.ModelSerializer):
 
     def get_hero_image_url(self, obj): return self._abs(obj.hero_image)
     def get_logo_image_url(self, obj): return self._abs(obj.logo_image)
+
+class EskepCardSerializer(serializers.ModelSerializer):
+    bullets = serializers.SerializerMethodField()
+    pills = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EskepCard
+        fields = ["id", "title", "lead", "bullets", "pills", "order"]
+
+    def get_bullets(self, obj):
+        # admin'de satır satır yazacağız, burada listeye çeviriyoruz
+        if not obj.bullets:
+            return []
+        return [line.strip() for line in obj.bullets.splitlines() if line.strip()]
+
+    def get_pills(self, obj):
+        if not obj.pills:
+            return []
+        return [p.strip() for p in obj.pills.split(",") if p.strip()]
+
+
+class EskepGalleryItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EskepGalleryItem
+        fields = ["id", "image_url", "alt_text", "order"]
+
+
+class EskepStatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EskepStat
+        fields = ["id", "label", "value", "order"]
+
+
+class EskepPageSerializer(serializers.ModelSerializer):
+    cards = EskepCardSerializer(many=True, read_only=True)
+    gallery = EskepGalleryItemSerializer(many=True, read_only=True)
+    stats = EskepStatSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = EskepPage
+        fields = [
+            "id",
+            "slug",
+            "intro_chip",
+            "title",
+            "subtitle",
+            "hero_image",
+            "shot1",
+            "shot2",
+            "logo",
+            "css",
+            "cards",
+            "gallery",
+            "stats",
+        ]

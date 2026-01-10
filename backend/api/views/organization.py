@@ -1,10 +1,15 @@
 # api/views/organization.py
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from django.db.models import Q
+from api.models.organization import Departman
+from api.serializers.organization import DepartmanTreeSerializer
+from api.views import permissions
 from .. import models as api_models, serializers as api_serializer
-
+from rest_framework.views import APIView
 
 class OrganizationMemberViewSetAPIVIew(generics.ListAPIView):
     serializer_class = api_serializer.OrganizationMemberSerializer
@@ -63,3 +68,55 @@ class DepartmanViewSet(viewsets.ModelViewSet):
     queryset = api_models.Departman.objects.all()
     serializer_class = api_serializer.DepartmanSerializer
     permission_classes = [AllowAny]
+
+class OrgChartByNameAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, slug, *args, **kwargs):
+        """
+        /api/orgchart/erkekler/ geldiğinde şunları sırayla dener:
+        1) parent is null VE name == slug
+        2) parent is null VE name icontains(slug)
+        3) parent is null VE name icontains('erkek')  (erkekler özelinde)
+        4) yoksa 404
+        """
+        raw = slug  # "erkekler" veya "kadinlar"
+        normalized = raw.replace("-", " ").strip()  # "erkekler" -> "erkekler"
+
+        # 1) tam eşleşme
+        qs = Departman.objects.filter(parent__isnull=True, name__iexact=normalized)
+        dept = qs.first()
+
+        # 2) içinde geçiyorsa (senin dosya adın uzun olduğu için)
+        if not dept:
+            qs = Departman.objects.filter(
+                parent__isnull=True,
+                name__icontains=normalized
+            ).order_by("id")
+            dept = qs.first()
+
+        # 3) özel kural: erkekler/kadinlar kelimesini ara
+        if not dept and normalized.lower().startswith("erkek"):
+            qs = Departman.objects.filter(
+                parent__isnull=True
+            ).filter(
+                Q(name__icontains="erkek") | Q(name__icontains="ERKEK")
+            ).order_by("id")
+            dept = qs.first()
+
+        if not dept and normalized.lower().startswith("kadin"):
+            qs = Departman.objects.filter(
+                parent__isnull=True
+            ).filter(
+                Q(name__icontains="kadın") | Q(name__icontains="kadin") | Q(name__icontains="KADIN")
+            ).order_by("id")
+            dept = qs.first()
+
+        if not dept:
+            return Response(
+                {"detail": f"'{slug}' için kök departman bulunamadı."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = DepartmanTreeSerializer(dept, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

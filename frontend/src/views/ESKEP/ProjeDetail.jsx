@@ -1,18 +1,21 @@
-// ProjeDetail.jsx
+// src/views/ESKEPinstructor/ProjeDetail.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
+import moment from "moment";
+import "moment/locale/tr";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
 import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
-import moment from "moment";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+
+moment.locale("tr");
 
 function ProjeDetail() {
   // ---- STATE ----
@@ -40,7 +43,6 @@ function ProjeDetail() {
   const lastElementRef = useRef(null);
 
   // ---- MODALS ----
-  // Video modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (variant_item) => {
@@ -48,7 +50,7 @@ function ProjeDetail() {
     setShow(true);
   };
 
-  // Note modal (tek modal; create/edit)
+  // Note modal
   const [noteShow, setNoteShow] = useState(false);
   const handleNoteClose = () => {
     setNoteShow(false);
@@ -82,23 +84,23 @@ function ProjeDetail() {
 
   // ---- FETCH DETAIL ----
   const fetchProjeDetail = async () => {
+    if (!userData?.user_id) return;
     try {
+      // backend: /eskepinstructor/proje-detail/<koordinator_id>/<proje_id>/
       const res = await api.get(
-        `eskepinstructor/proje-detail/${proje_id}/${userData?.user_id}/`
+        `eskepinstructor/proje-detail/${userData.user_id}/${proje_id}/`
       );
       const data = res.data;
       setProje(data);
       setQuestions(data?.question_answers || []);
       setStudentReview(data?.review || null);
 
-      // Tamamlama yüzdesi: curriculum toplam item sayısı üzerinden, yoksa lectures
       const totalFromCurriculum = (data?.curriculum || []).reduce(
         (sum, v) => sum + (v?.variant_items?.length || 0),
         0
       );
       const totalLectures = data?.lectures?.length || 0;
       const total = totalFromCurriculum || totalLectures || 0;
-
       const completed = data?.completed_lesson?.length || 0;
       const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
       setCompletionPercentage(percentage);
@@ -136,7 +138,6 @@ function ProjeDetail() {
     setCreateNote((n) => ({ ...n, [event.target.name]: event.target.value }));
   };
 
-  // Tek submit: selectedNote varsa PATCH, yoksa POST
   const handleSubmitNote = async (e) => {
     e.preventDefault();
     try {
@@ -186,7 +187,6 @@ function ProjeDetail() {
     setCreateMessage((m) => ({ ...m, [event.target.name]: event.target.value }));
   };
 
-  // konuşmayı id ile tazele
   const refreshConversation = async (questionId) => {
     try {
       setConversationLoading(true);
@@ -202,10 +202,8 @@ function ProjeDetail() {
     }
   };
 
-  // Yeni konuşma (soru) oluştur
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
-
     const title = createMessage.title?.trim();
     const message = createMessage.message?.trim();
 
@@ -226,7 +224,6 @@ function ProjeDetail() {
         formdata
       );
 
-      // İsteğe bağlı: yeni konuşmayı hemen aç
       const newQid = res?.data?.question_id;
       await fetchProjeDetail();
       if (newQid) {
@@ -243,7 +240,6 @@ function ProjeDetail() {
     }
   };
 
-  // Var olan konuşmaya yeni mesaj gönder
   const sendNewMessage = async (e) => {
     e.preventDefault();
 
@@ -261,14 +257,11 @@ function ProjeDetail() {
     }
 
     try {
-      // BE generic endpoint: body’de proje_id + question_id gönderiyoruz
-      const payload = {
+      await api.post(`eskepinstructor/question-answer-message-create/`, {
         proje_id,
         question_id: selectedConversation.id,
         message: msg,
-      };
-
-      await api.post(`eskepinstructor/question-answer-message-create/`, payload);
+      });
 
       await refreshConversation(selectedConversation.id);
       setCreateMessage({ title: "", message: "" });
@@ -343,7 +336,6 @@ function ProjeDetail() {
     }
   };
 
-  // ---- HELPERS ----
   const isItemCompleted = (item) => {
     const itemId = item?.id ?? item?.variant_item_id;
     return (
@@ -352,384 +344,454 @@ function ProjeDetail() {
     );
   };
 
-  // ---- RENDER ----
   return (
     <>
       <ESKEPBaseHeader />
 
-      <section className="pt-5 pb-5 min-vh-100 bg-body" style={{ paddingTop: '6rem', paddingBottom: '7rem' }}>
-        <div className="container-fluid">
+      <section
+        className="pt-5 pb-5 bg-light min-vh-100"
+        style={{ paddingTop: "6rem", paddingBottom: "6rem" }}
+      >
+        <div className="container-xxl">
           <Header />
-          <div className="row mt-0 mt-md-4 g-4" style={{minHeight: '75vh'}}>
-            <div className="col-lg-3 col-md-4 col-12">
-              <Sidebar />
+
+          {/* GRID LAYOUT: 3/9 */}
+          <div className="row mt-4">
+            {/* SOL: Sidebar */}
+            <div className="col-lg-3 col-md-4 mb-4">
+              {/* Bu sarmalayıcı sidebar'ın dar kalmasını engeller */}
+              <div
+                className="instructor-sidebar-wrapper"
+                style={{
+                  minWidth: "240px",
+                  width: "100%",
+                }}
+              >
+                <Sidebar />
+              </div>
             </div>
 
-            <div className="col-lg-9 col-md-8 col-12 d-flex flex-column pb-5">
-              <section className="mt-4"><div className="container-xxl">
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="card shadow rounded-2 p-0 mt-3">
-                        {/* Tabs */}
-                        <div className="card-header border-bottom px-4 pt-3 pb-0">
-                          <ul className="nav nav-bottom-line py-0" role="tablist">
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0 active"
-                                data-bs-toggle="pill"
-                                data-bs-target="#pj-tabs-1"
-                                type="button"
-                                role="tab"
-                                aria-selected="true"
-                              >
-                                Ödev Bölümleri
-                              </button>
-                            </li>
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                data-bs-toggle="pill"
-                                data-bs-target="#pj-tabs-2"
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                              >
-                                Notlar
-                              </button>
-                            </li>
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                data-bs-toggle="pill"
-                                data-bs-target="#pj-tabs-3"
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                              >
-                                Konuşma
-                              </button>
-                            </li>
-                            <li className="nav-item me-2 me-sm-4" role="presentation">
-                              <button
-                                className="nav-link mb-2 mb-md-0"
-                                data-bs-toggle="pill"
-                                data-bs-target="#pj-tabs-4"
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                              >
-                                Not Ver
-                              </button>
-                            </li>
-                          </ul>
+            {/* SAĞ: Content */}
+            <div className="col-lg-9 col-md-8">
+              <div className="card shadow rounded-2 p-0 mt-0">
+                {/* Tabs */}
+                <div className="card-header border-bottom px-4 pt-3 pb-0">
+                  <h5 className="mb-3 d-flex align-items-center gap-2">
+                    <i className="fas fa-diagram-project text-primary" />
+                    Proje Detayı
+                    {proje?.proje?.title && (
+                      <span className="badge bg-light text-dark border">
+                        {proje.proje.title}
+                      </span>
+                    )}
+                  </h5>
+                  <div className="small text-muted mb-3">
+                    Tamamlama:{" "}
+                    <strong className="text-success">
+                      {completionPercentage}%
+                    </strong>
+                  </div>
+
+                  <ul className="nav nav-bottom-line py-0" role="tablist">
+                    <li className="nav-item me-2 me-sm-4" role="presentation">
+                      <button
+                        className="nav-link mb-2 mb-md-0 active"
+                        data-bs-toggle="pill"
+                        data-bs-target="#pj-tabs-1"
+                        type="button"
+                        role="tab"
+                        aria-selected="true"
+                      >
+                        Bölümler
+                      </button>
+                    </li>
+                    <li className="nav-item me-2 me-sm-4" role="presentation">
+                      <button
+                        className="nav-link mb-2 mb-md-0"
+                        data-bs-toggle="pill"
+                        data-bs-target="#pj-tabs-2"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                      >
+                        Notlar
+                      </button>
+                    </li>
+                    <li className="nav-item me-2 me-sm-4" role="presentation">
+                      <button
+                        className="nav-link mb-2 mb-md-0"
+                        data-bs-toggle="pill"
+                        data-bs-target="#pj-tabs-3"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                      >
+                        Konuşma
+                      </button>
+                    </li>
+                    <li className="nav-item me-2 me-sm-4" role="presentation">
+                      <button
+                        className="nav-link mb-2 mb-md-0"
+                        data-bs-toggle="pill"
+                        data-bs-target="#pj-tabs-4"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                      >
+                        Not Ver
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Tab contents */}
+                <div className="card-body p-sm-4">
+                  <div className="tab-content">
+                    {/* Bölümler */}
+                    <div className="tab-pane fade show active" id="pj-tabs-1">
+                      <div className="progress mb-3">
+                        <div
+                          className="progress-bar"
+                          role="progressbar"
+                          style={{ width: `${completionPercentage}%` }}
+                          aria-valuenow={completionPercentage}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                        >
+                          {completionPercentage}%
                         </div>
+                      </div>
 
-                        {/* Tab contents */}
-                        <div className="card-body p-sm-4">
-                          <div className="tab-content">
-                            {/* Bölümler */}
-                            <div className="tab-pane fade show active" id="pj-tabs-1">
-                              <div className="accordion accordion-icon accordion-border" id="accordionExample2">
-                                <div className="progress mb-3">
-                                  <div
-                                    className="progress-bar"
-                                    role="progressbar"
-                                    style={{ width: `${completionPercentage}%` }}
-                                    aria-valuenow={completionPercentage}
-                                    aria-valuemin={0}
-                                    aria-valuemax={100}
-                                  >
-                                    {completionPercentage}%
-                                  </div>
-                                </div>
+                      {/* Eğer plain lectures varsa */}
+                      {(proje?.lectures || []).length > 0 && (
+                        <div className="mb-3">
+                          <h6 className="text-muted">Dersler</h6>
+                          {(proje?.lectures || []).map((c, index) => (
+                            <div
+                              key={index}
+                              className="d-flex justify-content-between border rounded p-3 mb-2 bg-white"
+                            >
+                              <span>{c?.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-                                {/* Varsayılan: ders listesi */}
-                                {(proje?.lectures || []).map((c, index) => (
-                                  <div key={index}>
-                                    <h3>{c?.name}</h3>
-                                  </div>
-                                ))}
+                      {/* Curriculum */}
+                      <div
+                        className="accordion accordion-icon accordion-border"
+                        id="accordionExample2"
+                      >
+                        {(proje?.curriculum || []).map((c, index) => (
+                          <div
+                            className="accordion-item mb-3 p-0 bg-white rounded"
+                            key={index}
+                          >
+                            <h6
+                              className="accordion-header"
+                              id={`heading-${index}`}
+                            >
+                              <button
+                                className="accordion-button p-3 fw-semibold collapsed"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target={`#collapse-${c?.variant_id}`}
+                                aria-expanded="true"
+                                aria-controls={`collapse-${c?.variant_id}`}
+                              >
+                                {c?.title}
+                                <span className="small ms-2">
+                                  ({c?.variant_items?.length || 0} Ders)
+                                </span>
+                              </button>
+                            </h6>
 
-                                {/* Curriculum */}
-                                {(proje?.curriculum || []).map((c, index) => (
-                                  <div className="accordion-item mb-3 p-3 bg-light" key={index}>
-                                    <h6 className="accordion-header font-base" id={`heading-${index}`}>
-                                      <button
-                                        className="accordion-button p-3 w-100 bg-light btn border fw-bold rounded d-sm-flex d-inline-block collapsed"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target={`#collapse-${c?.variant_id}`}
-                                        aria-expanded="true"
-                                        aria-controls={`collapse-${c?.variant_id}`}
-                                      >
-                                        {c?.title}
-                                        <span className="small ms-0 ms-sm-2">
-                                          ({c?.variant_items?.length || 0} Ders{(c?.variant_items?.length || 0) > 1 && "s"})
-                                        </span>
-                                      </button>
-                                    </h6>
-
+                            <div
+                              id={`collapse-${c?.variant_id}`}
+                              className="accordion-collapse collapse show"
+                              aria-labelledby={`heading-${index}`}
+                              data-bs-parent="#accordionExample2"
+                            >
+                              <div className="accordion-body">
+                                {(c?.variant_items || []).map((l, idx) => {
+                                  const itemId =
+                                    l?.id ?? l?.variant_item_id;
+                                  return (
                                     <div
-                                      id={`collapse-${c?.variant_id}`}
-                                      className="accordion-collapse collapse show"
-                                      aria-labelledby={`heading-${index}`}
-                                      data-bs-parent="#accordionExample2"
+                                      key={idx}
+                                      className="mb-3 pb-3 border-bottom"
                                     >
-                                      <div className="accordion-body mt-3">
-                                        {(c?.variant_items || []).map((l, idx) => {
-                                          const itemId = l?.id ?? l?.variant_item_id;
-                                          return (
-                                            <div key={idx}>
-                                              <div className="d-flex justify-content-between align-items-center">
-                                                <div className="position-relative d-flex align-items-center gap-2">
-                                                  {l?.file ? (
-                                                    <a
-                                                      href={l.file}
-                                                      target="_blank"
-                                                      rel="noopener noreferrer"
-                                                      className="btn btn-primary-soft btn-round btn-sm mb-0 position-static"
-                                                    >
-                                                      <i className="fas fa-file-pdf me-1" /> PDF'yi Görüntüle
-                                                    </a>
-                                                  ) : (
-                                                    <span className="text-muted">PDF mevcut değil</span>
-                                                  )}
+                                      <div className="d-flex justify-content-between align-items-center gap-3">
+                                        <div className="d-flex gap-2 align-items-center flex-wrap">
+                                          {l?.file ? (
+                                            <a
+                                              href={l.file}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="btn btn-primary-soft btn-sm"
+                                            >
+                                              <i className="fas fa-file-pdf me-1" />{" "}
+                                              PDF
+                                            </a>
+                                          ) : (
+                                            <span className="text-muted small">
+                                              PDF yok
+                                            </span>
+                                          )}
 
-                                                  {l?.video_url && (
-                                                    <button
-                                                      type="button"
-                                                      className="btn btn-outline-secondary btn-sm"
-                                                      onClick={() => handleShow(l)}
-                                                    >
-                                                      <i className="fas fa-play me-1" /> Videoyu Aç
-                                                    </button>
-                                                  )}
-                                                </div>
+                                          {l?.video_url && (
+                                            <button
+                                              type="button"
+                                              className="btn btn-outline-secondary btn-sm"
+                                              onClick={() => handleShow(l)}
+                                            >
+                                              <i className="fas fa-play me-1" />{" "}
+                                              Videoyu Aç
+                                            </button>
+                                          )}
 
-                                                <div className="d-flex align-items-center">
-                                                  <p className="mb-0 me-2">{l?.content_duration || "0m 0s"}</p>
-                                                  <input
-                                                    type="checkbox"
-                                                    className="form-check-input ms-2"
-                                                    onChange={() => handleMarkLessonAsCompleted(itemId)}
-                                                    checked={isItemCompleted(l)}
-                                                  />
-                                                </div>
-                                              </div>
-                                              <hr />
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Notlar */}
-                            <div className="tab-pane fade" id="pj-tabs-2">
-                              <div className="card">
-                                <div className="card-header border-bottom p-0 pb-3 d-flex justify-content-between align-items-center">
-                                  <h4 className="mb-0 p-3">Tüm Notlar</h4>
-                                  <button type="button" className="btn btn-primary me-3" onClick={() => handleNoteShow()}>
-                                    Not Ekle <i className="fas fa-pen"></i>
-                                  </button>
-                                </div>
-
-                                <div className="card-body p-0 pt-3">
-                                  {(proje?.notes || []).map((n) => (
-                                    <div key={n?.id} className="row g-4 p-3">
-                                      <div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
-                                        <h5>{n?.title}</h5>
-                                        <p className="mb-2">{n?.note || n?.notes}</p>
-                                        <small className="text-muted">
-                                          {moment(n?.date).format("DD MMM, YYYY HH:mm")}
-                                        </small>
-                                        <div className="hstack gap-3 flex-wrap mt-3">
-                                          <button type="button" onClick={() => handleNoteShow(n)} className="btn btn-success mb-0">
-                                            <i className="bi bi-pencil-square me-2" /> Düzenle
-                                          </button>
-                                          <button type="button" onClick={() => handleDeleteNote(n?.id)} className="btn btn-danger mb-0">
-                                            <i className="bi bi-trash me-2" /> Sil
-                                          </button>
+                                          <span className="text-muted small">
+                                            {l?.title ||
+                                              l?.name ||
+                                              "Ders içeriği"}
+                                          </span>
                                         </div>
-                                      </div>
-                                    </div>
-                                  ))}
 
-                                  {(proje?.notes?.length || 0) < 1 && (
-                                    <p className="mt-3 p-3">Not Bulunamadı</p>
-                                  )}
-                                  <hr />
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Konuşma */}
-                            <div className="tab-pane fade" id="pj-tabs-3">
-                              <div className="card">
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  <h4 className="mb-3 p-3">Konuşma</h4>
-                                  <form className="row g-4 p-3" onSubmit={(e) => e.preventDefault()}>
-                                    <div className="col-sm-6 col-lg-9">
-                                      <div className="position-relative">
-                                        <input
-                                          className="form-control pe-5 bg-transparent"
-                                          type="search"
-                                          placeholder="Ara"
-                                          aria-label="Ara"
-                                          onChange={handleSearchQuestion}
-                                        />
-                                        <button
-                                          type="button"
-                                          className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
-                                        >
-                                          <i className="fas fa-search fs-6 " />
-                                        </button>
-                                      </div>
-                                    </div>
-                                    <div className="col-sm-6 col-lg-3">
-                                      {/* Sadece state kontrollü modal */}
-                                      <button
-                                        type="button"
-                                        onClick={handleQuestionShow}
-                                        className="btn btn-primary mb-0 w-100"
-                                      >
-                                        Soru Sor
-                                      </button>
-                                    </div>
-                                  </form>
-                                </div>
-
-                                <div className="card-body p-0 pt-3">
-                                  <div className="vstack gap-3 p-3">
-                                    {(questions || []).map((q, index) => (
-                                      <div className="shadow rounded-3 p-3" key={q?.id || index}>
-                                        <div className="d-sm-flex justify-content-sm-between mb-3">
-                                          <div className="d-flex align-items-center">
-                                            <div className="avatar avatar-sm flex-shrink-0">
-                                              <img
-                                                src={q?.profile?.image}
-                                                className="avatar-img rounded-circle"
-                                                alt="avatar"
-                                                style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover" }}
-                                              />
-                                            </div>
-                                            <div className="ms-2">
-                                              <h6 className="mb-0">
-                                                <span className="text-decoration-none text-dark">{q?.profile?.full_name}</span>
-                                              </h6>
-                                              <small>{moment(q?.date).format("DD MMM, YYYY")}</small>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <h5>{q?.title}</h5>
-                                        <button
-                                          type="button"
-                                          className="btn btn-primary btn-sm mb-3 mt-3"
-                                          onClick={() => handleConversationShow(q)}
-                                        >
-                                          Konuşmaya Katıl <i className="fas fa-arrow-right"></i>
-                                        </button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Not Ver */}
-                            <div className="tab-pane fade" id="pj-tabs-4">
-                              <div className="card">
-                                <div className="card-header border-bottom p-0 pb-3">
-                                  <h4 className="mb-3 p-3">
-                                    {studentReview?.rating ? <span>Not Ver {studentReview.rating}</span> : "Not Ver"}
-                                  </h4>
-                                  <div className="mt-2">
-                                    {!studentReview && (
-                                      <form className="row g-3 p-3" onSubmit={handleCreateReviewSubmit}>
-                                        <div className="col-12 bg-light-input">
-                                          <select
-                                            id="inputState2"
-                                            className="form-select js-choice"
-                                            onChange={handleReviewChange}
-                                            name="rating"
-                                            defaultValue={1}
-                                          >
-                                            <option value={1}>★☆☆☆☆ (1/5)</option>
-                                            <option value={2}>★★☆☆☆ (2/5)</option>
-                                            <option value={3}>★★★☆☆ (3/5)</option>
-                                            <option value={4}>★★★★☆ (4/5)</option>
-                                            <option value={5}>★★★★★ (5/5)</option>
-                                          </select>
-                                        </div>
-                                        <div className="col-12 bg-light-input">
-                                          <textarea
-                                            className="form-control"
-                                            placeholder="Yorumun"
-                                            rows={3}
-                                            onChange={handleReviewChange}
-                                            name="review"
+                                        <div className="d-flex align-items-center gap-2">
+                                          <span className="small text-muted">
+                                            {l?.content_duration || "0m 0s"}
+                                          </span>
+                                          <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            onChange={() =>
+                                              handleMarkLessonAsCompleted(
+                                                itemId
+                                              )
+                                            }
+                                            checked={isItemCompleted(l)}
                                           />
                                         </div>
-                                        <div className="col-12">
-                                          <button type="submit" className="btn btn-primary mb-0">
-                                            Not Ver
-                                          </button>
-                                        </div>
-                                      </form>
-                                    )}
-
-                                    {studentReview && (
-                                      <form className="row g-3 p-3" onSubmit={handleUpdateReviewSubmit}>
-                                        <div className="col-12 bg-light-input">
-                                          <select
-                                            id="inputState2"
-                                            className="form-select js-choice"
-                                            onChange={handleReviewChange}
-                                            name="rating"
-                                            defaultValue={studentReview?.rating}
-                                          >
-                                            <option value={1}>★☆☆☆☆ (1/5)</option>
-                                            <option value={2}>★★☆☆☆ (2/5)</option>
-                                            <option value={3}>★★★☆☆ (3/5)</option>
-                                            <option value={4}>★★★★☆ (4/5)</option>
-                                            <option value={5}>★★★★★ (5/5)</option>
-                                          </select>
-                                        </div>
-                                        <div className="col-12 bg-light-input">
-                                          <textarea
-                                            className="form-control"
-                                            placeholder="Yorumun"
-                                            rows={3}
-                                            onChange={handleReviewChange}
-                                            name="review"
-                                            defaultValue={studentReview?.review}
-                                          />
-                                        </div>
-                                        <div className="col-12">
-                                          <button type="submit" className="btn btn-primary mb-0">
-                                            Yorumu Güncelle
-                                          </button>
-                                        </div>
-                                      </form>
-                                    )}
-                                  </div>
-                                </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
-                            {/* /Not Ver */}
                           </div>
-                        </div>
-                        {/* /Tab contents */}
+                        ))}
                       </div>
                     </div>
+
+                    {/* Notlar */}
+                    <div className="tab-pane fade" id="pj-tabs-2">
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h4 className="mb-0">Tüm Notlar</h4>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={() => handleNoteShow()}
+                        >
+                          Not Ekle <i className="fas fa-pen"></i>
+                        </button>
+                      </div>
+
+                      {(proje?.notes || []).map((n) => (
+                        <div key={n?.id} className="card mb-3">
+                          <div className="card-body">
+                            <h5>{n?.title}</h5>
+                            <p className="mb-2">{n?.note || n?.notes}</p>
+                            <small className="text-muted d-block mb-2">
+                              {moment(n?.date).format("DD MMM, YYYY HH:mm")}
+                            </small>
+                            <div className="d-flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleNoteShow(n)}
+                                className="btn btn-success btn-sm"
+                              >
+                                <i className="bi bi-pencil-square me-2" />{" "}
+                                Düzenle
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteNote(n?.id)}
+                                className="btn btn-danger btn-sm"
+                              >
+                                <i className="bi bi-trash me-2" /> Sil
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {(proje?.notes?.length || 0) < 1 && (
+                        <p className="mt-3 text-muted">Not bulunamadı.</p>
+                      )}
+                    </div>
+
+                    {/* Konuşma */}
+                    <div className="tab-pane fade" id="pj-tabs-3">
+                      <div className="d-flex flex-wrap gap-3 mb-3">
+                        <div className="flex-grow-1">
+                          <div className="position-relative">
+                            <input
+                              className="form-control pe-5 bg-transparent"
+                              type="search"
+                              placeholder="Soru / Konuşma ara…"
+                              onChange={handleSearchQuestion}
+                            />
+                            <span className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted">
+                              <i className="fas fa-search" />
+                            </span>
+                          </div>
+                        </div>
+                        <div style={{ minWidth: 140 }}>
+                          <button
+                            type="button"
+                            onClick={handleQuestionShow}
+                            className="btn btn-primary w-100"
+                          >
+                            Soru Sor
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="vstack gap-3">
+                        {(questions || []).map((q, index) => (
+                          <div className="card" key={q?.id || index}>
+                            <div className="card-body d-sm-flex justify-content-sm-between align-items-start gap-3">
+                              <div className="d-flex align-items-center gap-2 mb-2 mb-sm-0">
+                                <div className="avatar avatar-sm">
+                                  <img
+                                    src={q?.profile?.image}
+                                    alt=""
+                                    style={{
+                                      width: 50,
+                                      height: 50,
+                                      borderRadius: "50%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <h6 className="mb-0">
+                                    {q?.profile?.full_name}
+                                  </h6>
+                                  <small className="text-muted">
+                                    {moment(q?.date).format("DD MMM, YYYY")}
+                                  </small>
+                                </div>
+                              </div>
+                              <div className="flex-grow-1">
+                                <p className="mb-2 fw-semibold">{q?.title}</p>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-primary btn-sm"
+                                  onClick={() => handleConversationShow(q)}
+                                >
+                                  Konuşmaya Katıl{" "}
+                                  <i className="fas fa-arrow-right ms-1"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Not Ver */}
+                    <div className="tab-pane fade" id="pj-tabs-4">
+                      <h4 className="mb-3">
+                        {studentReview?.rating ? (
+                          <span>Not Ver ({studentReview.rating}/5)</span>
+                        ) : (
+                          "Not Ver"
+                        )}
+                      </h4>
+
+                      {!studentReview && (
+                        <form
+                          className="row g-3"
+                          onSubmit={handleCreateReviewSubmit}
+                        >
+                          <div className="col-12">
+                            <label className="form-label">Puan</label>
+                            <select
+                              className="form-select"
+                              onChange={handleReviewChange}
+                              name="rating"
+                              defaultValue={1}
+                            >
+                              <option value={1}>★☆☆☆☆ (1/5)</option>
+                              <option value={2}>★★☆☆☆ (2/5)</option>
+                              <option value={3}>★★★☆☆ (3/5)</option>
+                              <option value={4}>★★★★☆ (4/5)</option>
+                              <option value={5}>★★★★★ (5/5)</option>
+                            </select>
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label">Yorum</label>
+                            <textarea
+                              className="form-control"
+                              rows={3}
+                              onChange={handleReviewChange}
+                              name="review"
+                            />
+                          </div>
+                          <div className="col-12">
+                            <button type="submit" className="btn btn-primary">
+                              Kaydet
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {studentReview && (
+                        <form
+                          className="row g-3"
+                          onSubmit={handleUpdateReviewSubmit}
+                        >
+                          <div className="col-12">
+                            <label className="form-label">Puan</label>
+                            <select
+                              className="form-select"
+                              onChange={handleReviewChange}
+                              name="rating"
+                              defaultValue={studentReview?.rating}
+                            >
+                              <option value={1}>★☆☆☆☆ (1/5)</option>
+                              <option value={2}>★★☆☆☆ (2/5)</option>
+                              <option value={3}>★★★☆☆ (3/5)</option>
+                              <option value={4}>★★★★☆ (4/5)</option>
+                              <option value={5}>★★★★★ (5/5)</option>
+                            </select>
+                          </div>
+                          <div className="col-12">
+                            <label className="form-label">Yorum</label>
+                            <textarea
+                              className="form-control"
+                              rows={3}
+                              onChange={handleReviewChange}
+                              name="review"
+                              defaultValue={studentReview?.review}
+                            />
+                          </div>
+                          <div className="col-12">
+                            <button type="submit" className="btn btn-primary">
+                              Yorumu Güncelle
+                            </button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
+                    {/* /Not Ver */}
                   </div>
                 </div>
-              </section>
+              </div>
             </div>
           </div>
+          {/* /row */}
         </div>
       </section>
 
@@ -739,7 +801,12 @@ function ProjeDetail() {
           <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <ReactPlayer url={variantItem?.file || variantItem?.video_url} controls width={"100%"} height={"100%"} />
+          <ReactPlayer
+            url={variantItem?.file || variantItem?.video_url}
+            controls
+            width={"100%"}
+            height={"100%"}
+          />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
@@ -751,7 +818,11 @@ function ProjeDetail() {
       {/* Not Create/Edit Modal */}
       <Modal show={noteShow} size="lg" onHide={handleNoteClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{selectedNote?.id ? `Notu Düzenle: ${selectedNote.title}` : "Yeni Not Ekle"}</Modal.Title>
+          <Modal.Title>
+            {selectedNote?.id
+              ? `Notu Düzenle: ${selectedNote.title}`
+              : "Yeni Not Ekle"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleSubmitNote}>
@@ -777,27 +848,42 @@ function ProjeDetail() {
                 required
               />
             </div>
-            <button type="button" className="btn btn-secondary me-2" onClick={handleNoteClose}>
+            <button
+              type="button"
+              className="btn btn-secondary me-2"
+              onClick={handleNoteClose}
+            >
               <i className="fas fa-arrow-left"></i> Kapat
             </button>
             <button type="submit" className="btn btn-primary">
-              {selectedNote?.id ? "Güncelle" : "Kaydet"} <i className="fas fa-check-circle"></i>
+              {selectedNote?.id ? "Güncelle" : "Kaydet"}{" "}
+              <i className="fas fa-check-circle"></i>
             </button>
           </form>
         </Modal.Body>
       </Modal>
 
       {/* Conversation Modal */}
-      <Modal show={conversationShow} size="lg" onHide={handleConversationClose} centered>
+      <Modal
+        show={conversationShow}
+        size="lg"
+        onHide={handleConversationClose}
+        centered
+      >
         <Modal.Header closeButton>
-          <Modal.Title>Konuşma: {selectedConversation?.title || "—"}</Modal.Title>
+          <Modal.Title>
+            Konuşma: {selectedConversation?.title || "—"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="border p-2 p-sm-4 rounded-3">
             {conversationLoading ? (
               <div className="text-center py-4">Yükleniyor…</div>
             ) : (
-              <ul className="list-unstyled mb-0" style={{ overflowY: "auto", height: 500 }}>
+              <ul
+                className="list-unstyled mb-0"
+                style={{ overflowY: "auto", height: 500 }}
+              >
                 {(selectedConversation?.messages || []).map((m, index) => (
                   <li key={m?.id || index} className="comment-item mb-3">
                     <div className="d-flex">
@@ -805,11 +891,18 @@ function ProjeDetail() {
                         <img
                           className="avatar-img rounded-circle"
                           src={
-                            m?.profile?.image?.startsWith("http://127.0.0.1:8000")
+                            m?.profile?.image?.startsWith(
+                              "http://127.0.0.1:8000"
+                            )
                               ? m?.profile?.image
                               : `http://127.0.0.1:8000${m?.profile?.image}`
                           }
-                          style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover" }}
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                          }}
                           alt="user"
                         />
                       </div>
@@ -818,9 +911,15 @@ function ProjeDetail() {
                           <div className="d-flex w-100 justify-content-center">
                             <div className="me-2">
                               <h6 className="mb-1 lead fw-bold">
-                                <span className="text-decoration-none text-dark">{m?.profile?.full_name}</span>
+                                <span className="text-decoration-none text-dark">
+                                  {m?.profile?.full_name}
+                                </span>
                                 <br />
-                                <span style={{ fontSize: 12, color: "gray" }}>{moment(m?.date).format("DD MMM, YYYY")}</span>
+                                <span
+                                  style={{ fontSize: 12, color: "gray" }}
+                                >
+                                  {moment(m?.date).format("DD MMM, YYYY")}
+                                </span>
                               </h6>
                               <p className="mb-0 mt-3">{m?.message}</p>
                             </div>
@@ -844,7 +943,10 @@ function ProjeDetail() {
                 placeholder="Mesajınız"
                 required
               />
-              <button className="btn btn-primary ms-2 mb-0 w-25" type="submit">
+              <button
+                className="btn btn-primary ms-2 mb-0 w-25"
+                type="submit"
+              >
                 Gönder <i className="fas fa-paper-plane"></i>
               </button>
             </form>
@@ -852,8 +954,13 @@ function ProjeDetail() {
         </Modal.Body>
       </Modal>
 
-      {/* Soru Sor Modal (STATE KONTROLLÜ) */}
-      <Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose} centered>
+      {/* Soru Sor Modal */}
+      <Modal
+        show={addQuestionShow}
+        size="lg"
+        onHide={handleQuestionClose}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Soru Sor</Modal.Title>
         </Modal.Header>
@@ -881,7 +988,11 @@ function ProjeDetail() {
                 required
               />
             </div>
-            <button type="button" className="btn btn-secondary me-2" onClick={handleQuestionClose}>
+            <button
+              type="button"
+              className="btn btn-secondary me-2"
+              onClick={handleQuestionClose}
+            >
               Kapat
             </button>
             <button type="submit" className="btn btn-primary">

@@ -1,32 +1,31 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+// src/pages/DersSonuRaporuDetail.jsx
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
+import moment from "moment";
+import "moment/locale/tr";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
 import useUserData from "../plugin/useUserData";
 import Toast from "../plugin/Toast";
-import moment from "moment";
-import "moment/locale/tr";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-
-moment.locale("tr");
+import { buildImg, FALLBACK_SRC } from "../../utils/buildImg";
 
 function DersSonuRaporuDetail() {
   const api = useAxios();
   const userData = useUserData();
-  const { dersSonuRaporu_id } = useParams();
+  const { dersSonuRaporu_id, koordinator_id } = useParams();
 
   const [detail, setDetail] = useState(null);
   const [variantItem, setVariantItem] = useState(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
   const [fetching, setFetching] = useState(true);
-  const [error, setError] = useState("");
 
   const [createNote, setCreateNote] = useState({ title: "", note: "" });
   const [selectedNote, setSelectedNote] = useState(null);
@@ -39,10 +38,13 @@ function DersSonuRaporuDetail() {
   const [createReview, setCreateReview] = useState({ rating: 1, review: "" });
   const [studentReview, setStudentReview] = useState(null);
 
-  const [askModalOpen, setAskModalOpen] = useState(false);
+  const [questionModal, setQuestionModal] = useState(false);
 
   const lastElementRef = useRef(null);
-  const askTitleRef = useRef(null);
+
+  useEffect(() => {
+    moment.locale("tr");
+  }, []);
 
   // Video modal
   const [show, setShow] = useState(false);
@@ -65,17 +67,18 @@ function DersSonuRaporuDetail() {
     setNoteShow(true);
   };
 
-  // Fetch detail (memoize + reuse for refresh)
-  const fetchDetail = useCallback(async () => {
+  // Fetch detail
+  const fetchDetail = async () => {
+    debugger;
     if (!userData?.user_id || !dersSonuRaporu_id) return;
     try {
       setFetching(true);
-      setError("");
       const res = await api.get(
-        `eskepinstructor/derssonuraporu-detail/${dersSonuRaporu_id}/${userData.user_id}/`
+        `eskepinstructor/derssonuraporu-detail/${dersSonuRaporu_id}/${koordinator_id}/`
       );
       const data = res.data || {};
       setDetail(data);
+      console.log("DSR Detail:", data);
       setQuestions(data?.question_answers || []);
       setStudentReview(data?.review || null);
 
@@ -89,14 +92,18 @@ function DersSonuRaporuDetail() {
       setCompletionPercentage(total ? Math.round((completed / total) * 100) : 0);
     } catch (e) {
       console.error(e);
-      setError("Detay alınamadı");
-      try { Toast().fire({ icon: "error", title: "Detay alınamadı" }); } catch(_) {}
+      try {
+        Toast().fire({ icon: "error", title: "Detay alınamadı" });
+      } catch (_) {}
     } finally {
       setFetching(false);
     }
-  }, [api, dersSonuRaporu_id, userData?.user_id]);
+  };
 
-  useEffect(() => { fetchDetail(); }, [fetchDetail]);
+  useEffect(() => {
+    fetchDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.user_id, dersSonuRaporu_id]);
 
   // Complete lesson
   const handleMarkLessonAsCompleted = async (variantItemId) => {
@@ -158,10 +165,11 @@ function DersSonuRaporuDetail() {
     }
   };
 
-  // QA
+  // Konuşma
   const handleMessageChange = (e) => {
     setCreateMessage((m) => ({ ...m, [e.target.name]: e.target.value }));
   };
+
   const refreshConversation = async (questionId) => {
     try {
       setConversationLoading(true);
@@ -176,6 +184,7 @@ function DersSonuRaporuDetail() {
       setConversationLoading(false);
     }
   };
+
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
     const title = createMessage.title?.trim();
@@ -197,9 +206,10 @@ function DersSonuRaporuDetail() {
     await fetchDetail();
     if (newQid) await refreshConversation(newQid);
     setCreateMessage({ title: "", message: "" });
-    setAskModalOpen(false);
+    setQuestionModal(false);
     Toast().fire({ icon: "success", title: "Mesaj gönderildi" });
   };
+
   const sendNewMessage = async (e) => {
     e.preventDefault();
     if (!selectedConversation?.id) {
@@ -219,7 +229,8 @@ function DersSonuRaporuDetail() {
   };
 
   useEffect(() => {
-    if (lastElementRef.current) lastElementRef.current.scrollIntoView({ behavior: "smooth" });
+    if (lastElementRef.current)
+      lastElementRef.current.scrollIntoView({ behavior: "smooth" });
   }, [selectedConversation]);
 
   const handleSearchQuestion = (e) => {
@@ -228,7 +239,11 @@ function DersSonuRaporuDetail() {
       setQuestions(detail?.question_answers || []);
       return;
     }
-    setQuestions((detail?.question_answers || []).filter((it) => it?.title?.toLowerCase().includes(q)));
+    setQuestions(
+      (detail?.question_answers || []).filter((it) =>
+        it?.title?.toLowerCase().includes(q)
+      )
+    );
   };
 
   // Review
@@ -253,14 +268,21 @@ function DersSonuRaporuDetail() {
     fd.append("user", userData?.user_id);
     fd.append("rating", createReview.rating || studentReview?.rating);
     fd.append("review", createReview.review || studentReview?.review);
-    await api.patch(`stajer/review-detail/${userData?.user_id}/${studentReview?.id}/`, fd);
+    await api.patch(
+      `stajer/review-detail/${userData?.user_id}/${studentReview?.id}/`,
+      fd
+    );
     await fetchDetail();
     Toast().fire({ icon: "success", title: "Yorum güncellendi" });
   };
 
   const isItemCompleted = (item) => {
     const itemId = item?.id ?? item?.variant_item_id;
-    return detail?.completed_lesson?.some((cl) => cl?.variant_item?.id === itemId) || false;
+    return (
+      detail?.completed_lesson?.some(
+        (cl) => cl?.variant_item?.id === itemId
+      ) || false
+    );
   };
 
   const totalCounts = useMemo(() => {
@@ -276,78 +298,50 @@ function DersSonuRaporuDetail() {
     };
   }, [detail]);
 
-  // helpers
-  const avatarSrc = (url) => {
-    if (!url) return "https://ui-avatars.com/api/?name=?&background=ddd&color=555";
-    return url.startsWith("http://127.0.0.1:8000") ? url : `http://127.0.0.1:8000${url}`;
+  const handleImgError = (e) => {
+    e.target.onerror = null;
+    e.target.src = FALLBACK_SRC;
   };
 
   return (
     <>
       <ESKEPBaseHeader />
 
-      <section className="py-4 py-md-5 bg-light">
+      {/* bu sayfaya özel genişlik / sidebar düzeni */}
+      <section className="py-4 py-md-5 bg-light eskep-detail-layout">
         <div className="container-xxl">
           <Header />
 
-          {/* Üst araç çubuğu */}
-          <div className="d-flex align-items-center justify-content-between mt-3 mb-3">
-            <div className="d-flex align-items-center gap-2">
-              <h4 className="mb-0">Ders Sonu Raporu</h4>
-              {fetching && <span className="badge bg-secondary">Yükleniyor</span>}
-              {error && <span className="badge bg-danger">{error}</span>}
-            </div>
-            <div className="d-flex gap-2">
-              <button className="btn btn-outline-secondary btn-sm" onClick={fetchDetail} title="Yenile">
-                <i className="fas fa-rotate" /> Yenile
-              </button>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => { setAskModalOpen(true); setTimeout(() => askTitleRef.current?.focus(), 50); }}
-              >
-                <i className="fas fa-question-circle me-1" /> Soru Sor
-              </button>
-            </div>
-          </div>
-
-          <div className="row g-4 g-lg-5">
-            {/* SOL: Sidebar (mini kart) */}
-            <div className="col-lg-3 col-xl-3">
-              <div className="position-sticky" style={{ top: 88 }}>
-                <div className="card border-0 shadow-sm rounded-3 mb-3">
-                  <div className="card-body p-2 p-md-3">
-                    <Sidebar />
-                  </div>
-                </div>
-
-                {/* Mini özet kutuları */}
-                <div className="vstack gap-2">
-                  <MiniStat label="Tamamlama" value={`${completionPercentage}%`} />
-                  <MiniStat label="Bölüm" value={totalCounts.variants} />
-                  <MiniStat label="Ders" value={totalCounts.lessons} />
-                  <MiniStat label="Not" value={totalCounts.notes} />
-                  <MiniStat label="Konuşma" value={totalCounts.questions} />
-                </div>
-              </div>
+          <div className="row g-4 mt-0 mt-md-4 align-items-start">
+            {/* SOL: sidebar sadece */}
+            <div className="col-lg-4 col-xl-3">
+              <Sidebar />
             </div>
 
-            {/* SAĞ: İçerik */}
-            <div className="col-lg-9 col-xl-9">
+            {/* SAĞ: içerik */}
+            <div className="col-lg-8 col-xl-9">
               {/* Özeti */}
               <div className="card border-0 shadow-sm rounded-3 mb-3">
                 <div className="card-body p-3 p-md-4">
                   <div className="d-flex align-items-center justify-content-between mb-2">
-                    <h5 className="mb-0">Rapor Özeti</h5>
+                    <h5 className="mb-0">Ders Sonu Raporu Özeti</h5>
+                    {fetching && (
+                      <span className="badge bg-secondary">Yükleniyor</span>
+                    )}
                   </div>
 
                   <div className="small text-muted mb-3">
-                    {detail?.derssonuraporu?.title || detail?.title || "—"}
+                    {detail?.derssonuraporu?.title ||
+                      detail?.title ||
+                      "—"}
                   </div>
 
                   <div className="mb-3">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <span className="small fw-semibold">Tamamlama</span>
-                      <span className="small fw-bold">{completionPercentage}%</span>
+                      <span className="small fw-bold">
+                        {completionPercentage}%
+                      </span>
                     </div>
                     <div className="progress" style={{ height: 10 }}>
                       <div
@@ -360,6 +354,33 @@ function DersSonuRaporuDetail() {
                       />
                     </div>
                   </div>
+
+                  <div className="row text-center g-2">
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Bölüm</div>
+                        <div className="fw-bold">{totalCounts.variants}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Ders</div>
+                        <div className="fw-bold">{totalCounts.lessons}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Not</div>
+                        <div className="fw-bold">{totalCounts.notes}</div>
+                      </div>
+                    </div>
+                    <div className="col-6 col-md-3">
+                      <div className="p-2 border rounded-3 bg-white">
+                        <div className="small text-muted">Konuşma</div>
+                        <div className="fw-bold">{totalCounts.questions}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -368,22 +389,42 @@ function DersSonuRaporuDetail() {
                 <div className="card-header bg-white border-0 px-3 px-md-4 pt-3 pb-0">
                   <ul className="nav nav-pills gap-2 flex-wrap" role="tablist">
                     <li className="nav-item" role="presentation">
-                      <button className="nav-link active" data-bs-toggle="pill" data-bs-target="#dsr-1" type="button">
+                      <button
+                        className="nav-link active"
+                        data-bs-toggle="pill"
+                        data-bs-target="#dsr-1"
+                        type="button"
+                      >
                         Bölümler
                       </button>
                     </li>
                     <li className="nav-item" role="presentation">
-                      <button className="nav-link" data-bs-toggle="pill" data-bs-target="#dsr-2" type="button">
+                      <button
+                        className="nav-link"
+                        data-bs-toggle="pill"
+                        data-bs-target="#dsr-2"
+                        type="button"
+                      >
                         Notlar
                       </button>
                     </li>
                     <li className="nav-item" role="presentation">
-                      <button className="nav-link" data-bs-toggle="pill" data-bs-target="#dsr-3" type="button">
+                      <button
+                        className="nav-link"
+                        data-bs-toggle="pill"
+                        data-bs-target="#dsr-3"
+                        type="button"
+                      >
                         Konuşma
                       </button>
                     </li>
                     <li className="nav-item" role="presentation">
-                      <button className="nav-link" data-bs-toggle="pill" data-bs-target="#dsr-4" type="button">
+                      <button
+                        className="nav-link"
+                        data-bs-toggle="pill"
+                        data-bs-target="#dsr-4"
+                        type="button"
+                      >
                         Not Ver
                       </button>
                     </li>
@@ -392,7 +433,7 @@ function DersSonuRaporuDetail() {
 
                 <div className="card-body p-3 p-md-4">
                   <div className="tab-content">
-                    {/* Bölümler */}
+                    {/* --- BÖLÜMLER --- */}
                     <div className="tab-pane fade show active" id="dsr-1">
                       {fetching ? (
                         <SkeletonCurriculum />
@@ -400,18 +441,28 @@ function DersSonuRaporuDetail() {
                         <div className="accordion" id="accDsr">
                           {(detail?.lectures || []).length > 0 && (
                             <div className="mb-3">
-                              <h6 className="text-uppercase text-muted small mb-2">Dersler</h6>
+                              <h6 className="text-uppercase text-muted small mb-2">
+                                Dersler
+                              </h6>
                               {(detail?.lectures || []).map((c, i) => (
-                                <div key={i} className="p-3 border rounded-3 mb-2 bg-white d-flex justify-content-between">
+                                <div
+                                  key={i}
+                                  className="p-3 border rounded-3 mb-2 bg-white d-flex justify-content-between"
+                                >
                                   <span className="fw-semibold">{c?.name}</span>
-                                  <span className="badge bg-light text-dark">{c?.content_duration || "0m 0s"}</span>
+                                  <span className="badge bg-light text-dark">
+                                    {c?.content_duration || "0m 0s"}
+                                  </span>
                                 </div>
                               ))}
                             </div>
                           )}
 
                           {(detail?.curriculum || []).map((c, index) => (
-                            <div className="accordion-item border rounded-3 overflow-hidden mb-3" key={index}>
+                            <div
+                              className="accordion-item border rounded-3 overflow-hidden mb-3"
+                              key={index}
+                            >
                               <h2 className="accordion-header" id={`h-${index}`}>
                                 <button
                                   className="accordion-button collapsed bg-white fw-semibold"
@@ -427,17 +478,32 @@ function DersSonuRaporuDetail() {
                                   </div>
                                 </button>
                               </h2>
-                              <div id={`col-${c?.variant_id}`} className="accordion-collapse collapse" data-bs-parent="#accDsr">
+                              <div
+                                id={`col-${c?.variant_id}`}
+                                className="accordion-collapse collapse"
+                                data-bs-parent="#accDsr"
+                              >
                                 <div className="accordion-body bg-light">
                                   {(c?.variant_items || []).map((l, idx) => {
                                     const itemId = l?.id ?? l?.variant_item_id;
                                     const completed = isItemCompleted(l);
                                     return (
-                                      <div key={idx} className="p-3 bg-white rounded-3 mb-2 border">
+                                      <div
+                                        key={idx}
+                                        className="p-3 bg-white rounded-3 mb-2 border"
+                                      >
                                         <div className="d-flex justify-content-between align-items-center gap-3">
                                           <div className="d-flex align-items-center gap-2 flex-wrap">
-                                            <span className={`badge ${completed ? "bg-success" : "bg-light text-dark"}`}>
-                                              {completed ? "Tamamlandı" : "Bekliyor"}
+                                            <span
+                                              className={`badge ${
+                                                completed
+                                                  ? "bg-success"
+                                                  : "bg-light text-dark"
+                                              }`}
+                                            >
+                                              {completed
+                                                ? "Tamamlandı"
+                                                : "Bekliyor"}
                                             </span>
 
                                             {l?.file ? (
@@ -447,10 +513,13 @@ function DersSonuRaporuDetail() {
                                                 rel="noopener noreferrer"
                                                 className="btn btn-outline-primary btn-sm"
                                               >
-                                                <i className="fas fa-file-pdf me-1" /> PDF'yi Görüntüle
+                                                <i className="fas fa-file-pdf me-1" />{" "}
+                                                PDF'yi Görüntüle
                                               </a>
                                             ) : (
-                                              <span className="text-muted small">PDF yok</span>
+                                              <span className="text-muted small">
+                                                PDF yok
+                                              </span>
                                             )}
 
                                             {l?.video_url && (
@@ -459,18 +528,23 @@ function DersSonuRaporuDetail() {
                                                 className="btn btn-outline-secondary btn-sm"
                                                 onClick={() => handleShow(l)}
                                               >
-                                                <i className="fas fa-play me-1" /> Videoyu Aç
+                                                <i className="fas fa-play me-1" /> Videoyu
+                                                Aç
                                               </button>
                                             )}
                                           </div>
 
                                           <div className="d-flex align-items-center gap-2">
-                                            <span className="text-muted small">{l?.content_duration || "0m 0s"}</span>
+                                            <span className="text-muted small">
+                                              {l?.content_duration || "0m 0s"}
+                                            </span>
                                             <div className="form-check">
                                               <input
                                                 type="checkbox"
                                                 className="form-check-input"
-                                                onChange={() => handleMarkLessonAsCompleted(itemId)}
+                                                onChange={() =>
+                                                  handleMarkLessonAsCompleted(itemId)
+                                                }
                                                 checked={completed}
                                               />
                                             </div>
@@ -486,13 +560,16 @@ function DersSonuRaporuDetail() {
 
                           {(detail?.curriculum?.length || 0) < 1 &&
                             (detail?.lectures?.length || 0) < 1 && (
-                              <EmptyState title="İçerik Bulunamadı" subtitle="Henüz ders veya müfredat eklenmemiş." />
+                              <EmptyState
+                                title="İçerik Bulunamadı"
+                                subtitle="Henüz ders veya müfredat eklenmemiş."
+                              />
                             )}
                         </div>
                       )}
                     </div>
 
-                    {/* Notlar */}
+                    {/* --- NOTLAR --- */}
                     <div className="tab-pane fade" id="dsr-2">
                       <div className="d-flex justify-content-between align-items-center mb-3">
                         <h5 className="mb-0">Notlar</h5>
@@ -506,17 +583,30 @@ function DersSonuRaporuDetail() {
                       ) : (
                         <div className="vstack gap-3">
                           {(detail?.notes || []).map((n) => (
-                            <div key={n?.id} className="border rounded-3 p-3 bg-white shadow-sm">
+                            <div
+                              key={n?.id}
+                              className="border rounded-3 p-3 bg-white shadow-sm"
+                            >
                               <div className="d-flex justify-content-between align-items-start">
                                 <div>
                                   <h6 className="mb-1">{n?.title}</h6>
-                                  <p className="mb-0 text-muted">{n?.note || n?.notes}</p>
+                                  <p className="mb-0 text-muted">
+                                    {n?.note || n?.notes}
+                                  </p>
                                 </div>
                                 <div className="ms-3 d-flex gap-2">
-                                  <button type="button" onClick={() => handleNoteShow(n)} className="btn btn-sm btn-outline-success">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleNoteShow(n)}
+                                    className="btn btn-sm btn-outline-success"
+                                  >
                                     <i className="bi bi-pencil-square me-1" /> Düzenle
                                   </button>
-                                  <button type="button" onClick={() => handleDeleteNote(n?.id)} className="btn btn-sm btn-outline-danger">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteNote(n?.id)}
+                                    className="btn btn-sm btn-outline-danger"
+                                  >
                                     <i className="bi bi-trash me-1" /> Sil
                                   </button>
                                 </div>
@@ -525,122 +615,187 @@ function DersSonuRaporuDetail() {
                           ))}
 
                           {(detail?.notes?.length || 0) < 1 && (
-                            <EmptyState title="Not Bulunamadı" subtitle="Henüz not eklenmemiş." />
+                            <EmptyState
+                              title="Not Bulunamadı"
+                              subtitle="Henüz not eklenmemiş."
+                            />
                           )}
                         </div>
                       )}
                     </div>
 
-                    {/* Konuşma */}
+                    {/* --- KONUŞMA --- */}
                     <div className="tab-pane fade" id="dsr-3">
                       <div className="row g-3">
-                        {/* Sol: liste */}
+                        {/* Sol liste */}
                         <div className="col-lg-5">
                           <div className="card border-0 shadow-sm">
                             <div className="card-body">
                               <div className="input-group mb-3">
-                                <input className="form-control" type="search" placeholder="Konuşmalarda ara" onChange={handleSearchQuestion} />
+                                <input
+                                  className="form-control"
+                                  type="search"
+                                  placeholder="Konuşmalarda ara"
+                                  onChange={handleSearchQuestion}
+                                />
                                 <button
                                   className="btn btn-outline-primary"
                                   type="button"
-                                  onClick={() => { setAskModalOpen(true); setTimeout(() => askTitleRef.current?.focus(), 50); }}
+                                  onClick={() => setQuestionModal(true)}
                                 >
                                   Soru Sor
                                 </button>
                               </div>
-                              <div className="vstack gap-2" style={{ maxHeight: 480, overflowY: "auto" }}>
+                              <div
+                                className="vstack gap-2"
+                                style={{ maxHeight: 480, overflowY: "auto" }}
+                              >
                                 {(questions || []).map((q) => (
                                   <button
                                     key={q?.id}
-                                    className={`text-start p-3 rounded-3 border ${selectedConversation?.id === q?.id ? "bg-primary text-white" : "bg-white"}`}
-                                    onClick={() => (setSelectedConversation(q), refreshConversation(q.id))}
+                                    className={`text-start p-3 rounded-3 border ${
+                                      selectedConversation?.id === q?.id
+                                        ? "bg-primary text-white"
+                                        : "bg-white"
+                                    }`}
+                                    onClick={() => (
+                                      setSelectedConversation(q),
+                                      refreshConversation(q.id)
+                                    )}
                                   >
                                     <div className="d-flex align-items-center gap-2">
                                       <img
-                                        src={avatarSrc(q?.profile?.image)}
+                                        src={buildImg(q?.profile?.image)}
+                                        onError={handleImgError}
                                         alt="avatar"
                                         className="rounded-circle"
-                                        style={{ width: 40, height: 40, objectFit: "cover" }}
+                                        style={{
+                                          width: 40,
+                                          height: 40,
+                                          objectFit: "cover",
+                                        }}
                                       />
                                       <div>
-                                        <div className="fw-semibold small mb-1">{q?.profile?.full_name}</div>
-                                        <div className="small text-truncate" style={{ maxWidth: 220 }}>
+                                        <div className="fw-semibold small mb-1">
+                                          {q?.profile?.full_name}
+                                        </div>
+                                        <div
+                                          className="small text-truncate"
+                                          style={{ maxWidth: 220 }}
+                                        >
                                           {q?.title}
                                         </div>
-                                        <div className="small opacity-75">{moment(q?.date).format("DD MMM, YYYY")}</div>
+                                        <div className="small opacity-75">
+                                          {moment(q?.date).format("DD MMM, YYYY")}
+                                        </div>
                                       </div>
                                     </div>
                                   </button>
                                 ))}
                                 {(questions?.length || 0) < 1 && (
-                                  <EmptyState title="Konuşma yok" subtitle="Yeni bir soru oluşturarak başlayın." />
+                                  <EmptyState
+                                    title="Konuşma yok"
+                                    subtitle="Yeni bir soru oluşturarak başlayın."
+                                  />
                                 )}
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        {/* Sağ: mesajlar */}
+                        {/* Sağ konuşma */}
                         <div className="col-lg-7">
                           <div className="card border-0 shadow-sm">
                             <div className="card-body">
                               {selectedConversation ? (
                                 <>
                                   <div className="d-flex align-items-center justify-content-between mb-3">
-                                    <h6 className="mb-0">{selectedConversation?.title}</h6>
+                                    <h6 className="mb-0">
+                                      {selectedConversation?.title}
+                                    </h6>
                                     <span className="badge bg-light text-dark">
-                                      {selectedConversation?.messages?.length || 0} mesaj
+                                      {selectedConversation?.messages?.length ||
+                                        0}{" "}
+                                      mesaj
                                     </span>
                                   </div>
-                                  <div className="border rounded-3" style={{ height: 420, overflowY: "auto" }}>
+                                  <div
+                                    className="border rounded-3"
+                                    style={{ height: 420, overflowY: "auto" }}
+                                  >
                                     {conversationLoading ? (
-                                      <div className="text-center py-5">Yükleniyor…</div>
+                                      <div className="text-center py-5">
+                                        Yükleniyor…
+                                      </div>
                                     ) : (
                                       <div className="p-3">
-                                        {(selectedConversation?.messages || []).map((m, i) => (
-                                          <div key={m?.id || i} className="d-flex gap-2 mb-3">
-                                            <img
-                                              className="rounded-circle mt-1"
-                                              src={avatarSrc(m?.profile?.image)}
-                                              style={{ width: 36, height: 36, objectFit: "cover" }}
-                                              alt="user"
-                                            />
-                                            <div className="bg-light p-2 px-3 rounded-3 w-100">
-                                              <div className="d-flex justify-content-between align-items-center">
-                                                <div className="fw-semibold small">{m?.profile?.full_name}</div>
-                                                <div className="small text-muted">{moment(m?.date).format("DD MMM, YYYY")}</div>
+                                        {(selectedConversation?.messages || []).map(
+                                          (m, i) => (
+                                            <div
+                                              key={m?.id || i}
+                                              className="d-flex gap-2 mb-3"
+                                            >
+                                              <img
+                                                className="rounded-circle mt-1"
+                                                src={buildImg(m?.profile?.image)}
+                                                onError={handleImgError}
+                                                style={{
+                                                  width: 36,
+                                                  height: 36,
+                                                  objectFit: "cover",
+                                                }}
+                                                alt="user"
+                                              />
+                                              <div className="bg-light p-2 px-3 rounded-3 w-100">
+                                                <div className="d-flex justify-content-between align-items-center">
+                                                  <div className="fw-semibold small">
+                                                    {m?.profile?.full_name}
+                                                  </div>
+                                                  <div className="small text-muted">
+                                                    {moment(m?.date).format(
+                                                      "DD MMM, YYYY"
+                                                    )}
+                                                  </div>
+                                                </div>
+                                                <div className="mt-2">
+                                                  {m?.message}
+                                                </div>
                                               </div>
-                                              <div className="mt-2">{m?.message}</div>
                                             </div>
-                                          </div>
-                                        ))}
+                                          )
+                                        )}
                                         <div ref={lastElementRef} />
                                       </div>
                                     )}
                                   </div>
 
-                                  <form className="d-flex gap-2 mt-3" onSubmit={sendNewMessage}>
+                                  <form
+                                    className="d-flex gap-2 mt-3"
+                                    onSubmit={sendNewMessage}
+                                  >
                                     <textarea
                                       name="message"
                                       className="form-control bg-light"
                                       rows={2}
                                       onChange={handleMessageChange}
-                                      placeholder="Mesaj yazın (Ctrl+Enter ile gönder)"
+                                      placeholder="Mesaj yazın"
                                       value={createMessage.message}
-                                      onKeyDown={(e) => {
-                                        if (e.ctrlKey && e.key === "Enter") {
-                                          sendNewMessage(e);
-                                        }
-                                      }}
                                       required
                                     />
-                                    <button className="btn btn-primary" type="submit" disabled={conversationLoading}>
-                                      Gönder <i className="fas fa-paper-plane" />
+                                    <button
+                                      className="btn btn-primary"
+                                      type="submit"
+                                    >
+                                      Gönder{" "}
+                                      <i className="fas fa-paper-plane" />
                                     </button>
                                   </form>
                                 </>
                               ) : (
-                                <EmptyState title="Konuşma seçilmedi" subtitle="Soldan bir konuşma seçin veya yeni bir soru oluşturun." />
+                                <EmptyState
+                                  title="Konuşma seçilmedi"
+                                  subtitle="Soldan bir konuşma seçin veya yeni bir soru oluşturun."
+                                />
                               )}
                             </div>
                           </div>
@@ -648,21 +803,31 @@ function DersSonuRaporuDetail() {
                       </div>
                     </div>
 
-                    {/* Not Ver */}
+                    {/* --- NOT VER --- */}
                     <div className="tab-pane fade" id="dsr-4">
                       <div className="card border-0">
                         <div className="card-body p-0">
                           <div className="d-flex align-items-center justify-content-between mb-3">
                             <h5 className="mb-0">
-                              {studentReview?.rating ? `Notunuz: ${studentReview.rating}/5` : "Not Ver"}
+                              {studentReview?.rating
+                                ? `Notunuz: ${studentReview.rating}/5`
+                                : "Not Ver"}
                             </h5>
                           </div>
 
                           {!studentReview ? (
-                            <form className="row g-3" onSubmit={handleCreateReviewSubmit}>
+                            <form
+                              className="row g-3"
+                              onSubmit={handleCreateReviewSubmit}
+                            >
                               <div className="col-12">
                                 <label className="form-label">Puan</label>
-                                <select className="form-select" onChange={handleReviewChange} name="rating" defaultValue={1}>
+                                <select
+                                  className="form-select"
+                                  onChange={handleReviewChange}
+                                  name="rating"
+                                  defaultValue={1}
+                                >
                                   <option value={1}>★☆☆☆☆ (1/5)</option>
                                   <option value={2}>★★☆☆☆ (2/5)</option>
                                   <option value={3}>★★★☆☆ (3/5)</option>
@@ -672,17 +837,35 @@ function DersSonuRaporuDetail() {
                               </div>
                               <div className="col-12">
                                 <label className="form-label">Yorum</label>
-                                <textarea className="form-control" rows={3} onChange={handleReviewChange} name="review" />
+                                <textarea
+                                  className="form-control"
+                                  rows={3}
+                                  onChange={handleReviewChange}
+                                  name="review"
+                                />
                               </div>
                               <div className="col-12 d-flex justify-content-end">
-                                <button type="submit" className="btn btn-primary">Not Ver</button>
+                                <button
+                                  type="submit"
+                                  className="btn btn-primary"
+                                >
+                                  Not Ver
+                                </button>
                               </div>
                             </form>
                           ) : (
-                            <form className="row g-3" onSubmit={handleUpdateReviewSubmit}>
+                            <form
+                              className="row g-3"
+                              onSubmit={handleUpdateReviewSubmit}
+                            >
                               <div className="col-12">
                                 <label className="form-label">Puan</label>
-                                <select className="form-select" onChange={handleReviewChange} name="rating" defaultValue={studentReview?.rating}>
+                                <select
+                                  className="form-select"
+                                  onChange={handleReviewChange}
+                                  name="rating"
+                                  defaultValue={studentReview?.rating}
+                                >
                                   <option value={1}>★☆☆☆☆ (1/5)</option>
                                   <option value={2}>★★☆☆☆ (2/5)</option>
                                   <option value={3}>★★★☆☆ (3/5)</option>
@@ -692,10 +875,21 @@ function DersSonuRaporuDetail() {
                               </div>
                               <div className="col-12">
                                 <label className="form-label">Yorum</label>
-                                <textarea className="form-control" rows={3} onChange={handleReviewChange} name="review" defaultValue={studentReview?.review} />
+                                <textarea
+                                  className="form-control"
+                                  rows={3}
+                                  onChange={handleReviewChange}
+                                  name="review"
+                                  defaultValue={studentReview?.review}
+                                />
                               </div>
                               <div className="col-12 d-flex justify-content-end">
-                                <button type="submit" className="btn btn-primary">Yorumu Güncelle</button>
+                                <button
+                                  type="submit"
+                                  className="btn btn-primary"
+                                >
+                                  Yorumu Güncelle
+                                </button>
                               </div>
                             </form>
                           )}
@@ -713,45 +907,83 @@ function DersSonuRaporuDetail() {
 
       {/* Video Modal */}
       <Modal show={show} size="lg" onHide={handleClose} centered>
-        <Modal.Header closeButton><Modal.Title>Ders: {variantItem?.title}</Modal.Title></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title>Ders: {variantItem?.title}</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          <ReactPlayer url={variantItem?.file || variantItem?.video_url} controls width="100%" height="100%" />
+          <ReactPlayer
+            url={variantItem?.file || variantItem?.video_url}
+            controls
+            width="100%"
+            height="100%"
+          />
         </Modal.Body>
-        <Modal.Footer><Button variant="secondary" onClick={handleClose}>Kapat</Button></Modal.Footer>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Kapat
+          </Button>
+        </Modal.Footer>
       </Modal>
 
-      {/* Note Modal */}
+      {/* Not Create/Edit Modal */}
       <Modal show={noteShow} size="lg" onHide={handleNoteClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{selectedNote?.id ? `Notu Düzenle: ${selectedNote.title}` : "Yeni Not Ekle"}</Modal.Title>
+          <Modal.Title>
+            {selectedNote?.id
+              ? `Notu Düzenle: ${selectedNote.title}`
+              : "Yeni Not Ekle"}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleSubmitNote}>
             <div className="mb-3">
               <label className="form-label">Not Başlığı</label>
-              <input value={createNote.title} name="title" onChange={handleNoteChange} type="text" className="form-control" required />
+              <input
+                value={createNote.title}
+                name="title"
+                onChange={handleNoteChange}
+                type="text"
+                className="form-control"
+                required
+              />
             </div>
             <div className="mb-3">
               <label className="form-label">İçerik</label>
-              <textarea value={createNote.note} name="note" onChange={handleNoteChange} className="form-control" rows={8} required />
+              <textarea
+                value={createNote.note}
+                name="note"
+                onChange={handleNoteChange}
+                className="form-control"
+                rows={8}
+                required
+              />
             </div>
             <div className="d-flex justify-content-end gap-2">
-              <button type="button" className="btn btn-outline-secondary" onClick={handleNoteClose}>Kapat</button>
-              <button type="submit" className="btn btn-primary">{selectedNote?.id ? "Güncelle" : "Kaydet"}</button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={handleNoteClose}
+              >
+                Kapat
+              </button>
+              <button type="submit" className="btn btn-primary">
+                {selectedNote?.id ? "Güncelle" : "Kaydet"}
+              </button>
             </div>
           </form>
         </Modal.Body>
       </Modal>
 
-      {/* Soru Sor Modal (FIX) */}
-      <Modal show={askModalOpen} size="lg" onHide={() => setAskModalOpen(false)} centered>
-        <Modal.Header closeButton><Modal.Title>Soru Sor</Modal.Title></Modal.Header>
+      {/* Soru Sor Modal */}
+      <Modal show={questionModal} size="lg" onHide={() => setQuestionModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Soru Sor</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <form onSubmit={handleSaveQuestion}>
             <div className="mb-3">
               <label className="form-label">Soru Başlığı</label>
               <input
-                ref={askTitleRef}
                 value={createMessage.title}
                 name="title"
                 onChange={handleMessageChange}
@@ -772,7 +1004,11 @@ function DersSonuRaporuDetail() {
               />
             </div>
             <div className="d-flex justify-content-end gap-2">
-              <button type="button" className="btn btn-outline-secondary" onClick={() => setAskModalOpen(false)}>
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setQuestionModal(false)}
+              >
                 Kapat
               </button>
               <button type="submit" className="btn btn-primary">
@@ -790,19 +1026,7 @@ function DersSonuRaporuDetail() {
 
 export default DersSonuRaporuDetail;
 
-/* ————— yardımcı küçük bileşenler ————— */
-
-function MiniStat({ label, value }) {
-  return (
-    <div className="card border-0 shadow-sm">
-      <div className="card-body py-2">
-        <div className="small text-muted">{label}</div>
-        <div className="fs-5">{value}</div>
-      </div>
-    </div>
-  );
-}
-
+/* Yardımcı bileşenler */
 function EmptyState({ title = "Kayıt bulunamadı", subtitle = "" }) {
   return (
     <div className="text-center p-4 border rounded-3 bg-white">

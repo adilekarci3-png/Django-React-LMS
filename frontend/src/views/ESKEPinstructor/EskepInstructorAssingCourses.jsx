@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
@@ -18,7 +18,9 @@ function EskepInstructorAssingCourses() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [profile, setProfile] = useContext(ProfileContext);
-  console.log(profile);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
   const itemsPerPage = 3;
 
   const handleOpenModal = (course) => {
@@ -44,37 +46,58 @@ function EskepInstructorAssingCourses() {
   const getCategoryTitle = (category) =>
     typeof category === "object" ? category?.title : category;
 
- const fetchCourseData = () => {
-  debugger;
-  if (!user) return; // Kullanıcı yoksa çağırma
+  const fetchCourseData = () => {
+    if (!user) return;
 
-  setLoading(true);
-  api
-    .get(`eskepinstructor/course-list/${user?.user_id}/`)
-    .then((res) => {
-      debugger;
-      setAllCourses(res.data);
+    setLoading(true);
+    api
+      .get(`eskepinstructor/course-list/${user?.user_id}/`)
+      .then((res) => {
+        const data = res.data || [];
+        setAllCourses(data);
 
-      const initialPages = {};
-      res.data.forEach((course) => {
-        const cat = getCategoryTitle(course.category) || "Kategorisiz";
-        if (!initialPages[cat]) initialPages[cat] = 1;
+        const initialPages = {};
+        data.forEach((course) => {
+          const cat = getCategoryTitle(course.category) || "Kategorisiz";
+          if (!initialPages[cat]) initialPages[cat] = 1;
+        });
+        setCategoryPages(initialPages);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Kurs verisi alınamadı", err);
+        setLoading(false);
       });
-      setCategoryPages(initialPages);
-      setLoading(false);
-    })
-    .catch((err) => {
-      console.error("Kurs verisi alınamadı", err);
-      setLoading(false);
-    });
-};
+  };
 
- useEffect(() => {
-  fetchCourseData();
-}, [user]);
+  useEffect(() => {
+    fetchCourseData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const handleCategoryPageChange = (categoryName, newPage) => {
     setCategoryPages((prev) => ({ ...prev, [categoryName]: newPage }));
+  };
+
+  // Basit istatistikler
+  const { totalCourses, freeCount, paidCount } = useMemo(() => {
+    const total = allCourses.length;
+    const free = allCourses.filter((c) => Number(c.price) === 0).length;
+    const paid = total - free;
+    return { totalCourses: total, freeCount: free, paidCount: paid };
+  }, [allCourses]);
+
+  const filterBySearch = (course) => {
+    if (!searchTerm.trim()) return true;
+
+    const term = searchTerm.toLowerCase();
+    const title = (course.title || "").toLowerCase();
+    const shortInfo = (course.short_info || "").toLowerCase();
+    const desc = (course.description || "").toLowerCase();
+
+    return (
+      title.includes(term) || shortInfo.includes(term) || desc.includes(term)
+    );
   };
 
   const renderGroupedCourses = () => {
@@ -87,109 +110,149 @@ function EskepInstructorAssingCourses() {
     });
 
     return Object.entries(grouped).map(([categoryName, courseList]) => {
+      const filteredList = courseList.filter(filterBySearch);
+
+      if (filteredList.length === 0) {
+        return null;
+      }
+
       const currentPage = categoryPages[categoryName] || 1;
-      const totalPages = Math.ceil(courseList.length / itemsPerPage);
-      const paginated = courseList.slice(
+      const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+      const paginated = filteredList.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
       );
 
       return (
         <div key={categoryName} className="mb-5">
-          <h5 className="text-primary mb-3">
-            <i className="bi bi-folder2-open me-1"></i> {categoryName}
-          </h5>
+          {/* Kategori başlığı */}
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <div>
+              <h5 className="mb-1 fw-semibold">
+                <span className="badge bg-light text-primary border me-2">
+                  <i className="bi bi-folder2-open me-1"></i>
+                  {categoryName}
+                </span>
+              </h5>
+              <small className="text-muted">
+                Bu kategoride{" "}
+                <strong>{filteredList.length}</strong> kurs listeleniyor.
+              </small>
+            </div>
+          </div>
 
+          {/* Kartlar */}
           <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            {paginated.map((course) => (
-              <div className="col" key={course.id}>
-                <div className="card shadow-sm border-0 h-100">
-                  <div
-                    className="row g-0 flex-column flex-md-row"
-                    style={{ minHeight: "200px" }}
-                  >
-                    {/* Görsel */}
-                    <div className="col-md-4">
+            {paginated.map((course) => {
+              const imageSrc =
+                typeof course.image === "string"
+                  ? course.image
+                  : course.image?.url;
+
+              const shortHtml = course.short_info
+                ? course.short_info
+                : course.description
+                ? `${course.description.substring(0, 150)}...`
+                : "Açıklama yok.";
+
+              const isFree = Number(course.price) === 0;
+
+              return (
+                <div className="col" key={course.id}>
+                  <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden course-card">
+                    {/* Üst görsel */}
+                    <div className="position-relative">
                       <img
-                        src={
-                          typeof course.image === "string"
-                            ? course.image
-                            : course.image?.url
-                        }
+                        src={imageSrc || "/default-course-image.jpg"}
                         alt={course.title}
-                        className="img-fluid w-100 h-100 rounded-start"
+                        className="img-fluid w-100"
                         style={{
+                          height: "190px",
                           objectFit: "cover",
-                          borderTopRightRadius: 0,
-                          borderBottomRightRadius: 0,
                         }}
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = "/default-course-image.jpg";
                         }}
                       />
+
+                      <span
+                        className={`badge position-absolute top-0 end-0 m-2 px-3 py-2 ${
+                          isFree ? "bg-success" : "bg-danger"
+                        }`}
+                        style={{ fontSize: "0.75rem" }}
+                      >
+                        {isFree ? "Ücretsiz" : `${course.price} TL`}
+                      </span>
+
+                      {course.file && (
+                        <span
+                          className="badge bg-dark position-absolute bottom-0 start-0 m-2 d-flex align-items-center"
+                          style={{ fontSize: "0.7rem" }}
+                        >
+                          <i className="bi bi-play-circle me-1"></i> Video
+                        </span>
+                      )}
                     </div>
 
                     {/* İçerik */}
-                    <div className="col-md-8">
-                      <div className="card-body d-flex flex-column h-100">
-                        <h5 className="card-title text-primary">
-                          {course.title}
-                        </h5>
-                        <div
-                          className="card-text small text-muted mb-2"
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              course.short_info ||
-                              course.description?.substring(0, 150) + "..." ||
-                              "Açıklama yok.",
-                          }}
-                        ></div>
-                        <div className="mb-2 d-flex flex-wrap gap-2">
-                          <span className="badge bg-info">{course.level}</span>
-                          <span className="badge bg-secondary">
-                            {course.language}
-                          </span>
-                          {course.category && (
-                            <span className="badge bg-warning text-dark">
-                              {getCategoryTitle(course.category)}
-                            </span>
-                          )}
-                        </div>
+                    <div className="card-body d-flex flex-column">
+                      <h6 className="card-title mb-1 text-primary fw-semibold">
+                        {course.title}
+                      </h6>
 
-                        <div className="mt-auto d-flex justify-content-between align-items-center">
-                          <small className="text-muted">
-                            {course.enrolled_students} öğrenci
-                          </small>
-                          <span
-                            className={`fw-bold ${
-                              course.price > 0 ? "text-danger" : "text-success"
+                      <p className="mb-2 small text-muted">
+                        <span className="me-1 text-secondary">
+                          <i className="bi bi-translate me-1"></i>
+                          {course.language}
+                        </span>
+                        {" · "}
+                        <span className="ms-1">
+                          <i className="bi bi-bar-chart-line me-1"></i>
+                          {course.level || "Seviye Yok"}
+                        </span>
+                      </p>
+
+                      {course.category && (
+                        <p className="mb-2">
+                          <span className="badge bg-warning text-dark">
+                            {getCategoryTitle(course.category)}
+                          </span>
+                        </p>
+                      )}
+
+                      <div
+                        className="card-text small text-muted flex-grow-1"
+                        style={{ minHeight: "60px" }}
+                        dangerouslySetInnerHTML={{ __html: shortHtml }}
+                      ></div>
+
+                      <div className="d-flex justify-content-between align-items-center mt-3">
+                        <small className="text-muted">
+                          <i className="bi bi-people-fill me-1"></i>
+                          {course.enrolled_students} öğrenci
+                        </small>
+
+                        <div className="d-flex gap-2">
+                          {/* Katıl / Satın al butonlarını istersen açarsın */}
+                          {/* <button
+                            onClick={() => handleOpenModal(course)}
+                            className={`btn btn-sm ${
+                              isFree ? "btn-success" : "btn-outline-danger"
                             }`}
                           >
-                            {course.price > 0
-                              ? `${course.price} TL`
-                              : "Ücretsiz"}
-                          </span>
-                        </div>
-
-                        <div className="d-flex gap-2 mt-3 flex-wrap">
-                          {/* {course.price > 0 ? (
-                            <button
-                              onClick={() => handleOpenModal(course)}
-                              className="btn btn-danger btn-sm"
-                            >
-                              <i className="bi bi-credit-card me-1"></i> Satın
-                              Al
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleOpenModal(course)}
-                              className="btn btn-success btn-sm"
-                            >
-                              <i className="bi bi-box-arrow-in-right me-1"></i>{" "}
-                              Katıl
-                            </button>
-                          )} */}
+                            {isFree ? (
+                              <>
+                                <i className="bi bi-box-arrow-in-right me-1"></i>
+                                Katıl
+                              </>
+                            ) : (
+                              <>
+                                <i className="bi bi-credit-card me-1"></i>
+                                Satın Al
+                              </>
+                            )}
+                          </button> */}
 
                           {course.file && (
                             <button
@@ -197,7 +260,7 @@ function EskepInstructorAssingCourses() {
                                 setSelectedVideo(course.file);
                                 setShowVideoModal(true);
                               }}
-                              className="btn btn-outline-dark btn-sm"
+                              className="btn btn-sm btn-outline-dark"
                             >
                               <i className="bi bi-play-circle me-1"></i> İzle
                             </button>
@@ -207,14 +270,14 @@ function EskepInstructorAssingCourses() {
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Sayfalama */}
           {totalPages > 1 && (
             <nav className="mt-3">
-              <ul className="pagination justify-content-center">
+              <ul className="pagination justify-content-center mb-0">
                 <li className={`page-item ${currentPage === 1 && "disabled"}`}>
                   <button
                     className="page-link"
@@ -228,7 +291,9 @@ function EskepInstructorAssingCourses() {
                 {Array.from({ length: totalPages }, (_, i) => (
                   <li
                     key={i}
-                    className={`page-item ${currentPage === i + 1 && "active"}`}
+                    className={`page-item ${
+                      currentPage === i + 1 && "active"
+                    }`}
                   >
                     <button
                       className="page-link"
@@ -265,19 +330,99 @@ function EskepInstructorAssingCourses() {
   return (
     <>
       <ESKEPBaseHeader />
+
       <section className="pt-5 pb-5">
-        <div className="container">
+        {/* 🔹 SAYFAYI GENİŞLETTİĞİMİZ KISIM */}
+        <div className="container-xl px-3">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <div className="col-lg-3 col-md-3 mb-4">
+            {/* Sidebar tekrar eklendi */}
+            <div className="col-12 col-lg-3 mb-4">
               <Sidebar />
             </div>
-            <div className="col-lg-9 col-md-9">
-              <div className="card shadow-sm p-4">
-                <h4 className="mb-4">
-                  <i className="bi bi-grid-fill"></i> Kurslar
-                </h4>
 
+            {/* İçerik alanı – biraz daha geniş */}
+            <div className="col-12 col-lg-9">
+              <div className="card shadow-sm border-0 rounded-4 p-4 eskep-course-page">
+                {/* Üst başlık & özet alanı */}
+                <div className="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+                  <div>
+                    <h3 className="mb-1 d-flex align-items-center gap-2">
+                      <span className="badge bg-primary bg-opacity-10 text-primary border-0 rounded-pill px-3 py-2">
+                        <i className="bi bi-grid-fill me-2"></i>
+                        Eğitmen Kurslarım
+                      </span>
+                    </h3>
+                    <p className="text-muted mb-0 small mt-2">
+                      ESKEP üzerinde yayınladığınız tüm kurslarınızı bu
+                      ekrandan görüntüleyebilir ve videolarını hızlıca
+                      kontrol edebilirsiniz.
+                    </p>
+                  </div>
+
+                  {/* Minik istatistik barı */}
+                  <div className="d-flex flex-wrap gap-2">
+                    <div className="border rounded-3 px-3 py-2 text-center">
+                      <div className="fw-semibold" style={{ fontSize: "0.9rem" }}>
+                        {totalCourses}
+                      </div>
+                      <div className="text-muted" style={{ fontSize: "0.75rem" }}>
+                        Toplam Kurs
+                      </div>
+                    </div>
+                    <div className="border rounded-3 px-3 py-2 text-center">
+                      <div
+                        className="fw-semibold text-success"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        {freeCount}
+                      </div>
+                      <div className="text-muted" style={{ fontSize: "0.75rem" }}>
+                        Ücretsiz
+                      </div>
+                    </div>
+                    <div className="border rounded-3 px-3 py-2 text-center">
+                      <div
+                        className="fw-semibold text-danger"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        {paidCount}
+                      </div>
+                      <div className="text-muted" style={{ fontSize: "0.75rem" }}>
+                        Ücretli
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Arama alanı */}
+                <div className="mb-4">
+                  <div className="row g-2 align-items-center">
+                    <div className="col-md-8">
+                      <div className="input-group input-group-sm">
+                        <span className="input-group-text bg-white border-end-0">
+                          <i className="bi bi-search"></i>
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control border-start-0"
+                          placeholder="Kurs başlığı veya açıklama içinde ara..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-4 text-md-end">
+                      <small className="text-muted">
+                        {searchTerm
+                          ? `"${searchTerm}" için sonuçlar gösteriliyor.`
+                          : "Tüm kurslar listeleniyor."}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+
+                {/* İçerik */}
                 {loading ? (
                   <div className="text-center py-5">
                     <div className="spinner-border text-primary" role="status">
@@ -285,7 +430,7 @@ function EskepInstructorAssingCourses() {
                     </div>
                   </div>
                 ) : allCourses.length === 0 ? (
-                  <div className="alert alert-info text-center">
+                  <div className="alert alert-info text-center mb-0">
                     Henüz kurs eklenmemiş.
                   </div>
                 ) : (
@@ -297,6 +442,7 @@ function EskepInstructorAssingCourses() {
         </div>
       </section>
 
+      {/* Katıl / Satın Al Modalı */}
       {showJoinModal && selectedCourse && (
         <div
           className="modal fade show d-block"
@@ -316,8 +462,8 @@ function EskepInstructorAssingCourses() {
           }}
         >
           <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
+            <div className="modal-content rounded-4">
+              <div className="modal-header border-0">
                 <h5 className="modal-title">
                   {selectedCourse.price > 0 ? "Kursu Satın Al" : "Kursa Katıl"}
                 </h5>
@@ -328,8 +474,7 @@ function EskepInstructorAssingCourses() {
                 ></button>
               </div>
 
-              <div className="modal-body">
-                {/* Kurs Detayı */}
+              <div className="modal-body pt-0">
                 <div className="row">
                   <div className="col-md-4">
                     <img
@@ -379,11 +524,10 @@ function EskepInstructorAssingCourses() {
                   </div>
                 </div>
 
-                {/* Kullanıcı Profili */}
                 <hr />
                 <div className="d-flex align-items-center">
                   <img
-                    src={user.image || "/avatar.jpg"}
+                    src={user?.image || "/avatar.jpg"}
                     alt="Profil"
                     className="rounded-circle me-3"
                     style={{
@@ -399,7 +543,7 @@ function EskepInstructorAssingCourses() {
                 </div>
               </div>
 
-              <div className="modal-footer">
+              <div className="modal-footer border-0">
                 <button
                   className="btn btn-secondary"
                   onClick={handleCloseModal}
@@ -437,7 +581,7 @@ function EskepInstructorAssingCourses() {
         </div>
       )}
 
-      {/* 🎬 Video Modal */}
+      {/* Video Modal */}
       {showVideoModal && selectedVideo && (
         <div
           className="modal fade show d-block"
@@ -457,8 +601,8 @@ function EskepInstructorAssingCourses() {
           }}
         >
           <div className="modal-dialog modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
+            <div className="modal-content rounded-4">
+              <div className="modal-header border-0">
                 <h5 className="modal-title">Ders Videosu</h5>
                 <button
                   type="button"
@@ -469,7 +613,7 @@ function EskepInstructorAssingCourses() {
                   }}
                 ></button>
               </div>
-              <div className="modal-body">
+              <div className="modal-body pt-0">
                 <video width="100%" controls autoPlay>
                   <source src={selectedVideo} type="video/mp4" />
                   Tarayıcınız video etiketini desteklemiyor.

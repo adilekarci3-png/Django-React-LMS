@@ -35,9 +35,11 @@ function HafizBilgiList() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  // Yıl seçenekleri (listeden türet)
+  // Yıl seçenekleri
   const yearOptions = useMemo(() => {
     const ys = new Set(
       data
@@ -52,9 +54,7 @@ function HafizBilgiList() {
     const needle = q.trim().toLowerCase();
     const y = String(year || "").trim();
     return data.filter((item) => {
-      const text =
-        `${item.full_name || ""} ${item.ceptel || ""} ${item.adres || ""}`
-          .toLowerCase();
+      const text = `${item.full_name || ""} ${item.ceptel || ""} ${item.adres || ""}`.toLowerCase();
       const matchesText = needle === "" || text.includes(needle);
       const itemYear = String(item.hafizlikbitirmeyili || item.bitirme_yili || "");
       const matchesYear = !y || itemYear === y;
@@ -68,28 +68,10 @@ function HafizBilgiList() {
   const sliceStart = (pageSafe - 1) * pageSize;
   const visible = filtered.slice(sliceStart, sliceStart + pageSize);
 
-  useEffect(() => { setPage(1); }, [q, year]); // filtre değişince ilk sayfaya dön
-
-  const handleDelete = async (id) => {
-    const confirm = await Swal.fire({
-      title: "Emin misiniz?",
-      text: "Bu kayıt silinecek!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Evet, sil",
-      cancelButtonText: "İptal",
-    });
-
-    if (confirm.isConfirmed) {
-      try {
-        await api.delete(`hafiz/hafizbilgileri/${id}/`);
-        Swal.fire("Silindi!", "Kayıt başarıyla silindi.", "success");
-        fetchData();
-      } catch (err) {
-        Swal.fire("Hata!", "Silme işlemi başarısız.", "error");
-      }
-    }
-  };
+  // filtre değişince ilk sayfaya dön
+  useEffect(() => {
+    setPage(1);
+  }, [q, year]);
 
   const openEditModal = (item = null) => {
     setCurrentItem(item);
@@ -105,137 +87,167 @@ function HafizBilgiList() {
     <>
       <HBSBaseHeader />
 
-      <section className="pt-5 pb-5 bg-light">
+      <section className="py-5" style={{ background: "linear-gradient(180deg, #eef6ff 0%, #ffffff 40%)" }}>
         <div className="container">
-          <div className="card shadow-sm border-0">
-            {/* Başlık + Toolbar */}
-            <div className="card-body pb-2">
-              <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+          <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+            {/* Üst toolbar */}
+            <div className="card-body pb-2" style={{ background: "linear-gradient(90deg, #0ea5e9 0%, #38bdf8 40%, #e0f2fe 100%)" }}>
+              <div className="d-flex flex-wrap gap-3 justify-content-between align-items-center text-white">
                 <div>
-                  <h4 className="mb-1">
-                    <i className="bi bi-person-lines-fill me-2"></i>
+                  <h4 className="mb-1 d-flex align-items-center gap-2">
+                    <i className="bi bi-people-fill"></i>
                     Hafız Bilgileri
                   </h4>
-                  <small className="text-muted">
-                    Toplam {filtered.length} kayıt
-                    {q && <> • “{q}” için filtrelendi</>}
-                    {year && <> • Yıl: {year}</>}
-                  </small>
+                  <div className="small fw-light">
+                    Toplam{" "}
+                    <span className="badge bg-light text-dark rounded-pill px-3 py-1">
+                      {filtered.length}
+                    </span>{" "}
+                    kayıt
+                    {q && (
+                      <>
+                        {" "}
+                        • <span className="fw-semibold">“{q}”</span> için filtrelendi
+                      </>
+                    )}
+                    {year && (
+                      <>
+                        {" "}
+                        • Yıl: <span className="fw-semibold">{year}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="d-flex flex-wrap gap-2">
-                  <div className="input-group">
-                    <span className="input-group-text bg-white">
-                      <i className="bi bi-search"></i>
+                  {/* Arama */}
+                  <div className="input-group input-group-sm" style={{ minWidth: 220 }}>
+                    <span className="input-group-text bg-white border-0">
+                      <i className="bi bi-search text-secondary"></i>
                     </span>
                     <input
-                      className="form-control"
+                      className="form-control border-0"
                       placeholder="Ara: ad, telefon, adres…"
                       value={q}
                       onChange={(e) => setQ(e.target.value)}
                     />
                   </div>
 
+                  {/* Yıl filtresi */}
                   <select
-                    className="form-select"
+                    className="form-select form-select-sm border-0"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
                     style={{ minWidth: 140 }}
                   >
                     <option value="">Yıl (tümü)</option>
                     {yearOptions.map((y) => (
-                      <option key={y} value={y}>{y}</option>
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
                     ))}
                   </select>
 
-                  <button
-                    className="btn btn-outline-secondary"
-                    onClick={fetchData}
-                    title="Yenile"
-                  >
+                  {/* Yenile */}
+                  <button className="btn btn-sm btn-outline-light" onClick={fetchData} title="Yenile">
                     <i className="bi bi-arrow-clockwise"></i>
                   </button>
 
-                  <button
-                    className="btn btn-success"
-                    onClick={() => openEditModal(null)}
-                  >
-                    <i className="fas fa-plus me-1"></i> Yeni Ekle
+                  {/* Yeni ekle */}
+                  <button className="btn btn-sm btn-light text-primary fw-semibold" onClick={() => openEditModal(null)}>
+                    <i className="bi bi-plus-lg me-1"></i> Yeni Ekle
                   </button>
                 </div>
               </div>
             </div>
 
-            <hr className="my-0" />
-
             {/* Liste */}
             <div className="card-body">
               {loading ? (
-                // Basit skeleton/placeholder
                 <div className="py-4">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="placeholder-glow mb-3">
-                      <span className="placeholder col-12" style={{ height: 24 }}></span>
+                      <span className="placeholder col-12" style={{ height: 24, borderRadius: 9999 }}></span>
                     </div>
                   ))}
                 </div>
               ) : filtered.length === 0 ? (
                 <div className="text-center py-5">
-                  <div className="mb-2">Kayıt bulunamadı.</div>
-                  <button className="btn btn-outline-primary" onClick={() => openEditModal(null)}>
+                  <div className="mb-2 fs-6 text-muted">Kayıt bulunamadı.</div>
+                  <button className="btn btn-primary" onClick={() => openEditModal(null)}>
                     <i className="bi bi-plus-lg me-1"></i> Yeni kayıt oluştur
                   </button>
                 </div>
               ) : (
                 <>
-                  {/* Masaüstü: Tablo */}
+                  {/* Masaüstü tablo */}
                   <div className="table-responsive d-none d-md-block">
-                    <table className="table table-hover align-middle">
-                      <thead className="table-light">
-                        <tr>
-                          <th>Ad Soyad</th>
-                          <th>Telefon</th>
+                    <table className="table align-middle table-hover mb-0">
+                      <thead>
+                        <tr className="table-light">
+                          <th style={{ width: 280 }}>Ad Soyad</th>
+                          <th style={{ width: 150 }}>Telefon</th>
                           <th>Adres</th>
-                          <th>Yıl</th>
-                          <th style={{ width: 140 }}>İşlem</th>
+                          <th style={{ width: 80 }} className="text-center">
+                            Yıl
+                          </th>
+                          <th style={{ width: 140 }} className="text-end">
+                            İşlem
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {visible.map((item) => {
                           const yil = item.hafizlikbitirmeyili || item.bitirme_yili || "—";
                           return (
-                            <tr key={item.id}>
-                              <td className="fw-semibold">{item.full_name || "—"}</td>
+                            <tr key={item.id} className="align-middle">
+                              <td className="fw-semibold">
+                                <div className="d-flex align-items-center gap-2">
+                                  <div
+                                    className="rounded-circle d-flex align-items-center justify-content-center"
+                                    style={{
+                                      width: 34,
+                                      height: 34,
+                                      background: "#e0f2fe",
+                                      color: "#0f172a",
+                                      fontSize: 14,
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    {(item.full_name || "H")[0]}
+                                  </div>
+                                  <div>
+                                    <div>{item.full_name || "—"}</div>
+                                    <small className="text-muted">{item.email || ""}</small>
+                                  </div>
+                                </div>
+                              </td>
                               <td>{item.ceptel || "—"}</td>
                               <td className="text-truncate" style={{ maxWidth: 340 }}>
                                 {item.adres || "—"}
                               </td>
-                              <td>
-                                <span className="badge bg-light text-dark">{yil}</span>
+                              <td className="text-center">
+                                <span className="badge bg-soft text-dark" style={{ background: "#e2e8f0" }}>
+                                  {yil}
+                                </span>
                               </td>
-                              <td>
-                                <div className="btn-group">
+                              <td className="text-end">
+                                <div className="btn-group btn-group-sm">
                                   <button
-                                    className="btn btn-sm btn-outline-primary"
+                                    className="btn btn-outline-primary"
                                     onClick={() => openDetailModal(item)}
                                     title="Detay"
                                   >
-                                    <i className="fas fa-eye"></i>
+                                    <i className="bi bi-eye"></i>
                                   </button>
                                   <button
-                                    className="btn btn-sm btn-outline-secondary"
+                                    className="btn btn-outline-secondary"
                                     onClick={() => openEditModal(item)}
                                     title="Düzenle"
                                   >
-                                    <i className="fas fa-edit"></i>
+                                    <i className="bi bi-pencil-square"></i>
                                   </button>
-                                  <button
-                                    className="btn btn-sm btn-outline-danger"
-                                    onClick={() => handleDelete(item.id)}
-                                    title="Sil"
-                                  >
-                                    <i className="fas fa-trash"></i>
-                                  </button>
+                                  {/* Sil KALDIRILDI */}
                                 </div>
                               </td>
                             </tr>
@@ -245,46 +257,36 @@ function HafizBilgiList() {
                     </table>
                   </div>
 
-                  {/* Mobil: Kartlar */}
+                  {/* Mobil kartlar */}
                   <div className="d-md-none">
                     <div className="row g-3">
                       {visible.map((item) => {
                         const yil = item.hafizlikbitirmeyili || item.bitirme_yili || "—";
                         return (
                           <div className="col-12" key={item.id}>
-                            <div className="card shadow-sm">
+                            <div className="card shadow-sm border-0 rounded-3">
                               <div className="card-body">
-                                <div className="d-flex justify-content-between">
-                                  <h6 className="mb-1">{item.full_name || "—"}</h6>
-                                  <span className="badge bg-light text-dark">{yil}</span>
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                  <div>
+                                    <h6 className="mb-0">{item.full_name || "—"}</h6>
+                                    <small className="text-muted d-block">
+                                      <i className="bi bi-telephone me-1"></i>
+                                      {item.ceptel || "—"}
+                                    </small>
+                                  </div>
+                                  <span className="badge bg-info-subtle text-dark">{yil}</span>
                                 </div>
-                                <div className="small text-muted mb-2">
-                                  <i className="bi bi-telephone me-1"></i>
-                                  {item.ceptel || "—"}
-                                </div>
-                                <div className="small text-muted">
-                                  <i className="bi bi-geo-alt me-1"></i>
-                                  {item.adres || "—"}
+                                <div className="small text-muted d-flex gap-2">
+                                  <i className="bi bi-geo-alt-fill mt-1"></i>
+                                  <span>{item.adres || "—"}</span>
                                 </div>
                               </div>
                               <div className="card-footer bg-white d-flex justify-content-end gap-2">
-                                <button
-                                  className="btn btn-sm btn-outline-primary"
-                                  onClick={() => openDetailModal(item)}
-                                >
+                                <button className="btn btn-sm btn-outline-primary" onClick={() => openDetailModal(item)}>
                                   Detay
                                 </button>
-                                <button
-                                  className="btn btn-sm btn-outline-secondary"
-                                  onClick={() => openEditModal(item)}
-                                >
+                                <button className="btn btn-sm btn-outline-secondary" onClick={() => openEditModal(item)}>
                                   Düzenle
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleDelete(item.id)}
-                                >
-                                  Sil
                                 </button>
                               </div>
                             </div>
@@ -295,14 +297,11 @@ function HafizBilgiList() {
                   </div>
 
                   {/* Sayfalama */}
-                  <div className="d-flex justify-content-between align-items-center mt-3">
+                  <div className="d-flex justify-content-between align-items-center mt-4">
                     <small className="text-muted">
                       {filtered.length === 0
                         ? "0 kayıt"
-                        : `${sliceStart + 1}-${Math.min(
-                            sliceStart + pageSize,
-                            filtered.length
-                          )} / ${filtered.length}`}
+                        : `${sliceStart + 1}-${Math.min(sliceStart + pageSize, filtered.length)} / ${filtered.length}`}
                     </small>
 
                     <nav>
@@ -313,10 +312,7 @@ function HafizBilgiList() {
                           </button>
                         </li>
                         {Array.from({ length: totalPages }, (_, i) => i + 1)
-                          .slice(
-                            Math.max(0, pageSafe - 3),
-                            Math.max(0, pageSafe - 3) + 5
-                          )
+                          .slice(Math.max(0, pageSafe - 3), Math.max(0, pageSafe - 3) + 5)
                           .map((p) => (
                             <li key={p} className={`page-item ${p === pageSafe ? "active" : ""}`}>
                               <button className="page-link" onClick={() => setPage(p)}>
@@ -342,18 +338,11 @@ function HafizBilgiList() {
       <HBSBaseFooter />
 
       {showEditModal && (
-        <HafizBilgiEditModal
-          item={currentItem}
-          onClose={() => setShowEditModal(false)}
-          onSuccess={fetchData}
-        />
+        <HafizBilgiEditModal item={currentItem} onClose={() => setShowEditModal(false)} onSuccess={fetchData} />
       )}
 
       {showDetailModal && (
-        <HafizBilgiDetailModal
-          item={currentItem}
-          onClose={() => setShowDetailModal(false)}
-        />
+        <HafizBilgiDetailModal item={currentItem} onClose={() => setShowDetailModal(false)} />
       )}
     </>
   );

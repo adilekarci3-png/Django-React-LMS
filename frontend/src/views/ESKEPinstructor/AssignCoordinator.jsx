@@ -47,20 +47,19 @@ function AssignCoordinator() {
   const [selectedCoordinator, setSelectedCoordinator] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedUserToAssign, setSelectedUserToAssign] = useState("");
-  // const [filteredCoordinators, setFilteredCoordinators] = useState([]);
   const api = useAxios();
 
   const {
-  handleSubmit,
-  control,
-  reset,
-  watch,
-  formState: { errors, isSubmitting, isValid }
-} = useForm({
-  defaultValues,
-  resolver: yupResolver(schema),
-  mode: "onChange", // ekle
-});
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues,
+    resolver: yupResolver(schema),
+    mode: "onChange",
+  });
 
   const role = watch("role");
   const matchedRoleName =
@@ -73,6 +72,7 @@ function AssignCoordinator() {
   const filteredCoordinators = coordinators.filter((c) =>
     c.roles?.some((r) => r.name === matchedRoleName)
   );
+
   const fetchData = async () => {
     try {
       const [coordinatorsRes, studentsRes, internsRes] = await Promise.all([
@@ -84,14 +84,6 @@ function AssignCoordinator() {
       setCoordinators(coordinatorsRes.data);
       setStudents(studentsRes.data);
       setInterns(internsRes.data);
-
-      // Varsayılan olarak Ogrenci rolü atanmışsa filtrele
-      // const selectedRole = watch("role");
-      // if (selectedRole === "Ogrenci") {
-      //   fetchCoordinatorsByRole("ESKEPOgrenciKoordinator");
-      // } else if (selectedRole === "Stajer") {
-      //   fetchCoordinatorsByRole("ESKEPStajerKoordinator");
-      // }
     } catch (error) {
       console.error("Veriler alınırken hata oluştu", error);
     }
@@ -102,12 +94,9 @@ function AssignCoordinator() {
   }, []);
 
   const onSubmit = async (data) => {
-    
-    debugger;
     const endpoint = data.role === "Ogrenci" ? "ogrenci/" : "stajer/";
     try {
       const response = await api.post(endpoint, data);
-      debugger;
       setGeneralMessage(
         `${data.role === "Ogrenci" ? "Öğrenci" : "Stajyer"} başarıyla oluşturuldu.`
       );
@@ -124,20 +113,7 @@ function AssignCoordinator() {
     }
   };
 
-  // const fetchCoordinatorsByRole = async (roleName) => {
-  //   try {
-  //     const response = await api.get(
-  //       `eskepinstructor/koordinatorler/by-role/?role=${roleName}`
-  //     );
-      
-  //     setFilteredCoordinators(response.data);
-  //   } catch (error) {
-  //     console.error("Rol bazlı koordinatörler alınamadı", error);
-  //   }
-  // };
-
   const handleRoleUpdate = async (e) => {
-    
     e.preventDefault();
     if (!selectedCoordinator || !selectedRole) {
       setGeneralMessage("Lütfen koordinatör ve rol seçiniz.");
@@ -203,26 +179,34 @@ function AssignCoordinator() {
   return (
     <>
       <ESKEPBaseHeader />
-      <section className="py-5">
-        <div className="container">
+      {/* EskepInstructorDashboard ile aynı iskelet */}
+      <section className="pt-4 pb-5">
+        <div className="container-xxl">
           <Header />
-          <div className="row">
-            <div className="col-md-4 col-lg-3" style={{ minWidth: "280px" }}>
+          <div className="row g-4">
+            {/* SOL: sidebar */}
+            <div className="col-12 col-lg-3 col-xl-3">
               <Sidebar />
             </div>
-            <div className="col-lg-8">
-              <div className="card shadow border-0">
-                <div className="card-header bg-primary text-white">
+
+            {/* SAĞ: içerik */}
+            <div className="col-12 col-lg-9 col-xl-9">
+              <div className="card shadow border-0 rounded-4">
+                <div className="card-header bg-primary text-white rounded-top-4">
                   <h3 className="mb-0">Koordinatör Yönetimi</h3>
                 </div>
                 <div className="card-body p-4">
                   {generalMessage && (
                     <div
-                      className={`alert alert-${messageType === "success" ? "success" : "danger"}`}
+                      className={`alert alert-${
+                        messageType === "success" ? "success" : "danger"
+                      }`}
                     >
                       {generalMessage}
                     </div>
                   )}
+
+                  {/* 1. Koordinatör rolü güncelle */}
                   <form onSubmit={handleRoleUpdate} className="mb-4">
                     <h5 className="text-primary">Koordinatör Rolü Güncelle</h5>
                     <div className="row">
@@ -230,9 +214,7 @@ function AssignCoordinator() {
                         <select
                           className="form-control"
                           value={selectedCoordinator}
-                          onChange={(e) =>
-                            setSelectedCoordinator(e.target.value)
-                          }
+                          onChange={(e) => setSelectedCoordinator(e.target.value)}
                         >
                           <option value="">Koordinatör Seç</option>
                           {coordinators.map((c) => (
@@ -254,18 +236,13 @@ function AssignCoordinator() {
                         </select>
                       </div>
                     </div>
-                    <button
-                      type="submit"
-                      className="btn btn-success mt-3 w-100"
-                    >
+                    <button type="submit" className="btn btn-success mt-3 w-100">
                       Rolü Güncelle
                     </button>
                   </form>
 
-                  <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="border-top pt-4"
-                  >
+                  {/* 2. Yeni öğrenci/stajyer oluştur */}
+                  <form onSubmit={handleSubmit(onSubmit)} className="border-top pt-4">
                     <h5 className="text-info">Yeni Stajer / Öğrenci Oluştur</h5>
                     <div className="row">
                       <div className="col-md-6">
@@ -281,9 +258,7 @@ function AssignCoordinator() {
                           )}
                         />
                         {errors.role && (
-                          <div className="text-danger">
-                            {errors.role.message}
-                          </div>
+                          <div className="text-danger">{errors.role.message}</div>
                         )}
 
                         <Controller
@@ -322,15 +297,13 @@ function AssignCoordinator() {
                             <IMaskInput
                               {...field}
                               mask="(000) 000-0000"
-                              className="form-control"
+                              className="form-control mt-2"
                               placeholder="Cep Telefonu"
                             />
                           )}
                         />
                         {errors.ceptel && (
-                          <div className="text-danger">
-                            {errors.ceptel.message}
-                          </div>
+                          <div className="text-danger">{errors.ceptel.message}</div>
                         )}
 
                         <Controller
@@ -347,9 +320,10 @@ function AssignCoordinator() {
                             </select>
                           )}
                         />
-                        {errors.instructor && (
+                        {/* burası yanlış alana bakıyordu, düzelttik */}
+                        {errors.coordinator_id && (
                           <div className="text-danger">
-                            {errors.instructor.message}
+                            {errors.coordinator_id.message}
                           </div>
                         )}
                       </div>
@@ -361,7 +335,7 @@ function AssignCoordinator() {
                           render={({ field }) => (
                             <input
                               className="form-control mt-2"
-                              placeholder="İŞ Telefonu"
+                              placeholder="İş Telefonu"
                               {...field}
                             />
                           )}
@@ -380,9 +354,7 @@ function AssignCoordinator() {
                           )}
                         />
                         {errors.email && (
-                          <div className="text-danger">
-                            {errors.email.message}
-                          </div>
+                          <div className="text-danger">{errors.email.message}</div>
                         )}
 
                         <Controller
@@ -397,21 +369,24 @@ function AssignCoordinator() {
                           )}
                         />
                         {errors.gender && (
-                          <div className="text-danger">
-                            {errors.gender.message}
-                          </div>
+                          <div className="text-danger">{errors.gender.message}</div>
                         )}
 
                         <Controller
                           name="active"
                           control={control}
                           render={({ field }) => (
-                            <input
-                              type="checkbox"
-                              className="mt-3"
-                              {...field}
-                              disabled
-                            />
+                            <div className="form-check mt-3">
+                              <input
+                                type="checkbox"
+                                className="form-check-input"
+                                {...field}
+                                disabled
+                              />
+                              <label className="form-check-label ms-2">
+                                Aktif (otomatik)
+                              </label>
+                            </div>
                           )}
                         />
                       </div>
@@ -432,7 +407,7 @@ function AssignCoordinator() {
 
                   <hr className="my-4" />
                   <h5 className="text-secondary">Dışa Aktar</h5>
-                  <div className="d-flex gap-2">
+                  <div className="d-flex gap-2 flex-wrap">
                     <button
                       className="btn btn-outline-primary"
                       onClick={() => exportToExcel(students, "ogrenci_listesi")}
@@ -449,6 +424,7 @@ function AssignCoordinator() {
                 </div>
               </div>
             </div>
+            {/* /SAĞ */}
           </div>
         </div>
       </section>

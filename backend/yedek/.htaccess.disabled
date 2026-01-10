@@ -1,0 +1,3 @@
+PassengerEnabled on
+PassengerAppRoot /home/akademiehadorg/public_html/test.akademi.ehad.org.tr/backend
+PassengerPython  /home/akademiehadorg/public_html/test.akademi.ehad.org.tr/backend/venv/bin/python

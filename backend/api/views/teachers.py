@@ -1,6 +1,7 @@
 # api/views/teachers.py
 from datetime import timedelta
 
+from api.views.utils import _build_person_response
 from utils.booleans import strtobool
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
@@ -74,7 +75,43 @@ class TeacherStudentsListAPIVIew(viewsets.ViewSet):
         return Response(students)
 
 
-class EskepInstructorStudentsStajersListAPIView(viewsets.ViewSet):
+class EskepKoordinatorStudentsListAPIView(viewsets.ViewSet):
+    """
+    /eskep/koordinator/students/<user_id>/
+    => sadece bu koordinator'e bağlı öğrenciler
+    """
+    def list(self, request, user_id=None):
+        if not str(user_id).isdigit():
+            return Response({"error": "Geçersiz kullanıcı ID'si."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # user_id -> koordinator
+        try:
+            koordinator = api_models.Koordinator.objects.get(user_id=user_id)
+        except api_models.Koordinator.DoesNotExist:
+            return Response({"error": "Koordinatör bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
+
+        ogrenciler = api_models.Ogrenci.objects.filter(instructor=koordinator)
+
+        response_data = []
+        unique_user_ids = set()
+
+        for ogr in ogrenciler:
+            user = getattr(ogr, "user", None)
+            if user and user.id in unique_user_ids:
+                continue
+
+            response_data.append(_build_person_response(ogr))
+
+            if user:
+                unique_user_ids.add(user.id)
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+class EskepKoordinatorStajersListAPIView(viewsets.ViewSet):
+    """
+    /eskep/koordinator/stajers/<user_id>/
+    => sadece bu koordinator'e bağlı stajerler
+    """
     def list(self, request, user_id=None):
         if not str(user_id).isdigit():
             return Response({"error": "Geçersiz kullanıcı ID'si."}, status=status.HTTP_400_BAD_REQUEST)
@@ -84,33 +121,22 @@ class EskepInstructorStudentsStajersListAPIView(viewsets.ViewSet):
         except api_models.Koordinator.DoesNotExist:
             return Response({"error": "Koordinatör bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
 
-        ogrenciler = api_models.Ogrenci.objects.filter(instructor=koordinator)
         stajerler = api_models.Stajer.objects.filter(instructor=koordinator)
 
-        unique_user_ids = set()
         response_data = []
+        unique_user_ids = set()
 
-        for item in list(ogrenciler) + list(stajerler):
-            user = item.user
-            if user.id in unique_user_ids:
+        for stj in stajerler:
+            user = getattr(stj, "user", None)
+            if user and user.id in unique_user_ids:
                 continue
 
-            profile = getattr(user, "profile", None)
-            profile_date = getattr(profile, "date", None)
-            formatted_date = profile_date.strftime("%Y-%m-%d") if hasattr(profile_date, "strftime") else profile_date
+            response_data.append(_build_person_response(stj))
 
-            response_data.append({
-                "full_name": getattr(item, "full_name", None),
-                "image": item.image.url if getattr(item, "image", None) else None,
-                "country": str(item.country) if getattr(item, "country", None) else None,
-                "city": str(item.city) if getattr(item, "city", None) else None,
-                "date": formatted_date,
-            })
+            if user:
+                unique_user_ids.add(user.id)
 
-            unique_user_ids.add(user.id)
-
-        return Response(response_data)
-
+        return Response(response_data, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
 def TeacherAllMonthEarningAPIView(request, teacher_id):

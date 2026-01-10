@@ -1,4 +1,5 @@
 import React from "react";
+import "./css/hbs-theme.css";
 
 function HBSBaseFooter() {
   return (

@@ -1,0 +1,485 @@
+/* ================================================================
+   ESKEP – Modern Beyaz Tema
+   Header koyu aqua, içerik alanı beyaz & sade
+   ================================================================ */
+
+/* ---------- Temel Renkler ---------- */
+:root {
+  --eskep-primary: #0fa3b1;
+  --eskep-primary-dark: #0a6f95;
+  --eskep-primary-light: #e6f8fa;
+  --eskep-secondary: #ff9100;
+  --eskep-text-strong: #1b1b1b;
+  --eskep-text-soft: #5c6b70;
+  --eskep-bg-page: #ffffff;
+  --eskep-bg-card: #ffffff;
+  --eskep-bg-muted: #f7f9fa;
+  --eskep-border: rgba(0, 0, 0, 0.08);
+  --eskep-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Header ---------- */
+header.hdm-min-header.eskep-theme.eskep-theme--aqua,
+header.hdm-min-header.eskep-theme.eskep-theme--aqua .navbar {
+  background: linear-gradient(90deg, #0fa3b1, #0a6f95);
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Arama alanı */
+header.hdm-min-header.eskep-theme--aqua input.form-control {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+header.hdm-min-header.eskep-theme--aqua input.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ---------- Beyaz Sayfa Teması ---------- */
+.page-eskep.eskep-theme--aqua {
+  background: var(--eskep-bg-page);
+  color: var(--eskep-text-strong);
+}
+
+/* Hero alanı (tam beyaz, sade tasarım) */
+.eskep-hero {
+  background: #fff;
+  padding: 4rem 0 3rem 0;
+  border-bottom: 1px solid var(--eskep-border);
+}
+.eskep-hero h1, .eskep-hero h2, .eskep-hero h3 {
+  color: var(--eskep-text-strong);
+}
+.eskep-hero p {
+  color: var(--eskep-text-soft);
+  font-size: 1.1rem;
+}
+.eskep-hero .btn-cta {
+  background: var(--eskep-secondary);
+  border: none;
+  color: #fff;
+  padding: 0.7rem 1.6rem;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(255, 145, 0, 0.3);
+}
+.eskep-hero .btn-cta:hover {
+  background: #ff7b00;
+}
+.eskep-hero .btn-outline {
+  border: 1px solid var(--eskep-primary);
+  color: var(--eskep-primary-dark);
+  background: transparent;
+  padding: 0.7rem 1.4rem;
+  border-radius: 10px;
+}
+.eskep-hero .btn-outline:hover {
+  background: var(--eskep-primary);
+  color: #fff;
+}
+
+/* ---------- Stat Kartları ---------- */
+.hdm-stats-section {
+  background: var(--eskep-bg-muted);
+  padding: 3rem 0;
+}
+.hdm-stat-card {
+  border-radius: 14px;
+  background: var(--eskep-bg-card);
+  box-shadow: var(--eskep-shadow);
+  border: 1px solid var(--eskep-border);
+  padding: 1.2rem 1.4rem;
+  text-align: center;
+}
+.hdm-stat-card .hdm-stat-icon {
+  width: 46px; height: 46px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--eskep-primary);
+  color: #fff;
+  font-size: 1.3rem;
+  margin: 0 auto 0.6rem auto;
+}
+.hdm-stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--eskep-text-strong);
+}
+.hdm-stat-label {
+  font-size: 0.95rem;
+  color: var(--eskep-text-soft);
+}
+
+/* ---------- Özellik Kartları (Feature) ---------- */
+.hdm-features-section {
+  background: #fff;
+  padding: 3.5rem 0;
+}
+.hdm-feature-card {
+  background: #fff;
+  border: 1px solid var(--eskep-border);
+  border-radius: 14px;
+  padding: 1.8rem;
+  box-shadow: var(--eskep-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hdm-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
+}
+.hdm-feature-card .hdm-feature-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--eskep-primary);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+.hdm-feature-card h5 {
+  color: var(--eskep-text-strong);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.hdm-feature-card p {
+  color: var(--eskep-text-soft);
+  font-size: 0.95rem;
+}
+
+/* ---------- CTA (Alt Kısım) ---------- */
+.hdm-callout {
+  background: linear-gradient(90deg, var(--eskep-primary), var(--eskep-primary-dark));
+  color: #fff;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  margin: 3rem auto;
+  box-shadow: 0 8px 22px rgba(15, 163, 177, 0.25);
+}
+.hdm-callout h4 {
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.4rem;
+}
+.hdm-callout p {
+  color: rgba(255, 255, 255, 0.85);
+}
+.hdm-callout .btn-cta {
+  background: var(--eskep-secondary);
+  border: none;
+  color: #fff;
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+}
+.hdm-callout .btn-cta:hover {
+  background: #ff7b00;
+}
+
+/* ---------- Footer ---------- */
+.hdm-min-footer.eskep-theme {
+  background: var(--eskep-primary-dark);
+  border-top: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+.hdm-min-footer.eskep-theme .text-footer {
+  color: rgba(255,255,255,0.8);
+}
+
+/* ---------- Animasyonlar ---------- */
+.hover-lift {
+  transition: all 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================================
+   HERO — koyu aqua & sol görsel yerleşimi
+   ========================================================= */
+
+/* Daha koyu hero paleti (emerald→aqua→cyan) */
+.eskep-hero--deep {
+  --hero-c1: #0b3e4a;  /* koyu emerald */
+  --hero-c2: #0fa3b1;  /* aqua */
+  --hero-c3: #0a6f95;  /* cyan/teal */
+  background: linear-gradient(120deg, var(--hero-c1), var(--hero-c2) 45%, var(--hero-c3));
+  color: #eaf8ff;
+  padding: 56px 0 48px;
+  position: relative;
+}
+
+/* Parlaklık/kontrast */
+.eskep-hero--deep h1,
+.eskep-hero--deep h2 { color:#ffffff; }
+.eskep-hero--deep p  { color: rgba(255,255,255,.85); }
+
+/* Izgara yerleşimi: görsel solda, metin sağda */
+.eskep-hero__wrap {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr; /* görsel biraz daha geniş */
+  gap: 28px;
+  align-items: center;
+}
+
+/* Görsel kartı: hafif taşma + gölge */
+.eskep-hero__media {
+  position: relative;
+}
+.eskep-hero__card {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  background: #0ea5b3;
+  border: 1px solid rgba(255,255,255,.16);
+}
+.eskep-hero__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* İçerik (sağ) */
+.eskep-hero__content h1 {
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin-bottom: .6rem;
+}
+.eskep-hero__content .lead {
+  font-size: 1.06rem;
+  margin-bottom: 1rem;
+}
+
+/* Badges */
+.eskep-hero__badges {
+  display:flex; gap:8px; margin: 10px 0 18px;
+}
+.eskep-badge {
+  background: rgba(255,255,255,.9);
+  color:#0a3d49;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+/* Butonlar */
+.btn-cta--orange{
+  background: #ff9100; color:#fff; border:none;
+  border-radius: 12px; padding: .7rem 1.2rem;
+  box-shadow: 0 10px 22px rgba(255,145,0,.32);
+}
+.btn-cta--orange:hover{ background:#ff7b00; color:#fff; }
+
+.btn-outline--glass{
+  background: rgba(255,255,255,.12);
+  color:#fff; border:1px solid rgba(255,255,255,.35);
+  border-radius: 12px; padding:.7rem 1.2rem;
+}
+.btn-outline--glass:hover{ background: rgba(255,255,255,.22); }
+
+/* Küçük ekran: yığılma (üstte metin, altta görsel) */
+@media (max-width: 992px){
+  .eskep-hero__wrap{
+    grid-template-columns: 1fr;
+  }
+  .eskep-hero__media{ order:2; }
+  .eskep-hero__content{ order:1; text-align:left; }
+}
+
+/* =========================================================
+   HERO — koyu aqua, küçük resim, yüksek kontrast
+   ========================================================= */
+
+.eskep-hero--dark {
+  --hero-c1: #073f4b;   /* koyu emerald */
+  --hero-c2: #0a7081;   /* deniz yeşili */
+  --hero-c3: #0993a3;   /* aqua tonu */
+  background: linear-gradient(135deg, var(--hero-c1), var(--hero-c2) 50%, var(--hero-c3) 100%);
+  color: #ffffff;
+  padding: 80px 0 72px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Desenli karanlık overlay */
+.eskep-hero--dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top left, rgba(255,255,255,0.08), transparent 70%);
+}
+
+/* Hero içi yerleşim */
+.eskep-hero__wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+}
+
+/* Metin alanı */
+.eskep-hero__content {
+  flex: 1.1;
+  position: relative;
+  z-index: 1;
+}
+
+.eskep-hero__content h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.eskep-hero__content p {
+  color: rgba(255,255,255,0.88);
+  font-size: 1.1rem;
+  margin-bottom: 1.4rem;
+}
+
+/* Küçük rozetler */
+.eskep-hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 1.8rem;
+}
+.eskep-badge {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+}
+
+/* Butonlar */
+.btn-cta--orange {
+  background: #ff9100;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.4rem;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(255,145,0,0.35);
+}
+.btn-cta--orange:hover { background: #ff7a00; }
+
+.btn-outline--glass {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 12px;
+  padding: 0.75rem 1.4rem;
+}
+.btn-outline--glass:hover { background: rgba(255,255,255,0.15); }
+
+/* Görsel kısmı — küçük ve dekoratif */
+.eskep-hero__media {
+  flex: 0.55;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.eskep-hero__media img {
+  width: 70%;
+  max-width: 260px;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.4);
+  opacity: 0.92;
+  transition: transform 0.3s ease;
+}
+.eskep-hero__media img:hover {
+  transform: scale(1.04);
+}
+
+/* Küçük ekran: alt alta */
+@media (max-width: 992px) {
+  .eskep-hero__wrap {
+    flex-direction: column;
+    text-align: center;
+  }
+  .eskep-hero__media img {
+    width: 60%;
+    max-width: 220px;
+  }
+}
+
+/* ============================
+   ESKEP – Daha yakın & daha koyu
+   (yalnızca bu sayfayı etkiler)
+   ============================ */
+
+/* 1) Dikey boşlukları küçült */
+.page-eskep .hdm-stats-section{
+  padding: 1.5rem 0 1.1rem;               /* eskiden ~3rem */
+}
+.page-eskep .hdm-features-section{
+  padding: 1.75rem 0 1.4rem;              /* eskiden ~3.5rem */
+}
+.page-eskep .hdm-callout{
+  margin: 1.75rem auto 0;                 /* CTA’yı yukarı çek */
+  padding: 1.4rem 2rem;                   /* biraz daha kompakt */
+  border-radius: 14px;
+}
+
+/* Grid aralıklarını daralt (sadece bu iki bölümde) */
+.page-eskep .hdm-stats-section .row.g-3{
+  --bs-gutter-x: .75rem;
+  --bs-gutter-y: .75rem;
+}
+.page-eskep .hdm-features-section .row.g-4{
+  --bs-gutter-x: .9rem;
+  --bs-gutter-y: .9rem;
+}
+
+/* Kart iç dolguları biraz küçült */
+.page-eskep .hdm-feature-card{ padding: 1.4rem; }
+.page-eskep .hdm-stat-card{ padding: 1rem 1.1rem; }
+
+/* 2) Paleti koyulaştır */
+.page-eskep .hdm-stat-card .hdm-stat-icon,
+.page-eskep .hdm-feature-card .hdm-feature-icon{
+  background: linear-gradient(135deg, #0c7b86, #0b4f65) !important; /* daha koyu aqua/teal */
+  box-shadow: 0 10px 24px rgba(11,79,101,.35);
+}
+
+.page-eskep .hdm-feature-card h5{ color:#17323a; }
+.page-eskep .hdm-feature-card p{ color:#54656b; }
+
+/* CTA şeridini 2–3 ton koyulaştır */
+.page-eskep .hdm-callout{
+  background: linear-gradient(90deg, #0b4f59, #0a3e47 60%, #08333b) !important;
+  box-shadow: 0 10px 26px rgba(8,62,71,.28);
+}
+.page-eskep .hdm-callout h4{ color:#ffffff; }
+.page-eskep .hdm-callout p{ color: rgba(255,255,255,.85); }
+
+/* CTA’daki buton kontrastı */
+.page-eskep .hdm-callout .btn-cta{
+  background:#ff8d00;
+  box-shadow: 0 6px 16px rgba(255,141,0,.32);
+}
+.page-eskep .hdm-callout .btn-outline-light.soft{
+  border-color: rgba(255,255,255,.65);
+  color:#fff;
+}
+
+/* İsteğe bağlı: kart kenarlarını biraz belirginleştirip gölgeyi toparla */
+.page-eskep .hdm-stat-card,
+.page-eskep .hdm-feature-card{
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 8px 18px rgba(0,0,0,.07);
+}

@@ -14,10 +14,10 @@ import "moment/locale/tr";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
-function DersSonuRaporuDetail() {
+function ProjeDetail() {
   const api = useAxios();
   const userData = useUserData();
-  const { dersSonuRaporu_id } = useParams();
+  const { proje_id, koordinator_id } = useParams();
 
   const [detail, setDetail] = useState(null);
   const [variantItem, setVariantItem] = useState(null);
@@ -65,11 +65,11 @@ function DersSonuRaporuDetail() {
 
   // Fetch detail
   const fetchDetail = async () => {
-    if (!userData?.user_id || !dersSonuRaporu_id) return;
+    if (!userData?.user_id || !proje_id) return;
     try {
       setFetching(true);
       const res = await api.get(
-        `eskepinstructor/derssonuraporu-detail/${dersSonuRaporu_id}/${userData.user_id}/`
+        `eskepinstructor/proje-detail/${koordinator_id}/${proje_id}/`
       );
       const data = res.data || {};
       setDetail(data);
@@ -95,7 +95,7 @@ function DersSonuRaporuDetail() {
   useEffect(() => {
     fetchDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData?.user_id, dersSonuRaporu_id]);
+  }, [userData?.user_id, proje_id]);
 
   // Complete lesson
   const handleMarkLessonAsCompleted = async (variantItemId) => {
@@ -104,9 +104,9 @@ function DersSonuRaporuDetail() {
     try {
       const formdata = new FormData();
       formdata.append("user_id", userData?.user_id || 0);
-      formdata.append("dersSonuRaporu_id", dersSonuRaporu_id);
+      formdata.append("proje_id", proje_id);
       formdata.append("variant_item_id", variantItemId);
-      await api.post(`instructor/derssonuraporu-completed/`, formdata);
+      await api.post(`instructor/proje-completed/`, formdata);
       await fetchDetail();
       setMarkAsCompletedStatus((s) => ({ ...s, [key]: "Updated" }));
     } catch (e) {
@@ -122,19 +122,19 @@ function DersSonuRaporuDetail() {
     e.preventDefault();
     const fd = new FormData();
     fd.append("koordinator_id", userData?.user_id);
-    fd.append("dersSonuRaporu_id", dersSonuRaporu_id);
+    fd.append("proje_id", proje_id);
     fd.append("title", (createNote.title || "").trim());
     fd.append("note", (createNote.note || "").trim());
     try {
       if (selectedNote?.id) {
         await api.patch(
-          `eskepinstructor/derssonuraporu-note-detail/${dersSonuRaporu_id}/${userData?.user_id}/${selectedNote.id}/`,
+          `eskepinstructor/proje-note-detail/${proje_id}/${userData?.user_id}/${selectedNote.id}/`,
           fd
         );
         Toast().fire({ icon: "success", title: "Not güncellendi" });
       } else {
         await api.post(
-          `eskepinstructor/derssonuraporu-note/${dersSonuRaporu_id}/${userData?.user_id}/`,
+          `eskepinstructor/proje-note/${proje_id}/${userData?.user_id}/`,
           fd
         );
         Toast().fire({ icon: "success", title: "Not eklendi" });
@@ -148,7 +148,7 @@ function DersSonuRaporuDetail() {
   const handleDeleteNote = async (noteId) => {
     try {
       await api.delete(
-        `eskepinstructor/derssonuraporu-note-detail/${dersSonuRaporu_id}/${userData?.user_id}/${noteId}/`
+        `eskepinstructor/proje-note-detail/${proje_id}/${userData?.user_id}/${noteId}/`
       );
       await fetchDetail();
       Toast().fire({ icon: "success", title: "Not silindi" });
@@ -165,7 +165,7 @@ function DersSonuRaporuDetail() {
     try {
       setConversationLoading(true);
       const res = await api.get(
-        `eskepinstructor/question-answer-list-create/${dersSonuRaporu_id}/`
+        `eskepinstructor/question-answer-list-create/${proje_id}/`
       );
       const list = res.data || [];
       setQuestions(list);
@@ -184,12 +184,12 @@ function DersSonuRaporuDetail() {
       return;
     }
     const fd = new FormData();
-    fd.append("dersSonuRaporu_id", dersSonuRaporu_id);
+    fd.append("proje_id", proje_id);
     fd.append("gonderen_id", userData?.user_id);
     fd.append("title", title);
     fd.append("message", message);
     const res = await api.post(
-      `eskepinstructor/question-answer-list-create/${dersSonuRaporu_id}/`,
+      `eskepinstructor/question-answer-list-create/${proje_id}/`,
       fd
     );
     const newQid = res?.data?.question_id;
@@ -207,7 +207,7 @@ function DersSonuRaporuDetail() {
     const msg = createMessage.message?.trim();
     if (!msg) return;
     const fd = new FormData();
-    fd.append("dersSonuRaporu_id", dersSonuRaporu_id);
+    fd.append("proje_id", proje_id);
     fd.append("gonderen_id", userData?.user_id);
     fd.append("question_id", selectedConversation.id);
     fd.append("message", msg);
@@ -236,11 +236,11 @@ function DersSonuRaporuDetail() {
   const handleCreateReviewSubmit = async (e) => {
     e.preventDefault();
     const fd = new FormData();
-    fd.append("dersSonuRaporu_id", detail?.dersSonuRaporu?.id || detail?.id);
+    fd.append("proje_id", detail?.proje?.id || detail?.id);
     fd.append("user_id", userData?.user_id);
     fd.append("rating", createReview.rating);
     fd.append("review", createReview.review);
-    await api.post(`stajer/rate-derssonuraporu/`, fd);
+    await api.post(`stajer/rate-proje/`, fd);
     await fetchDetail();
     Toast().fire({ icon: "success", title: "Yorum oluşturuldu" });
   };
@@ -284,7 +284,7 @@ function DersSonuRaporuDetail() {
 
           <div className="row g-4 g-lg-5 mt-0 mt-md-4">
             {/* SOL: Sidebar (sticky kart) */}
-            <div className="col-lg-2 col-xl-2">
+            <div className="col-lg-3 col-xl-2">
               <div className="position-sticky" style={{ top: 88 }}>
                 <div className="card border-0 shadow-sm rounded-3">
                   <div className="card-body p-2 p-md-3">
@@ -295,7 +295,7 @@ function DersSonuRaporuDetail() {
             </div>
 
             {/* SAĞ: Özet + Sekmeler */}
-            <div className="col-lg-10 col-xl-10">
+            <div className="col-lg-9 col-xl-10">
               {/* Özeti */}
               <div className="card border-0 shadow-sm rounded-3 mb-3">
                 <div className="card-body p-3 p-md-4">
@@ -305,7 +305,7 @@ function DersSonuRaporuDetail() {
                   </div>
 
                   <div className="small text-muted mb-3">
-                    {detail?.derssonuraporu?.title || detail?.title || "—"}
+                    {detail?.proje?.title || detail?.title || "—"}
                   </div>
 
                   <div className="mb-3">
@@ -736,7 +736,7 @@ function DersSonuRaporuDetail() {
   );
 }
 
-export default DersSonuRaporuDetail;
+export default ProjeDetail;
 
 function EmptyState({ title = "Kayıt bulunamadı", subtitle = "" }) {
   return (

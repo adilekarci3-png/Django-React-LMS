@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 
-import AkademiBaseHeader from "../partials/AkademiBaseHeader";
-import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
@@ -58,7 +56,8 @@ function ChangePassword() {
     if (!strongEnough) {
       Toast().fire({
         icon: "error",
-        title: "Yeni şifre en az 8 karakter olmalı ve en az bir harf + bir rakam içermelidir.",
+        title:
+          "Yeni şifre en az 8 karakter olmalı ve en az bir harf + bir rakam içermelidir.",
       });
       return;
     }
@@ -86,7 +85,9 @@ function ChangePassword() {
     } catch (err) {
       const data = err?.response?.data;
       const firstFieldError =
-        (data && typeof data === "object" && Object.values(data).find((v) => typeof v === "string")) ||
+        (data &&
+          typeof data === "object" &&
+          Object.values(data).find((v) => typeof v === "string")) ||
         data?.detail ||
         data?.message;
 
@@ -103,28 +104,38 @@ function ChangePassword() {
     <>
       <ESKEPBaseHeader />
 
-      <section className="pt-5 pb-5">
-        <div className="container">
+      {/* EskepInstructorDashboard ile AYNI iskelet */}
+      <section className="pt-4 pb-5">
+        <div className="container-xxl">
           <Header />
 
-          <div className="row mt-0 mt-md-4">
+          <div className="row g-4 mt-0 mt-md-4">
             {/* SOL: Sidebar */}
-            <div className="col-lg-2 col-md-4 col-12 mb-4 mb-md-0">
+            <div className="col-12 col-lg-3 col-xl-3">
               <Sidebar />
             </div>
 
             {/* SAĞ: İçerik */}
-            <div className="col-lg-10 col-md-8 col-12">
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="mb-0">Şifre Değiştir</h3>
+            <div className="col-12 col-lg-9 col-xl-9">
+              <div className="card shadow border-0 rounded-4">
+                <div className="card-header bg-white border-0 rounded-top-4 pb-0">
+                  <h3 className="mb-3">Şifre Değiştir</h3>
+                  <p className="text-muted mb-0">
+                    Güvenliğiniz için güçlü bir şifre kullanın.
+                  </p>
                 </div>
 
-                <div className="card-body">
-                  <form className="row gx-3" onSubmit={changePasswordSubmit} noValidate>
+                <div className="card-body pt-3 pb-4">
+                  <form
+                    className="row gx-3"
+                    onSubmit={changePasswordSubmit}
+                    noValidate
+                  >
                     {/* Eski Şifre */}
-                    <div className="mb-3 col-12">
-                      <label className="form-label" htmlFor="password1">Eski Şifre</label>
+                    <div className="mb-3 col-12 col-md-8 col-lg-6">
+                      <label className="form-label" htmlFor="password1">
+                        Eski Şifre
+                      </label>
                       <div className="input-group">
                         <input
                           type={show.old ? "text" : "password"}
@@ -140,7 +151,9 @@ function ChangePassword() {
                         <button
                           type="button"
                           className="btn btn-outline-secondary"
-                          onClick={() => setShow((s) => ({ ...s, old: !s.old }))}
+                          onClick={() =>
+                            setShow((s) => ({ ...s, old: !s.old }))
+                          }
                           tabIndex={-1}
                         >
                           {show.old ? "Gizle" : "Göster"}
@@ -149,8 +162,10 @@ function ChangePassword() {
                     </div>
 
                     {/* Yeni Şifre */}
-                    <div className="mb-1 col-12">
-                      <label className="form-label" htmlFor="password2">Yeni Şifre</label>
+                    <div className="mb-1 col-12 col-md-8 col-lg-6">
+                      <label className="form-label" htmlFor="password2">
+                        Yeni Şifre
+                      </label>
                       <div className="input-group">
                         <input
                           type={show.nw ? "text" : "password"}
@@ -166,22 +181,31 @@ function ChangePassword() {
                         <button
                           type="button"
                           className="btn btn-outline-secondary"
-                          onClick={() => setShow((s) => ({ ...s, nw: !s.nw }))}
+                          onClick={() =>
+                            setShow((s) => ({ ...s, nw: !s.nw }))
+                          }
                           tabIndex={-1}
                         >
                           {show.nw ? "Gizle" : "Göster"}
                         </button>
                       </div>
                     </div>
+
                     <div className="col-12 mb-3">
-                      <small className={`text-${strongEnough ? "success" : "muted"}`}>
+                      <small
+                        className={`${
+                          strongEnough ? "text-success" : "text-muted"
+                        }`}
+                      >
                         En az 8 karakter, bir rakam ve bir harf içermelidir.
                       </small>
                     </div>
 
                     {/* Yeni Şifreyi Doğrula */}
-                    <div className="mb-3 col-12">
-                      <label className="form-label" htmlFor="password3">Yeni Şifreyi Doğrula</label>
+                    <div className="mb-3 col-12 col-md-8 col-lg-6">
+                      <label className="form-label" htmlFor="password3">
+                        Yeni Şifreyi Doğrula
+                      </label>
                       <div className="input-group">
                         <input
                           type={show.conf ? "text" : "password"}
@@ -197,20 +221,29 @@ function ChangePassword() {
                         <button
                           type="button"
                           className="btn btn-outline-secondary"
-                          onClick={() => setShow((s) => ({ ...s, conf: !s.conf }))}
+                          onClick={() =>
+                            setShow((s) => ({ ...s, conf: !s.conf }))
+                          }
                           tabIndex={-1}
                         >
                           {show.conf ? "Gizle" : "Göster"}
                         </button>
                       </div>
                       {password.confirm_new_password &&
-                        password.confirm_new_password !== password.new_password && (
-                          <small className="text-danger">Şifreler eşleşmiyor.</small>
+                        password.confirm_new_password !==
+                          password.new_password && (
+                          <small className="text-danger">
+                            Şifreler eşleşmiyor.
+                          </small>
                         )}
                     </div>
 
-                    <div className="col-12">
-                      <button className="btn btn-primary" type="submit" disabled={submitting}>
+                    <div className="col-12 mt-2">
+                      <button
+                        className="btn btn-primary"
+                        type="submit"
+                        disabled={submitting}
+                      >
                         {submitting ? "Kaydediliyor..." : "Yeni Şifreyi Kaydet"}{" "}
                         <i className="fas fa-check-circle"></i>
                       </button>
@@ -221,7 +254,6 @@ function ChangePassword() {
             </div>
             {/* /SAĞ */}
           </div>
-          {/* /ROW */}
         </div>
       </section>
 

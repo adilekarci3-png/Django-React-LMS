@@ -167,27 +167,51 @@ class EskepInstructorProjeDetailAPIView(generics.RetrieveAPIView):
     lookup_url_kwarg = "proje_id"
 
     def _resolve_koordinator(self):
+        """
+        URL'den gelen koordinator_id hem Koordinator.id hem de Koordinator.user.id
+        olabilir. İkisinden birine göre bulmaya çalışıyoruz.
+        """
         raw = self.kwargs.get("koordinator_id")
         try:
             raw = int(raw)
         except (TypeError, ValueError):
             raise NotFound("Geçersiz koordinator_id")
+
         return get_object_or_404(
             api_models.Koordinator.objects.select_related("user"),
             Q(id=raw) | Q(user__id=raw),
         )
 
     def get_queryset(self):
-        k = self._resolve_koordinator()
-        return api_models.EskepProje.objects.filter(k= k, koordinator=k).select_related(
-            "inserteduser", "koordinator", "koordinator__user", "category"
+        """
+        Sadece bu koordinatöre ait projeleri getir.
+        EskepProje modelinde 'k' diye bir alan yok; doğru alan 'koordinator'.
+        """
+        koordinator = self._resolve_koordinator()
+
+        # sadece o koordinatörün projeleri
+        qs = (
+            api_models.EskepProje.objects
+            .filter(koordinator=koordinator)
+            .select_related(
+                "inserteduser",
+                "koordinator",
+                "koordinator__user",
+                "category",
+            )
         )
+        return qs
 
     def get_object(self):
+        """
+        URL'den gelen proje_id'ye göre, sadece bu koordinatörün projeleri
+        içinde arayacağız.
+        """
         try:
             proj_id = int(self.kwargs.get(self.lookup_url_kwarg))
         except (TypeError, ValueError):
             raise NotFound("Geçersiz proje_id")
+
         return get_object_or_404(self.get_queryset(), pk=proj_id)
 
 

@@ -1,17 +1,49 @@
+/* ---- Screen (normal görünüm) ---- */
+.print-area {
+  display: none;
+}
+
+/* ---- Print (yazdırma) ---- */
 @media print {
+  /* Sayfa boyutu ve kenar boşlukları */
+  @page {
+    size: A4;
+    margin: 0; /* Kenar boşluklarını içerikte padding ile yöneteceğiz */
+  }
+
+  /* Ekrandaki her şeyi gizle */
   body * {
-    visibility: hidden;
+    visibility: hidden !important;
   }
 
-  .print-area,
-  .print-area * {
-    visibility: visible;
-  }
-
+  /* Sadece print alanını göster */
   .print-area {
+    display: block !important;
+    visibility: visible !important;
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
+    width: 210mm;         /* A4 genişliği */
+    min-height: 297mm;    /* A4 yüksekliği (isteğe bağlı) */
+    padding: 16mm 12mm;   /* Yazdırma iç boşlukları */
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* print-area içindeki tüm elemanları görünür yap */
+  .print-area * {
+    visibility: visible !important;
+  }
+
+  /* Yazdırma sırasında görünmemesi gereken alanlar için yardımcı sınıf */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Sayfa kırımı yardımcı sınıfı */
+  .page-break {
+    page-break-before: always;
+    break-before: page;
   }
 }

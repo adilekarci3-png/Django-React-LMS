@@ -68,3 +68,20 @@ class KoordinatorLookupMixin:
         if koordinator is None:
             return False
         return koordinator.roles.filter(name="ESKEPGenelKoordinator").exists()
+    
+def _build_person_response(item):
+    """
+    Ogrenci veya Stajer için ortak response üreten helper
+    """
+    user = getattr(item, "user", None)
+    profile = getattr(user, "profile", None) if user else None
+    profile_date = getattr(profile, "date", None)
+    formatted_date = profile_date.strftime("%Y-%m-%d") if hasattr(profile_date, "strftime") else profile_date
+
+    return {
+        "full_name": getattr(item, "full_name", None),
+        "image": item.image.url if getattr(item, "image", None) else None,
+        "country": str(item.country) if getattr(item, "country", None) else None,
+        "city": str(item.city) if getattr(item, "city", None) else None,
+        "date": formatted_date,
+    }

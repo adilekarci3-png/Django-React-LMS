@@ -1,105 +1,64 @@
-.index-container {
-    padding: 50px 20px;
-    background-color: #f3f3f3;
-    min-height: 100vh;
-    text-align: center;
-  }
-  
-  .index-title {
-    font-size: 2rem;
-    color: #197278;
-    margin-bottom: 30px;
-  }
-  
-  .index-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 24px;
-  }
-  
-  .index-card {
-    background: #fff;
-    width: 280px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
-  }
-  
-  .index-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .index-image-container {
-    width: 100%;
-    padding-top: 100%; /* kare oran */
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .index-image {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 10px;
-  }
-  
-  .index-card-body {
-    padding: 20px;
-  }
-  
-  .index-card-title {
-    font-size: 1.2rem;
-    color: #197278;
-    margin-bottom: 10px;
-  }
-  
-  .index-desc {
-    font-size: 0.9rem;
-    color: #555;
-    min-height: 40px;
-    margin-bottom: 15px;
-  }
-  
-  .index-btn {
-    background: #197278;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .index-btn:hover {
-    background: #125e61;
-  }
-  
-  .index-btn-disabled {
-    background: #aaa;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 999px;
-    cursor: not-allowed;
-    border: none;
-  }
-  .index-heading {
-    margin-bottom: 40px;
-    text-align: center;
-  }
-  
-.main-title {
-    font-size: 2.4rem;
-    color: #197278;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-  
-  .sub-title {
-    font-size: 1.2rem;
-    color: #4a4a4a;
-    font-style: italic;
-    letter-spacing: 0.5px;
-  }
+/* ——— Konteyner ——— */
+.ix-container{max-width:1200px;margin:0 auto;padding:0 18px}
+
+/* ——— Başlık (sade) ——— */
+.ix-hero{padding:18px 0 6px}
+.ix-title{margin:0;font-size:28px;font-weight:800;letter-spacing:.2px;color:#0b1b2b}
+.ix-subtitle{margin:4px 0 0;color:rgba(11,27,43,.70);font-size:15px}
+
+/* ——— Bölüm ——— */
+.ix-section{padding:14px 0 40px}
+
+/* ——— Grid ——— */
+.ix-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width:1100px){.ix-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:820px){.ix-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.ix-grid{grid-template-columns:1fr}}
+
+/* ——— Kart ——— */
+.ix-card{
+  border:1px solid rgba(2,132,199,.15);
+  border-radius:12px;
+  background:#fff;
+  overflow:hidden;
+  transition:box-shadow .15s ease, transform .15s ease;
+  display:flex;flex-direction:column;min-height:100%;
+}
+.ix-card:hover{box-shadow:0 10px 28px rgba(8,122,169,.12);transform:translateY(-2px)}
+
+/* ——— Kapak görseli (kısa) ——— */
+.ix-cover{height:120px; /* kısa kapak */ background:linear-gradient(135deg,#8ef7ea,#07a0e0);display:flex;align-items:center;justify-content:center}
+.ix-cover img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ——— İçerik ——— */
+.ix-body{padding:12px;display:flex;flex-direction:column;gap:8px}
+.ix-name{margin:2px 0 0;font-size:1.02rem}
+.ix-desc{margin:0;color:rgba(11,27,43,.70);font-size:.95rem}
+.ix-actions{margin-top:4px}
+
+/* ——— Buton ——— */
+.ix-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:36px;padding:0 14px;border-radius:10px;
+  font-weight:700;border:1px solid transparent;
+  background:linear-gradient(135deg,#5fe7e4,#07a0e0);color:#fff;
+}
+.ix-btn:hover{filter:brightness(.96)}
+.ix-btn.disabled{background:rgba(0,0,0,.06);color:#777;border-color:rgba(0,0,0,.12);cursor:not-allowed}
+
+/* ——— Skeleton ——— */
+.skeleton .ix-cover{background:linear-gradient(90deg,rgba(0,0,0,.06),rgba(0,0,0,.12),rgba(0,0,0,.06));background-size:200% 100%;animation:sheen 1.15s linear infinite}
+.skeleton .ix-body{gap:10px}
+.skeleton-box{height:120px}
+.sk-line{height:12px;border-radius:8px;background:rgba(0,0,0,.06)}
+.sk-pill{height:34px;border-radius:999px;background:rgba(0,0,0,.06)}
+.w-40{width:40%}.w-60{width:60%}.w-90{width:90%}
+@keyframes sheen{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ——— Pager ——— */
+.ix-pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:18px}
+.ix-pager-btn{border:1px solid rgba(2,132,199,.25);background:#fff;color:#07485d;padding:8px 12px;border-radius:10px;font-weight:700}
+.ix-pager-btn:disabled{opacity:.45;cursor:not-allowed}
+.ix-pager-pages{display:flex;gap:6px;list-style:none;padding:0;margin:0}
+.ix-page{min-width:38px;height:38px;padding:0 10px;border-radius:10px;border:1px solid rgba(2,132,199,.25);background:#fff;font-weight:700;color:#07485d}
+.ix-page.active{background:linear-gradient(135deg,#5fe7e4,#07a0e0);color:#fff;border-color:transparent}

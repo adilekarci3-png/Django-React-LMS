@@ -1,8 +1,13 @@
 // src/pages/Contact.jsx
-import React, { useMemo, useState } from "react";
-import AkademiBaseHeader from "../partials/AkademiBaseHeader";
+import React, { useEffect, useMemo, useState } from "react";
+import HomeHeader from "../partials/HomeHeader";
+import HomeFooter from "../partials/HomeFooter";
 
 export default function Contact() {
+  // ⚙️ Burayı kendi ortamına göre değiştir
+  const API_BASE =
+    import.meta?.env?.VITE_API_URL?.replace(/\/+$/, "") || "http://127.0.0.1:8000";
+
   const css = `
   :root{
     --ink:#0b1220; --text:#0e1726; --muted:#475569; --line:#cbd5e1; --subtle:#f8fafc;
@@ -63,26 +68,64 @@ export default function Contact() {
   .ratio iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   `;
 
-  const initial = useMemo(() => ({ name: "", email: "", phone: "", subject: "Genel", message: "" }), []);
+  // form state
+  const initial = useMemo(
+    () => ({ name: "", email: "", phone: "", subject: "", message: "" }),
+    []
+  );
   const [form, setForm] = useState(initial);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [ok, setOk] = useState(null);
 
+  // konu listesi (artık backend'ten)
+  const [subjects, setSubjects] = useState([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [subjectsError, setSubjectsError] = useState(null);
+
   const set = (k, v) => setForm((s) => ({ ...s, [k]: v }));
+
+  // konuları çek
+  useEffect(() => {
+    async function fetchSubjects() {
+      setSubjectsLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/contact/subjects/`);
+        if (!res.ok) throw new Error("Konu listesi alınamadı");
+        const data = await res.json();
+        setSubjects(data);
+        // ilk seçileni otomatik ver
+        if (data.length > 0) {
+          setForm((s) => ({ ...s, subject: String(data[0].id) }));
+        }
+      } catch (err) {
+        console.error(err);
+        setSubjectsError("Konu listesi yüklenemedi.");
+      } finally {
+        setSubjectsLoading(false);
+      }
+    }
+    fetchSubjects();
+  }, [API_BASE]);
 
   function validate() {
     const e = {};
     if (!form.name.trim()) e.name = "Ad Soyad zorunludur.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Geçerli bir e-posta giriniz.";
-    if (form.phone && !/^\+?\d[\d\s\-]{7,}$/.test(form.phone)) e.phone = "Telefon formatı hatalı.";
-    if (!form.message.trim() || form.message.trim().length < 10) e.message = "Lütfen en az 10 karakter yazınız.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+      e.email = "Geçerli bir e-posta giriniz.";
+    if (form.phone && !/^\+?\d[\d\s\-]{7,}$/.test(form.phone))
+      e.phone = "Telefon formatı hatalı.";
+    if (!form.message.trim() || form.message.trim().length < 10)
+      e.message = "Lütfen en az 10 karakter yazınız.";
+    if (!form.subject) e.subject = "Lütfen bir konu seçiniz.";
     setErrors(e);
     return Object.keys(e).length === 0;
   }
 
   function getCookie(name) {
-    const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+    const match = document.cookie.match(
+      new RegExp("(^| )" + name + "=([^;]+)")
+    );
     return match ? decodeURIComponent(match[2]) : "";
   }
 
@@ -92,14 +135,30 @@ export default function Contact() {
     if (!validate()) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/v1/contact/", {
+      // backend FK bekliyor: number
+      const payload = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        subject: form.subject ? Number(form.subject) : null,
+        message: form.message,
+      };
+
+      const res = await fetch(`${API_BASE}/api/v1/contact/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-        body: JSON.stringify(form),
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify(payload),
+        credentials: "include",
       });
       if (!res.ok) throw new Error("İstek başarısız: " + res.status);
       setOk(true);
-      setForm(initial);
+      setForm((s) => ({
+        ...initial,
+        subject: subjects.length ? String(subjects[0].id) : "",
+      }));
       setErrors({});
     } catch (err) {
       console.error(err);
@@ -112,97 +171,237 @@ export default function Contact() {
   return (
     <>
       <style>{css}</style>
-      <AkademiBaseHeader />
+      <HomeHeader />
 
       <div className="outer">
         <main className="page">
           <section className="content">
             <div className="container grid">
+              {/* Sol: Form */}
               <div className="card">
                 <div className="card-header">
-                  <div style={{ width: 12, height: 12, borderRadius: 999, background: "var(--pri-600)" }} />
+                  <div
+                    style={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: 999,
+                      background: "var(--pri-600)",
+                    }}
+                  />
                   <h2 className="card-title">Mesaj Gönder</h2>
                 </div>
                 <form className="card-body" noValidate onSubmit={onSubmit}>
-                  {ok === true && <div className="alert alert-success">Mesajınız alındı.</div>}
-                  {ok === false && <div className="alert alert-error">Bir hata oluştu.</div>}
+                  {ok === true && (
+                    <div className="alert alert-success">
+                      Mesajınız alındı.
+                    </div>
+                  )}
+                  {ok === false && (
+                    <div className="alert alert-error">Bir hata oluştu.</div>
+                  )}
 
                   <div className="row row-2">
                     <div className="field">
-                      <input id="name" placeholder=" " value={form.name} onChange={(e) => set("name", e.target.value)} />
-                      <label htmlFor="name" className="label">Ad Soyad</label>
+                      <input
+                        id="name"
+                        placeholder=" "
+                        value={form.name}
+                        onChange={(e) => set("name", e.target.value)}
+                      />
+                      <label htmlFor="name" className="label">
+                        Ad Soyad
+                      </label>
                       {errors.name && <div className="error">{errors.name}</div>}
                     </div>
                     <div className="field">
-                      <input id="email" type="email" placeholder=" " value={form.email} onChange={(e) => set("email", e.target.value)} />
-                      <label htmlFor="email" className="label">E-posta</label>
-                      {errors.email && <div className="error">{errors.email}</div>}
+                      <input
+                        id="email"
+                        type="email"
+                        placeholder=" "
+                        value={form.email}
+                        onChange={(e) => set("email", e.target.value)}
+                      />
+                      <label htmlFor="email" className="label">
+                        E-posta
+                      </label>
+                      {errors.email && (
+                        <div className="error">{errors.email}</div>
+                      )}
                     </div>
                   </div>
 
                   <div className="row row-2">
                     <div className="field">
-                      <input id="phone" placeholder=" " value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-                      <label htmlFor="phone" className="label">Telefon</label>
-                      {errors.phone && <div className="error">{errors.phone}</div>}
+                      <input
+                        id="phone"
+                        placeholder=" "
+                        value={form.phone}
+                        onChange={(e) => set("phone", e.target.value)}
+                      />
+                      <label htmlFor="phone" className="label">
+                        Telefon
+                      </label>
+                      {errors.phone && (
+                        <div className="error">{errors.phone}</div>
+                      )}
                     </div>
                     <div className="field">
-                      <select id="subject" value={form.subject} onChange={(e) => set("subject", e.target.value)}>
-                        <option>Genel</option>
-                        <option>Eğitim / Kurs</option>
-                        <option>Gönüllülük</option>
-                        <option>Bağış</option>
-                        <option>İş Birliği</option>
-                        <option>Diğer</option>
+                      <select
+                        id="subject"
+                        value={form.subject}
+                        onChange={(e) => set("subject", e.target.value)}
+                        disabled={subjectsLoading || subjectsError}
+                      >
+                        {subjectsLoading && <option>Yükleniyor...</option>}
+                        {subjectsError && (
+                          <option value="">Konu yüklenemedi</option>
+                        )}
+                        {!subjectsLoading &&
+                          !subjectsError &&
+                          subjects.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                          ))}
                       </select>
-                      <label htmlFor="subject" className="label">Konu</label>
+                      <label htmlFor="subject" className="label">
+                        Konu
+                      </label>
+                      {errors.subject && (
+                        <div className="error">{errors.subject}</div>
+                      )}
                     </div>
                   </div>
 
                   <div className="row">
                     <div className="field">
-                      <textarea id="message" placeholder=" " value={form.message} onChange={(e) => set("message", e.target.value)} />
-                      <label htmlFor="message" className="label">Mesajınız</label>
-                      {errors.message && <div className="error">{errors.message}</div>}
+                      <textarea
+                        id="message"
+                        placeholder=" "
+                        value={form.message}
+                        onChange={(e) => set("message", e.target.value)}
+                      />
+                      <label htmlFor="message" className="label">
+                        Mesajınız
+                      </label>
+                      {errors.message && (
+                        <div className="error">{errors.message}</div>
+                      )}
                     </div>
                   </div>
 
                   <div className="actions">
-                    <button type="button" className="btn btn-ghost" onClick={() => { setForm(initial); setErrors({}); setOk(null); }}>Temizle</button>
-                    <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? <span className="spinner"/> : "Gönder"}</button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      onClick={() => {
+                        setForm(
+                          subjects.length
+                            ? {
+                                ...initial,
+                                subject: String(subjects[0].id),
+                              }
+                            : initial
+                        );
+                        setErrors({});
+                        setOk(null);
+                      }}
+                    >
+                      Temizle
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}
+                    >
+                      {loading ? <span className="spinner" /> : "Gönder"}
+                    </button>
                   </div>
                 </form>
               </div>
 
+              {/* Sağ: Bilgi + Harita */}
               <div className="grid" style={{ gap: 36 }}>
                 <div className="card">
                   <div className="card-header">
-                    <div style={{ width: 12, height: 12, borderRadius: 999, background: "var(--sec-700)" }} />
+                    <div
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 999,
+                        background: "var(--sec-700)",
+                      }}
+                    />
                     <h2 className="card-title">İletişim Bilgilerimiz</h2>
                   </div>
                   <div className="card-body">
                     <div className="info-list">
-                      <div className="info-item"><div className="info-icon">📍</div><div>GMK Bulvarı No: XX, Çankaya / Ankara</div></div>
-                      <div className="info-item"><div className="info-icon">✉️</div><div><a className="info-link" href="mailto:bilgi@ehad.org.tr">bilgi@ehad.org.tr</a></div></div>
-                      <div className="info-item"><div className="info-icon">📞</div><div><a className="info-link" href="tel:+903123240034">+90 312 324 00 34</a></div></div>
-                      <div className="info-item"><div className="info-icon">⏰</div><div>Pzt–Cum: 09:00–18:00</div></div>
-                      <div className="info-item"><div className="info-icon">🌐</div><div><a className="info-link" href="https://www.ehad.org.tr/">ehad.org.tr</a></div></div>
+                      <div className="info-item">
+                        <div className="info-icon">📍</div>
+                        <div>GMK Bulvarı No: XX, Çankaya / Ankara</div>
+                      </div>
+                      <div className="info-item">
+                        <div className="info-icon">✉️</div>
+                        <div>
+                          <a
+                            className="info-link"
+                            href="mailto:bilgi@ehad.org.tr"
+                          >
+                            bilgi@ehad.org.tr
+                          </a>
+                        </div>
+                      </div>
+                      <div className="info-item">
+                        <div className="info-icon">📞</div>
+                        <div>
+                          <a className="info-link" href="tel:+903123240034">
+                            +90 312 324 00 34
+                          </a>
+                        </div>
+                      </div>
+                      <div className="info-item">
+                        <div className="info-icon">⏰</div>
+                        <div>Pzt–Cum: 09:00–18:00</div>
+                      </div>
+                      <div className="info-item">
+                        <div className="info-icon">🌐</div>
+                        <div>
+                          <a className="info-link" href="https://www.ehad.org.tr/">
+                            ehad.org.tr
+                          </a>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="card map">
                   <div className="card-header">
-                    <div style={{ width: 12, height: 12, borderRadius: 999, background: "var(--pri-500)" }} />
+                    <div
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 999,
+                        background: "var(--pri-500)",
+                      }}
+                    />
                     <h2 className="card-title">Harita</h2>
                   </div>
                   <div className="card-body">
-                    <div className="ratio"><iframe title="Konum" loading="lazy" allowFullScreen src="https://www.google.com/maps?q=Ankara&output=embed"/></div>
+                    <div className="ratio">
+                      <iframe
+                        title="Konum"
+                        loading="lazy"
+                        allowFullScreen
+                        src="https://www.google.com/maps?q=Ankara&output=embed"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </section>
+          <HomeFooter />
         </main>
       </div>
     </>
