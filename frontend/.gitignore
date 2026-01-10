@@ -39,3 +39,9 @@ Thumbs.db
 # === Environment ===
 .env
 .env.*
+.venv/
+venv/
+**/.venv/
+**/venv/
+**/site-packages/
+backend/yedek/venv/
