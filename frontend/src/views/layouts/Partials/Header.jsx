@@ -112,13 +112,6 @@ function Header() {
             <Link to="/profile" className="btn btn-outline-secondary btn-sm rounded-pill">
               Profili Gör
             </Link>
-            <Link
-              to="/profile-edit"
-              className="btn btn-sm rounded-pill text-white"
-              style={{ backgroundColor: THEME.bordo }}
-            >
-              Ayarlar <i className="fas fa-gear fa-spin ms-1" />
-            </Link>
           </div>
         </div>
       </div>

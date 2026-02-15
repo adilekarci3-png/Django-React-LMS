@@ -204,6 +204,7 @@ import ProjeWeeklyUpload from "./views/ESKEPstajer/ProjeWeeklyUpload";
 import EskepApplication from "./views/ESKEP/EskepApplication";
 import KadinlarOrgChart from "./views/base/KadinlarOrgChart";
 import ErkeklerOrgChart from "./views/base/ErkeklerOrgChart";
+import ShowProfile from "./components/ShowProfile";
 
 
 const BASENAME = import.meta.env.VITE_BASENAME || "/test.akademi.ehad.org.tr";
@@ -297,6 +298,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <Search />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile/"
+              element={
+                <PrivateRoute>
+                  <ShowProfile />
                 </PrivateRoute>
               }
             />

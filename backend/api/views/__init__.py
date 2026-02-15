@@ -185,7 +185,9 @@ from .courses import (
     StudentRateCourseCreateAPIView,
     StudentRateCourseUpdateAPIView,
     StudentWishListListCreateAPIView,
-    CourseDeleteView
+    CourseDeleteView,
+    StudentEnrollCourseAPIView,
+    StudentDonationCreateAPIView
 )
 
 # --- qa (soru/cevap) ---
@@ -415,6 +417,8 @@ __all__ = [
     "StudentRateCourseUpdateAPIView",
     "StudentWishListListCreateAPIView",
     "CourseDeleteView",
+    "StudentEnrollCourseAPIView",
+    "StudentDonationCreateAPIView",
 
     # qa
     "QuestionAnswerListCreateAPIView",

@@ -154,6 +154,8 @@ urlpatterns = [
         api_views.CourseQuestionAnswerMessageCreateAPIView.as_view(),
         name="course-qa-create-alias",
     ),
+    path("student/enroll-course/", api_views.StudentEnrollCourseAPIView.as_view()),
+    path("student/create-donation/", api_views.StudentDonationCreateAPIView.as_view()),
 
     # HBS Temsilci
     path("agent/summary/<agent_id>/", api_views.AgentSummaryAPIView.as_view()),

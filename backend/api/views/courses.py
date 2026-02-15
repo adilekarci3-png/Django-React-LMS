@@ -405,3 +405,99 @@ class CourseVariantItemDeleteAPIVIew(generics.DestroyAPIView):
         course = api_models.Course.objects.get(teacher=teacher, course_id=course_id)
         variant = api_models.Variant.objects.get(variant_id=variant_id, course=course)
         return api_models.VariantItem.objects.get(variant=variant, variant_item_id=variant_item_id)
+
+
+from rest_framework import generics, status, permissions # permissions eklendi
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.db import transaction
+from decimal import Decimal
+from api import models as api_models
+from api import serializers as api_serializer
+
+class StudentEnrollCourseAPIView(generics.CreateAPIView):
+    """
+    Ücretsiz kurslar (0.00 TL) için doğrudan kayıt oluşturur.
+    """
+    serializer_class = api_serializer.EnrolledCourseSerializer
+    permission_classes = [permissions.AllowAny] 
+
+    def create(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id") or request.data.get("id")
+        course_id = request.data.get("course_id")
+
+        user = get_object_or_404(User, id=user_id)
+        course = get_object_or_404(api_models.Course, id=course_id)
+
+        if api_models.EnrolledCourse.objects.filter(user=user, course=course).exists():
+            return Response({"message": "Bu kursa zaten kayıtlısınız."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if Decimal(str(course.price)) == Decimal("0.00"):
+            try:
+                with transaction.atomic():
+                    order = api_models.CartOrder.objects.create(
+                        student=user,
+                        full_name=getattr(user, 'full_name', user.username),
+                        email=user.email
+                    )
+                    order.teachers.add(course.teacher)
+
+                    order_item = api_models.CartOrderItem.objects.create(
+                        order=order,
+                        course=course,
+                        teacher=course.teacher,
+                        price=Decimal("0.00"),
+                        total=Decimal("0.00"),
+                        initial_total=Decimal("0.00")
+                    )
+
+                    api_models.EnrolledCourse.objects.create(
+                        user=user,
+                        course=course,
+                        teacher=course.teacher,
+                        order_item=order_item
+                    )
+
+                return Response({"message": "Kursa başarıyla katıldınız!"}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({"message": f"Teknik hata: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"message": "Bu kurs bağış gerektiriyor."}, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+class StudentDonationCreateAPIView(generics.CreateAPIView):
+    """
+    Ücretli kurslar için sadece talep (CartOrder) oluşturur.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id") or request.data.get("id")
+        course_id = request.data.get("course_id")
+
+        user = get_object_or_404(User, id=user_id)
+        course = get_object_or_404(api_models.Course, id=course_id)
+
+        try:
+            with transaction.atomic():
+                order = api_models.CartOrder.objects.create(
+                    student=user,
+                    full_name=getattr(user, 'full_name', user.username),
+                    email=user.email
+                )
+                order.teachers.add(course.teacher)
+                
+                api_models.CartOrderItem.objects.create(
+                    order=order,
+                    course=course,
+                    teacher=course.teacher,
+                    price=course.price,
+                    total=course.price,
+                    initial_total=course.price
+                )
+
+            return Response({
+                "message": "Bağış talebiniz alındı, onay bekliyor.", 
+                "order_oid": order.oid
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"message": f"Hata: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

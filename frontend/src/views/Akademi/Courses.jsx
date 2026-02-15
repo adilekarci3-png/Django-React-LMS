@@ -38,6 +38,32 @@ function Courses() {
   const handleOpenModal = (course) => { setSelectedCourse(course); setShowJoinModal(true); };
   const handleCloseModal = () => { setShowJoinModal(false); setSelectedCourse(null); };
 
+  // Kursa katılma isteği atan fonksiyon
+const handleEnroll = async () => {
+  // profile.id kontrolü (Context'ten geliyor)
+  if (!profile?.id) {
+    alert("Lütfen önce giriş yapınız.");
+    return;
+  }
+
+  const payload = { id: profile.id, course_id: selectedCourse.id };
+  // Fiyatı sayıya çevirerek karşılaştır
+  const isFree = parseFloat(selectedCourse.price) === 0;
+
+  try {
+    const endpoint = isFree ? "student/enroll-course/" : "student/create-donation/";
+    const res = await api.post(endpoint, payload);
+    
+    alert(res.data.message);
+    
+    handleCloseModal();
+    fetchCourseData(); // Sayfadaki öğrenci sayısını güncelle
+  } catch (error) {
+    console.error("Enrollment error:", error);
+    alert(error.response?.data?.message || "İşlem sırasında bir hata oluştu.");
+  }
+};
+
   const getCategoryTitle = (category) => (typeof category === "object" ? category?.title : category);
 
   const fetchCourseData = () => {
@@ -149,7 +175,7 @@ function Courses() {
           return String(a.title || "").localeCompare(String(b.title || ""));
         case "popularity":
         default:
-          return (b.enrolled_students || 0) - (a.enrolled_students || 0);
+          return (b.students.length || 0) - (a.students.length || 0);
       }
     });
 
@@ -210,12 +236,12 @@ function Courses() {
             />
             <div className="d-flex justify-content-between align-items-center mt-auto">
               <small className="text-muted">
-                <i className="bi bi-people-fill me-1"></i>{course.enrolled_students || 0} öğrenci
+                <i className="bi bi-people-fill me-1"></i>{course.students.length || 0} öğrenci
               </small>
               <div className="d-flex gap-2 flex-wrap">
                 {course.price > 0 ? (
                   <button onClick={() => handleOpenModal(course)} className="btn btn-danger btn-sm">
-                    <i className="bi bi-credit-card me-1"></i> Satın Al
+                    <i className="bi bi-credit-card me-1"></i> Bağış Yap
                   </button>
                 ) : (
                   <button onClick={() => handleOpenModal(course)} className="btn btn-success btn-sm">
@@ -420,7 +446,7 @@ function Courses() {
             <div className="modal-content border-0 shadow-lg">
               <div className="modal-header bg-light">
                 <h5 className="modal-title">
-                  {selectedCourse.price > 0 ? "Kursu Satın Al" : "Kursa Katıl"}
+                  {selectedCourse.price > 0 ? "Kursa Bağış Yap" : "Kursa Katıl"}
                 </h5>
                 <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
@@ -446,7 +472,7 @@ function Courses() {
                       <span className="badge bg-warning text-dark">{getCategoryTitle(selectedCourse?.category) || "Kategorisiz"}</span>
                     </div>
                     <div className="mt-3 small">
-                      <div className="mb-1"><strong>Öğrenci Sayısı:</strong> {selectedCourse.enrolled_students || 0}</div>
+                      <div className="mb-1"><strong>Öğrenci Sayısı:</strong> {selectedCourse.students.length || 0}</div>
                       <div><strong>Fiyat:</strong> {selectedCourse.price > 0 ? `${selectedCourse.price} TL` : "Ücretsiz"}</div>
                     </div>
                   </div>
@@ -461,17 +487,18 @@ function Courses() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button className="btn btn-light" onClick={handleCloseModal}>Vazgeç</button>
-                {selectedCourse.price > 0 ? (
-                  <button className="btn btn-danger" onClick={() => { alert(`Satın alındı: ${selectedCourse.title}`); handleCloseModal(); }}>
-                    <i className="bi bi-credit-card me-1"></i> Satın Al
-                  </button>
-                ) : (
-                  <button className="btn btn-success" onClick={() => { alert(`Katıldınız: ${selectedCourse.title}`); handleCloseModal(); }}>
-                    <i className="bi bi-box-arrow-in-right me-1"></i> Katıl
-                  </button>
-                )}
-              </div>
+  <button className="btn btn-light" onClick={handleCloseModal}>Vazgeç</button>
+  
+  {selectedCourse.price > 0 ? (
+    <button className="btn btn-danger" onClick={handleEnroll}>
+      <i className="bi bi-credit-card me-1"></i> Bağış Yap ve Katıl
+    </button>
+  ) : (
+    <button className="btn btn-success" onClick={handleEnroll}>
+      <i className="bi bi-box-arrow-in-right me-1"></i> Kursa Katıl
+    </button>
+  )}
+</div>
             </div>
           </div>
         </div>

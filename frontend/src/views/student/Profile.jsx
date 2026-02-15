@@ -8,6 +8,10 @@ import { ProfileContext } from "../plugin/Context";
 import AkademiBaseFooter from "../partials/AkademiBaseFooter";
 import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 
+import AvatarCropModal from "@/components/AvatarCropModal";
+import { getCroppedFile } from "../../utils/cropImage";
+
+
 /*
   ✅ Tasarım iyileştirmeleri
   - Daha modern kart yapısı + yumuşak gölgeler
@@ -21,6 +25,10 @@ import AkademiBaseHeader from "../partials/AkademiBaseHeader";
 
 function Profile() {
   const [profile, setProfile] = useContext(ProfileContext);
+
+  const [cropOpen, setCropOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
+
 
   // Hook'lar
   const api = useAxios();
@@ -95,30 +103,24 @@ function Profile() {
   const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
+   const selectedFile = e.target.files?.[0];
+   if (!selectedFile) return;
 
-    // Boyut kontrolü
-    if (selectedFile.size > MAX_FILE_SIZE) {
-      setError("Lütfen 2MB'tan küçük bir görsel yükleyin.");
-      e.target.value = "";
-      return;
-    }
+   // aynı dosyayı tekrar seçebilsin diye
+   e.target.value = "";
 
-    setError("");
-    setSuccess("");
+   if (selectedFile.size > MAX_FILE_SIZE) {
+    setError("Lütfen 2MB'tan küçük bir görsel yükleyin.");
+    return;
+   }
 
-    // State'e File olarak yaz
-    setProfileData((p) => ({ ...p, image: selectedFile }));
+   setError("");
+   setSuccess("");
 
-    // Dosya meta
-    fileMetaRef.current = { name: selectedFile.name, size: selectedFile.size };
-
-    // Önceki blob URL'yi serbest bırak
-    revokePrevBlobUrl();
-    const blobUrl = URL.createObjectURL(selectedFile);
-    prevBlobUrlRef.current = blobUrl;
-    setImagePreview(blobUrl);
+   // sadece kırpma için bekletiyoruz
+   fileMetaRef.current = { name: selectedFile.name, size: selectedFile.size };
+   setPendingFile(selectedFile);
+   setCropOpen(true);
   };
 
   const handleReset = () => {
@@ -404,6 +406,37 @@ function Profile() {
           </div>
         </div>
       </section>
+      <AvatarCropModal
+  open={cropOpen}
+  file={pendingFile}
+  onClose={() => {
+    setCropOpen(false);
+    setPendingFile(null);
+  }}
+  onConfirm={async (areaPixels, imageUrl) => {
+    try {
+      const croppedFile = await getCroppedFile(imageUrl, areaPixels, 512);
+
+      // artık form submit bu dosyayı yollayacak
+      setProfileData((p) => ({ ...p, image: croppedFile }));
+
+      // preview'ı kırpılmış dosyaya çevir
+      revokePrevBlobUrl();
+      const blobUrl = URL.createObjectURL(croppedFile);
+      prevBlobUrlRef.current = blobUrl;
+      setImagePreview(blobUrl);
+
+      setCropOpen(false);
+      setPendingFile(null);
+    } catch (err) {
+      console.error(err);
+      setError("Görsel kırpılırken bir hata oluştu.");
+    }
+  }}
+/>
+
+
+
       <AkademiBaseFooter />
     </>
   );
