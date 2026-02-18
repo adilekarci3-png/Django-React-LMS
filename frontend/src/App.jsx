@@ -97,6 +97,8 @@ import DersSonuRaporuDetail from "./views/ESKEPinstructor/DersSonuRaporuDetail";
 import OdevDetail from "./views/ESKEPinstructor/OdevDetail";
 import ProjeDetail from "./views/ESKEPinstructor/ProjeDetail";
 import ESKEPContactMessages from "./views/base/ContactMessages";
+import EskepShowProfile from "./views/ESKEP/ShowProfileEskep";
+import EskepProfileEdit from "./views/ESKEP/ProfileEdit";
 
 //Eskep Instructor Pages
 import ESKEPinstructorCourseCreate from "./views/ESKEPinstructor/EskepInstructorCourseCreate";
@@ -138,6 +140,16 @@ import EskepStajerDersSonuRaporus from "./views/ESKEPstajer/EskepStajerDersSonuR
 import EskepStajerKitapTahlilis from "./views/ESKEPstajer/EskepStajerKitapTahlilis";
 import EskepStajerProjes from "./views/ESKEPstajer/EskepStajerProjes";
 import EskepStajerDashboard from "./views/ESKEPstajer/EskepStajerDashboard";
+import EskepStajerProfile from "./views/ESKEPstajer/Profile"
+import EskepStajerWishlist from "./views/ESKEPstajer/Wishlist"
+import EskepStajerQuestionAnswer from "./views/ESKEPstajer/QA";
+import EskepStajerQuestionAnswerDetail from "./views/ESKEPstajer/QADetail";
+import EskepStajerDersSonuRaporuDetail from "./views/ESKEPstajer/DersSonuRaporuDetail";
+import EskepStajerOdevDetail from "./views/ESKEPstajer/OdevDetail";
+import EskepStajerKitapTahliliDetail from "./views/ESKEPstajer/KitapTahliliDetail";
+import EskepStajerProjeDetail from "./views/ESKEPstajer/ProjeDetail";
+
+
 
 //Eskep Ogrenci Pages
 import EskepOgrenciDashboard from "./views/ESKEPstudent/Dashboard";
@@ -211,6 +223,7 @@ const BASENAME = import.meta.env.VITE_BASENAME || "/test.akademi.ehad.org.tr";
 
 function App() {
   const [profile, setProfile] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
   const rehydrated = useAuthStore((state) => state.rehydrated);
   const allUserData = useAuthStore((state) => state.allUserData);
   const user = useUserData();
@@ -239,7 +252,7 @@ function App() {
 
   return (
     <MainWrapper>
-      {/* <CartContext.Provider value={[cartCount, setCartCount]}> */}
+     <CartContext.Provider value={[cartCount, setCartCount]}>
       <ProfileContext.Provider value={[profile, setProfile]}>
         {/* <BrowserRouter basename={BASENAME}> */}
         <BrowserRouter>
@@ -729,6 +742,22 @@ function App() {
               }
             />
             <Route
+              path="/eskep/profile"
+              element={
+                <PrivateRoute>
+                  <EskepShowProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskep/profile-edit"
+              element={
+                <PrivateRoute>
+                  <EskepProfileEdit />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/eskep/dashboard"
               element={
                 <PrivateRoute>
@@ -1036,6 +1065,38 @@ function App() {
             />
             {/* ESKEP Stajer */}
             <Route
+              path="/eskepstajer/profile/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepstajer/wishlist/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerWishlist />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepstajer/question-answer/"
+              element={
+                <PrivateRoute>
+                  <EskepStajerQuestionAnswer />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepstajer/question-answer/course_id"
+              element={
+                <PrivateRoute>
+                  <EskepStajerQuestionAnswerDetail />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/eskepstajer/odevs/"
               element={
                 <PrivateRoute>
@@ -1044,10 +1105,10 @@ function App() {
               }
             />
             <Route
-              path="/eskepstajer/odevs/:id"
+              path="/eskepstajer/odevs/:id/:koordinator_id/"
               element={
                 <PrivateRoute>
-                  <OdevDetail />
+                  <EskepStajerOdevDetail />
                 </PrivateRoute>
               }
             />
@@ -1061,10 +1122,10 @@ function App() {
               }
             />
             <Route
-              path="/eskepstajer/derssonuraporus/:id"
+              path="/eskepstajer/derssonuraporus/:id/:koordinator_id/"
               element={
                 <PrivateRoute>
-                  <DersSonuRaporuDetail />
+                  <EskepStajerDersSonuRaporuDetail />
                 </PrivateRoute>
               }
             />
@@ -1077,10 +1138,10 @@ function App() {
               }
             />
             <Route
-              path="/eskepstajer/kitaptahlileris/:id"
+              path="/eskepstajer/kitaptahlileris/:id/:koordinator_id/"
               element={
                 <PrivateRoute>
-                  <KitapTahliliDetail />
+                  <EskepStajerKitapTahliliDetail />
                 </PrivateRoute>
               }
             />
@@ -1093,10 +1154,10 @@ function App() {
               }
             />
             <Route
-              path="/eskepstajer/projes/:id"
+              path="/eskepstajer/projes/:id/:koordinator_id/"
               element={
                 <PrivateRoute>
-                  <ProjeDetail />
+                  <EskepStajerProjeDetail />
                 </PrivateRoute>
               }
             />
@@ -1336,7 +1397,7 @@ function App() {
           </Routes>
         </BrowserRouter>
       </ProfileContext.Provider>
-      {/* </CartContext.Provider> */}
+     </CartContext.Provider>
     </MainWrapper>
   );
 }

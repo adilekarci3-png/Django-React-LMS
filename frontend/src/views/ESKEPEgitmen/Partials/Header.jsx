@@ -32,10 +32,10 @@ function Header() {
             </div>
             <div>
               <a
-                href="profile-edit.html"
-                className="btn btn-primary btn-sm d-none d-md-block"
+                href="/eskep/profile"
+                className="btn btn-sm btn-primary"
               >
-                Hesap Ayarları <i className="fas fa-gear fa-spin"></i>
+                Profili Gör
               </a>
             </div>
           </div>

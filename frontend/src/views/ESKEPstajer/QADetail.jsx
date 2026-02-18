@@ -16,10 +16,11 @@ function QADetail() {
                     {/* Header Here */}
                     <Header />
                     <div className="row mt-0 mt-md-4">
-                        {/* Sidebar Here */}
-                        <Sidebar />
-                        <div className="col-lg-10 col-md-8 col-12">
-                            <h4 className="mb-0 mb-4"> <i className='fas fa-envelope'></i> Soru/Cevap - Yasin Süresi Tefsiri</h4>
+                        <div className="col-lg-3 col-md-4 col-12">
+                           <Sidebar />
+                        </div>
+                        <div className="col-lg-9 col-md-8 col-12">
+                            <h4 className="mb-0 mb-4"> <i className='fas fa-envelope text-primary'></i> Soru/Cevap - Yasin Süresi Tefsiri</h4>
 
                             <div className="card mb-4">
                                 <div className="card-header">

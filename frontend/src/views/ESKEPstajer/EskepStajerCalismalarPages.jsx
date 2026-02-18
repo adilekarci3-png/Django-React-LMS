@@ -304,7 +304,7 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
             <div className="col-lg-9 col-md-9 col-12">
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                 <h4 className="mb-0 d-flex align-items-center gap-2">
-                  <i className="fas fa-chalkboard-user" />
+                  <i className="fas fa-chalkboard-user text-info " />
                   {pageTitle}
                 </h4>
                 <div className="text-muted small">

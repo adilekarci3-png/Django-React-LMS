@@ -1,5 +1,6 @@
 // KitapTahliliCreate.jsx
 import { useState, useEffect, useMemo } from "react";
+import { Link , useNavigate} from "react-router-dom";
 import { FiSave, FiPlus, FiTrash2, FiUpload, FiImage } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
@@ -23,6 +24,7 @@ const MAX_IMAGE_MB = 5;
 
 function KitapTahliliCreate() {
   const api = useAxios();
+  const navigate = useNavigate();
 
   // Hem hook hem fallback (ortama göre biri boş olabilir)
   const userHook = useUserData();
@@ -186,6 +188,7 @@ function KitapTahliliCreate() {
       await api.post(`eskepstajer/kitaptahlili-create/`, fd);
       Swal.fire({ icon: "success", title: "Kitap Tahlili başarıyla oluşturuldu" });
       resetForm();
+      navigate("/eskepstajer/kitaptahlileris");
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -213,6 +216,9 @@ function KitapTahliliCreate() {
               <form onSubmit={handleSubmit}>
                 <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                   <h2 className="mb-0">📘 Kitap Tahlili Oluştur</h2>
+                  <Link to="/eskepstajer/kitaptahlileris" className="btn btn-light">
+                     ← Listeye Dön
+                  </Link>
                 </div>
 
                 {/* Genel Bilgiler */}

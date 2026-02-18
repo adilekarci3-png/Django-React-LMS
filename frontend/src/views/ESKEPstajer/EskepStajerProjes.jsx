@@ -4,6 +4,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
+import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Modal from "react-modal";
@@ -85,15 +86,17 @@ function EskepStajerProjes() {
   const fileName = (f) =>
     (typeof f === "object" && (f?.filename || f?.name)) || undefined;
 
-  const statusBadge = (s) => {
-    const map = {
-      Approved: "badge bg-success",
-      Pending: "badge bg-warning text-dark",
-      Rejected: "badge bg-danger",
-      Draft: "badge bg-secondary",
-    };
-    return map[s] || "badge bg-light text-dark";
-  };
+   const normalizeStatus = (s) => String(s || "").toLocaleLowerCase("tr").trim();
+  const statusBadge = (status) => {
+  const t = normalizeStatus(status);
+  if (t.includes("incele")) return "badge bg-info";
+  if (t.includes("taslak")) return "badge bg-secondary";
+  if (t.includes("pasif")) return "badge bg-dark";
+  if (t.includes("redd")) return "badge bg-danger";
+  if (t.includes("teslim edildi") || t.includes("onay") || t.includes("tamam"))
+    return "badge bg-success";
+  return "badge bg-light text-dark";
+};
 
   const fetchData = useCallback(() => {
     if (!user?.user_id) return;
@@ -134,10 +137,7 @@ function EskepStajerProjes() {
     }
     if (statusFilter !== "all") {
       data = data.filter(
-        (p) =>
-          (p.eskepProje_status || "")
-            .toLowerCase()
-            .replace(" ", "") === statusFilter
+        (p) => (p.eskepProje_status || "") === statusFilter
       );
     }
     if (koorFilter !== "all") {
@@ -182,10 +182,37 @@ function EskepStajerProjes() {
     setModalIsOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (!window.confirm("Bu projeyi silmek istediğinize emin misiniz?"))
-      return;
-    api.delete(`/eskepstajer/proje/${id}/`).then(() => fetchData());
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Emin misiniz?",
+      text: "Bu projeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Evet, sil",
+      cancelButtonText: "İptal",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`eskepstajer/proje-delete/${id}/`);
+      fetchData();
+      Swal.fire({
+        title: "Silindi!",
+        text: "Proje başarıyla silindi.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (e) {
+      console.error(e);
+      Swal.fire({
+        title: "Hata!",
+        text: "Silme işlemi sırasında bir sorun oluştu.",
+        icon: "error",
+        confirmButtonText: "Tamam",
+      });
+    }
   };
 
   // image placeholder
@@ -334,7 +361,7 @@ function EskepStajerProjes() {
             <div className="col-lg-9 col-md-8 col-12">
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                 <h4 className="mb-0">
-                  <i className="fas fa-project-diagram me-2"></i> Projelerim
+                  <i className="fas fa-project-diagram text-danger me-2"></i> Projelerim
                 </h4>
                 <div className="text-muted small">
                   {fetching ? "Yükleniyor..." : `${projeler.length} kayıt`}
@@ -384,10 +411,11 @@ function EskepStajerProjes() {
                         aria-label="Duruma göre filtrele"
                       >
                         <option value="all">Tümü</option>
-                        <option value="approved">approved</option>
-                        <option value="pending">pending</option>
-                        <option value="rejected">rejected</option>
-                        <option value="draft">draft</option>
+                        <option value="İncelemede">İncelemede</option>
+                        <option value="Taslak">Taslak</option>
+                        <option value="Pasif">Pasif</option>
+                        <option value="Reddedilmiş">Reddedilmiş</option>
+                        <option value="Teslim Edildi">Teslim Edildi</option>
                       </select>
                     </div>
                     <div className="col-6 col-md-3">
@@ -458,7 +486,7 @@ function EskepStajerProjes() {
                         <th>Durum</th>
                         <th>Koordinatör</th>
                         <th>Koordinatördeki Durumu</th>
-                        <th className="text-end">İşlemler</th>
+                        <th className="text-center">İşlemler</th>
                       </tr>
                     </thead>
 
@@ -556,11 +584,7 @@ function EskepStajerProjes() {
 
                               <td data-label="Koordinatör">
                                 <div className="d-flex align-items-center">
-                                  <div className="eskep-avatar">
-                                    {(p?.koordinator?.full_name || "?")
-                                      .slice(0, 2)
-                                      .toUpperCase()}
-                                  </div>
+                            
                                   <span className="ms-2">
                                     {p.koordinator?.full_name || "-"}
                                   </span>
@@ -571,51 +595,41 @@ function EskepStajerProjes() {
                                 {p.koordinator_eskepProje_status || "-"}
                               </td>
 
-                              <td className="text-end" data-label="İşlemler">
-                                <div
-                                  className="btn-group"
-                                  role="group"
-                                  aria-label="İşlemler"
-                                >
+                              <td className="text-center" data-label="İşlemler">
+                                <div className="d-flex align-items-center justify-content-center gap-1">
                                   <Link
                                     to={`/eskep/edit-proje/${p.id}`}
-                                    className="btn btn-sm btn-outline-warning"
+                                    className="btn btn-sm btn-outline-warning icon-btn"
                                     title="Düzenle"
                                   >
-                                    <FiEdit3 className="me-1" />
-                                    Düzenle
+                                    <FiEdit3 size={15} />
                                   </Link>
 
                                   <button
-                                    className="btn btn-sm btn-outline-danger"
+                                    className="btn btn-sm btn-outline-danger icon-btn"
                                     onClick={() => handleDelete(p.id)}
                                     title="Sil"
                                   >
-                                    <FiTrash2 className="me-1" />
-                                    Sil
+                                    <FiTrash2 size={15} />
                                   </button>
 
                                   {filesExist(p) && (
                                     <button
-                                      className="btn btn-sm btn-outline-info"
+                                      className="btn btn-sm btn-outline-info icon-btn"
                                       onClick={() => openModal(p)}
                                       title="Bölümleri Görüntüle"
                                     >
-                                      <FiFolder className="me-1" />
-                                      Bölümler
+                                      <FiFolder size={15} />
                                     </button>
                                   )}
 
-                                  {/* YENİ: sadece onaylanmış projelerde haftalık içerik butonu */}
-                                  {p?.eskepProje_status?.toLowerCase() ===
-                                    "approved" && (
+                                  {p?.eskepProje_status?.toLowerCase() === "approved" && (
                                     <button
-                                      className="btn btn-sm btn-outline-primary"
+                                      className="btn btn-sm btn-outline-primary icon-btn"
                                       onClick={() => openWeeklyModal(p)}
                                       title="Haftalık İçerik"
                                     >
-                                      <FiFileText className="me-1" />
-                                      Haftalık
+                                      <FiFileText size={15} />
                                     </button>
                                   )}
                                 </div>
