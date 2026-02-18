@@ -48,7 +48,7 @@ function EducationSchedule() {
     <>
   <ESKEPBaseHeader />
   <section className="pt-5 pb-5 bg-light">
-    <div className="container">
+    <div className="container-xxl">
       <Header />
       <div className="row mt-0 mt-md-4 align-items-start">
         {/* Sidebar */}

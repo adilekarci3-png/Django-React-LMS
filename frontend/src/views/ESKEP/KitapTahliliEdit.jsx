@@ -285,7 +285,7 @@ function KitapTahliliEdit() {
             <form className="col-lg-9 col-md-9 col-12" onSubmit={handleSubmit}>
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                 <h2 className="mb-0">✏️ Kitap Tahlili Düzenle</h2>
-                <Link to="/stajer/kitaptahlillerim" className="btn btn-light">
+                <Link to="/eskepstajer/kitaptahlileris" className="btn btn-light">
                   ← Listeye Dön
                 </Link>
               </div>

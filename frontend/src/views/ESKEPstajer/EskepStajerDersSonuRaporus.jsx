@@ -29,11 +29,27 @@ Modal.setAppElement("#root");
 // --- helpers ---
 const LANG_MAP = { Turkce: "Türkçe", Ingilizce: "İngilizce", Arapca: "Arapça" };
 const LEVEL_MAP = { Baslangic: "Başlangıç", Orta: "Orta", "Ileri Seviye": "İleri Seviye" };
+const LANG_OPTIONS = Object.entries(LANG_MAP).map(([value, label]) => ({ value, label }));
+const LEVEL_OPTIONS = Object.entries(LEVEL_MAP).map(([value, label]) => ({ value, label }));
 
 const normKey = (s) => String(s || "").toLocaleLowerCase("tr").trim();
+const normLang = (v) => {
+  const s = String(v || "").toLowerCase();
+  if (s === "turkce" || s === "türkçe") return "Turkce";
+  if (s === "ingilizce") return "Ingilizce";
+  if (s === "arapca" || s === "arapça") return "Arapca";
+  return "";
+};
+const normLevel = (v) => {
+  const s = String(v || "").toLowerCase();
+  if (s === "baslangic" || s === "başlangıç") return "Baslangic";
+  if (s === "orta") return "Orta";
+  if (s === "ileri seviye" || s === "ileri" || s === "ileri-seviye") return "Ileri Seviye";
+  return "";
+};
 const statusBadge = (status) => {
   const t = normKey(status);
-  if (t.includes("incele")) return "badge bg-warning text-dark";
+  if (t.includes("incele")) return "badge bg-info";
   if (t.includes("taslak")) return "badge bg-secondary";
   if (t.includes("pasif")) return "badge bg-dark";
   if (t.includes("redd")) return "badge bg-danger";
@@ -80,6 +96,8 @@ function EskepStajerDersSonuRaporus() {
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [koorFilter, setKoorFilter] = useState("all");
+  const [langFilter, setLangFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -142,11 +160,16 @@ function EskepStajerDersSonuRaporus() {
       data = data.filter((r) => (r.title || "").toLocaleLowerCase("tr").includes(qq));
     }
     if (statusFilter !== "all") {
-      const sf = statusFilter.toLocaleLowerCase("tr");
-      data = data.filter((r) => normKey(r.derssonuraporu_status).includes(sf));
+      data = data.filter((r) => (r.derssonuraporu_status || "") === statusFilter);
     }
     if (koorFilter !== "all") {
       data = data.filter((r) => (r.koordinator?.full_name || "") === koorFilter);
+    }
+    if (langFilter !== "all") {
+      data = data.filter((r) => normLang(r.language) === langFilter);
+    }
+    if (levelFilter !== "all") {
+      data = data.filter((r) => normLevel(r.level) === levelFilter);
     }
     if (dateFrom) {
       data = data.filter((r) => r.date && moment(r.date).isSameOrAfter(moment(dateFrom)));
@@ -157,7 +180,7 @@ function EskepStajerDersSonuRaporus() {
 
     setRows(data);
     setPage(1);
-  }, [q, statusFilter, koorFilter, dateFrom, dateTo, allRows]);
+  }, [q, statusFilter, koorFilter, langFilter, levelFilter, dateFrom, dateTo, allRows]);
 
   // sayfalama
   const totalPages = Math.max(1, Math.ceil((rows?.length || 0) / pageSize));
@@ -192,10 +215,10 @@ function EskepStajerDersSonuRaporus() {
 
     try {
       setDeletingId(id);
-      await api.delete(`/eskepstajer/derssonuraporu/${id}/`);
+      await api.delete(`/eskepstajer/derssonuraporu-delete/${id}/`);
       await fetchData();
       Swal.fire({ icon: "success", title: "Silindi", timer: 1200, showConfirmButton: false });
-    } catch {
+    } catch (e) {
       Swal.fire({ icon: "error", title: "Silme başarısız" });
     } finally {
       setDeletingId(null);
@@ -220,7 +243,7 @@ function EskepStajerDersSonuRaporus() {
             <div className="col-lg-9 col-md-9 col-12">
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                 <h4 className="mb-0">
-                  <i className="fas fa-chalkboard-user me-2" />
+                  <i className="fas fa-chalkboard-user text-info me-2" />
                   Ders Sonu Raporlarım
                 </h4>
                 <div className="text-muted small">
@@ -232,9 +255,9 @@ function EskepStajerDersSonuRaporus() {
                 <div className="card-header">
                   <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <div>
-                      <h3 className="mb-0">Ders Sonu Raporları</h3>
+                      <h3 className="mb-0">Ders Sonu Rapor Listesi</h3>
                       <span className="text-muted">
-                        Panelinizden raporlarınızı takip edin ve yönetin.
+                        Staj sürecindeki rapor çalışmalarınızı buradan takip edebilirsiniz.
                       </span>
                     </div>
                     <Link to="/eskep/create-derssonuraporu" className="btn btn-primary">
@@ -272,15 +295,15 @@ function EskepStajerDersSonuRaporus() {
                         aria-label="Duruma göre filtrele"
                       >
                         <option value="all">Tümü</option>
-                        <option value="incelemede">İncelemede</option>
-                        <option value="taslak">Taslak</option>
-                        <option value="pasif">Pasif</option>
-                        <option value="reddedilmiş">Reddedilmiş</option>
-                        <option value="teslim">Teslim Edildi</option>
+                        <option value="İncelemede">İncelemede</option>
+                        <option value="Taslak">Taslak</option>
+                        <option value="Pasif">Pasif</option>
+                        <option value="Reddedilmiş">Reddedilmiş</option>
+                        <option value="Teslim Edildi">Teslim Edildi</option>
                       </select>
                     </div>
 
-                    <div className="col-6 col-md-3">
+                    <div className="col-6 col-md-2">
                       <label className="form-label">Koordinatör</label>
                       <select
                         className="form-select"
@@ -297,7 +320,35 @@ function EskepStajerDersSonuRaporus() {
                       </select>
                     </div>
 
-                    <div className="col-6 col-md-1">
+                    <div className="col-6 col-md-2">
+                      <label className="form-label">Dil</label>
+                      <select
+                        className="form-select"
+                        value={langFilter}
+                        onChange={(e) => setLangFilter(e.target.value)}
+                      >
+                        <option value="all">Tümü</option>
+                        {LANG_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-6 col-md-2">
+                      <label className="form-label">Seviye</label>
+                      <select
+                        className="form-select"
+                        value={levelFilter}
+                        onChange={(e) => setLevelFilter(e.target.value)}
+                      >
+                        <option value="all">Tümü</option>
+                        {LEVEL_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-6 col-md-2">
                       <label className="form-label">Başlangıç</label>
                       <input
                         type="date"
@@ -307,7 +358,7 @@ function EskepStajerDersSonuRaporus() {
                         aria-label="Başlangıç tarihi"
                       />
                     </div>
-                    <div className="col-6 col-md-1">
+                    <div className="col-6 col-md-2">
                       <label className="form-label">Bitiş</label>
                       <input
                         type="date"
@@ -318,13 +369,15 @@ function EskepStajerDersSonuRaporus() {
                       />
                     </div>
 
-                    <div className="col-12 col-md-1 d-grid">
+                    <div className="col-12 col-md-2 d-grid">
                       <button
                         className="btn btn-outline-secondary"
                         onClick={() => {
                           setQ("");
                           setStatusFilter("all");
                           setKoorFilter("all");
+                          setLangFilter("all");
+                          setLevelFilter("all");
                           setDateFrom("");
                           setDateTo("");
                           setRows(allRows);
@@ -348,7 +401,7 @@ function EskepStajerDersSonuRaporus() {
                         <th>Bölümler</th>
                         <th>Durum</th>
                         <th>Koordinatör</th>
-                        <th className="text-end">İşlemler</th>
+                        <th className="text-center">İşlemler</th>
                       </tr>
                     </thead>
 
@@ -413,54 +466,36 @@ function EskepStajerDersSonuRaporus() {
                             </td>
 
                             <td data-label="Koordinatör">
-                              <div className="d-flex align-items-center">
-                                <div
-                                  className="d-inline-flex align-items-center justify-content-center"
-                                  style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 8,
-                                    background: "#e9ecef",
-                                    fontSize: 12,
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  {(c?.koordinator?.full_name || "?").slice(0, 2).toUpperCase()}
-                                </div>
-                                <span className="ms-2">{c.koordinator?.full_name || "-"}</span>
-                              </div>
+                              {c.koordinator?.full_name || "—"}
                             </td>
 
-                            <td className="text-end" data-label="İşlemler">
-                              <div className="btn-group" role="group" aria-label="İşlemler">
+                            <td className="text-center" data-label="İşlemler">
+                              <div className="d-flex align-items-center justify-content-center gap-1">
                                 <Link
                                   to={`/eskep/edit-derssonuraporu/${c.id}`}
-                                  className="btn btn-sm btn-outline-warning"
+                                  className="btn btn-sm btn-outline-warning icon-btn"
                                   title="Düzenle"
                                 >
-                                  <FiEdit3 className="me-1" />
-                                  Düzenle
+                                  <FiEdit3 size={15} />
                                 </Link>
 
                                 {filesExist(c) && (
                                   <button
-                                    className="btn btn-sm btn-outline-info"
+                                    className="btn btn-sm btn-outline-info icon-btn"
                                     onClick={() => openModal(c)}
                                     title="Bölümleri Görüntüle"
                                   >
-                                    <FiFolder className="me-1" />
-                                    Bölümler
+                                    <FiFolder size={15} />
                                   </button>
                                 )}
 
                                 <button
-                                  className="btn btn-sm btn-outline-danger"
+                                  className="btn btn-sm btn-outline-danger icon-btn"
                                   disabled={deletingId === c.id}
                                   onClick={() => handleDelete(c.id)}
                                   title="Kaydı sil"
                                 >
-                                  <FiTrash2 className="me-1" />
-                                  {deletingId === c.id ? "Siliniyor..." : "Sil"}
+                                  <FiTrash2 size={15} />
                                 </button>
                               </div>
                             </td>

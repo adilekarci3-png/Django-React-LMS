@@ -45,10 +45,10 @@ function Header() {
             </div>
             <div>
               <a
-                href="/profile-edit"
+                href="/eskep/profile"
                 className="btn btn-sm btn-primary"
               >
-                Hesap Ayarları <i className="fas fa-gear fa-spin ms-1" />
+                Profili Gör
               </a>
             </div>
           </div>

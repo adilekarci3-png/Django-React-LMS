@@ -228,11 +228,13 @@ function ProjeEdit() {
         <div className="container">
           <Header />
           <div className="row mt-0 mt-md-4">
+            <div className="col-lg-3 col-md-4 col-12 mb-4">
             <Sidebar />
+            </div>
             <form className="col-lg-9 col-md-8 col-12" onSubmit={handleSubmit}>
               <div className="d-flex align-items-center justify-content-between">
                 <h2 className="mb-4">✏️ Ödev Düzenle</h2>
-                <Link to="/stajer/projelerim" className="btn btn-light">← Listeye Dön</Link>
+                <Link to="/eskepstajer/projes" className="btn btn-light">← Listeye Dön</Link>
               </div>
 
               {loading ? (

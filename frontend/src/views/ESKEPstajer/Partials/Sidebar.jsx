@@ -48,8 +48,8 @@ function Sidebar() {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-dark" to={`/student/wishlist/`}>
-                  <i className="fas fa-heart text-pink me-2"></i> İstekler
+                <Link className="nav-link text-dark" to={`/eskepstajer/wishlist/`}>
+                  <i className="fas fa-heart text-danger me-2"></i> İstekler
                 </Link>
               </li>
             </ul>
@@ -93,7 +93,7 @@ function Sidebar() {
             <h6 className="text-uppercase text-muted px-2 mb-2">Hesap Ayarları</h6>
             <ul className="list-unstyled ms-n2">
               <li className="nav-item">
-                <Link className="nav-link text-dark" to={`/student/profile/`}>
+                <Link className="nav-link text-dark" to={`/eskep/profile-edit/`}>
                   <i className="fas fa-edit text-secondary me-2"></i> Profil Düzenle
                 </Link>
               </li>

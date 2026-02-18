@@ -154,13 +154,14 @@ function ProjeCreate() {
     <>
       <ESKEPBaseHeader />
       <section className="pt-5 pb-5">
-        <div className="container">
+        <div className="container-xxl">
           <Header />
           <div className="row mt-0 mt-md-4">
             <div className="col-lg-3 col-md-3 col-12 mb-4 mb-md-0">
-                         <Sidebar />
-                       </div>
-            <form className="col-lg-9 col-md-8 col-12" onSubmit={handleSubmit}>
+              <Sidebar />
+            </div>
+          <div className="col-lg-9 col-md-9 col-12">
+            <form onSubmit={handleSubmit}>
               <h2 className="mb-4">📘 Proje Oluştur</h2>
 
               <div className="mb-3">
@@ -275,6 +276,7 @@ function ProjeCreate() {
                 Proje Oluştur
               </button>
             </form>
+          </div>
           </div>
         </div>
       </section>

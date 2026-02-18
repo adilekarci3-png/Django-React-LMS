@@ -1,9 +1,10 @@
 // EskepStajerOdevs.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import Modal from "react-modal";
-import { FiFileText, FiExternalLink, FiDownload, FiX, FiSearch } from "react-icons/fi";
+import { FiFileText, FiExternalLink, FiDownload, FiX, FiSearch, FiFile, FiTrash2, FiEdit3 } from "react-icons/fi";
 
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
@@ -13,7 +14,6 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 import "./css/ModalStyle.css";
-import "./css/eskep-stajer-projes.css";
 
 Modal.setAppElement("#root");
 
@@ -54,25 +54,17 @@ function EskepStajerOdevs() {
   const levelLabel = (v) => LEVEL_MAP[normLevel(v)] || "—";
 
   // === Durum normalize + rozet ===
-  const normalizeStatus = (s) => {
-    const t = String(s || "").toLowerCase();
-    if (["approved", "onaylandı", "onaylandi", "tamamlandı", "tamamlandi", "completed"].includes(t)) return "approved";
-    if (["pending", "bekliyor", "waiting"].includes(t)) return "pending";
-    if (["rejected", "reddedildi", "red"].includes(t)) return "rejected";
-    if (["draft", "taslak"].includes(t)) return "draft";
-    return t || "";
-  };
-  const statusBadge = (s) => {
-    const n = normalizeStatus(s);
-    const map = {
-      approved: "badge bg-success",
-      pending: "badge bg-warning text-dark",
-      rejected: "badge bg-danger",
-      draft: "badge bg-secondary",
-    };
-    const cls = map[n] || "badge bg-light text-dark";
-    return <span className={cls}>{s || "—"}</span>;
-  };
+  const normalizeStatus = (s) => String(s || "").toLocaleLowerCase("tr").trim();
+  const statusBadge = (status) => {
+  const t = normalizeStatus(status);
+  if (t.includes("incele")) return "badge bg-info";
+  if (t.includes("taslak")) return "badge bg-secondary";
+  if (t.includes("pasif")) return "badge bg-dark";
+  if (t.includes("redd")) return "badge bg-danger";
+  if (t.includes("teslim edildi") || t.includes("onay") || t.includes("tamam"))
+    return "badge bg-success";
+  return "badge bg-light text-dark";
+};
 
   // === Veri & UI durumları ===
   const [allOdevs, setAllOdevs] = useState([]);
@@ -151,40 +143,42 @@ function EskepStajerOdevs() {
   };
 
   // Filtre uygula
-  const applyFilters = () => {
+  useEffect(() => {
     let data = [...allOdevs];
 
     if (q.trim()) {
       const qq = q.trim().toLowerCase();
       data = data.filter((p) => (p.title || "").toLowerCase().includes(qq));
     }
+    
+    // Durum Filtresi: backend değerleriyle birebir karşılaştırma
     if (statusFilter !== "all") {
-      data = data.filter((p) => normalizeStatus(p?.odev_status) === statusFilter);
+      data = data.filter((p) => (p.odev_status || "") === statusFilter);
     }
+
     if (koorFilter !== "all") {
-      data = data.filter((p) => (p?.koordinator?.full_name || "") === koorFilter);
+      data = data.filter((p) => (p.koordinator?.full_name || "") === koorFilter);
     }
+
     if (langFilter !== "all") {
-      data = data.filter((p) => normLang(p?.language) === langFilter);
+      data = data.filter((p) => normLang(p.language) === langFilter);
     }
+
     if (levelFilter !== "all") {
-      data = data.filter((p) => normLevel(p?.level) === levelFilter);
+      data = data.filter((p) => normLevel(p.level) === levelFilter);
     }
+
     if (dateFrom) {
       data = data.filter((p) => p.date && moment(p.date).isSameOrAfter(moment(dateFrom)));
     }
+
     if (dateTo) {
       data = data.filter((p) => p.date && moment(p.date).isSameOrBefore(moment(dateTo)));
     }
 
     setOdevs(data);
     setPage(1);
-  };
-
-  useEffect(() => {
-    applyFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, koorFilter, langFilter, levelFilter, dateFrom, dateTo, allOdevs]);
+  }, [q, statusFilter, koorFilter, langFilter, levelFilter, dateFrom, dateTo, allOdevs]);
 
   // Sayfalama verisi
   const totalPages = Math.max(1, Math.ceil((odevs?.length || 0) / pageSize));
@@ -203,14 +197,35 @@ function EskepStajerOdevs() {
 
   // Silme
   const onDelete = async (id) => {
-    const ok = window.confirm("Bu ödevi silmek istediğinize emin misiniz?");
-    if (!ok) return;
+    const result = await Swal.fire({
+      title: "Emin misiniz?",
+      text: "Bu ödevi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Evet, sil",
+      cancelButtonText: "İptal",
+    });
+    if (!result.isConfirmed) return;
     try {
-      await api.delete(`/eskepstajer/odev/${id}/`);
+      await api.delete(`eskepstajer/odev-delete/${id}/`);
       fetchData();
+      Swal.fire({
+        title: "Silindi!",
+        text: "Ödev başarıyla silindi.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (e) {
       console.error(e);
-      alert("Silme işlemi sırasında bir sorun oluştu.");
+      Swal.fire({
+        title: "Hata!",
+        text: "Silme işlemi sırasında bir sorun oluştu.",
+        icon: "error",
+        confirmButtonText: "Tamam",
+      });
     }
   };
 
@@ -239,7 +254,7 @@ function EskepStajerOdevs() {
             <div className="col-lg-9 col-md-8 col-12">
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                 <h4 className="mb-0">
-                  <i className="fas fa-chalkboard-user me-2"></i> Ödevlerim
+                  <i className="fas fa-chalkboard-user text-success me-2"></i> Ödevlerim
                 </h4>
                 <div className="text-muted small">
                   {fetching ? "Yükleniyor..." : `${odevs.length} kayıt`}
@@ -287,90 +302,62 @@ function EskepStajerOdevs() {
                         className="form-select"
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        aria-label="Duruma göre filtrele"
                       >
                         <option value="all">Tümü</option>
-                        <option value="approved">Approved/Onaylandı</option>
-                        <option value="pending">Pending/Bekliyor</option>
-                        <option value="rejected">Rejected/Reddedildi</option>
-                        <option value="draft">Draft/Taslak</option>
+                        <option value="İncelemede">İncelemede</option>
+                        <option value="Taslak">Taslak</option>
+                        <option value="Pasif">Pasif</option>
+                        <option value="Reddedilmiş">Reddedilmiş</option>
+                        <option value="Teslim Edildi">Teslim Edildi</option>
                       </select>
                     </div>
 
                     <div className="col-6 col-md-2">
                       <label className="form-label">Koordinatör</label>
-                      <select
-                        className="form-select"
-                        value={koorFilter}
-                        onChange={(e) => setKoorFilter(e.target.value)}
-                        aria-label="Koordinatöre göre filtrele"
-                      >
+                      <select className="form-select" value={koorFilter} onChange={(e) => setKoorFilter(e.target.value)}>
                         <option value="all">Tümü</option>
-                        {koordinatorOptions.map((k) => (
-                          <option key={k} value={k}>
-                            {k}
-                          </option>
-                        ))}
+                        {koordinatorOptions.map(k => <option key={k} value={k}>{k}</option>)}
                       </select>
                     </div>
 
                     <div className="col-6 col-md-2">
                       <label className="form-label">Dil</label>
-                      <select
-                        className="form-select"
-                        value={langFilter}
-                        onChange={(e) => setLangFilter(e.target.value)}
-                        aria-label="Dile göre filtrele"
-                      >
+                      <select className="form-select" value={langFilter} onChange={(e) => setLangFilter(e.target.value)}>
                         <option value="all">Tümü</option>
-                        {LANG_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
+                        {LANG_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </div>
 
                     <div className="col-6 col-md-2">
                       <label className="form-label">Seviye</label>
-                      <select
-                        className="form-select"
-                        value={levelFilter}
-                        onChange={(e) => setLevelFilter(e.target.value)}
-                        aria-label="Seviyeye göre filtrele"
-                      >
+                      <select className="form-select" value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}>
                         <option value="all">Tümü</option>
-                        {LEVEL_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>
-                            {o.label}
-                          </option>
-                        ))}
+                        {LEVEL_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
                     </div>
 
-                    <div className="col-6 col-md-1">
-                      <label className="form-label">Başlangıç</label>
+                    {/* Alt Satır: Tarihler ve Temizle Butonu */}
+                    <div className="col-6 col-md-2">
+                      <label className="form-label">Başlangıç Tarihi</label>
                       <input
                         type="date"
                         className="form-control"
                         value={dateFrom}
                         onChange={(e) => setDateFrom(e.target.value)}
-                        aria-label="Başlangıç tarihi"
                       />
                     </div>
 
-                    <div className="col-6 col-md-1">
-                      <label className="form-label">Bitiş</label>
+                    <div className="col-6 col-md-2">
+                      <label className="form-label">Bitiş Tarihi</label>
                       <input
                         type="date"
                         className="form-control"
                         value={dateTo}
                         onChange={(e) => setDateTo(e.target.value)}
-                        aria-label="Bitiş tarihi"
                       />
                     </div>
 
-                    <div className="col-12 col-md-1 d-grid">
+                    <div className="col-12 col-md-2 d-grid">
                       <button
                         className="btn btn-outline-secondary"
                         onClick={() => {
@@ -384,7 +371,6 @@ function EskepStajerOdevs() {
                           setOdevs(allOdevs);
                           setPage(1);
                         }}
-                        title="Filtreleri temizle"
                       >
                         Temizle
                       </button>
@@ -402,7 +388,7 @@ function EskepStajerOdevs() {
                         <th>Bölümler</th>
                         <th>Durum</th>
                         <th>Koordinatör</th>
-                        <th className="text-end">İşlemler</th>
+                        <th className="text-center">İşlemler</th>
                       </tr>
                     </thead>
 
@@ -453,37 +439,41 @@ function EskepStajerOdevs() {
                               {Array.isArray(c?.curriculum) ? c.curriculum.length : 0}
                             </td>
 
-                            <td data-label="Durum">{statusBadge(c?.odev_status)}</td>
+                            <td data-label="Durum"><span className={statusBadge(c.odev_status)} style={{ minWidth: "90px", display: "inline-block" }}>
+                                {c.odev_status || "—"}
+                              </span></td>
 
                             <td data-label="Koordinatör">
                               {c?.koordinator?.full_name || "—"}
                             </td>
 
-                            <td className="text-end" data-label="İşlemler">
-                              <div className="btn-group" role="group" aria-label="İşlemler">
+                            <td className="text-center" data-label="İşlemler">
+                              <div className="d-flex align-items-center justify-content-center gap-1">
                                 <Link
                                   to={`/eskep/edit-odev/${c.id}`}
-                                  className="btn btn-sm btn-outline-warning"
+                                  className="btn btn-sm btn-outline-warning icon-btn"
                                   title="Düzenle"
                                 >
-                                  Düzenle
+                                  <FiEdit3 size={15} />
                                 </Link>
-                                <button
-                                  className="btn btn-sm btn-outline-danger"
-                                  onClick={() => onDelete(c.id)}
-                                  title="Sil"
-                                >
-                                  Sil
-                                </button>
+                                
                                 {filesExist(c) && (
                                   <button
-                                    className="btn btn-sm btn-outline-info"
+                                    className="btn btn-sm btn-outline-info icon-btn"
                                     onClick={() => openModal(c.curriculum)}
                                     title="Bölümleri Görüntüle"
                                   >
-                                    Bölümler
+                                    <FiFile size={15} />
                                   </button>
                                 )}
+
+                                  <button
+                                  className="btn btn-sm btn-outline-danger icon-btn"
+                                  onClick={() => onDelete(c.id)}
+                                  title="Sil"
+                                >
+                                  <FiTrash2 size={15} />
+                                </button>
                               </div>
                             </td>
                           </tr>

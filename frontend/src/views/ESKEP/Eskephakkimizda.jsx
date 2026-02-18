@@ -158,7 +158,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;color:var(
     <>
       <style>{css}</style>
       <ESKEPBaseHeader />
-      <div className="outer">
+      <div className="container-xxl">
         <main className="page">
           {/* Intro */}
           <div className="intro">

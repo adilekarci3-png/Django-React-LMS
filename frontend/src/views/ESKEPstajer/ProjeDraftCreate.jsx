@@ -1,6 +1,6 @@
 // src/pages/ESKEP/Stajer/ProjeDraftCreate.jsx
 import { useState, useEffect } from "react";
-import Sidebar from "./Partials/Sidebar";
+import Sidebar from "../ESKEP/Partials/Sidebar";
 import Header from "./Partials/Header";
 import Swal from "sweetalert2";
 
@@ -133,14 +133,14 @@ function ProjeDraftCreate() {
     <>
       <ESKEPBaseHeader />
       <section className="pt-5 pb-5">
-        <div className="container">
+        <div className="container-xxl">
           <Header />
           <div className="row mt-0 mt-md-4">
             <div className="col-lg-3 col-md-3 col-12 mb-4 mb-md-0">
               <Sidebar />
             </div>
-
-            <form className="col-lg-9 col-md-8 col-12" onSubmit={handleSubmit}>
+           <div className="col-lg-9 col-md-8 col-12" >
+            <form onSubmit={handleSubmit}>
               <h2 className="mb-4">📘 Stajer Projesi – Ön Taslak</h2>
               <p className="text-muted mb-4">
                 Bu form sadece <strong>bir defa</strong> doldurulur. Koordinatör
@@ -249,6 +249,7 @@ function ProjeDraftCreate() {
                 Ön Taslağı Gönder
               </button>
             </form>
+          </div>
           </div>
         </div>
       </section>

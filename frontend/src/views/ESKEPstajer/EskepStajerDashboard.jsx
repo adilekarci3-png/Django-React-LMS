@@ -1,15 +1,35 @@
+// ============================================================
+// App.js — Eklenecek Route'lar
+// ============================================================
+//
+// import EskepStajerDersSonuRaporuDetail from "./views/eskepstajer/EskepStajerDersSonuRaporuDetail";
+// import EskepStajerOdevDetail from "./views/eskepstajer/EskepStajerOdevDetail";
+// import EskepStajerKitapTahliliDetail from "./views/eskepstajer/EskepStajerKitapTahliliDetail";
+// import EskepStajerProjeDetail from "./views/eskepstajer/EskepStajerProjeDetail";
+//
+// <Route path="/eskepstajer/derssonuraporus/:id/:koordinator_id/" element={<EskepStajerDersSonuRaporuDetail />} />
+// <Route path="/eskepstajer/odevs/:id/:koordinator_id/"           element={<EskepStajerOdevDetail />} />
+// <Route path="/eskepstajer/kitaptahlileris/:id/:koordinator_id/" element={<EskepStajerKitapTahliliDetail />} />
+// <Route path="/eskepstajer/projes/:id/:koordinator_id/"          element={<EskepStajerProjeDetail />} />
+
+// ============================================================
+// EskepStajerDashboard.jsx — güncel hali
+// ============================================================
+// Dashboard'da her liste için iki parametre gerekiyor:
+//   /:id/:koordinator_id
+// Backend listeleri dönerken item içinde koordinator_id veya
+// koordinator.id alanı olmalı. Yoksa backend'den eklenmesi lazım.
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import moment from "moment";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import useAxios from "../../utils/useAxios";
 import useUserData from "../plugin/useUserData";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-
 import { FaTasks, FaBook, FaProjectDiagram, FaMedal } from "react-icons/fa";
-import { BsJournalText } from "react-icons/bs"; // BiJournalCheck yerine
+import { BsJournalText } from "react-icons/bs";
 
 function EskepStajerDashboard() {
   const [stats, setStats] = useState({});
@@ -28,9 +48,9 @@ function EskepStajerDashboard() {
       const [summary, hw, reports, books, proj] = await Promise.all([
         api.get(`student/summary/${userId}/`),
         api.get(`eskepstajer/odev-list/${userId}/`),
-        api.get(`eskepstajer/kitaptahlili-list/${userId}/`),
         api.get(`eskepstajer/derssonuraporu-list/${userId}/`),
-        api.get(`eskepstajer/proje-list/${userId}/`)
+        api.get(`eskepstajer/kitaptahlili-list/${userId}/`),
+        api.get(`eskepstajer/proje-list/${userId}/`),
       ]);
       setStats(summary.data[0]);
       setHomeworks(hw.data);
@@ -44,11 +64,16 @@ function EskepStajerDashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []); // eslint-disable-line
 
-  const renderList = (title, data, detailPath, labelKey = "title") => (
+  // ── Yardımcı: koordinator_id'yi item'dan çıkar ──────────────
+  // Backend hangi field adıyla dönüyorsa onu kullanın.
+  // Olası field adları: koordinator_id | koordinator?.id | koordinator
+  const getKoordinatorId = (item) =>
+    item?.koordinator_id ?? item?.koordinator?.id ?? item?.koordinator ?? 0;
+
+  // ── İki parametreli detay linki olan liste render ────────────
+  const renderDetailList = (title, data, basePath, labelKey = "title") => (
     <div className="card mb-4">
       <div className="card-header">
         <h5 className="mb-0">{title}</h5>
@@ -57,9 +82,15 @@ function EskepStajerDashboard() {
         {data.length > 0 ? (
           <ul className="list-group">
             {data.map((item, index) => (
-              <li className="list-group-item d-flex justify-content-between align-items-center" key={index}>
+              <li
+                className="list-group-item d-flex justify-content-between align-items-center"
+                key={index}
+              >
                 <span>{item[labelKey]}</span>
-                <Link to={`${detailPath}/${item.id}`} className="btn btn-sm btn-primary">
+                <Link
+                  to={`${basePath}/${item.id}/${getKoordinatorId(item)}`}
+                  className="btn btn-sm btn-primary"
+                >
                   Detay
                 </Link>
               </li>
@@ -75,21 +106,20 @@ function EskepStajerDashboard() {
   return (
     <>
       <ESKEPBaseHeader />
-
-      <section className="pt-5 pb-5">
-        <div className="container">
+      <section className="pt-5 pb-5 bg-light">
+        <div className="container-xxl">
           <Header />
-          <div className="row mt-0 mt-md-4">
-            <div className="col-lg-2 col-md-2 col-12 mb-4 mb-md-0">
+          <div className="row mt-0 mt-md-4 align-items-start">
+            <div className="col-lg-3 col-md-4 col-12 mb-4">
               <Sidebar />
             </div>
-            <div className="col-lg-10 col-md-10 col-12">
+            <div className="col-lg-9 col-md-8 col-12">
               <div className="row mb-4">
                 <h4 className="mb-0 mb-4">
                   <i className="bi bi-grid-fill"></i> Öğrenci Paneli
                 </h4>
 
-                {/* İstatistik kutuları */}
+                {/* İstatistik kartları */}
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-success bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
                     <FaMedal className="display-6 text-success me-3" />
@@ -99,7 +129,6 @@ function EskepStajerDashboard() {
                     </div>
                   </div>
                 </div>
-
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-primary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
                     <BsJournalText className="display-6 text-primary me-3" />
@@ -109,7 +138,6 @@ function EskepStajerDashboard() {
                     </div>
                   </div>
                 </div>
-
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-info bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
                     <FaTasks className="display-6 text-info me-3" />
@@ -119,7 +147,6 @@ function EskepStajerDashboard() {
                     </div>
                   </div>
                 </div>
-
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-secondary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
                     <FaBook className="display-6 text-secondary me-3" />
@@ -129,7 +156,6 @@ function EskepStajerDashboard() {
                     </div>
                   </div>
                 </div>
-
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-dark bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
                     <FaProjectDiagram className="display-6 text-dark me-3" />
@@ -145,17 +171,17 @@ function EskepStajerDashboard() {
                 <p className="p-3">Yükleniyor...</p>
               ) : (
                 <>
-                  {renderList("Ödevler", homeworks, "/eskepstajer/odevs")}
-                  {renderList("Ders Sonu Raporları", lessonReports, "/eskepstajer/derssonuraporus")}
-                  {renderList("Kitap Tahlilleri", bookReviews, "/eskepstajer/kitaptahlileris")}
-                  {renderList("Projeler", projects, "/eskepstajer/projes")}
+                  {/* Her liste için iki parametreli path */}
+                  {renderDetailList("Ödevler",             homeworks,     "/eskepstajer/odevs")}
+                  {renderDetailList("Ders Sonu Raporları", lessonReports, "/eskepstajer/derssonuraporus")}
+                  {renderDetailList("Kitap Tahlilleri",    bookReviews,   "/eskepstajer/kitaptahlileris")}
+                  {renderDetailList("Projeler",            projects,      "/eskepstajer/projes")}
                 </>
               )}
             </div>
           </div>
         </div>
       </section>
-
       <ESKEPBaseFooter />
     </>
   );

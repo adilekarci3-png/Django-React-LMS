@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { FiSave, FiPlus, FiTrash2, FiUpload, FiImage } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
@@ -19,6 +20,7 @@ const mdParser = new MarkdownIt();
 function DersSonuRaporuCreate() {
   const api = useAxios();
   const user = UserData();
+  const navigate = useNavigate(); // YOK
 
   const [submitting, setSubmitting] = useState(false);
   const [category, setCategory] = useState([]);
@@ -153,6 +155,7 @@ function DersSonuRaporuCreate() {
       setSubmitting(true);
       await api.post(`eskepstajer/derssonuraporu-create/`, formdata);
       Swal.fire({ icon: "success", title: "Ders Sonu Raporu başarıyla oluşturuldu" });
+      navigate("/eskepstajer/derssonuraporus");
       // İstersen burada formu sıfırlayabilirsin
     } catch (err) {
       Swal.fire({ icon: "error", title: "İşlem başarısız", text: "Lütfen tekrar deneyin." });
@@ -178,6 +181,9 @@ function DersSonuRaporuCreate() {
               <form onSubmit={handleSubmit}>
                 <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                   <h2 className="mb-0">📘 Ders Sonu Raporu Oluştur</h2>
+                  <Link to="/eskepstajer/derssonuraporus" className="btn btn-light">
+                     ← Listeye Dön
+                   </Link>
                 </div>
 
                 {/* Genel Bilgiler */}

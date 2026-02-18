@@ -45,7 +45,7 @@ const CoordinatorMenu = () => {
           <div className="coordinator-col">
             <h6 className="dropdown-header px-0">📚 Yönetim</h6>
             <Link className="dropdown-item px-0" to={`/eskepinstructor/dashboard/`}>
-              <i className="bi bi-grid-fill me-2"></i> Panel
+              <i className="bi bi-grid-fill text-primary"></i> Panel
             </Link>          
 
             <hr className="my-2" />
@@ -75,16 +75,16 @@ const CoordinatorMenu = () => {
           <div className="coordinator-col">
             <h6 className="dropdown-header px-0">🗂 Gönderilen Dosyalar</h6>
             <Link className="dropdown-item px-0" to={`/eskepinstructor/odevs/`}>
-              <i className="fas fa-tasks me-2"></i> Ödevler
+              <i className="fas fa-tasks text-danger"></i> Ödevler
             </Link>
             <Link className="dropdown-item px-0" to={`/eskepinstructor/kitaptahlileris/`}>
-              <i className="fas fa-book me-2"></i> Kitap Tahlilleri
+              <i className="fas fa-book text-primary"></i> Kitap Tahlilleri
             </Link>
             <Link className="dropdown-item px-0" to={`/eskepinstructor/dersSonuRaporus/`}>
-              <i className="fas fa-file-alt me-2"></i> Ders Sonu Raporları
+              <i className="fas fa-file-alt text-secondary"></i> Ders Sonu Raporları
             </Link>
             <Link className="dropdown-item px-0" to={`/eskepinstructor/projes/`}>
-              <i className="fas fa-folder me-2"></i> Proje Dosyaları
+              <i className="fas fa-folder text-success"></i> Proje Dosyaları
             </Link>
 
             <hr className="my-2" />
@@ -111,37 +111,37 @@ const CoordinatorMenu = () => {
           <div className="coordinator-col">
             <h6 className="dropdown-header px-0">👥 Kullanıcı</h6>
             <Link className="dropdown-item px-0" to={`/eskepinstructor/ogrenci-list/`}>
-              <i className="fas fa-user-graduate me-2"></i> Koordinatör Öğrencileri
+              <i className="fas fa-user-graduate text-info"></i> Koordinatör Öğrencileri
             </Link>
             <Link className="dropdown-item px-0" to={`/eskepinstructor/stajer-list/`}>
-              <i className="fas fa-user-clock me-2"></i> Koordinatör Stajerleri
+              <i className="fas fa-user-clock text-warning"></i> Koordinatör Stajerleri
             </Link>
 
             <hr className="my-2" />
 
             <h6 className="dropdown-header px-0">📅 Organizasyon</h6>
             <Link className="dropdown-item px-0" to={`/eskep/egitim-takvimi/`}>
-              <i className="fas fa-calendar-alt me-2"></i> Genel Takvim
+              <i className="fas fa-calendar-alt text-danger"></i> Genel Takvim
             </Link>
 
             <hr className="my-2" />
 
             <h6 className="dropdown-header px-0">💬 Etkileşim</h6>
             <Link className="dropdown-item px-0" to={`/instructor/reviews/`}>
-              <i className="fas fa-star me-2"></i> Yorumlar
+              <i className="fas fa-star text-warning"></i> Yorumlar
             </Link>
             <Link className="dropdown-item px-0" to={`/instructor/question-answer/`}>
-              <i className="fas fa-envelope me-2"></i> Soru / Cevap
+              <i className="fas fa-envelope text-primary"></i> Soru / Cevap
             </Link>
 
             <hr className="my-2" />
 
             <h6 className="dropdown-header px-0">⚙️ Ayarlar</h6>
             <Link className="dropdown-item px-0" to={`/instructor/earning/`}>
-              <i className="fas fa-turkish-lira-sign me-2"></i> Bağış
+              <i className="fas fa-turkish-lira-sign text-success"></i> Bağış
             </Link>
             <Link className="dropdown-item px-0" to={`/instructor/profile/`}>
-              <i className="fas fa-gear me-2"></i> Profil & Ayarlar
+              <i className="fas fa-gear text-dark"></i> Profil & Ayarlar
             </Link>
 
             {/* 🔐 Sadece ESKEPGenelKoordinator görecek */}

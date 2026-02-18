@@ -12,14 +12,17 @@ function QA() {
       <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
-        <div className="container">
+        <div className="container-xxl">
           {/* Header Here */}
           <Header />
           <div className="row mt-0 mt-md-4">
             {/* Sidebar Here */}
-            <Sidebar />
-            <div className="col-lg-10 col-md-8 col-12">
-              <h4 className="mb-0 mb-4"> <i className='fas fa-envelope'></i> Soru ve Cevap</h4>
+            <div className="col-lg-3 col-md-4 col-12">
+                <Sidebar />
+            </div>
+            
+            <div className="col-lg-9 col-md-8 col-12">
+              <h4 className="mb-0 mb-4"> <i className='fas fa-envelope text-primary'></i> Soru ve Cevap</h4>
 
               <div className="card mb-4">
                 <div className="card-header">
@@ -60,7 +63,7 @@ function QA() {
                         </td>
                         <td><p className='mt-3'>5</p></td>
                         <td>
-                          <Link to={`/student/question-answer/course_id/`} className='btn btn-primary btn-sm mt-3'>Sohbete Katılın <i className='fas fa-arrow-right'></i></Link>
+                          <Link to={`/eskepstajer/question-answer/course_id/`} className='btn btn-primary btn-sm mt-3'>Sohbete Katılın <i className='fas fa-arrow-right'></i></Link>
                         </td>
                       </tr>
                       <tr>
@@ -87,7 +90,7 @@ function QA() {
                         </td>
                         <td><p className='mt-3'>5</p></td>
                         <td>
-                          <Link to={`/student/question-answer/course_id/`} className='btn btn-primary btn-sm mt-3'>Sohbete Katılın <i className='fas fa-arrow-right'></i></Link>
+                          <Link to={`/eskepstajer/question-answer/course_id/`} className='btn btn-primary btn-sm mt-3'>Sohbete Katılın <i className='fas fa-arrow-right'></i></Link>
                         </td>
                       </tr>
                     </tbody>
