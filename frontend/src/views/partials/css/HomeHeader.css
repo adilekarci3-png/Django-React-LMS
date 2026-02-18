@@ -1,0 +1,110 @@
+/* HomeHeader.css — sade, Index (odoo) uyumlu */
+
+/* Header zemin + ince çizgi */
+.ehad-header{
+  background:#fff;
+  border-bottom:1px solid #e2e8f0;
+}
+
+/* Navbar */
+.ehad-navbar{
+  background: transparent !important;
+  padding: 12px 0;
+  font-family: 'Segoe UI','Roboto',sans-serif;
+  font-size: 0.95rem;
+}
+
+/* Container (odoo-container ile aynı max-width) */
+.ehad-container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+  display:flex;
+  align-items:center;
+}
+
+/* Brand */
+.ehad-brand{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  font-weight:800;
+  letter-spacing:.2px;
+  color:#0b1b2b !important;
+}
+
+.ehad-brand:hover{ color:#0b1b2b !important; }
+
+.ehad-brand-dot{
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:#714b67;
+  box-shadow:0 0 0 4px rgba(113,75,103,.10);
+}
+
+/* Linkler (önemli: global .navbar-nav .nav-link beyaz !important veriyorsa bunu ezer) */
+.ehad-header .navbar-nav .ehad-nav-link{
+  color: rgba(11,27,43,.75) !important;
+  font-weight:600;
+  padding: 8px 10px !important;
+  border-radius:10px;
+  transition: background .2s ease, color .2s ease;
+  text-decoration:none;
+}
+
+.ehad-header .navbar-nav .ehad-nav-link:hover,
+.ehad-header .navbar-nav .ehad-nav-link:focus{
+  background:#f7fafc;
+  color:#0b1b2b !important;
+}
+
+.ehad-header .navbar-nav .ehad-nav-link.active{
+  color:#714b67 !important;
+  background: rgba(113,75,103,.10);
+}
+
+/* Butonlar */
+.ehad-btn-ghost{
+  border:1px solid #e2e8f0 !important;
+  background:#fff !important;
+  color:#0b1b2b !important;
+  border-radius:12px !important;
+  padding:8px 12px !important;
+}
+
+.ehad-btn-ghost:hover{
+  background:#f7fafc !important;
+}
+
+.ehad-btn-primary{
+  background:#714b67 !important;
+  border:1px solid #714b67 !important;
+  color:#fff !important;
+  border-radius:12px !important;
+  padding:8px 14px !important;
+}
+
+.ehad-btn-primary:hover{
+  filter: brightness(.96);
+  color:#fff !important;
+}
+
+/* Toggler */
+.ehad-toggler{
+  border:1px solid #e2e8f0 !important;
+  border-radius:12px !important;
+  padding:6px 10px !important;
+}
+
+.ehad-toggler:focus{
+  box-shadow:0 0 0 4px rgba(113,75,103,.12) !important;
+}
+
+/* Mobil düzen */
+@media (max-width: 991.98px){
+  .ehad-container{ justify-content: space-between; }
+  .navbar-collapse{ padding-top: 10px; }
+}

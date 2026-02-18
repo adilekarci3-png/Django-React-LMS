@@ -1,64 +1,214 @@
-/* ——— Konteyner ——— */
-.ix-container{max-width:1200px;margin:0 auto;padding:0 18px}
+/* ——— Index.css (OPTION B: Subtle Dots Pattern) ——— */
 
-/* ——— Başlık (sade) ——— */
-.ix-hero{padding:18px 0 6px}
-.ix-title{margin:0;font-size:28px;font-weight:800;letter-spacing:.2px;color:#0b1b2b}
-.ix-subtitle{margin:4px 0 0;color:rgba(11,27,43,.70);font-size:15px}
+/* Font Importları */
+@import url('https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
 
-/* ——— Bölüm ——— */
-.ix-section{padding:14px 0 40px}
-
-/* ——— Grid ——— */
-.ix-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-@media (max-width:1100px){.ix-grid{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:820px){.ix-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:560px){.ix-grid{grid-template-columns:1fr}}
-
-/* ——— Kart ——— */
-.ix-card{
-  border:1px solid rgba(2,132,199,.15);
-  border-radius:12px;
-  background:#fff;
-  overflow:hidden;
-  transition:box-shadow .15s ease, transform .15s ease;
-  display:flex;flex-direction:column;min-height:100%;
+/* ——— GENEL KAPLAYICI ——— */
+.odoo-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
 }
-.ix-card:hover{box-shadow:0 10px 28px rgba(8,122,169,.12);transform:translateY(-2px)}
 
-/* ——— Kapak görseli (kısa) ——— */
-.ix-cover{height:120px; /* kısa kapak */ background:linear-gradient(135deg,#8ef7ea,#07a0e0);display:flex;align-items:center;justify-content:center}
-.ix-cover img{width:100%;height:100%;object-fit:cover;display:block}
+/* ——— HERO BÖLÜMÜ ——— */
+.odoo-hero {
+  padding: 60px 0 50px;
+  background-color: #fff;
 
-/* ——— İçerik ——— */
-.ix-body{padding:12px;display:flex;flex-direction:column;gap:8px}
-.ix-name{margin:2px 0 0;font-size:1.02rem}
-.ix-desc{margin:0;color:rgba(11,27,43,.70);font-size:.95rem}
-.ix-actions{margin-top:4px}
-
-/* ——— Buton ——— */
-.ix-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  height:36px;padding:0 14px;border-radius:10px;
-  font-weight:700;border:1px solid transparent;
-  background:linear-gradient(135deg,#5fe7e4,#07a0e0);color:#fff;
+  /* OPTION B: radial tint + repeatable svg dots */
+  position: relative;
+  overflow: hidden;
+  background-image:
+    radial-gradient(900px 360px at 15% 0%, rgba(113,75,103,.08), transparent 65%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='6' cy='6' r='1.2' fill='rgba(113,75,103,0.12)'/%3E%3Ccircle cx='24' cy='18' r='1.2' fill='rgba(113,75,103,0.10)'/%3E%3Ccircle cx='40' cy='34' r='1.2' fill='rgba(113,75,103,0.08)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, repeat;
+  background-size: auto, 120px 120px;
+  background-position: center top, 0 0;
 }
-.ix-btn:hover{filter:brightness(.96)}
-.ix-btn.disabled{background:rgba(0,0,0,.06);color:#777;border-color:rgba(0,0,0,.12);cursor:not-allowed}
 
-/* ——— Skeleton ——— */
-.skeleton .ix-cover{background:linear-gradient(90deg,rgba(0,0,0,.06),rgba(0,0,0,.12),rgba(0,0,0,.06));background-size:200% 100%;animation:sheen 1.15s linear infinite}
-.skeleton .ix-body{gap:10px}
-.skeleton-box{height:120px}
-.sk-line{height:12px;border-radius:8px;background:rgba(0,0,0,.06)}
-.sk-pill{height:34px;border-radius:999px;background:rgba(0,0,0,.06)}
-.w-40{width:40%}.w-60{width:60%}.w-90{width:90%}
-@keyframes sheen{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.odoo-title { font-family: 'Caveat', cursive; font-size: 3rem; font-weight: 400; color: #1a202c; line-height: 1.1; }
 
-/* ——— Pager ——— */
-.ix-pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:18px}
-.ix-pager-btn{border:1px solid rgba(2,132,199,.25);background:#fff;color:#07485d;padding:8px 12px;border-radius:10px;font-weight:700}
-.ix-pager-btn:disabled{opacity:.45;cursor:not-allowed}
-.ix-pager-pages{display:flex;gap:6px;list-style:none;padding:0;margin:0}
-.ix-page{min-width:38px;height:38px;padding:0 10px;border-radius:10px;border:1px solid rgba(2,132,199,.25);background:#fff;font-weight:700;color:#07485d}
-.ix-page.active{background:linear-gradient(135deg,#5fe7e4,#07a0e0);color:#fff;border-color:transparent}
+.text-highlight { color: #714b67; position: relative; display: inline-block; z-index: 1; }
+.text-highlight::before { content: ''; position: absolute; top: 55%; left: -5px; right: -5px; height: 12px; background-color: #F6C343; z-index: -1; transform: translateY(-50%) rotate(-1deg); border-radius: 4px; opacity: 0.7; }
+.odoo-subtitle { font-family: 'Patrick Hand', cursive; font-size: 1.4rem; color: #4a5568; margin-top: 10px; }
+
+/* ——— SWITCH (ANAHTAR) TASARIMI ——— */
+.odoo-toggle-wrapper { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 70px; /* Oklar için biraz daha boşluk */ }
+.odoo-switch { position: relative; display: inline-block; width: 54px; height: 30px; }
+.odoo-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e0; transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; }
+input:checked + .slider { background-color: #714b67; }
+input:checked + .slider:before { transform: translateX(24px); }
+.slider.round { border-radius: 34px; }
+.slider.round:before { border-radius: 50%; }
+
+.toggle-label { font-family: 'Patrick Hand', cursive; font-size: 1.3rem; color: #a0aec0; transition: all 0.3s; }
+.toggle-label.active { color: #2d3748; font-weight: bold; }
+.toggle-label.active-chaos { color: #e53e3e; font-weight: bold; text-decoration: line-through; }
+
+/* ——— GRID YAPISI ——— */
+.odoo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 Eşit sütun */
+  gap: 20px;
+  justify-items: center;
+  align-items: stretch; /* Hepsi aynı hizada */
+  padding-top: 50px;
+  padding-bottom: 80px;
+}
+
+@media (max-width: 1100px) {
+    .odoo-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+    .odoo-grid { display: flex; overflow-x: auto; padding-left: 20px; padding-right: 20px; justify-content: flex-start; }
+    .odoo-card-wrapper { min-width: 180px; }
+}
+
+/* ——— KART TASARIMI (DÜZELTİLDİ: Eşit Kareler) ——— */
+.odoo-card-wrapper { width: 100%; display: flex; justify-content: center; position: relative; }
+
+.odoo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* İkon ve yazıyı ortala */
+
+  width: 180px;  /* Sabit genişlik */
+  height: 180px; /* Sabit yükseklik (Tam kare) */
+
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 10px;
+  z-index: 2;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.odoo-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+.odoo-card.dimmed { opacity: 0.6; border-color: #feb2b2; }
+
+/* İkon Kutusu */
+.odoo-icon-box {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.odoo-icon-box img { width: 100%; height: 100%; object-fit: contain; }
+
+/* Başlık */
+.odoo-app-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+    text-align: center;
+    line-height: 1.4; /* Satır aralığı */
+}
+
+/* Yakında Rozeti */
+.badge-soon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #edf2f7;
+    color: #718096;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* ——— KAOS ELEMENTLERİ (HİZALAMALAR DÜZELTİLDİ) ——— */
+.chaos-overlay {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 160px;
+  animation: fadeIn 0.5s ease;
+}
+
+.chaos-text {
+  font-family: 'Gloria Hallelujah', cursive;
+  font-size: 1.1rem;
+  color: #C53030;
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  text-shadow: 2px 2px 0px #fff;
+}
+
+.chaos-svg-wrapper {
+  width: 50px;
+  height: 50px;
+  color: #C53030;
+  opacity: 0.9;
+}
+.hand-arrow { width: 100%; height: 100%; overflow: visible; }
+
+/* ——— OK POZİSYONLARI (Pixel İnce Ayarlar) ——— */
+
+/* 1. Karmaşık Excel (Sağ üstten karta bakacak) */
+.pos-top-right {
+  top: -70px;
+  right: 10px; /* Biraz daha sağa çektik, kartın üstüne binmesin */
+  align-items: flex-start;
+}
+.pos-top-right .chaos-svg-wrapper {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+/* 2. WhatsApp (Sol üst) */
+.pos-top-left {
+  top: -70px;
+  left: 30px;
+  align-items: flex-end;
+}
+.pos-top-left .chaos-svg-wrapper {
+  margin-right: 30px; /* Oku yazının sağına doğru iter */
+  margin-top: 5px;    /* Oku biraz aşağı indirir */
+}
+
+/* 3. Zoom (Alt Orta) */
+.pos-bottom {
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column-reverse;
+}
+
+/* 4. Kağıt Çizelgeler (Sol Orta - Karta YAKLAŞTIRILDI) */
+.pos-left-mid {
+  top: 60px;      /* Dikeyde ortaladık */
+  left: -135px;   /* Karta iyice yaklaştırdık */
+  flex-direction: row;
+  align-items: center;
+}
+.pos-left-mid .chaos-svg-wrapper { margin-left: -26px; margin-top: -10px; }
+
+/* 5. Not Defteri (Sağ Alt - Hizalama DÜZELTİLDİ) */
+.pos-bottom-right {
+  bottom: 175px;
+  right: -10px;
+  align-items: flex-start; /* Oku başa al */
+}
+.pos-bottom-right .chaos-svg-wrapper { margin-left: 40px; }
+
+/* Pagination */
+.odoo-pagination { margin-top: 40px; display: flex; justify-content: center; gap: 15px; }
+.odoo-pagination button { background: #fff; border: 1px solid #e2e8f0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

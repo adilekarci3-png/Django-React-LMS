@@ -1,18 +1,23 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
+import "./css/HomeHeader.css";
+
 
 function HomeHeader() {
+  const navClass = ({ isActive }) =>
+    `ehad-nav-link ${isActive ? "active" : ""}`;
+
   return (
-    <header className="sticky-top shadow-sm">
-      <nav className="navbar navbar-expand-lg header-glass">
-        <div className="container">
-          <Link to="/" className="navbar-brand fw-bold text-white">
-            <span className="brand-badge me-2" />
+    <header className="ehad-header sticky-top">
+      <nav className="navbar navbar-expand-lg ehad-navbar">
+        <div className="ehad-container">
+          <Link to="/" className="ehad-brand">
+            <span className="ehad-brand-dot" aria-hidden="true" />
             EHAD Akademi
           </Link>
 
           <button
-            className="navbar-toggler border-0 text-white"
+            className="navbar-toggler ehad-toggler"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#ehadMainNav"
@@ -20,37 +25,40 @@ function HomeHeader() {
             aria-expanded="false"
             aria-label="Menüyü Aç/Kapat"
           >
-            <span className="navbar-toggler-icon navbar-toggler-icon-white" />
+            <span className="navbar-toggler-icon" />
           </button>
 
           <div className="collapse navbar-collapse" id="ehadMainNav">
-            <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-1">
               <li className="nav-item">
-                <NavLink end to="/" className="nav-link nav-link-ghost">
+                <NavLink end to="/" className={navClass}>
                   Anasayfa
                 </NavLink>
               </li>
+
               <li className="nav-item">
-                <NavLink to="/about-ehad" className="nav-link nav-link-ghost">
+                <NavLink to="/about-ehad" className={navClass}>
                   Hakkımızda
                 </NavLink>
               </li>
+
               <li className="nav-item">
-                <NavLink to="/academy" className="nav-link nav-link-ghost">
+                <NavLink to="/academy" className={navClass}>
                   Akademi
                 </NavLink>
               </li>
+
               <li className="nav-item">
-                <NavLink to="/contact" className="nav-link nav-link-ghost">
+                <NavLink to="/contact" className={navClass}>
                   İletişim
                 </NavLink>
               </li>
 
-              <li className="nav-item d-lg-flex ms-lg-3">
-                <NavLink to="/login" className="btn btn-outline-light btn-sm me-lg-2 mb-2 mb-lg-0">
+              <li className="nav-item d-lg-flex align-items-center ms-lg-3 gap-2 mt-2 mt-lg-0">
+                <NavLink to="/login" className="btn ehad-btn-ghost btn-sm">
                   Giriş Yap
                 </NavLink>
-                <NavLink to="/register" className="btn btn-grad btn-sm">
+                <NavLink to="/register" className="btn ehad-btn-primary btn-sm">
                   Kayıt Ol
                 </NavLink>
               </li>
