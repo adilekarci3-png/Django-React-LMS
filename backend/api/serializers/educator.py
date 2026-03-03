@@ -18,7 +18,7 @@ class EducatorSerializer(serializers.ModelSerializer):
 
 class EducatorVideoLinkSerializer(serializers.ModelSerializer):
     instructor_id = serializers.PrimaryKeyRelatedField(
-        queryset=api_models.Educator.objects.all(),
+        queryset=api_models.Teacher.objects.all(),
         source="instructor",
         write_only=True,
         required=False,

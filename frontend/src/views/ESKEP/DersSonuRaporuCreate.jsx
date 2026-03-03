@@ -116,15 +116,17 @@ function DersSonuRaporuCreate() {
   const removeVariant = (i) => setVariants((arr) => arr.filter((_, idx) => idx !== i));
 
   // Validasyon
-  const validateForm = () => {
+ const validateForm = () => {
     const er = {};
-    if (!derssonuraporu.title) er.title = "Ders Sonu Raporu başlığı zorunludur.";
-    if (!derssonuraporu.description) er.description = "Ders Sonu Raporu açıklaması zorunludur.";
+    if (!derssonuraporu.title?.trim()) er.title = "Ders Sonu Raporu başlığı zorunludur.";
+    if (!derssonuraporu.description?.trim()) er.description = "Ders Sonu Raporu açıklaması zorunludur.";
     if (!derssonuraporu.image?.file) er.image = "Kapak resmi yükleyiniz.";
     if (!derssonuraporu.category) er.category = "Kategori seçiniz.";
+    if (!derssonuraporu.level) er.level = "Seviye seçiniz.";
+    if (!derssonuraporu.language) er.language = "Dil seçiniz.";
 
     variants.forEach((v, i) => {
-      if (!v.title) er[`variant_title_${i}`] = "Bölüm adı zorunludur.";
+      if (!v.title?.trim()) er[`variant_title_${i}`] = "Bölüm adı zorunludur.";
       if (!v.pdf) er[`variant_pdf_${i}`] = "PDF dosyası ekleyiniz.";
     });
 
@@ -180,7 +182,9 @@ function DersSonuRaporuCreate() {
             <div className="col-lg-9 col-md-9 col-12">
               <form onSubmit={handleSubmit}>
                 <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                  <h2 className="mb-0">📘 Ders Sonu Raporu Oluştur</h2>
+                  <h2 className="mb-0">
+                    <i className="fas fa-chalkboard-user text-info me-2" />
+                    Ders Sonu Raporu Oluştur</h2>
                   <Link to="/eskepstajer/derssonuraporus" className="btn btn-light">
                      ← Listeye Dön
                    </Link>
@@ -273,7 +277,7 @@ function DersSonuRaporuCreate() {
                       <div className="col-md-4">
                         <label className="form-label">Seviye</label>
                         <select
-                          className="form-select"
+                          className={`form-select ${errors.level ? "is-invalid" : ""}`}
                           name="level"
                           value={derssonuraporu.level}
                           onChange={handleInputChange}
@@ -285,12 +289,13 @@ function DersSonuRaporuCreate() {
                             </option>
                           ))}
                         </select>
+                        {errors.level && <div className="invalid-feedback">{errors.level}</div>}
                       </div>
 
                       <div className="col-md-4">
                         <label className="form-label">Dil</label>
                         <select
-                          className="form-select"
+                          className={`form-select ${errors.language ? "is-invalid" : ""}`}
                           name="language"
                           value={derssonuraporu.language}
                           onChange={handleInputChange}
@@ -302,6 +307,7 @@ function DersSonuRaporuCreate() {
                             </option>
                           ))}
                         </select>
+                        {errors.language && <div className="invalid-feedback">{errors.language}</div>}
                       </div>
 
                       <div className="col-12">

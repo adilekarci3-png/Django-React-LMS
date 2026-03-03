@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
+import Header from "./Partials/Header";
 
-const WebcamRecordPage = () => {
+function WebcamRecordPage() {
   const videoRef = useRef(null);
   const mediaStreamRef = useRef(null);
   const recorderRef = useRef(null);
@@ -19,7 +20,6 @@ const WebcamRecordPage = () => {
   const [blobUrl, setBlobUrl] = useState(null);
   const [error, setError] = useState("");
 
-  // Yardımcılar
   const parseRes = (res) => {
     const [w, h] = res.split("x").map(Number);
     return { width: { ideal: w }, height: { ideal: h } };
@@ -84,8 +84,7 @@ const WebcamRecordPage = () => {
         await videoRef.current.play();
       }
       await loadDevices();
-    } catch (e) {
-      console.error(e);
+    } catch {
       setError("Kamera/Mikrofon erişimi alınamadı. HTTPS ve izinleri doğrulayın.");
     }
   };
@@ -94,15 +93,11 @@ const WebcamRecordPage = () => {
     setError("");
     if (!mediaStreamRef.current) return setError("Önce önizlemeyi başlatın.");
     chunksRef.current = [];
-    const mimeOpts = [
-      "video/webm;codecs=vp9,opus",
-      "video/webm;codecs=vp8,opus",
-      "video/webm",
-    ];
+    const mimeOpts = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
     const mimeType = mimeOpts.find((m) => MediaRecorder.isTypeSupported(m)) || "";
     try {
       const rec = new MediaRecorder(mediaStreamRef.current, mimeType ? { mimeType } : undefined);
-      rec.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunksRef.current.push(e.data); };
+      rec.ondataavailable = (e) => { if (e.data?.size > 0) chunksRef.current.push(e.data); };
       rec.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: rec.mimeType || "video/webm" });
         const url = URL.createObjectURL(blob);
@@ -112,8 +107,7 @@ const WebcamRecordPage = () => {
       recorderRef.current = rec;
       setRecordingState("recording");
       startTimer();
-    } catch (e) {
-      console.error(e);
+    } catch {
       setError("Kayıt başlatılamadı.");
     }
   };
@@ -150,11 +144,19 @@ const WebcamRecordPage = () => {
     a.click();
   };
 
+  const fmtTime = (s) => {
+    const hh = String(Math.floor(s / 3600)).padStart(2, "0");
+    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    return `${hh}:${mm}:${ss}`;
+  };
+
   useEffect(() => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setError("Tarayıcınız kamera kaydını desteklemiyor.");
       return;
     }
+    loadDevices();
     startPreview();
     return () => {
       resetTimer();
@@ -165,129 +167,148 @@ const WebcamRecordPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => { loadDevices(); }, []);
-
   useEffect(() => {
-    if (recordingState === "idle" || recordingState === "stopped") {
-      startPreview();
-    }
+    if (recordingState === "idle" || recordingState === "stopped") startPreview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCam, selectedMic, resolution]);
-
-  const fmtTime = (s) => {
-    const hh = String(Math.floor(s / 3600)).padStart(2, "0");
-    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
-    const ss = String(s % 60).padStart(2, "0");
-    return `${hh}:${mm}:${ss}`;
-  };
 
   return (
     <>
       <ESKEPBaseHeader />
-      {/* Sayfanın tamamına geniş yatay boşluklar */}
-      <section className="py-4 bg-light px-3 px-md-5">
-        <div className="container-fluid">
-          <div className="row align-items-start gx-tight">
-            {/* Sidebar */}
-            <div className="col-lg-3 col-md-4 mb-4 pe-1 pe-md-2">
+      <section className="pt-5 pb-5 bg-light">
+        <div className="container-xxl">
+          <Header />
+          <div className="row mt-0 mt-md-4">
+            <div className="col-lg-3 col-md-4 col-12 mb-4">
               <Sidebar />
             </div>
+            <div className="col-lg-9 col-md-8 col-12">
+              <div className="bg-white p-5 rounded shadow">
+                <div className="d-flex align-items-center justify-content-between mb-4">
+                  <h3 className="mb-0">
+                  <i className="fa-solid fa-film text-warning"></i> Webcam ile Video Oluştur
+                </h3>
+                
+                  <span className="badge bg-secondary fs-6">
+                    Süre: {fmtTime(elapsed)}
+                  </span>
+                  
+                </div>
+                
 
-            {/* Main (ortalanmış ve daraltılmış) */}
-            <div className="col-lg-9 col-md-8 ps-1 ps-md-2">
-              <div className="mx-auto" style={{ maxWidth: 960 }}>
-                <div className="card shadow-sm border-0">
-                  <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 className="mb-0">🎥 Webcam ile Video Oluştur</h4>
-                    <span className="badge bg-dark-subtle text-white">
-                      Süre: <strong className="ms-1">{fmtTime(elapsed)}</strong>
-                    </span>
+                {/* Cihaz Ayarları */}
+
+                <div className="row g-3 mb-4">
+                  <p className="text-muted mb-0">
+                    Kameranızı kullanarak yeni bir video kaydedin. Kayıt tamamlandıktan sonra videoyu indirip ders materyallerinize ekleyebilirsiniz.
+                  </p>
+                  <div className="col-md-4">
+                    <label className="form-label">Kamera</label>
+                    <select
+                      className="form-select"
+                      value={selectedCam}
+                      onChange={(e) => setSelectedCam(e.target.value)}
+                    >
+                      {devices.cams.map((d) => (
+                        <option key={d.deviceId} value={d.deviceId}>
+                          {d.label || "Kamera"}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-
-                  <div className="card-body">
-                    {/* Kontroller (ortalı) */}
-                    <div className="row g-3 mb-3">
-                      <div className="col-md-4">
-                        <label className="form-label">Kamera</label>
-                        <select className="form-select" value={selectedCam} onChange={(e) => setSelectedCam(e.target.value)}>
-                          {devices.cams.map((d) => (
-                            <option key={d.deviceId} value={d.deviceId}>{d.label || "Kamera"}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="col-md-4">
-                        <label className="form-label">Mikrofon</label>
-                        <select className="form-select" value={selectedMic} onChange={(e) => setSelectedMic(e.target.value)}>
-                          {devices.mics.map((d) => (
-                            <option key={d.deviceId} value={d.deviceId}>{d.label || "Mikrofon"}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="col-md-4">
-                        <label className="form-label">Çözünürlük</label>
-                        <select className="form-select" value={resolution} onChange={(e) => setResolution(e.target.value)}>
-                          <option value="1280x720">1280x720 (HD)</option>
-                          <option value="1920x1080">1920x1080 (Full HD)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Daha küçük video alanı (ortalı, max 720px) */}
-                    <div className="mx-auto mb-3" style={{ maxWidth: 720 }}>
-                      <div className="ratio ratio-16x9">
-                        <video
-                          ref={videoRef}
-                          className="w-100 rounded bg-dark"
-                          playsInline
-                          muted
-                        />
-                      </div>
-                    </div>
-
-                    {error && (
-                      <div className="alert alert-danger mb-3 text-center">
-                        {error} (Not: Kamera/mikrofon için <strong>HTTPS</strong> gerekir.)
-                      </div>
-                    )}
-
-                    {/* Kayıt Butonları (ortalı) */}
-                    <div className="d-flex flex-wrap gap-2 justify-content-center">
-                      <button className="btn btn-success" onClick={startRecording} disabled={recordingState === "recording"}>
-                        ⏺️ Kaydı Başlat
-                      </button>
-                      <button className="btn btn-warning" onClick={pauseRecording} disabled={recordingState !== "recording"}>
-                        ⏸️ Duraklat
-                      </button>
-                      <button className="btn btn-info" onClick={resumeRecording} disabled={recordingState !== "paused"}>
-                        ▶️ Devam
-                      </button>
-                      <button className="btn btn-danger" onClick={stopRecording} disabled={recordingState === "idle" || recordingState === "stopped"}>
-                        ⏹️ Bitir
-                      </button>
-
-                      <div className="d-flex flex-wrap gap-2">
-                        <button className="btn btn-outline-secondary" onClick={downloadVideo} disabled={!blobUrl}>
-                          ⬇️ İndir (.webm)
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Kayıt sonrası küçük önizleme (ortalı, max 720px) */}
-                    {blobUrl && (
-                      <div className="mt-3 mx-auto" style={{ maxWidth: 720 }}>
-                        <div className="alert alert-success py-2 text-center">
-                          Kayıt hazır. İndirebilirsiniz.
-                        </div>
-                        <div className="ratio ratio-16x9">
-                          <video src={blobUrl} controls className="w-100 rounded" />
-                        </div>
-                      </div>
-                    )}
+                  <div className="col-md-4">
+                    <label className="form-label">Mikrofon</label>
+                    <select
+                      className="form-select"
+                      value={selectedMic}
+                      onChange={(e) => setSelectedMic(e.target.value)}
+                    >
+                      {devices.mics.map((d) => (
+                        <option key={d.deviceId} value={d.deviceId}>
+                          {d.label || "Mikrofon"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">Çözünürlük</label>
+                    <select
+                      className="form-select"
+                      value={resolution}
+                      onChange={(e) => setResolution(e.target.value)}
+                    >
+                      <option value="1280x720">1280×720 (HD)</option>
+                      <option value="1920x1080">1920×1080 (Full HD)</option>
+                    </select>
                   </div>
                 </div>
 
-                <p className="text-muted small mt-3 text-center">
-                  İpucu: Kayıt başlamıyorsa, sayfayı <strong>HTTPS</strong> üzerinden açtığınızdan ve tarayıcı izinlerini verdiğinizden emin olun.
+                {/* Video Önizleme */}
+                <div className="ratio ratio-16x9 mb-3 rounded overflow-hidden bg-dark">
+                  <video ref={videoRef} className="w-100" playsInline muted />
+                </div>
+
+                {/* Hata */}
+                {error && (
+                  <div className="alert alert-danger mb-3">
+                    {error} — Kamera/mikrofon için <strong>HTTPS</strong> gereklidir.
+                  </div>
+                )}
+
+                {/* Kayıt Butonları */}
+                <div className="d-flex flex-wrap gap-2 justify-content-center mb-3">
+                  <button
+                    className="btn btn-success"
+                    onClick={startRecording}
+                    disabled={recordingState === "recording"}
+                  >
+                    ⏺️ Kaydı Başlat
+                  </button>
+                  <button
+                    className="btn btn-warning"
+                    onClick={pauseRecording}
+                    disabled={recordingState !== "recording"}
+                  >
+                    ⏸️ Duraklat
+                  </button>
+                  <button
+                    className="btn btn-info"
+                    onClick={resumeRecording}
+                    disabled={recordingState !== "paused"}
+                  >
+                    ▶️ Devam
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={stopRecording}
+                    disabled={recordingState === "idle" || recordingState === "stopped"}
+                  >
+                    ⏹️ Bitir
+                  </button>
+                  <button
+                    className="btn btn-outline-secondary"
+                    onClick={downloadVideo}
+                    disabled={!blobUrl}
+                  >
+                    ⬇️ İndir (.webm)
+                  </button>
+                </div>
+
+                {/* Kayıt Sonrası Önizleme */}
+                {blobUrl && (
+                  <div className="mt-3">
+                    <div className="alert alert-success py-2 text-center mb-2">
+                      Kayıt hazır. İndirebilirsiniz.
+                    </div>
+                    <div className="ratio ratio-16x9 rounded overflow-hidden">
+                      <video src={blobUrl} controls className="w-100" />
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-muted small mt-3 text-center mb-0">
+                  İpucu: Kayıt başlamıyorsa sayfayı <strong>HTTPS</strong> üzerinden açtığınızdan
+                  ve tarayıcı izinlerini verdiğinizden emin olun.
                 </p>
               </div>
             </div>
@@ -297,6 +318,6 @@ const WebcamRecordPage = () => {
       <ESKEPBaseFooter />
     </>
   );
-};
+}
 
 export default WebcamRecordPage;

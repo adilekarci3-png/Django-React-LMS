@@ -68,10 +68,13 @@ function EskepInstructorStudentStajerList() {
     <>
       <ESKEPBaseHeader />
       <section className="pt-5 pb-5 bg-light">
-        <div className="container">
+        <div className="container-xxl">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <Sidebar />
+            <div className="col-md-4 col-lg-3" style={{ minWidth: "280px" }}>
+              <Sidebar />
+            </div>
+            
             <div className="col-lg-9 col-md-8 col-12">
               <h3 className="text-primary mb-4">📘 Öğrenci ve Stajyer Listesi</h3>
               <div className="mb-4">

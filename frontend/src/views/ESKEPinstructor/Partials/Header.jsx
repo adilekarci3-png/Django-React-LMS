@@ -45,7 +45,7 @@ function Header() {
             </div>
             <div>
               <a
-                href="/eskep/profile"
+                href="/eskepinstructor/profile"
                 className="btn btn-sm btn-primary"
               >
                 Profili Gör

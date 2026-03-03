@@ -7,6 +7,12 @@ import KoordinatorMenu from "../partials/menus/CoordinatorMenu";
 import StajerMenu from "../partials/menus/StajerMenu";
 import OgrenciMenu from "../partials/menus/OgrenciMenu";
 
+<<<<<<< HEAD
+import "./css/eskep-aqua.css";
+import EgitmenMenu from "./menus/EgitmenMenu";
+
+=======
+>>>>>>> b5ede7be1cee27c86925f69c6e0bb320c22beaa9
 export default function ESKEPBaseHeader() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -34,6 +40,8 @@ export default function ESKEPBaseHeader() {
   const isEskepOgrenci =
     baseRoles.includes("Ogrenci") && subRoles.includes("ESKEPOgrenci");
 
+  const isEskepEgitmen = baseRoles.includes("Teacher") && subRoles.includes("ESKEPEgitmen");
+
   const onSubmit = (e) => {
     e.preventDefault();
     const s = q.trim();
@@ -56,6 +64,44 @@ export default function ESKEPBaseHeader() {
               ESKEP
             </Link>
 
+<<<<<<< HEAD
+            {/* Koordinatör menüsü */}
+            {isEskepKoordinator && <KoordinatorMenu />}
+
+            {/* 🔐 sadece ESKEPGenelKoordinator ise göster */}
+            {/* {canSeeContactMessages && (
+              <NavLink className="eskep-link" to="/contact-messages">
+                İletişim Mesajları
+              </NavLink>
+            )} */}
+
+            {/* Stajer menüsü */}
+            {isEskepStajer && <StajerMenu />}
+
+            {/* Öğrenci menüsü */}
+            {isEskepOgrenci && <OgrenciMenu />}
+
+            {isEskepEgitmen && <EgitmenMenu />}
+          </div>
+
+          {/* Sağ: arama + giriş */}
+          <div className="eskep-actions">
+            <form
+              className="eskep-search"
+              onSubmit={onSubmit}
+              role="search"
+              aria-label="Site içi arama"
+            >
+              <input
+                type="search"
+                placeholder="Ara"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                aria-label="Arama"
+              />
+              <button type="submit" aria-label="Ara">
+                <FaSearch size={14} />
+=======
             {/* Mobile toggler */}
             <div className="d-flex align-items-center gap-2 d-lg-none">
               <button
@@ -65,6 +111,7 @@ export default function ESKEPBaseHeader() {
                 aria-label="Ara"
               >
                 <FaSearch size={13} />
+>>>>>>> b5ede7be1cee27c86925f69c6e0bb320c22beaa9
               </button>
               <button
                 className="navbar-toggler eskep-toggler"

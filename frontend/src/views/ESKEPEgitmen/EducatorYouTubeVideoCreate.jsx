@@ -1,72 +1,50 @@
-// src/views/AkademiEgitmen/EducatorYouTubeVideoCreate.jsx
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import useAxios from "../../utils/useAxios";
-import {
-  TextField,
-  Button,
-  InputLabel,
-  Typography,
-  Card,
-  CardContent,
-  Box,
-  Grid,
-} from "@mui/material";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import Swal from "sweetalert2";
-
+import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
+import { useParams, useNavigate } from "react-router-dom";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
+import Header from "./Partials/Header";
 
-import MdEditor from "react-markdown-editor-lite";
-import "react-markdown-editor-lite/lib/index.css";
-import MarkdownIt from "markdown-it";
-const mdParser = new MarkdownIt();
+const validationSchema = Yup.object({
+  title: Yup.string().required("Başlık zorunludur"),
+  videoUrl: Yup.string()
+    .url("Geçerli bir URL giriniz")
+    .required("Video linki zorunludur"),
+  description: Yup.string(),
+});
 
 function EducatorYouTubeVideoCreate() {
   const api = useAxios();
-  const { id } = useParams(); // opsiyonel: koordinator başka eğitmen adına açarsa Educator PK
-  const educatorId = Number.isFinite(Number(id)) ? Number(id) : null;
+  const profile = useUserData();
+  const { id } = useParams();
+  // Koordinatör başka eğitmen adına açarsa route'dan gelir, yoksa token'dan alınır
+  const educatorId = Number.isFinite(Number(id)) ? Number(id) : profile?.user_id;
+  const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    videoUrl: "",
-    description: "",
-  });
-
-  const handleChange = (field) => (e) => {
-    setFormData({ ...formData, [field]: e.target.value });
-  };
-
-  const handleEditorChange = ({ text }) => {
-    setFormData({ ...formData, description: text });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!formData.title?.trim() || !formData.videoUrl?.trim()) {
-      Swal.fire("Uyarı", "Başlık ve Video Linki zorunludur.", "warning");
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
+    if (!educatorId) {
+      Swal.fire("Hata", "Kullanıcı bilgisi alınamadı.", "error");
+      setSubmitting(false);
       return;
     }
-
     try {
-      setLoading(true);
       const payload = {
-        title: formData.title,
-        videoUrl: formData.videoUrl,      // model alanı camelCase
-        description: formData.description,
+        title: values.title,
+        videoUrl: values.videoUrl,
+        description: values.description,
+        instructor_id: educatorId,
       };
-      // Koordinatör akışı: route ile Educator PK geldiyse gönder
-      if (educatorId) payload.instructor_id = educatorId;
 
-      await api.post("/educator/video/link/create/", payload);
-      Swal.fire("Başarılı", "Video bağlantısı kaydedildi!", "success");
-      setFormData({ title: "", videoUrl: "", description: "" });
-    } catch (error) {
-      console.error(error);
-      const data = error?.response?.data;
+      await api.post("educator/video/link/create/", payload);
+      await Swal.fire("Başarılı", "Video bağlantısı kaydedildi!", "success");
+      navigate("/eskepegitmen/youtube-video-list/");
+      resetForm();
+    } catch (err) {
+      const data = err?.response?.data;
       const msg =
         data && typeof data === "object"
           ? Object.entries(data)
@@ -75,117 +53,81 @@ function EducatorYouTubeVideoCreate() {
           : "Bağlantı kaydedilemedi";
       Swal.fire("Hata", msg, "error");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
     <>
       <ESKEPBaseHeader />
-      <section className="pt-5 pb-5 bg-light min-vh-100">
-        <div className="container">
+      <section className="pt-5 pb-5 bg-light">
+        <div className="container-xxl">
+          <Header />
           <div className="row mt-0 mt-md-4">
-            <div className="col-lg-3 col-md-4 col-12">
+            <div className="col-lg-3 col-md-4 col-12 mb-4">
               <Sidebar />
             </div>
-
             <div className="col-lg-9 col-md-8 col-12">
-              <Card className="shadow-sm rounded-4">
-                <CardContent sx={{ background: "#f9f9f9", borderRadius: 2 }}>
-                  <Box className="d-flex align-items-center mb-4">
-                    <Box
-                      sx={{
-                        background: "#90caf9",
-                        width: 50,
-                        height: 50,
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#fff",
-                        fontSize: 22,
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                        marginRight: 2,
-                      }}
-                    >
-                      <i className="bi bi-link-45deg"></i>
-                    </Box>
-                    <Typography variant="h5" sx={{ fontWeight: "bold", color: "#1976d2" }}>
-                      YouTube Video Bağlantısı Ekle
-                    </Typography>
-                  </Box>
+              <div className="bg-white p-5 rounded shadow">
+                <h3 className="mb-2">
+                    <i className="fa-brands fa-youtube text-danger"></i> Youtube Video Bağlantısı Ekle
+                </h3>
+                <p className="text-muted mb-4">
+                  YouTube veya benzeri bir platformdaki videonuzun bağlantısını ekleyebilirsiniz. Video, eğitmen profilinizde görüntülenecektir.
+                </p>
 
-                  <form onSubmit={handleSubmit}>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Video Başlığı"
-                          fullWidth
-                          value={formData.title}
-                          onChange={handleChange("title")}
-                          size="small"
-                          required
-                          sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                <Formik
+                  initialValues={{ title: "", videoUrl: "", description: "" }}
+                  validationSchema={validationSchema}
+                  onSubmit={handleSubmit}
+                >
+                  {({ isSubmitting }) => (
+                    <Form>
+                      <div className="mb-3">
+                        <label className="form-label">Video Başlığı</label>
+                        <Field name="title" className="form-control" placeholder="Video başlığını giriniz" />
+                        <div className="text-danger small">
+                          <ErrorMessage name="title" />
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="form-label">Video Linki (YouTube, Vimeo vb.)</label>
+                        <Field
+                          name="videoUrl"
+                          className="form-control"
+                          placeholder="https://youtube.com/watch?v=..."
                         />
-                      </Grid>
+                        <div className="text-danger small">
+                          <ErrorMessage name="videoUrl" />
+                        </div>
+                      </div>
 
-                      <Grid item xs={12}>
-                        <InputLabel sx={{ mb: 1, fontWeight: "bold", color: "#333" }}>
-                          Açıklama (Markdown)
-                        </InputLabel>
-                        <Box
-                          sx={{
-                            border: "1px solid #cfd8dc",
-                            borderRadius: "8px",
-                            padding: "8px",
-                            background: "#ffffff",
-                          }}
-                        >
-                          <MdEditor
-                            value={formData.description}
-                            style={{ height: "150px", borderRadius: "6px" }}
-                            renderHTML={(text) => mdParser.render(text)}
-                            onChange={handleEditorChange}
-                          />
-                        </Box>
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Video Linki (YouTube, Vimeo vb.)"
-                          fullWidth
-                          value={formData.videoUrl}
-                          onChange={handleChange("videoUrl")}
-                          size="small"
-                          required
-                          sx={{ backgroundColor: "#fff", borderRadius: 1 }}
+                      <div className="mb-3">
+                        <label className="form-label">Açıklama</label>
+                        <Field
+                          name="description"
+                          as="textarea"
+                          rows={4}
+                          className="form-control"
+                          placeholder="Kısa bir açıklama ekleyebilirsiniz (isteğe bağlı)"
                         />
-                      </Grid>
+                        <div className="text-danger small">
+                          <ErrorMessage name="description" />
+                        </div>
+                      </div>
 
-                      <Grid item xs={12}>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          size="large"
-                          fullWidth
-                          disabled={loading}
-                          sx={{
-                            py: 1.5,
-                            fontWeight: "bold",
-                            backgroundColor: "#64b5f6",
-                            color: "#fff",
-                            "&:hover": { backgroundColor: "#42a5f5" },
-                            borderRadius: 2,
-                            boxShadow: "0 2px 6px rgba(100, 181, 246, 0.3)",
-                          }}
-                        >
-                          {loading ? "Kaydediliyor..." : "Bağlantıyı Kaydet"}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </form>
-                </CardContent>
-              </Card>
+                      <button
+                        type="submit"
+                        className="btn btn-success w-100"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Kaydediliyor..." : "Bağlantıyı Kaydet"}
+                      </button>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
             </div>
           </div>
         </div>

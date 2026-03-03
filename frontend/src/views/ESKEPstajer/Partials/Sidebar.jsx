@@ -20,7 +20,7 @@ function Sidebar() {
         <div className="collapse navbar-collapse p-3" id="sidenav">
           <div className="navbar-nav flex-column w-100">
             {/* GENEL İŞLEMLER */}
-            <h6 className="text-uppercase text-muted px-2 mb-2">Genel İşlemler</h6>
+            <h6 className="navbar-header">Genel İşlemler</h6>
             <ul className="list-unstyled ms-n2 mb-4">
               <li className="nav-item">
                 <Link className="nav-link text-dark" to={`/eskepstajer/dashboard/`}>
@@ -55,17 +55,17 @@ function Sidebar() {
             </ul>
 
             {/* ÇALIŞMA DURUMLARI */}
-            <h6 className="text-uppercase text-muted px-2 mb-2">Çalışma Durumları</h6>
+            <h6 className="navbar-header">Çalışma Durumları</h6>
             <ul className="list-unstyled ms-n2 mb-4">
               <li className="nav-item">
                 <Link className="nav-link text-dark" to={`/eskepstajer/works/incele`}>
-                  <i className="fas fa-hourglass-half text-warning me-2"></i>
+                  <i className="fas fa-clock text-info me-2"></i>
                   İncelemede Olan Çalışmalarım
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link text-dark" to={`/eskepstajer/works/draft`}>
-                  <i className="fas fa-pencil-alt text-secondary me-2"></i>
+                  <i className="fas fa-archive text-secondary me-2"></i>
                   Taslakta Olan Çalışmalarım
                 </Link>
               </li>
@@ -90,7 +90,7 @@ function Sidebar() {
             </ul>
 
             {/* HESAP AYARLARI */}
-            <h6 className="text-uppercase text-muted px-2 mb-2">Hesap Ayarları</h6>
+            <h6 className="navbar-header">Hesap Ayarları</h6>
             <ul className="list-unstyled ms-n2">
               <li className="nav-item">
                 <Link className="nav-link text-dark" to={`/eskep/profile-edit/`}>
@@ -98,7 +98,7 @@ function Sidebar() {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link text-dark" to={`/student/change-password/`}>
+                <Link className="nav-link text-dark" to={`/eskep/change-password/`}>
                   <i className="fas fa-lock text-dark me-2"></i> Şifre Değiştir
                 </Link>
               </li>

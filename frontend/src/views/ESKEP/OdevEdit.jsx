@@ -284,7 +284,7 @@ function OdevEdit() {
 
             <form className="col-lg-9 col-md-9 col-12" onSubmit={handleSubmit}>
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <h2 className="mb-0">✏️ Ödev Düzenle</h2>
+                <h2 className="mb-0"><i className="fas fa-chalkboard-user text-success me-2" /> Ödev Düzenle</h2>
                 <Link to="/eskepstajer/odevs/" className="btn btn-light">
                   ← Listeye Dön
                 </Link>

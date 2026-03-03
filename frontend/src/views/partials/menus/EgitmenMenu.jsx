@@ -1,100 +1,118 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import "./css/coordinatormenu.css";
 
 const EgitmenMenu = () => {
+
+  const [open, setOpen] = useState(false);
+
+  const toggleMenu = (e) => {
+    e.preventDefault();
+    setOpen((prev) => !prev);
+  };
+
+  const closeMenu = () => {
+    setOpen(false);
+  };
   return (
-    <li className="nav-item dropdown">
+     <li className="nav-item dropdown position-static">
       <a
-        className="nav-link dropdown-toggle"
+        className={`nav-link dropdown-toggle ${open ? "show" : ""}`}
         href="#"
         role="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
+        aria-expanded={open ? "true" : "false"}
+        onClick={toggleMenu}
       >
-        <i className="fa-solid fa-user-tie me-1"></i> Eğitmen
+        <i className="fa-solid fa-graduation-cap"></i> Eğitmen
       </a>
 
-      <ul className="dropdown-menu dropdown-menu-end">
-        {/* 1. Genel */}
-        <li className="dropdown-header">📋 Genel</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/dashboard/`}>
-            <i className="fa-solid fa-gauge me-2 text-primary"></i> Panel
-          </Link>
-        </li>
+      <div
+        className={`dropdown-menu student-mega shadow-lg border-0 mt-0 ${
+          open ? "show" : ""
+        }`}
+        // inline style ile kesin aç
+        style={{
+          display: open ? "block" : "none",
+        }}
+      >
 
-        {/* 2. İçerik Ekle */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">➕ İçerik Ekle</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/canli-ders-ekle/`}>
-            <i className="fa-solid fa-video me-2 text-danger"></i> Canlı Ders Ekle
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/youtube-video-ekle/`}>
-            <i className="fa-brands fa-youtube me-2 text-danger"></i> YouTube Video Ekle
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/ders-saat-ekle/`}>
-            <i className="fa-regular fa-clock me-2 text-success"></i> Ders Saati Ekle
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/video-olustur/`}>
-            <i className="fa-solid fa-film me-2 text-warning"></i> Video Oluştur
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/video-ekle/`}>
-            <i className="fa-solid fa-upload me-2 text-info"></i> Video Ekle
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/dokuman-ekle/`}>
-            <i className="fa-solid fa-file-arrow-up me-2 text-secondary"></i> Döküman Ekle
-          </Link>
-        </li>
+      <div className="d-flex flex-wrap gap-3">
+          {/* Sütun 1: Panel + Eğitim */}
+          <div className="student-col">
+            <h6 className="dropdown-header px-0">📊 Panel</h6>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/dashboard/`} onClick={closeMenu}>
+              <i className="fa-solid fa-gauge text-primary me-2"></i> Panel
+            </Link>
 
-        {/* 3. Listelerim */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">📚 Listelerim</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/live-lessons/`}>
-            <i className="fa-solid fa-video me-2 text-success"></i> Canlı Derslerim
-          </Link>
-        </li>
-        
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/youtube-video-list/`}>
-            <i className="fa-brands fa-youtube me-2 text-danger"></i> YouTube Videolarım
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/video-list/`}>
-            <i className="fa-solid fa-photo-film me-2 text-info"></i> Videolarım
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/created-videos/`}>
-            <i className="fa-solid fa-clapperboard me-2 text-warning"></i> Oluşturduğum Videolarım
-          </Link>
-        </li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/documents/`}>
-            <i className="fa-regular fa-file-lines me-2 text-secondary"></i> Dökümanlarım
-          </Link>
-        </li>
+            <hr className="my-2" />
+         <h6 className="dropdown-header px-0">➕ İçerik Ekle</h6>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/canli-ders-ekle/`} onClick={closeMenu}>
+              <i className="fa-solid fa-video me-2 text-danger"></i> Canlı Ders Oluştur
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/youtube-video-ekle/`} onClick={closeMenu}>
+              <i className="fa-brands fa-youtube me-2 text-danger"></i> YouTube Video Ekle
+            </Link>
+            <Link
+              className="dropdown-item px-0"
+              to={`/eskepegitmen/video-ekle`}
+              onClick={closeMenu}
+            >
+              <i className="fa-solid fa-upload me-2 text-info"></i> Video Yükle
+            </Link>
+            <Link
+              className="dropdown-item px-0"
+              to={`/eskepegitmen/video-olustur/`}
+              onClick={closeMenu}
+            >
+              <i className="fa-solid fa-film me-2 text-warning"></i> Video Oluştur
+            </Link>
+            
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/dokuman-ekle/`} onClick={closeMenu}>
+              <i className="fa-solid fa-file-arrow-up me-2 text-secondary"></i> Döküman Oluştur
+            </Link>
+          </div>
 
-        {/* 4. Ders Yönetimi */}
-        <li><hr className="dropdown-divider" /></li>
-        <li className="dropdown-header">🗓️ Ders Yönetimi</li>
-        <li>
-          <Link className="dropdown-item" to={`/eskepegitmen/takvim/`}>
-            <i className="fa-regular fa-calendar-days me-2 text-primary"></i> Ders Takvimim
-          </Link>
-        </li>
-      </ul>
+        <div className="student-col">
+            <h6 className="dropdown-header px-0">📚 Listelerim</h6>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/live-lessons/`} onClick={closeMenu}>
+              <i className="fa-solid fa-video me-2 text-danger"></i> Canlı Derslerim
+            </Link>
+            <Link
+              className="dropdown-item px-0"
+              to={`/eskepegitmen/youtube-video-list/`}
+              onClick={closeMenu}
+            >
+              <i className="fa-brands fa-youtube me-2 text-danger"></i> YouTube Videolarım
+            </Link>
+            <Link
+              className="dropdown-item px-0"
+              to={`/eskepegitmen/video-list/`}
+              onClick={closeMenu}
+            >
+              <i className="fa-solid fa-photo-film me-2 text-info"></i> Videolarım
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/created-videos/`} onClick={closeMenu}>
+              <i className="fa-solid fa-clapperboard me-2 text-warning"></i> Oluşturduğum Videolarım
+            </Link>
+             <Link className="dropdown-item px-0" to={`/eskepegitmen/documents/`} onClick={closeMenu}>
+              <i className="fa-regular fa-file-lines me-2 text-secondary"></i> Dökümanlarım
+            </Link>
+             {/* <Link className="dropdown-item px-0" to={`/eskep/create-proje/`} onClick={closeMenu}>
+              <i className="fa-solid fa-folder-plus me-2"></i> Proje Dosyalarını gönder
+            </Link> */}
+          </div>
+
+<div className="student-col">
+            <h6 className="dropdown-header px-0">⚙️ Diğer</h6>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/takvim`} onClick={closeMenu}>
+             <i className="fa-regular fa-calendar-days me-2 text-primary"></i> Ders Takvimim
+            </Link>
+            <Link className="dropdown-item px-0" to={`/eskepegitmen/profil-edit/`} onClick={closeMenu}>
+              <i className="fa-solid fa-user-gear me-2"></i> Profil & Ayarlar
+            </Link>
+          </div>
+        </div>
+      </div>
     </li>
   );
 };

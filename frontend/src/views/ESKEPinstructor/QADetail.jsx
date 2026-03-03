@@ -1,8 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import EskepBaseHeader from "../partials/ESKEPBaseHeader";
-import EskepBaseFooter from "../partials/ESKEPBaseFooter";
+import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from './Partials/Sidebar'
 import Header from './Partials/Header'
 

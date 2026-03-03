@@ -256,7 +256,7 @@ function DersSonuRaporuEdit() {
             <div className="col-lg-9 col-md-9 col-12">
               <form onSubmit={handleSubmit}>
                 <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                  <h2 className="mb-0">✏️ Ders Sonu Raporu Düzenle</h2>
+                  <h2 className="mb-0"><i className="fas fa-chalkboard-user text-info me-2" /> Ders Sonu Raporu Düzenle</h2>
                   <Link to="/eskepstajer/derssonuraporus" className="btn btn-light">
                     ← Listeye Dön
                   </Link>

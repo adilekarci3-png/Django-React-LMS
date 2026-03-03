@@ -49,9 +49,7 @@ const StajerMenu = () => {
             <hr className="my-2" />
 
             <h6 className="dropdown-header px-0">📚 Eğitim</h6>
-            <Link className="dropdown-item px-0" to={`/eskepstajer/courses/`} onClick={closeMenu}>
-              <i className="fa-solid fa-chalkboard-user text-primary me-2"></i> Kurslarım
-            </Link>
+        
             <Link className="dropdown-item px-0" to={`/eskepstajer/odevs/`} onClick={closeMenu}>
               <i className="fas fa-tasks text-success me-2"></i> Ödevlerim
             </Link>
@@ -121,7 +119,7 @@ const StajerMenu = () => {
             >
               <i className="fa-solid fa-envelope text-primary me-2"></i> Soru / Cevap
             </Link>
-            <Link className="dropdown-item px-0" to={`/eskepstajer/profile/`} onClick={closeMenu}>
+            <Link className="dropdown-item px-0" to={`/eskep/profile-edit/`} onClick={closeMenu}>
               <i className="fa-solid fa-user-gear me-2"></i> Profil & Ayarlar
             </Link>
           </div>

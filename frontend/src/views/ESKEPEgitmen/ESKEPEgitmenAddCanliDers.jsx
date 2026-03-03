@@ -63,15 +63,20 @@ const ESKEPEgitmenAddCanliDers = () => {
     <>
       <ESKEPBaseHeader />
       <section className="pt-5 pb-5 bg-light">
-        <div className="container">
+        <div className="container-xxl">
           <Header />
           <div className="row mt-0 mt-md-4">
-            <div className="col-lg-3">
+            <div className="col-lg-3 col-md-4 col-12 mb-4">
               <Sidebar />
             </div>
-            <div className="col-lg-9">
+            <div className="col-lg-9 col-md-8 col-12">
               <div className="bg-white p-5 rounded shadow">
-                <h3 className="mb-4 text-primary fw-bold">🎥 Canlı Ders Oluştur</h3>
+                <h3 className="mb-2">
+                    <i className="fa-solid fa-video text-danger"></i> Canlı Ders Oluştur
+                </h3>
+                <p className="text-muted mb-4">
+                    Gerçekleştireceğiniz canlı dersin bilgilerini giriniz. Platform seçimi yaparsanız, bağlantı alanı otomatik olarak doldurulacaktır.
+                  </p>
                 <Formik
                   initialValues={initialValues}
                   validationSchema={validationSchema}
@@ -164,7 +169,7 @@ const ESKEPEgitmenAddCanliDers = () => {
                         className="btn btn-success w-100"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? "Kaydediliyor..." : "Dersi Oluştur"}
+                        {isSubmitting ? "Kaydediliyor..." : "Canlı Dersi Kaydet"}
                       </button>
                     </Form>
                   )}

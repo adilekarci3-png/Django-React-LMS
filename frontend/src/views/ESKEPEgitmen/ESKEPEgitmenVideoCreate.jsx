@@ -1,54 +1,52 @@
-import { useState } from "react";
-import axios from "axios";
-import {
-  TextField,
-  Button,
-  InputLabel,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Grid,
-  Divider,
-} from "@mui/material";
+import { useRef } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import Swal from "sweetalert2";
-
-import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import useAxios from "../../utils/useAxios";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
+import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import Sidebar from "./Partials/Sidebar";
+import Header from "./Partials/Header";
+import { useNavigate } from "react-router-dom";
 
+const validationSchema = Yup.object({
+  title: Yup.string().required("Başlık zorunludur"),
+  description: Yup.string(),
+  videoUrl: Yup.string().url("Geçerli bir URL giriniz"),
+  videoFile: Yup.mixed(),
+}).test("url-or-file", "Video URL veya dosya giriniz", function (values) {
+  return !!values.videoUrl || !!values.videoFile;
+});
 
 function ESKEPEgitmenVideoCreate() {
-  const [formData, setFormData] = useState({
-    title: "",
-    videoUrl: "",
-    videoFile: null,
-    description: "",
-  });
+  const api = useAxios();
+  const fileRef = useRef();
+  const navigate = useNavigate();
 
-  const handleChange = (field) => (e) => {
-    const value = field === "videoFile" ? e.target.files[0] : e.target.value;
-    setFormData({ ...formData, [field]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const payload = new FormData();
-    payload.append("title", formData.title);
-    payload.append("description", formData.description);
-    payload.append("video_url", formData.videoUrl);
-    if (formData.videoFile) {
-      payload.append("video_file", formData.videoFile);
-    }
-
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      await axios.post("http://127.0.0.1:8000/api/v1/instructor/video/create/", payload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      Swal.fire("Başarılı", "Video başarıyla yüklendi!", "success");
-    } catch (error) {
-      console.error(error);
-      Swal.fire("Hata", "Video yüklenemedi", "error");
+      const fd = new FormData();
+      fd.append("title", values.title);
+      fd.append("description", values.description);
+      if (values.videoUrl) fd.append("video_url", values.videoUrl);
+      if (values.videoFile) fd.append("video_file", values.videoFile);
+
+      await api.post("instructor/video/create/", fd);
+      await Swal.fire("Başarılı", "Video başarıyla yüklendi!", "success");
+      navigate("/eskepegitmen/video-list/");
+      resetForm();
+      if (fileRef.current) fileRef.current.value = "";
+    } catch (err) {
+      const data = err?.response?.data;
+      const msg =
+        data && typeof data === "object"
+          ? Object.entries(data)
+              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+              .join("\n")
+          : "Video yüklenemedi";
+      Swal.fire("Hata", msg, "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -56,117 +54,87 @@ function ESKEPEgitmenVideoCreate() {
     <>
       <ESKEPBaseHeader />
       <section className="pt-5 pb-5 bg-light">
-        <div className="container">
+        <div className="container-xxl">
+          <Header />
           <div className="row mt-0 mt-md-4">
-            
-            {/* Sol Sidebar */}
-            <div className="col-lg-3 mb-4 mb-lg-0">
+            <div className="col-lg-3 col-md-4 col-12 mb-4">
               <Sidebar />
             </div>
+            <div className="col-lg-9 col-md-8 col-12">
+              <div className="bg-white p-5 rounded shadow">
+                <h3 className="mb-2">
+                  <i className="fa-solid fa-upload text-info"></i> Video Yükle
+                </h3>
+                <p className="text-muted mb-4">
+                  Yeni video yükleyebilir veya YouTube / harici bağlantı ekleyebilirsiniz.
+                </p>
 
-            {/* Sağ Gövde */}
-            <div className="col-lg-9">
-              <Card className="shadow-lg border-0 rounded-4">
-                <CardContent sx={{ p: 4 }}>
-                  {/* Başlık */}
-                  <Box className="d-flex align-items-center mb-3">
-                    <Box
-                      sx={{
-                        background: "linear-gradient(135deg,#ff416c,#ff4b2b)",
-                        width: 55,
-                        height: 55,
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#fff",
-                        fontSize: 26,
-                        boxShadow: "0 4px 12px rgba(255,65,108,0.35)",
-                        mr: 2,
-                      }}
-                    >
-                      <i className="bi bi-camera-video-fill"></i>
-                    </Box>
-                    <Box>
-                      <Typography variant="h5" className="fw-bold text-primary">
-                        Eğitmen Video Ekle
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Yeni video yükleyebilir veya YouTube bağlantısı ekleyebilirsiniz.
-                      </Typography>
-                    </Box>
-                  </Box>
+                <Formik
+                  initialValues={{ title: "", description: "", videoUrl: "", videoFile: null }}
+                  validationSchema={validationSchema}
+                  onSubmit={handleSubmit}
+                >
+                  {({ isSubmitting, setFieldValue }) => (
+                    <Form>
+                      <div className="mb-3">
+                        <label className="form-label">Video Başlığı</label>
+                        <Field name="title" className="form-control" placeholder="Video başlığını giriniz" />
+                        <div className="text-danger small">
+                          <ErrorMessage name="title" />
+                        </div>
+                      </div>
 
-                  <Divider sx={{ my: 3 }} />
-
-                  {/* Form */}
-                  <form onSubmit={handleSubmit}>
-                    <Grid container spacing={3}>
-                      {/* Başlık */}
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Video Başlığı"
-                          fullWidth
-                          value={formData.title}
-                          onChange={handleChange("title")}
-                          size="small"
-                          variant="outlined"
+                      <div className="mb-3">
+                        <label className="form-label">Açıklama</label>
+                        <Field
+                          name="description"
+                          as="textarea"
+                          rows={4}
+                          className="form-control"
+                          placeholder="Kısa bir açıklama ekleyebilirsiniz (isteğe bağlı)"
                         />
-                      </Grid>
+                        <div className="text-danger small">
+                          <ErrorMessage name="description" />
+                        </div>
+                      </div>
 
-                      {/* Açıklama */}
-                      <Grid item xs={12}>
-                        <TextField
-                          label="Açıklama"
-                          fullWidth
-                          multiline
-                          rows={5}
-                          value={formData.description}
-                          onChange={handleChange("description")}
-                          variant="outlined"
+                      <div className="mb-3">
+                        <label className="form-label">YouTube / Video URL</label>
+                        <Field
+                          name="videoUrl"
+                          className="form-control"
+                          placeholder="https://youtube.com/watch?v=..."
                         />
-                      </Grid>
+                        <div className="text-danger small">
+                          <ErrorMessage name="videoUrl" />
+                        </div>
+                      </div>
 
-                      {/* URL */}
-                      <Grid item xs={12}>
-                        <TextField
-                          label="YouTube / Video URL"
-                          fullWidth
-                          value={formData.videoUrl}
-                          onChange={handleChange("videoUrl")}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </Grid>
-
-                      {/* Dosya Yükleme */}
-                      <Grid item xs={12}>
-                        <InputLabel sx={{ mb: 1, fontWeight: "500" }}>
-                          Video Dosyası Yükle (.mp4)
-                        </InputLabel>
+                      <div className="mb-4">
+                        <label className="form-label">Video Dosyası Yükle (.mp4)</label>
                         <input
+                          ref={fileRef}
                           type="file"
                           accept="video/mp4"
-                          onChange={handleChange("videoFile")}
                           className="form-control"
+                          onChange={(e) => setFieldValue("videoFile", e.currentTarget.files[0])}
                         />
-                      </Grid>
+                        <div className="text-danger small">
+                          <ErrorMessage name="videoFile" />
+                        </div>
+                      </div>
 
-                      {/* Kaydet Butonu */}
-                      <Grid item xs={12} className="d-flex justify-content-end">
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          color="success"
-                          size="large"
-                        >
-                          💾 Videoyu Kaydet
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </form>
-                </CardContent>
-              </Card>
+                      <button
+                        type="submit"
+                        className="btn btn-success w-100"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Kaydediliyor..." : "Videoyu Kaydet"}
+                      </button>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
             </div>
           </div>
         </div>

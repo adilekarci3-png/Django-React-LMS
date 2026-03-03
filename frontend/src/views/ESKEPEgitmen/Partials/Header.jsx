@@ -32,7 +32,7 @@ function Header() {
             </div>
             <div>
               <a
-                href="/eskep/profile"
+                href="/eskepegitmen/profile"
                 className="btn btn-sm btn-primary"
               >
                 Profili Gör

@@ -116,7 +116,7 @@ function EskepStajerDashboard() {
             <div className="col-lg-9 col-md-8 col-12">
               <div className="row mb-4">
                 <h4 className="mb-0 mb-4">
-                  <i className="bi bi-grid-fill"></i> Öğrenci Paneli
+                  <i className="bi bi-grid-fill text-primary"></i> Stajer Paneli
                 </h4>
 
                 {/* İstatistik kartları */}
@@ -129,38 +129,39 @@ function EskepStajerDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="col-sm-6 col-lg-4 mb-3">
-                  <div className="bg-primary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <BsJournalText className="display-6 text-primary me-3" />
-                    <div>
-                      <h5 className="fw-bold mb-0">{stats.lesson_reports_completed}</h5>
-                      <p className="mb-0">Ders Sonu Raporları</p>
-                    </div>
-                  </div>
-                </div>
+                
                 <div className="col-sm-6 col-lg-4 mb-3">
                   <div className="bg-info bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
                     <FaTasks className="display-6 text-info me-3" />
                     <div>
-                      <h5 className="fw-bold mb-0">{stats.homework_count}</h5>
+                      <h5 className="fw-bold mb-0">{homeworks.filter(h => h.is_completed).length}</h5>
                       <p className="mb-0">Tamamlanan Ödev</p>
                     </div>
                   </div>
                 </div>
                 <div className="col-sm-6 col-lg-4 mb-3">
-                  <div className="bg-secondary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <FaBook className="display-6 text-secondary me-3" />
+                  <div className="bg-primary bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
+                    <BsJournalText className="display-6 text-primary me-3" />
                     <div>
-                      <h5 className="fw-bold mb-0">{stats.book_reviews}</h5>
+                      <h5 className="fw-bold mb-0">{lessonReports.length}</h5>
+                      <p className="mb-0">Ders Sonu Raporları</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-sm-6 col-lg-4 mb-3">
+                  <div className="bg-warning bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
+                    <FaBook className="display-6 text-warning me-3" />
+                    <div>
+                      <h5 className="fw-bold mb-0">{bookReviews.length}</h5>
                       <p className="mb-0">Kitap Tahlilleri</p>
                     </div>
                   </div>
                 </div>
                 <div className="col-sm-6 col-lg-4 mb-3">
-                  <div className="bg-dark bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
-                    <FaProjectDiagram className="display-6 text-dark me-3" />
+                  <div className="bg-danger bg-opacity-10 p-4 rounded-3 d-flex align-items-center">
+                    <FaProjectDiagram className="display-6 text-danger me-3" />
                     <div>
-                      <h5 className="fw-bold mb-0">{stats.projects}</h5>
+                      <h5 className="fw-bold mb-0">{projects.length}</h5>
                       <p className="mb-0">Projeler</p>
                     </div>
                   </div>

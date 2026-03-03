@@ -8,11 +8,19 @@ import {
   FiExternalLink,
   FiDownload,
   FiX,
-  FiFilter,
   FiFolder,
   FiSearch,
   FiEdit3,
   FiTrash2,
+  FiBook,
+  FiClipboard,
+  FiBookOpen,
+  FiLayers,
+  FiClock,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiSlash,
+  FiArchive,
 } from "react-icons/fi";
 import Swal from "sweetalert2";
 
@@ -24,13 +32,12 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 
 import "./css/ModalStyle.css";
-// (İsteğe bağlı) Proje sayfasındaki küçük stilleri burada da kullanmak isterseniz:
-// import "./css/eskep-stajer-projes.css";
 
 Modal.setAppElement("#root");
 
 // ---- helpers ----
 const trLower = (s) => String(s ?? "").toLocaleLowerCase("tr").trim();
+
 const normalizeStatusKey = (s) => {
   const t = trLower(s);
   if (t.includes("incele")) return "incelemede";
@@ -42,70 +49,83 @@ const normalizeStatusKey = (s) => {
   return t;
 };
 
-const statusBadgeClass = (status) => {
-  switch (normalizeStatusKey(status)) {
-    case "incelemede":
-      return "badge bg-warning text-dark";
-    case "taslak":
-      return "badge bg-secondary";
-    case "pasif":
-      return "badge bg-dark";
-    case "reddedildi":
-      return "badge bg-danger";
-    case "teslimedildi":
-      return "badge bg-success";
-    default:
-      return "badge bg-light text-dark";
-  }
+// Durum badge — sadece badge içi renkli, etrafı yok
+const statusBadge = (status) => {
+  const key = normalizeStatusKey(status);
+  const map = {
+    incelemede: { cls: "badge bg-info",       label: "İncelemede" },
+    taslak:     { cls: "badge bg-secondary",  label: "Taslak" },
+    pasif:      { cls: "badge bg-dark",       label: "Pasif" },
+    reddedildi: { cls: "badge bg-danger",     label: "Reddedildi" },
+    teslimedildi: { cls: "badge bg-success",  label: "Teslim Edildi" },
+  };
+  const entry = map[key];
+  return entry
+    ? <span className={entry.cls}>{entry.label}</span>
+    : <span className="badge bg-light text-dark">{status || "—"}</span>;
 };
 
+// Tür badge — Ödev=success, Rapor=info, Kitap=warning, Proje=danger
 const typeBadge = (type) => {
   switch (type) {
-    case "ODEV":
-      return <span className="badge bg-info">Ödev</span>;
-    case "RAPOR":
-      return <span className="badge bg-warning text-dark">Ders Sonu Raporu</span>;
-    case "KITAP":
-      return <span className="badge bg-success">Kitap Tahlili</span>;
-    case "PROJE":
-      return <span className="badge bg-primary">Proje</span>;
-    default:
-      return null;
+    case "ODEV":  return <span className="badge bg-success">Ödev</span>;
+    case "RAPOR": return <span className="badge bg-info">Rapor</span>;
+    case "KITAP": return <span className="badge bg-warning text-dark">Tahlil</span>;
+    case "PROJE": return <span className="badge bg-danger">Proje</span>;
+    default:      return null;
   }
 };
 
-const LANG_MAP = { Turkce: "Türkçe", Ingilizce: "İngilizce", Arapca: "Arapça" };
+// Sayfa başlığı ikonu — tipe göre
+const PAGE_META = {
+  ALL:   { icon: <FiLayers   className="me-2 text-secondary" />,                          label: "Tümü" },
+  ODEV:  { icon: <FiBook     className="me-2 text-success"   />,                          label: "Ödevler" },
+  RAPOR: { icon: <FiClipboard className="me-2 text-info"    />,                           label: "Ders Sonu Raporları" },
+  KITAP: { icon: <FiBookOpen className="me-2 text-warning"   />,                          label: "Kitap Tahlilleri" },
+  PROJE: { icon: <FiFileText className="me-2 text-danger"    />,                          label: "Projeler" },
+};
+
+// Durum ikonu (sayfa başlığı için)
+const STATUS_META = {
+  taslak:      { icon: <FiArchive     className="me-2 text-secondary" />, color: "text-secondary" },
+  pasif:       { icon: <FiSlash       className="me-2 text-dark"      />, color: "text-dark" },
+  reddedildi:  { icon: <FiAlertCircle className="me-2 text-danger"    />, color: "text-danger" },
+  teslimedildi:{ icon: <FiCheckCircle className="me-2 text-success"   />, color: "text-success" },
+  incelemede:  { icon: <FiClock       className="me-2 text-info"      />, color: "text-info" },
+};
+
+const LANG_MAP  = { Turkce: "Türkçe", Ingilizce: "İngilizce", Arapca: "Arapça" };
 const LEVEL_MAP = { Baslangic: "Başlangıç", Orta: "Orta", "Ileri Seviye": "İleri Seviye" };
 // ---- end helpers ----
 
 function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle = "Çalışmalarım" }) {
-  const api = useAxios();
+  const api  = useAxios();
   const user = useUserData();
 
   const [fetching, setFetching] = useState(true);
-  const [error, setError] = useState("");
-  const [items, setItems] = useState([]);
+  const [error,    setError   ] = useState("");
+  const [items,    setItems   ] = useState([]);
 
   // filtreler
-  const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("ALL"); // ALL | ODEV | RAPOR | KITAP | PROJE
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [query,      setQuery     ] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [dateFrom,   setDateFrom  ] = useState("");
+  const [dateTo,     setDateTo    ] = useState("");
 
   // sayfalama
   const [page, setPage] = useState(1);
   const pageSize = 8;
 
   // Modal
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [modalIsOpen,    setModalIsOpen   ] = useState(false);
+  const [selectedFiles,  setSelectedFiles ] = useState([]);
   const headingId = "assignment-modal-title";
   const onClose = useCallback(() => setModalIsOpen(false), []);
 
   // Delete
   const [deletingKey, setDeletingKey] = useState(null);
 
-  // Güvenli yardımcılar
+  // --- dosya yardımcıları ---
   const safeUrl = (f) => {
     if (!f) return "#";
     if (typeof f === "string") return f;
@@ -113,67 +133,52 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
     if (f?.file) return typeof f.file === "string" ? f.file : f.file?.url ?? "#";
     return "#";
   };
-  const fileTitle = (f, i) => (f?.title || f?.variant?.title || `Bölüm ${i + 1}`);
-  const fileName = (f) => {
+  const fileTitle = (f, i) => f?.title || f?.variant?.title || `Bölüm ${i + 1}`;
+  const fileName  = (f) => {
     if (!f) return undefined;
     if (typeof f === "object") {
-      if (f?.filename) return f.filename;
-      if (f?.name) return f.name;
-      if (f?.file?.filename) return f.file.filename;
-      if (f?.file?.name) return f.file.name;
+      if (f?.filename)        return f.filename;
+      if (f?.name)            return f.name;
+      if (f?.file?.filename)  return f.file.filename;
+      if (f?.file?.name)      return f.file.name;
     }
     try {
       const u = new URL(safeUrl(f));
       return decodeURIComponent(u.pathname.split("/").pop());
-    } catch {
-      return undefined;
-    }
+    } catch { return undefined; }
   };
 
   const pickStatus = (x) => {
     const keys = [
-      "odev_status",
-      "status",
-      "durum",
-      "derssonuraporu_status",
-      "kitaptahlili_status",
-      "kitap_status",
-      "rapor_status",
-      "kitap_durum",
-      "rapor_durum",
-      "state",
-      "statu",
-      "work_status",
-      "proje_status",
-      "eskepProje_status",
-      "koordinator_eskepProje_status",
+      "odev_status", "status", "durum", "derssonuraporu_status",
+      "kitaptahlili_status", "kitap_status", "rapor_status",
+      "kitap_durum", "rapor_durum", "state", "statu",
+      "work_status", "proje_status", "eskepProje_status",
     ];
     for (const k of keys) {
       if (x?.[k] !== undefined && x?.[k] !== null && x?.[k] !== "") return x[k];
     }
-    if (x?.meta?.status) return x.meta.status;
     return "—";
   };
 
   const normalize = (arr, type) =>
     (arr || []).map((x) => ({
-      id: x.id,
+      id:       x.id,
       type,
-      title: x.title || x.name || "—",
-      image: x.image || x.cover || "/img/default-course.png",
+      title:    x.title || x.name || "—",
+      image:    x.image || x.cover || "/img/default-course.png",
       language: x.language || x.lang || "—",
-      level: x.level || x.difficulty || "—",
-      date: x.date || x.created_at || x.created || x.updated_at || null,
-      status: pickStatus(x),
-      owner: x.koordinator?.full_name || x.author?.full_name || x.owner?.full_name || "—",
+      level:    x.level || x.difficulty || "—",
+      date:     x.date || x.created_at || x.created || x.updated_at || null,
+      status:   pickStatus(x),
+      owner:    x.koordinator?.full_name || x.author?.full_name || x.owner?.full_name || "—",
       sections: [
         ...(Array.isArray(x.curriculum) ? x.curriculum.flatMap((c) => c?.variant_items || []) : []),
-        ...(Array.isArray(x.sections) ? x.sections : []),
-        ...(Array.isArray(x.variants) ? x.variants : []),
-        ...(Array.isArray(x.files) ? x.files : []),
-        ...(Array.isArray(x.lectures) ? x.lectures : []),
+        ...(Array.isArray(x.sections)   ? x.sections   : []),
+        ...(Array.isArray(x.variants)   ? x.variants   : []),
+        ...(Array.isArray(x.files)      ? x.files      : []),
+        ...(Array.isArray(x.lectures)   ? x.lectures   : []),
       ],
-      raw: x,
     }));
 
   const fetchAll = useCallback(async () => {
@@ -188,7 +193,7 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
         api.get(`eskepstajer/proje-list/${user.user_id}/`),
       ]);
       const merged = [
-        ...normalize(odevRes.data, "ODEV"),
+        ...normalize(odevRes.data,  "ODEV"),
         ...normalize(raporRes.data, "RAPOR"),
         ...normalize(kitapRes.data, "KITAP"),
         ...normalize(projeRes.data, "PROJE"),
@@ -198,29 +203,32 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
       );
       setItems(wanted);
       setPage(1);
-    } catch (e) {
+    } catch {
       setError("Kayıtlar yüklenemedi.");
     } finally {
       setFetching(false);
     }
   }, [api, user?.user_id, statusLabel]);
 
-  useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  const deleteEndpointByType = (type, id) => {
+  const editLink = (it) => {
+    switch (it.type) {
+      case "ODEV":  return `/eskep/edit-odev/${it.id}`;
+      case "RAPOR": return `/eskep/edit-derssonuraporu/${it.id}`;
+      case "KITAP": return `/eskep/edit-kitaptahlili/${it.id}`;
+      case "PROJE": return `/eskep/edit-proje/${it.id}`;
+      default:      return "#";
+    }
+  };
+
+  const deleteEndpoint = (type, id) => {
     switch (type) {
-      case "ODEV":
-        return `eskepstajer/odev/${id}/`;
-      case "RAPOR":
-        return `eskepstajer/derssonuraporu/${id}/`;
-      case "KITAP":
-        return `eskepstajer/kitaptahlili/${id}/`;
-      case "PROJE":
-        return `eskepstajer/proje/${id}/`;
-      default:
-        return null;
+      case "ODEV":  return `eskepstajer/odev-delete/${id}/`;
+      case "RAPOR": return `eskepstajer/derssonuraporu-delete/${id}/`;
+      case "KITAP": return `eskepstajer/kitaptahlili-delete/${id}/`;
+      case "PROJE": return `eskepstajer/proje-delete/${id}/`;
+      default:      return null;
     }
   };
 
@@ -236,7 +244,7 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
     if (!ask.isConfirmed) return;
 
     const key = `${it.type}-${it.id}`;
-    const url = deleteEndpointByType(it.type, it.id);
+    const url = deleteEndpoint(it.type, it.id);
     if (!url) return;
 
     try {
@@ -251,42 +259,37 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
     }
   };
 
-  // Arama + tür + tarih filtresi
+  // Filtreleme
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim().toLocaleLowerCase("tr");
     return items.filter((it) => {
-      const matchesType = typeFilter === "ALL" ? true : it.type === typeFilter;
-      const matchesQuery =
-        !q ||
-        it.title.toLowerCase().includes(q) ||
-        (it.language || "").toLowerCase().includes(q) ||
-        (it.level || "").toLowerCase().includes(q) ||
-        (it.owner || "").toLowerCase().includes(q);
+      const matchesType  = typeFilter === "ALL" || it.type === typeFilter;
+      const matchesQuery = !q
+        || it.title.toLocaleLowerCase("tr").includes(q)
+        || (it.language || "").toLocaleLowerCase("tr").includes(q)
+        || (it.level    || "").toLocaleLowerCase("tr").includes(q)
+        || (it.owner    || "").toLocaleLowerCase("tr").includes(q);
       const matchesFrom = !dateFrom || (it.date && moment(it.date).isSameOrAfter(moment(dateFrom)));
-      const matchesTo = !dateTo || (it.date && moment(it.date).isSameOrBefore(moment(dateTo)));
+      const matchesTo   = !dateTo   || (it.date && moment(it.date).isSameOrBefore(moment(dateTo)));
       return matchesType && matchesQuery && matchesFrom && matchesTo;
     });
   }, [items, query, typeFilter, dateFrom, dateTo]);
 
-  // Sayfalama
-  const totalPages = Math.max(1, Math.ceil((filtered?.length || 0) / pageSize));
-  const pageData = useMemo(() => {
+  const totalPages = Math.max(1, Math.ceil((filtered.length || 0) / pageSize));
+  const pageData   = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return (filtered || []).slice(start, start + pageSize);
+    return filtered.slice(start, start + pageSize);
   }, [filtered, page]);
 
   const onImgError = (e) => {
     e.currentTarget.src =
       "data:image/svg+xml;utf8," +
       encodeURIComponent(
-        `<svg xmlns='http://www.w3.org/2000/svg' width='100' height='70'><rect width='100' height='70' fill='#e9ecef'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#6c757d' font-size='12'>no image</text></svg>`
+        `<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72'><rect width='72' height='72' fill='#e9ecef'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#6c757d' font-size='11'>no image</text></svg>`
       );
   };
 
-  const openModal = (secList) => {
-    setSelectedFiles(secList || []);
-    setModalIsOpen(true);
-  };
+  const statusMeta = STATUS_META[normalizeStatusKey(statusLabel)] || {};
 
   return (
     <>
@@ -295,39 +298,41 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
         <div className="container-xxl">
           <Header />
           <div className="row mt-0 mt-md-4">
-            {/* SOL: Sidebar */}
             <div className="col-lg-3 col-md-3 col-12 mb-4 mb-md-0">
               <Sidebar />
             </div>
 
-            {/* SAĞ: İçerik */}
             <div className="col-lg-9 col-md-9 col-12">
-              <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <h4 className="mb-0 d-flex align-items-center gap-2">
-                  <i className="fas fa-chalkboard-user text-info " />
-                  {pageTitle}
-                </h4>
-                <div className="text-muted small">
-                  {fetching ? "Yükleniyor..." : `${filtered.length} kayıt`}
+
+              {/* ── SAYFA BAŞLIĞI (üstte, bağımsız) ── */}
+              <div className="mb-4">
+                <div className="d-flex align-items-center gap-2 mb-1">
+                  {statusMeta.icon}
+                  <h4 className="mb-0">{pageTitle}</h4>
+                  <span className="text-muted small ms-1">
+                    {fetching ? "" : `· ${filtered.length} kayıt`}
+                  </span>
                 </div>
+                <p className="text-muted small mb-0">
+                  Durum: <strong className={statusMeta.color || ""}>{statusLabel}</strong>
+                </p>
               </div>
 
-              {/* Filtreler */}
+              {/* ── FİLTRE + TABLO KARTI ── */}
               <div className="card mb-4">
-                <div className="card-body">
+                {/* Filtreler */}
+                <div className="card-body border-bottom">
                   <div className="row g-2 align-items-end">
                     <div className="col-12 col-md-4">
                       <label className="form-label">Ara</label>
                       <div className="input-group">
-                        <span className="input-group-text" aria-hidden>
-                          <FiSearch />
-                        </span>
+                        <span className="input-group-text" aria-hidden><FiSearch /></span>
                         <input
                           type="search"
                           className="form-control"
-                          placeholder="Başlık / dil / seviye / hazırlayan…"
+                          placeholder="Başlık / dil / seviye / koordinatör…"
                           value={query}
-                          onChange={(e) => setQuery(e.target.value)}
+                          onChange={(e) => { setQuery(e.target.value); setPage(1); }}
                           aria-label="Çalışmalarda ara"
                         />
                       </div>
@@ -335,20 +340,17 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
 
                     <div className="col-6 col-md-2">
                       <label className="form-label">Tür</label>
-                      <div className="d-flex align-items-center gap-2">
-                        <FiFilter aria-hidden />
-                        <select
-                          className="form-select"
-                          value={typeFilter}
-                          onChange={(e) => setTypeFilter(e.target.value)}
-                        >
-                          <option value="ALL">Tümü</option>
-                          <option value="ODEV">Ödevler</option>
-                          <option value="RAPOR">Ders Sonu Raporları</option>
-                          <option value="KITAP">Kitap Tahlilleri</option>
-                          <option value="PROJE">Projeler</option>
-                        </select>
-                      </div>
+                      <select
+                        className="form-select"
+                        value={typeFilter}
+                        onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
+                      >
+                        <option value="ALL">Tümü</option>
+                        <option value="ODEV">Ödevler</option>
+                        <option value="RAPOR">Ders Sonu Raporları</option>
+                        <option value="KITAP">Kitap Tahlilleri</option>
+                        <option value="PROJE">Projeler</option>
+                      </select>
                     </div>
 
                     <div className="col-6 col-md-2">
@@ -357,51 +359,34 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
                         type="date"
                         className="form-control"
                         value={dateFrom}
-                        onChange={(e) => setDateFrom(e.target.value)}
+                        onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
                       />
                     </div>
+
                     <div className="col-6 col-md-2">
                       <label className="form-label">Bitiş</label>
                       <input
                         type="date"
                         className="form-control"
                         value={dateTo}
-                        onChange={(e) => setDateTo(e.target.value)}
+                        onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
                       />
                     </div>
 
                     <div className="col-12 col-md-2 d-grid">
                       <button
                         className="btn btn-outline-secondary"
-                        onClick={() => {
-                          setQuery("");
-                          setTypeFilter("ALL");
-                          setDateFrom("");
-                          setDateTo("");
-                          setPage(1);
-                        }}
+                        onClick={() => { setQuery(""); setTypeFilter("ALL"); setDateFrom(""); setDateTo(""); setPage(1); }}
                       >
-                        Filtreleri Temizle
+                        Temizle
                       </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card-header border-top">
-                  <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div>
-                      <h3 className="mb-0">Çalışmalar</h3>
-                      <span className="text-muted">
-                        Durum:{" "}
-                        <strong className={statusBadgeClass(statusLabel)}>{statusLabel}</strong>
-                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Tablo */}
                 <div className="table-responsive overflow-y-hidden">
-                  <table className="table mb-0 text-nowrap table-hover table-centered align-middle">
+                  <table className="table table-sm mb-0 text-nowrap table-hover table-centered align-middle">
                     <thead className="table-light">
                       <tr>
                         <th>Tür</th>
@@ -409,125 +394,107 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
                         <th>Kayıt Tarihi</th>
                         <th>Bölümler</th>
                         <th>Durum</th>
-                        <th>Hazırlayan</th>
-                        <th className="text-end">İşlemler</th>
+                        <th>Kordinatör</th>
+                        <th className="text-center">İşlemler</th>
                       </tr>
                     </thead>
 
                     <tbody>
                       {error && (
                         <tr>
-                          <td colSpan={7} className="text-danger">
-                            {error}
-                          </td>
+                          <td colSpan={7} className="text-danger">{error}</td>
                         </tr>
                       )}
 
-                      {fetching &&
-                        Array.from({ length: 5 }).map((_, i) => (
-                          <tr key={`sk-${i}`}>
-                            <td colSpan={7}>
-                              <div className="placeholder-glow py-2">
-                                <span className="placeholder col-2 me-2" />
-                                <span className="placeholder col-3 me-2" />
-                                <span className="placeholder col-2 me-2" />
-                                <span className="placeholder col-1 me-2" />
-                                <span className="placeholder col-1 me-2" />
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                      {fetching && Array.from({ length: 5 }).map((_, i) => (
+                        <tr key={`sk-${i}`}>
+                          <td colSpan={7}>
+                            <div className="placeholder-glow py-2">
+                              <span className="placeholder col-1 me-2" />
+                              <span className="placeholder col-3 me-2" />
+                              <span className="placeholder col-2 me-2" />
+                              <span className="placeholder col-1 me-2" />
+                              <span className="placeholder col-1 me-2" />
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
 
-                      {!fetching &&
-                        !error &&
-                        pageData.map((it) => (
-                          <tr key={`${it.type}-${it.id}`}>
-                            <td>{typeBadge(it.type)}</td>
+                      {!fetching && !error && pageData.map((it) => (
+                        <tr key={`${it.type}-${it.id}`}>
+                          {/* Tür */}
+                          <td>{typeBadge(it.type)}</td>
 
-                            <td>
-                              <div className="d-flex align-items-center">
-                                <img
-                                  src={it.image}
-                                  onError={onImgError}
-                                  alt={`${it.title || "çalışma"} görseli`}
-                                  className="rounded"
-                                  style={{ width: 72, height: 72, borderRadius: 12, objectFit: "cover" }}
-                                />
-                                <div className="ms-3">
-                                  <h6 className="mb-1">{it.title}</h6>
-                                  <div className="text-muted small">
-                                    {(LANG_MAP[it.language] || it.language || "—")} · {(LEVEL_MAP[it.level] || it.level || "—")}
-                                  </div>
+                          {/* Başlık */}
+                          <td>
+                            <div className="d-flex align-items-center">
+                              <img
+                                src={it.image}
+                                onError={onImgError}
+                                alt={`${it.title} görseli`}
+                                className="rounded"
+                                style={{ width: 52, height: 52, objectFit: "cover", flexShrink: 0 }}
+                              />
+                              <div className="ms-3">
+                                <h6 className="mb-1 fw-semibold">{it.title}</h6>
+                                <div className="text-muted small">
+                                  {LANG_MAP[it.language] || it.language || "—"} · {LEVEL_MAP[it.level] || it.level || "—"}
                                 </div>
                               </div>
-                            </td>
+                            </div>
+                          </td>
 
-                            <td>{it.date ? moment(it.date).format("D MMM YYYY") : "—"}</td>
-                            <td>{it.sections?.length || "-"}</td>
+                          {/* Tarih */}
+                          <td>{it.date ? moment(it.date).format("D MMM YYYY") : "—"}</td>
 
-                            <td>
-                              <span className={statusBadgeClass(it.status)}>{it.status}</span>
-                            </td>
+                          {/* Bölümler */}
+                          <td>{it.sections?.length || "—"}</td>
 
-                            <td>{it.owner}</td>
+                          {/* Durum */}
+                          <td>{statusBadge(it.status)}</td>
 
-                            <td className="text-end">
-                              <div className="btn-group" role="group" aria-label="İşlemler">
-                                {it.type === "ODEV" && (
-                                  <Link to={`/eskep/edit-odev/${it.id}`} className="btn btn-sm btn-outline-warning">
-                                    <FiEdit3 className="me-1" />
-                                    Düzenle
-                                  </Link>
-                                )}
-                                {it.type === "RAPOR" && (
-                                  <Link to={`/eskep/edit-derssonuraporu/${it.id}`} className="btn btn-sm btn-outline-warning">
-                                    <FiEdit3 className="me-1" />
-                                    Düzenle
-                                  </Link>
-                                )}
-                                {it.type === "KITAP" && (
-                                  <Link to={`/eskep/edit-kitaptahlili/${it.id}`} className="btn btn-sm btn-outline-warning">
-                                    <FiEdit3 className="me-1" />
-                                    Düzenle
-                                  </Link>
-                                )}
-                                {it.type === "PROJE" && (
-                                  <Link to={`/eskep/edit-proje/${it.id}`} className="btn btn-sm btn-outline-warning">
-                                    <FiEdit3 className="me-1" />
-                                    Düzenle
-                                  </Link>
-                                )}
+                          {/* Hazırlayan */}
+                          <td>{it.owner}</td>
 
-                                {!!it.sections?.length && (
-                                  <button
-                                    className="btn btn-sm btn-outline-info"
-                                    onClick={() => openModal(it.sections)}
-                                    title="Bölümleri Görüntüle"
-                                  >
-                                    <FiFolder className="me-1" />
-                                    Bölümler
-                                  </button>
-                                )}
+                          {/* İşlemler — sadece ikonlar, ortalı, sıkıştırılmış */}
+                          <td className="text-center">
+                            <div className="d-flex align-items-center justify-content-center gap-1">
+                              <Link
+                                to={editLink(it)}
+                                className="btn btn-sm btn-outline-warning icon-btn px-1 py-1"
+                                title="Düzenle"
+                              >
+                                <FiEdit3 size={14} />
+                              </Link>
 
+                              {!!it.sections?.length && (
                                 <button
-                                  className="btn btn-sm btn-outline-danger"
-                                  disabled={deletingKey === `${it.type}-${it.id}`}
-                                  onClick={() => handleDelete(it)}
-                                  title="Kaydı sil"
+                                  className="btn btn-sm btn-outline-info icon-btn px-1 py-1"
+                                  onClick={() => { setSelectedFiles(it.sections); setModalIsOpen(true); }}
+                                  title="Bölümleri Görüntüle"
                                 >
-                                  <FiTrash2 className="me-1" />
-                                  {deletingKey === `${it.type}-${it.id}` ? "Siliniyor..." : "Sil"}
+                                  <FiFolder size={14} />
                                 </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                              )}
 
-                      {!fetching && !error && pageData.length < 1 && (
+                              <button
+                                className="btn btn-sm btn-outline-danger icon-btn px-1 py-1"
+                                disabled={deletingKey === `${it.type}-${it.id}`}
+                                onClick={() => handleDelete(it)}
+                                title="Kaydı sil"
+                              >
+                                <FiTrash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+
+                      {!fetching && !error && pageData.length === 0 && (
                         <tr>
                           <td colSpan={7} className="text-center py-5">
                             <div className="text-muted">
-                              <FiFolder className="mb-2" size={28} />
+                              <FiFolder size={28} className="mb-2" />
                               <div className="fw-semibold">Kayıt bulunamadı</div>
                               <div className="small">Filtreleri temizleyip tekrar deneyin.</div>
                             </div>
@@ -580,12 +547,8 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
         aria={{ labelledby: headingId }}
       >
         <div className="modalHeader">
-          <h3 id={headingId} className="modalTitle">
-            Bölüm Dosyaları
-          </h3>
-          <button className="iconBtn" aria-label="Kapat" onClick={onClose} title="Kapat">
-            <FiX />
-          </button>
+          <h3 id={headingId} className="modalTitle">Bölüm Dosyaları</h3>
+          <button className="iconBtn" aria-label="Kapat" onClick={onClose}><FiX /></button>
         </div>
 
         <div className="modalBody">
@@ -594,33 +557,18 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
               {selectedFiles.map((file, idx) => (
                 <li key={idx} className="fileItem">
                   <div className="fileMain">
-                    <span className="fileIcon" aria-hidden>
-                      <FiFileText />
-                    </span>
+                    <span className="fileIcon" aria-hidden><FiFileText /></span>
                     <div className="fileTexts">
                       <div className="fileTitle">{fileTitle(file, idx)}</div>
                       {fileName(file) && <div className="fileMeta">{fileName(file)}</div>}
                     </div>
                   </div>
                   <div className="fileActions">
-                    <a
-                      className="btn ghost"
-                      href={safeUrl(file)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="Yeni sekmede aç"
-                    >
-                      <FiExternalLink className="btnIcon" />
-                      Önizle
+                    <a className="btn ghost" href={safeUrl(file)} target="_blank" rel="noopener noreferrer" title="Önizle">
+                      <FiExternalLink className="btnIcon" />Önizle
                     </a>
-                    <a
-                      className="btn primary"
-                      href={safeUrl(file)}
-                      download={fileName(file)}
-                      title="İndir"
-                    >
-                      <FiDownload className="btnIcon" />
-                      İndir
+                    <a className="btn primary" href={safeUrl(file)} download={fileName(file)} title="İndir">
+                      <FiDownload className="btnIcon" />İndir
                     </a>
                   </div>
                 </li>
@@ -632,25 +580,38 @@ function EskepStajerCalismalarByStatus({ statusLabel = "İncelemede", pageTitle 
         </div>
 
         <div className="modalFooter">
-          <button className="btn outline" onClick={onClose}>
-            Kapat
-          </button>
+          <button className="btn outline" onClick={onClose}>Kapat</button>
         </div>
       </Modal>
     </>
   );
 }
 
-// --- 5 sayfa (status + başlık) ---
+// --- 5 sayfa export'u ---
+export function EskepStajerIncelemedeCalismalar() {
+  return (
+    <EskepStajerCalismalarByStatus
+      statusLabel="İncelemede"
+      pageTitle="İncelemede Olan Çalışmalarım"
+    />
+  );
+}
+
 export function EskepStajerTaslakCalismalar() {
   return (
-    <EskepStajerCalismalarByStatus statusLabel="Taslak" pageTitle="Taslakta Olan Çalışmalarım" />
+    <EskepStajerCalismalarByStatus
+      statusLabel="Taslak"
+      pageTitle="Taslakta Olan Çalışmalarım"
+    />
   );
 }
 
 export function EskepStajerPasifCalismalar() {
   return (
-    <EskepStajerCalismalarByStatus statusLabel="Pasif" pageTitle="Pasifte Olan Çalışmalarım" />
+    <EskepStajerCalismalarByStatus
+      statusLabel="Pasif"
+      pageTitle="Pasifte Olan Çalışmalarım"
+    />
   );
 }
 
@@ -666,17 +627,8 @@ export function EskepStajerReddedilmisCalismalar() {
 export function EskepStajerTeslimEdilmisCalismalar() {
   return (
     <EskepStajerCalismalarByStatus
-      statusLabel="Teslim Edildi"
+      statusLabel="Teslim Edilmiş"
       pageTitle="Teslim Edilmiş Çalışmalarım"
-    />
-  );
-}
-
-export function EskepStajerIncelemedeCalismalar() {
-  return (
-    <EskepStajerCalismalarByStatus
-      statusLabel="İncelemede"
-      pageTitle="İncelemede Olan Çalışmalarım"
     />
   );
 }

@@ -202,18 +202,22 @@ export default function EskepStajerCalendar() {
     });
   }, [rawEvents, showProje, showKitap, showDers, showOdev]);
 
+   const getKoordinatorId = (item) =>
+    item?.koordinator_id ?? item?.koordinator?.id ?? item?.koordinator ?? 0;
+
   const handleEventClick = (info) => {
     const type = info.event.extendedProps?.type;
     const raw = info.event.extendedProps?.raw;
 
+
     if (type === "proje") {
-      navigate(`/eskep/edit-proje/${raw.id}`);
+      navigate(`/eskepstajer/projes/${raw.id}/${getKoordinatorId(raw)}`);
     } else if (type === "kitap") {
-      navigate(`/eskep/kitap-tahlili/${raw.id}`);
+      navigate(`/eskepstajer/kitaptahlileris/${raw.id}/${getKoordinatorId(raw)}`);
     } else if (type === "ders") {
-      navigate(`/eskep/ders-rapor/${raw.id}`);
+      navigate(`/eskepstajer/derssonuraporus/${raw.id}/${getKoordinatorId(raw)}`);
     } else if (type === "odev") {
-      navigate(`/eskep/odev/${raw.id}`);
+      navigate(`/eskepstajer/odevs/${raw.id}/${getKoordinatorId(raw)}`);
     }
   };
 
@@ -240,8 +244,7 @@ export default function EskepStajerCalendar() {
                 <div>
                   <h3 className="fw-bold mb-1">📅 Stajer Takvimi</h3>
                   <p className="text-muted mb-0">
-                    Projeler, kitap tahlilleri, ders sonu raporları ve ödevlerin teslim
-                    tarihleri burada.
+                    Projeler, kitap tahlilleri, ders sonu raporları ve ödevleri buradan takip edebilirsiniz.
                   </p>
                 </div>
                 <div className="text-muted small">
@@ -356,6 +359,7 @@ export default function EskepStajerCalendar() {
                     <h5 className="text-secondary fw-bold mb-3">
                       📋 Etkinlikler
                     </h5>
+                   <div style={{ maxHeight: "650px", overflowY: "auto", paddingRight: "5px" }}>
                     <ul className="list-group list-group-flush">
                       {sortedEvents.length === 0 && (
                         <li className="list-group-item text-muted small">
@@ -387,6 +391,7 @@ export default function EskepStajerCalendar() {
                         </li>
                       ))}
                     </ul>
+                   </div>
                   </div>
                 </div>
               </div>
