@@ -45,3 +45,4 @@ venv/
 **/venv/
 **/site-packages/
 backend/yedek/venv/
+backend/*.sqlite3

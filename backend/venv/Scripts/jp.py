@@ -1,4 +1,4 @@
-#!C:\Users\alemd\Desktop\Django-React-LMS\backend\venv\Scripts\python.exe
+#!D:\Yazılım\EHAD\Egitim\Django-React-LMS\backend\venv\Scripts\python.exe
 
 import sys
 import json
