@@ -2,11 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import HDMBaseHeader from "../partials/HDMBaseHeader";
 import HDMBaseFooter from "../partials/HDMBaseFooter";
-import AsymHero from "./AsymHero";           // yolu senin yapına göre
-import hafizlikImage from "./images/3.png";
+// import "./css/hdm-theme.css";
 
 /* --------- Yardımcılar --------- */
-/* Scroll görünürlüğü: görünce 'reveal-visible' ekler */
 function useReveal(threshold = 0.15) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -28,7 +26,6 @@ function useReveal(threshold = 0.15) {
   return [ref, visible];
 }
 
-/* Wrapper: reveal + gecikme (stagger) */
 function Reveal({ as: Tag = "div", delay = 0, className = "", children, threshold = 0.15 }) {
   const [ref, visible] = useReveal(threshold);
   return (
@@ -42,12 +39,10 @@ function Reveal({ as: Tag = "div", delay = 0, className = "", children, threshol
   );
 }
 
-/* Yumuşak sayım */
 function CountUp({ end = 0, duration = 1200, prefix = "", suffix = "" }) {
   const ref = useRef(null);
   const [started, setStarted] = useState(false);
   const [val, setVal] = useState(0);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -63,59 +58,45 @@ function CountUp({ end = 0, duration = 1200, prefix = "", suffix = "" }) {
     io.observe(el);
     return () => io.disconnect();
   }, []);
-
   useEffect(() => {
     if (!started) return;
     const t0 = performance.now();
     const to = Number(end) || 0;
     const tick = (now) => {
       const p = Math.min(1, (now - t0) / duration);
-      const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      const eased = 1 - Math.pow(1 - p, 3);
       setVal(Math.round(to * eased));
       if (p < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
   }, [started, end, duration]);
-
-  return (
-    <span ref={ref}>
-      {prefix}
-      {val.toLocaleString("tr-TR")}
-      {suffix}
-    </span>
-  );
+  return <span ref={ref}>{prefix}{val.toLocaleString("tr-TR")}{suffix}</span>;
 }
 
 /* --------- Bölümler --------- */
 function StatsStrip() {
   const items = [
-    { icon: "bi-broadcast", label: "Aktif Dinleme", value: 42 },
+    { icon: "bi-broadcast",     label: "Aktif Dinleme",       value: 42   },
     { icon: "bi-journal-check", label: "Aylık Değerlendirme", value: 1280 },
-    { icon: "bi-people", label: "Eğitmen", value: 86 },
-    { icon: "bi-geo-alt", label: "Şube / İl", value: 81 },
+    { icon: "bi-people",        label: "Eğitmen",             value: 86   },
+    { icon: "bi-geo-alt",       label: "Şube / İl",           value: 81   },
   ];
   return (
     <section className="hdm-stats-section">
-      <div className="container">
-        <div className="row g-3 g-md-4">
-          {items.map((it, i) => (
-            <div key={it.label} className="col-6 col-md-3">
-              <Reveal delay={i * 90}>
-                <div className="hdm-stat-card hover-lift">
-                  <div className="hdm-stat-icon">
-                    <i className={`bi ${it.icon}`} />
-                  </div>
-                  <div>
-                    <div className="hdm-stat-value">
-                      <CountUp end={it.value} duration={1100 + i * 150} />
-                    </div>
-                    <div className="hdm-stat-label">{it.label}</div>
-                  </div>
+      <div className="hdm-stats__grid">
+        {items.map((it, i) => (
+          <Reveal key={it.label} delay={i * 90}>
+            <div className="hdm-stat-card hover-lift">
+              <div className="hdm-stat-icon"><i className={`bi ${it.icon}`} /></div>
+              <div>
+                <div className="hdm-stat-value">
+                  <CountUp end={it.value} duration={1100 + i * 150} />
                 </div>
-              </Reveal>
+                <div className="hdm-stat-label">{it.label}</div>
+              </div>
             </div>
-          ))}
-        </div>
+          </Reveal>
+        ))}
       </div>
     </section>
   );
@@ -123,36 +104,25 @@ function StatsStrip() {
 
 function FeatureGrid() {
   const features = [
-    {
-      icon: "bi-headphones",
-      title: "Canlı Dinleme Kuyruğu",
-      text: "Öğrenciler sıraya girer, eğitmenler tek ekrandan dinler ve puanlar.",
-    },
-    {
-      icon: "bi-clipboard-check",
-      title: "Değerlendirme & Notlar",
-      text: "Sure/ayet bazlı notlandırma, hata türleri ve otomatik raporlar.",
-    },
-    {
-      icon: "bi-calendar-event",
-      title: "Takvim & Bildirim",
-      text: "Programlar, hatırlatmalar ve SMS/e-posta duyuruları tek yerde.",
-    },
+    { icon: "bi-headphones",      title: "Canlı Dinleme Kuyruğu", text: "Öğrenciler sıraya girer, eğitmenler tek ekrandan dinler ve puanlar." },
+    { icon: "bi-clipboard-check", title: "Değerlendirme & Notlar",  text: "Sure/ayet bazlı notlandırma, hata türleri ve otomatik raporlar."     },
+    { icon: "bi-calendar-event",  title: "Takvim & Bildirim",       text: "Programlar, hatırlatmalar ve SMS/e-posta duyuruları tek yerde."      },
   ];
   return (
     <section className="hdm-features-section">
-      <div className="container">
-        <div className="row g-4">
+      <div className="hdm-features__inner">
+        <div className="hdm-section-label">Özellikler</div>
+        <h2 className="hdm-section-title">Kapsamlı araçlar</h2>
+        <p className="hdm-section-sub">Hafızlık dinleme sürecini güçlendirecek her şey burada</p>
+        <div className="hdm-features__grid">
           {features.map((f, i) => (
-            <div key={f.title} className="col-md-4">
-              <Reveal delay={i * 120}>
-                <div className="hdm-feature-card hover-lift">
-                  <div className="hdm-feature-icon"><i className={`bi ${f.icon}`} /></div>
-                  <h5 className="text-white mb-2">{f.title}</h5>
-                  <p className="text-footer m-0">{f.text}</p>
-                </div>
-              </Reveal>
-            </div>
+            <Reveal key={f.title} delay={i * 120}>
+              <div className="hdm-feature-card hover-lift">
+                <div className="hdm-feature-icon"><i className={`bi ${f.icon}`} /></div>
+                <div className="hdm-feature-title">{f.title}</div>
+                <p className="hdm-feature-desc">{f.text}</p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -163,23 +133,33 @@ function FeatureGrid() {
 function CalloutBand() {
   return (
     <Reveal as="section" className="hdm-callout" threshold={0.2}>
-      <div className="container">
-        <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
-          <div>
-            <h4 className="text-white mb-1">Bugün bir okumayı destekleyin</h4>
-            <p className="text-footer mb-0">Canlı dinlemeye katılın veya yeni bir oturum planlayın.</p>
-          </div>
-          <div className="d-flex gap-2">
-            <Link to="/hdm/live" className="btn btn-cta btn-sm">Canlı Dinlemeye Git</Link>
-            <Link to="/hdm/hafizgeneltakvim/" className="btn btn-outline-light btn-sm">Takvimi Aç</Link>
-          </div>
+      <div className="hdm-callout__wrap">
+        <div className="hdm-callout__text">
+          <h4>Bugün bir okumayı destekleyin</h4>
+          <p>Canlı dinlemeye katılın veya yeni bir oturum planlayın.</p>
         </div>
+        <div className="hdm-callout__actions">
+          <Link to="/hdm/live" className="hdm-callout__btn hdm-callout__btn--white">
+            Canlı Dinlemeye Git <i className="bi bi-arrow-right"></i>
+          </Link>
+          <Link to="/hdm/hafizgeneltakvim/" className="hdm-callout__btn hdm-callout__btn--ghost">
+            Takvimi Aç
+          </Link>
+        </div>
+        <span className="callout-orb callout-orb--a" />
+        <span className="callout-orb callout-orb--b" />
       </div>
-      <span className="callout-orb callout-orb--a" />
-      <span className="callout-orb callout-orb--b" />
     </Reveal>
   );
 }
+
+const MODULES = [
+  { emoji: "🎧", name: "Canlı Dinleme Modülü"   },
+  { emoji: "📋", name: "Değerlendirme Modülü"    },
+  { emoji: "📅", name: "Takvim & Program Modülü" },
+  { emoji: "📊", name: "Raporlama Modülü"         },
+  { emoji: "🕌", name: "Sure & Ayet Takibi"       },
+];
 
 /* --------- Sayfa --------- */
 export default function HDMIndex() {
@@ -187,18 +167,56 @@ export default function HDMIndex() {
     <div className="page-hdm">
       <HDMBaseHeader />
 
-      <AsymHero
-        title="Hafızlık Dinleme Merkezi"
-        subtitle="Her Okuma Bir Dua, Her Dinleme Bir Destek"
-        image={hafizlikImage}
-        alt="Hafızlık Dinleme"
-        theme="indigo"
-        badges={["Canlı", "Değerlendirme", "Takvim"]}
-        primary={{ to: "/hdm/live", label: "Canlı Dinlemeye Git" }}
-        secondary={{ to: "/hdm/docs", label: "Kılavuz" }}
-      />
+      {/* HERO */}
+      <div className="hdm-hero-wrap">
+        <div className="hdm-hero">
+          <div>
+            <div className="hdm-eyebrow">
+              <span className="hdm-eyebrow-dot"></span>
+              EHAD • HDM Platformu
+            </div>
+            <h1 className="hdm-title">
+              Hafızlık dinlemede<br />için <em>tek platform</em>
+            </h1>
+            <p className="hdm-lead">
+              Canlı dinleme kuyrukları, sure bazlı değerlendirme ve takvim
+              yönetimini profesyonel bir platformda birleştir.
+            </p>
+            <div className="hdm-hero-badges">
+              <span className="hdm-hero-badge"><i className="bi bi-broadcast"></i> Canlı</span>
+              <span className="hdm-hero-badge"><i className="bi bi-clipboard-check"></i> Değerlendirme</span>
+              <span className="hdm-hero-badge"><i className="bi bi-calendar-event"></i> Takvim</span>
+            </div>
+            <div className="hdm-hero-actions">
+              <Link to="/hdm/live" className="hdm-btn--cta">
+                Canlı Dinlemeye Git <i className="bi bi-arrow-right"></i>
+              </Link>
+              <Link to="/hdm/docs" className="hdm-btn--ghost">
+                <i className="bi bi-book"></i> Kılavuz
+              </Link>
+            </div>
+          </div>
+
+          <div className="hdm-hero__media">
+            <div className="hdm-hero__card">
+              <div className="hdm-hero__icon"><i className="bi bi-headphones"></i></div>
+              <div className="hdm-hero__card-label">Hafızlık Dinleme</div>
+              <div className="hdm-hero__card-sub">Her Okuma Bir Dua, Her Dinleme Bir Destek</div>
+            </div>
+            <div className="hdm-pill hdm-pill--top">
+              <span className="hdm-pill-dot hdm-pill-dot--v"></span> Aktif Dinleme: 42
+            </div>
+            <div className="hdm-pill hdm-pill--bottom">
+              <span className="hdm-pill-dot hdm-pill-dot--amber"></span> +86 Eğitmen
+            </div>
+          </div>
+        </div>
+      </div>
 
       <StatsStrip />
+
+      
+
       <FeatureGrid />
       <CalloutBand />
 

@@ -1,11 +1,16 @@
 /* === YANA DOĞRU GENİŞLEYEN MEGA MENÜ (ORTAK) === */
 
+
+.dropdown.position-static{
+  position: relative; /* kritik */
+}
 /* Taban: kapalı */
 .dropdown.position-static > .dropdown-menu.coordinator-mega,
 .dropdown.position-static > .dropdown-menu.student-mega {
   position: absolute;
-  top: 100%;
-  left: 0;
+  top: calc(100% + 8px);
+  left: auto;
+  right: 0;
   min-width: 720px;
   padding: 1.25rem 1.5rem;
   background: #fff;
@@ -23,12 +28,6 @@
   display: block !important;
   opacity: 1;
   visibility: visible;
-}
-
-/* 2) JS olmasa bile hover ile aç */
-.coordinator-dropdown:hover > .dropdown-menu.coordinator-mega,
-.coordinator-dropdown:focus-within > .dropdown-menu.coordinator-mega {
-  display: block;
 }
 
 /* İçerik yatayda dursun */

@@ -1,485 +1,547 @@
 /* ================================================================
-   ESKEP – Modern Beyaz Tema
-   Header koyu aqua, içerik alanı beyaz & sade
+   ESKEP – Mavi/Aqua Tema
+   Akademi yeşil temasının birebir kopyası, renk paleti mavi/aqua
    ================================================================ */
 
-/* ---------- Temel Renkler ---------- */
 :root {
-  --eskep-primary: #0fa3b1;
-  --eskep-primary-dark: #0a6f95;
-  --eskep-primary-light: #e6f8fa;
-  --eskep-secondary: #ff9100;
-  --eskep-text-strong: #1b1b1b;
-  --eskep-text-soft: #5c6b70;
-  --eskep-bg-page: #ffffff;
-  --eskep-bg-card: #ffffff;
-  --eskep-bg-muted: #f7f9fa;
-  --eskep-border: rgba(0, 0, 0, 0.08);
-  --eskep-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  --blue:        #0fa3b1;
+  --blue-dark:   #0a7081;
+  --blue-light:  #1ac8d8;
+  --blue-pale:   #e6f8fa;
+  --blue-pale2:  #c8eef3;
+  --amber:       #f59e0b;
+  --text:        #0b1c20;
+  --text-soft:   #4a6b72;
+  --border:      rgba(15,163,177,0.13);
+  --border-soft: #daedf0;
+  --card-bg:     #ffffff;
+  --radius:      18px;
+  --shadow:      0 6px 28px rgba(15,163,177,0.09);
+  --shadow-hover:0 12px 40px rgba(15,163,177,0.18);
 }
 
-/* ---------- Header ---------- */
-header.hdm-min-header.eskep-theme.eskep-theme--aqua,
-header.hdm-min-header.eskep-theme.eskep-theme--aqua .navbar {
-  background: linear-gradient(90deg, #0fa3b1, #0a6f95);
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+/* ======= HERO ======= */
+.eskep-hero-wrap {
+  background: #fff;
+  border-bottom: 1px solid var(--border-soft);
 }
 
-/* Arama alanı */
-header.hdm-min-header.eskep-theme--aqua input.form-control {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #fff;
-}
-header.hdm-min-header.eskep-theme--aqua input.form-control::placeholder {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-/* ---------- Beyaz Sayfa Teması ---------- */
-.page-eskep.eskep-theme--aqua {
-  background: var(--eskep-bg-page);
-  color: var(--eskep-text-strong);
-}
-
-/* Hero alanı (tam beyaz, sade tasarım) */
 .eskep-hero {
-  background: #fff;
-  padding: 4rem 0 3rem 0;
-  border-bottom: 1px solid var(--eskep-border);
-}
-.eskep-hero h1, .eskep-hero h2, .eskep-hero h3 {
-  color: var(--eskep-text-strong);
-}
-.eskep-hero p {
-  color: var(--eskep-text-soft);
-  font-size: 1.1rem;
-}
-.eskep-hero .btn-cta {
-  background: var(--eskep-secondary);
-  border: none;
-  color: #fff;
-  padding: 0.7rem 1.6rem;
-  border-radius: 10px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(255, 145, 0, 0.3);
-}
-.eskep-hero .btn-cta:hover {
-  background: #ff7b00;
-}
-.eskep-hero .btn-outline {
-  border: 1px solid var(--eskep-primary);
-  color: var(--eskep-primary-dark);
-  background: transparent;
-  padding: 0.7rem 1.4rem;
-  border-radius: 10px;
-}
-.eskep-hero .btn-outline:hover {
-  background: var(--eskep-primary);
-  color: #fff;
-}
-
-/* ---------- Stat Kartları ---------- */
-.hdm-stats-section {
-  background: var(--eskep-bg-muted);
-  padding: 3rem 0;
-}
-.hdm-stat-card {
-  border-radius: 14px;
-  background: var(--eskep-bg-card);
-  box-shadow: var(--eskep-shadow);
-  border: 1px solid var(--eskep-border);
-  padding: 1.2rem 1.4rem;
-  text-align: center;
-}
-.hdm-stat-card .hdm-stat-icon {
-  width: 46px; height: 46px;
-  display: grid; place-items: center;
-  border-radius: 50%;
-  background: var(--eskep-primary);
-  color: #fff;
-  font-size: 1.3rem;
-  margin: 0 auto 0.6rem auto;
-}
-.hdm-stat-value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--eskep-text-strong);
-}
-.hdm-stat-label {
-  font-size: 0.95rem;
-  color: var(--eskep-text-soft);
-}
-
-/* ---------- Özellik Kartları (Feature) ---------- */
-.hdm-features-section {
-  background: #fff;
-  padding: 3.5rem 0;
-}
-.hdm-feature-card {
-  background: #fff;
-  border: 1px solid var(--eskep-border);
-  border-radius: 14px;
-  padding: 1.8rem;
-  box-shadow: var(--eskep-shadow);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hdm-feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.12);
-}
-.hdm-feature-card .hdm-feature-icon {
-  width: 48px;
-  height: 48px;
-  background: var(--eskep-primary);
-  color: #fff;
+  padding: 72px 48px 64px;
+  max-width: 1240px;
+  margin: 0 auto;
   display: grid;
-  place-items: center;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  font-size: 1.4rem;
-}
-.hdm-feature-card h5 {
-  color: var(--eskep-text-strong);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-.hdm-feature-card p {
-  color: var(--eskep-text-soft);
-  font-size: 0.95rem;
-}
-
-/* ---------- CTA (Alt Kısım) ---------- */
-.hdm-callout {
-  background: linear-gradient(90deg, var(--eskep-primary), var(--eskep-primary-dark));
-  color: #fff;
-  border-radius: 16px;
-  padding: 2rem 2.5rem;
-  margin: 3rem auto;
-  box-shadow: 0 8px 22px rgba(15, 163, 177, 0.25);
-}
-.hdm-callout h4 {
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.4rem;
-}
-.hdm-callout p {
-  color: rgba(255, 255, 255, 0.85);
-}
-.hdm-callout .btn-cta {
-  background: var(--eskep-secondary);
-  border: none;
-  color: #fff;
-  padding: 0.6rem 1.4rem;
-  border-radius: 10px;
-}
-.hdm-callout .btn-cta:hover {
-  background: #ff7b00;
-}
-
-/* ---------- Footer ---------- */
-.hdm-min-footer.eskep-theme {
-  background: var(--eskep-primary-dark);
-  border-top: 1px solid rgba(255,255,255,0.15);
-  color: #fff;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-}
-.hdm-min-footer.eskep-theme .text-footer {
-  color: rgba(255,255,255,0.8);
-}
-
-/* ---------- Animasyonlar ---------- */
-.hover-lift {
-  transition: all 0.2s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
-}
-
-/* =========================================================
-   HERO — koyu aqua & sol görsel yerleşimi
-   ========================================================= */
-
-/* Daha koyu hero paleti (emerald→aqua→cyan) */
-.eskep-hero--deep {
-  --hero-c1: #0b3e4a;  /* koyu emerald */
-  --hero-c2: #0fa3b1;  /* aqua */
-  --hero-c3: #0a6f95;  /* cyan/teal */
-  background: linear-gradient(120deg, var(--hero-c1), var(--hero-c2) 45%, var(--hero-c3));
-  color: #eaf8ff;
-  padding: 56px 0 48px;
-  position: relative;
-}
-
-/* Parlaklık/kontrast */
-.eskep-hero--deep h1,
-.eskep-hero--deep h2 { color:#ffffff; }
-.eskep-hero--deep p  { color: rgba(255,255,255,.85); }
-
-/* Izgara yerleşimi: görsel solda, metin sağda */
-.eskep-hero__wrap {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr; /* görsel biraz daha geniş */
-  gap: 28px;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
   align-items: center;
 }
 
-/* Görsel kartı: hafif taşma + gölge */
-.eskep-hero__media {
-  position: relative;
-}
-.eskep-hero__card {
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0,0,0,.35);
-  background: #0ea5b3;
-  border: 1px solid rgba(255,255,255,.16);
-}
-.eskep-hero__img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-/* İçerik (sağ) */
-.eskep-hero__content h1 {
-  font-weight: 800;
-  letter-spacing: .2px;
-  margin-bottom: .6rem;
-}
-.eskep-hero__content .lead {
-  font-size: 1.06rem;
-  margin-bottom: 1rem;
-}
-
-/* Badges */
-.eskep-hero__badges {
-  display:flex; gap:8px; margin: 10px 0 18px;
-}
-.eskep-badge {
-  background: rgba(255,255,255,.9);
-  color:#0a3d49;
-  border: 1px solid rgba(255,255,255,.35);
+.eskep-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--blue-pale);
+  color: var(--blue-dark);
+  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 5px 14px;
   border-radius: 999px;
-  padding: 6px 12px;
-  font-weight: 600;
-  font-size: .9rem;
+  margin-bottom: 22px;
+  border: 1px solid var(--blue-pale2);
 }
 
-/* Butonlar */
-.btn-cta--orange{
-  background: #ff9100; color:#fff; border:none;
-  border-radius: 12px; padding: .7rem 1.2rem;
-  box-shadow: 0 10px 22px rgba(255,145,0,.32);
-}
-.btn-cta--orange:hover{ background:#ff7b00; color:#fff; }
-
-.btn-outline--glass{
-  background: rgba(255,255,255,.12);
-  color:#fff; border:1px solid rgba(255,255,255,.35);
-  border-radius: 12px; padding:.7rem 1.2rem;
-}
-.btn-outline--glass:hover{ background: rgba(255,255,255,.22); }
-
-/* Küçük ekran: yığılma (üstte metin, altta görsel) */
-@media (max-width: 992px){
-  .eskep-hero__wrap{
-    grid-template-columns: 1fr;
-  }
-  .eskep-hero__media{ order:2; }
-  .eskep-hero__content{ order:1; text-align:left; }
+.eskep-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: eskep-pulse 2s ease-in-out infinite;
 }
 
-/* =========================================================
-   HERO — koyu aqua, küçük resim, yüksek kontrast
-   ========================================================= */
-
-.eskep-hero--dark {
-  --hero-c1: #073f4b;   /* koyu emerald */
-  --hero-c2: #0a7081;   /* deniz yeşili */
-  --hero-c3: #0993a3;   /* aqua tonu */
-  background: linear-gradient(135deg, var(--hero-c1), var(--hero-c2) 50%, var(--hero-c3) 100%);
-  color: #ffffff;
-  padding: 80px 0 72px;
-  position: relative;
-  overflow: hidden;
+@keyframes eskep-pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:.35; transform:scale(.65); }
 }
 
-/* Desenli karanlık overlay */
-.eskep-hero--dark::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at top left, rgba(255,255,255,0.08), transparent 70%);
-}
-
-/* Hero içi yerleşim */
-.eskep-hero__wrap {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 60px;
-}
-
-/* Metin alanı */
-.eskep-hero__content {
-  flex: 1.1;
-  position: relative;
-  z-index: 1;
-}
-
-.eskep-hero__content h1 {
-  font-size: 2.4rem;
+.eskep-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 3.8vw, 54px);
   font-weight: 800;
-  color: #fff;
-  margin-bottom: 1rem;
-  line-height: 1.2;
+  line-height: 1.16;
+  color: var(--text);
+  margin: 0 0 18px;
+  letter-spacing: -.02em;
 }
 
-.eskep-hero__content p {
-  color: rgba(255,255,255,0.88);
-  font-size: 1.1rem;
-  margin-bottom: 1.4rem;
+.eskep-title em {
+  font-style: italic;
+  color: var(--blue);
 }
 
-/* Küçük rozetler */
-.eskep-hero__badges {
+.eskep-lead {
+  font-size: 1.05rem;
+  color: var(--text-soft);
+  line-height: 1.72;
+  margin-bottom: 30px;
+  max-width: 460px;
+}
+
+.eskep-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 1.8rem;
+  margin-bottom: 34px;
 }
+
 .eskep-badge {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.25);
+  background: var(--blue-pale);
+  border: 1px solid var(--blue-pale2);
+  color: var(--blue-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 5px 14px;
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  backdrop-filter: blur(4px);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* Butonlar */
-.btn-cta--orange {
-  background: #ff9100;
+.eskep-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.eskep-btn--cta {
+  padding: 13px 28px;
+  border-radius: 14px;
+  background: var(--blue);
   color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
   border: none;
-  border-radius: 12px;
-  padding: 0.75rem 1.4rem;
-  font-weight: 600;
-  box-shadow: 0 6px 18px rgba(255,145,0,0.35);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  transition: background .15s, transform .12s, box-shadow .15s;
+  box-shadow: 0 8px 24px rgba(15,163,177,0.30);
 }
-.btn-cta--orange:hover { background: #ff7a00; }
-
-.btn-outline--glass {
-  background: transparent;
+.eskep-btn--cta:hover {
+  background: var(--blue-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(15,163,177,0.35);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.4);
-  border-radius: 12px;
-  padding: 0.75rem 1.4rem;
 }
-.btn-outline--glass:hover { background: rgba(255,255,255,0.15); }
 
-/* Görsel kısmı — küçük ve dekoratif */
+.eskep-btn--ghost {
+  padding: 12px 24px;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-soft);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--border-soft);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color .15s, color .15s;
+}
+.eskep-btn--ghost:hover {
+  border-color: var(--blue);
+  color: var(--blue-dark);
+}
+
+/* Hero Görsel */
 .eskep-hero__media {
-  flex: 0.55;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-}
-.eskep-hero__media img {
-  width: 70%;
-  max-width: 260px;
-  height: auto;
-  border-radius: 16px;
-  box-shadow: 0 14px 35px rgba(0,0,0,0.4);
-  opacity: 0.92;
-  transition: transform 0.3s ease;
-}
-.eskep-hero__media img:hover {
-  transform: scale(1.04);
 }
 
-/* Küçük ekran: alt alta */
-@media (max-width: 992px) {
-  .eskep-hero__wrap {
-    flex-direction: column;
+.eskep-hero__card {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 24px;
+  background: var(--blue-pale);
+  border: 1.5px solid var(--blue-pale2);
+  box-shadow: 0 20px 60px rgba(15,163,177,0.14);
+  aspect-ratio: 4/3.1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.eskep-hero__card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15,163,177,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.eskep-hero__icon {
+  width: 76px; height: 76px;
+  border-radius: 22px;
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px;
+  color: #fff;
+  box-shadow: 0 12px 32px rgba(15,163,177,0.38);
+  position: relative; z-index: 1;
+}
+
+.eskep-hero__card-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--blue-dark);
+  text-align: center;
+  position: relative; z-index: 1;
+}
+
+.eskep-hero__card-sub {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  font-weight: 600;
+  text-align: center;
+  position: relative; z-index: 1;
+}
+
+.eskep-pill {
+  position: absolute;
+  background: #fff;
+  border: 1.5px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex; align-items: center; gap: 7px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  white-space: nowrap;
+  z-index: 2;
+}
+.eskep-pill--top    { top: -18px; right: -10px; color: var(--blue-dark); }
+.eskep-pill--bottom { bottom: -18px; left: -10px; color: var(--amber); }
+
+.eskep-pill-dot { width: 7px; height: 7px; border-radius: 50%; }
+.eskep-pill-dot--blue  { background: var(--blue); }
+.eskep-pill-dot--amber { background: var(--amber); }
+
+/* ======= STATS ======= */
+.eskep-stats {
+  padding: 32px 48px;
+  background: #f7fbfc;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.eskep-stats__grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.eskep-stat {
+  background: #fff;
+  border: 1.5px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex; align-items: center; gap: 14px;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.eskep-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--blue-pale2);
+}
+
+.eskep-stat__icon {
+  width: 44px; height: 44px;
+  border-radius: 13px;
+  background: var(--blue-pale);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  border: 1px solid var(--blue-pale2);
+}
+
+.eskep-stat__value {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.eskep-stat__label {
+  font-size: 0.81rem;
+  color: var(--text-soft);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ======= SECTION HEADER ======= */
+.eskep-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.eskep-section-label::before {
+  content: '';
+  display: inline-block;
+  width: 18px; height: 2px;
+  background: var(--blue);
+  border-radius: 2px;
+}
+
+.eskep-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 5px;
+  letter-spacing: -.01em;
+}
+
+.eskep-section-sub {
+  font-size: 0.92rem;
+  color: var(--text-soft);
+}
+
+/* ======= MODULES ======= */
+.eskep-modules {
+  padding: 48px 48px 40px;
+  background: #f7fbfc;
+}
+
+.eskep-modules__inner {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.eskep-modules__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.eskep-module-card {
+  background: #fff;
+  border: 1.5px solid var(--border-soft);
+  border-radius: 18px;
+  padding: 28px 16px 24px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+  text-decoration: none;
+  color: inherit;
+}
+.eskep-module-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--blue-pale2);
+}
+
+.eskep-module-card__emoji {
+  width: 60px; height: 60px;
+  border-radius: 18px;
+  background: var(--blue-pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  border: 1.5px solid var(--blue-pale2);
+  transition: background .15s;
+}
+.eskep-module-card:hover .eskep-module-card__emoji {
+  background: var(--blue-pale2);
+}
+
+.eskep-module-card__name {
+  font-weight: 800;
+  font-size: 0.86rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+/* ======= FEATURES ======= */
+.eskep-features {
+  padding: 40px 48px;
+  background: #fff;
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.eskep-features__inner {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.eskep-features__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.eskep-feature {
+  background: var(--blue-pale);
+  border: 1.5px solid var(--blue-pale2);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: transform .15s, box-shadow .15s;
+}
+.eskep-feature:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.eskep-feature__icon {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue);
+  font-size: 1.3rem;
+  border: 1.5px solid var(--blue-pale2);
+}
+
+.eskep-feature__title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.eskep-feature__desc {
+  font-size: 0.87rem;
+  color: var(--text-soft);
+  line-height: 1.65;
+}
+
+/* ======= CALLOUT ======= */
+.eskep-callout {
+  padding: 48px 48px 64px;
+  background: #f7fbfc;
+}
+
+.eskep-callout__wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  background: var(--blue);
+  border-radius: 22px;
+  padding: 36px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+  position: relative; overflow: hidden;
+}
+
+.eskep-callout__wrap::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+
+.eskep-callout__text h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -.01em;
+}
+
+.eskep-callout__text p {
+  font-size: 0.92rem;
+  color: rgba(255,255,255,.80);
+  margin: 0;
+}
+
+.eskep-callout__actions {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  position: relative; z-index: 1;
+}
+
+.eskep-callout__btn {
+  padding: 12px 26px;
+  border-radius: 13px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: transform .12s;
+}
+.eskep-callout__btn:hover { transform: translateY(-1px); }
+
+.eskep-callout__btn--white {
+  background: #fff;
+  color: var(--blue-dark);
+  border: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+.eskep-callout__btn--ghost {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,.35);
+}
+.eskep-callout__btn--ghost:hover { background: rgba(255,255,255,.22); }
+
+/* ======= RESPONSIVE ======= */
+@media (max-width: 1100px) {
+  .eskep-stats__grid    { grid-template-columns: repeat(2,1fr); }
+  .eskep-modules__grid  { grid-template-columns: repeat(3,1fr); }
+  .eskep-features__grid { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 860px) {
+  .eskep-hero {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 40px 24px;
     text-align: center;
   }
-  .eskep-hero__media img {
-    width: 60%;
-    max-width: 220px;
-  }
+  .eskep-lead          { max-width: 100%; }
+  .eskep-badges        { justify-content: center; }
+  .eskep-actions       { justify-content: center; }
+  .eskep-hero__media   { order: -1; }
+  .eskep-hero__card    { max-width: 340px; margin: 0 auto; }
+  .eskep-stats         { padding-left: 20px; padding-right: 20px; }
+  .eskep-modules       { padding-left: 20px; padding-right: 20px; }
+  .eskep-features      { padding-left: 20px; padding-right: 20px; }
+  .eskep-callout       { padding-left: 20px; padding-right: 20px; }
+  .eskep-callout__wrap { padding: 28px 24px; }
+  .eskep-modules__grid { grid-template-columns: repeat(2,1fr); }
 }
 
-/* ============================
-   ESKEP – Daha yakın & daha koyu
-   (yalnızca bu sayfayı etkiler)
-   ============================ */
-
-/* 1) Dikey boşlukları küçült */
-.page-eskep .hdm-stats-section{
-  padding: 1.5rem 0 1.1rem;               /* eskiden ~3rem */
-}
-.page-eskep .hdm-features-section{
-  padding: 1.75rem 0 1.4rem;              /* eskiden ~3.5rem */
-}
-.page-eskep .hdm-callout{
-  margin: 1.75rem auto 0;                 /* CTA’yı yukarı çek */
-  padding: 1.4rem 2rem;                   /* biraz daha kompakt */
-  border-radius: 14px;
-}
-
-/* Grid aralıklarını daralt (sadece bu iki bölümde) */
-.page-eskep .hdm-stats-section .row.g-3{
-  --bs-gutter-x: .75rem;
-  --bs-gutter-y: .75rem;
-}
-.page-eskep .hdm-features-section .row.g-4{
-  --bs-gutter-x: .9rem;
-  --bs-gutter-y: .9rem;
-}
-
-/* Kart iç dolguları biraz küçült */
-.page-eskep .hdm-feature-card{ padding: 1.4rem; }
-.page-eskep .hdm-stat-card{ padding: 1rem 1.1rem; }
-
-/* 2) Paleti koyulaştır */
-.page-eskep .hdm-stat-card .hdm-stat-icon,
-.page-eskep .hdm-feature-card .hdm-feature-icon{
-  background: linear-gradient(135deg, #0c7b86, #0b4f65) !important; /* daha koyu aqua/teal */
-  box-shadow: 0 10px 24px rgba(11,79,101,.35);
-}
-
-.page-eskep .hdm-feature-card h5{ color:#17323a; }
-.page-eskep .hdm-feature-card p{ color:#54656b; }
-
-/* CTA şeridini 2–3 ton koyulaştır */
-.page-eskep .hdm-callout{
-  background: linear-gradient(90deg, #0b4f59, #0a3e47 60%, #08333b) !important;
-  box-shadow: 0 10px 26px rgba(8,62,71,.28);
-}
-.page-eskep .hdm-callout h4{ color:#ffffff; }
-.page-eskep .hdm-callout p{ color: rgba(255,255,255,.85); }
-
-/* CTA’daki buton kontrastı */
-.page-eskep .hdm-callout .btn-cta{
-  background:#ff8d00;
-  box-shadow: 0 6px 16px rgba(255,141,0,.32);
-}
-.page-eskep .hdm-callout .btn-outline-light.soft{
-  border-color: rgba(255,255,255,.65);
-  color:#fff;
-}
-
-/* İsteğe bağlı: kart kenarlarını biraz belirginleştirip gölgeyi toparla */
-.page-eskep .hdm-stat-card,
-.page-eskep .hdm-feature-card{
-  border: 1px solid rgba(0,0,0,.06);
-  box-shadow: 0 8px 18px rgba(0,0,0,.07);
+@media (max-width: 560px) {
+  .eskep-stats__grid    { grid-template-columns: 1fr; }
+  .eskep-features__grid { grid-template-columns: 1fr; }
 }
