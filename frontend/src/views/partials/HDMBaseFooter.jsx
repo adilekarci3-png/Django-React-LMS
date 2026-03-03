@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./css/HDMGirisPage.css";
+
 function HDMBaseFooter() {
   return (
     <footer className="hdm-min-footer text-light">
@@ -13,7 +14,7 @@ function HDMBaseFooter() {
             </p>
           </div>
           <div className="col-6 col-lg-3">
-            <h6 className="text-white mb-2">Sistem</h6>
+            <h6 className="mb-2">Sistem</h6>
             <ul className="list-unstyled m-0">
               <li><Link className="footer-link" to="/about-hdm">Hakkında</Link></li>
               <li><Link className="footer-link" to="/support">Destek</Link></li>
@@ -21,7 +22,7 @@ function HDMBaseFooter() {
             </ul>
           </div>
           <div className="col-6 col-lg-3">
-            <h6 className="text-white mb-2">Kaynaklar</h6>
+            <h6 className="mb-2">Kaynaklar</h6>
             <ul className="list-unstyled m-0">
               <li><Link className="footer-link" to="/docs">Kullanım Kılavuzu</Link></li>
               <li><Link className="footer-link" to="/help">Yardım</Link></li>
@@ -29,7 +30,7 @@ function HDMBaseFooter() {
             </ul>
           </div>
           <div className="col-lg-2">
-            <h6 className="text-white mb-2">İletişim</h6>
+            <h6 className="mb-2">İletişim</h6>
             <p className="text-footer m-0">Cinnah Cd. No:12 Çankaya / Ankara</p>
             <p className="text-footer m-0">E: <a href="mailto:hdm@kuransistemi.org" className="footer-link">hdm@kuransistemi.org</a></p>
             <p className="text-footer m-0">T: +90 312 000 00 00</p>

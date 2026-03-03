@@ -1,141 +1,150 @@
-// src/pages/HBSHakkimizda.jsx
 import React from "react";
 import HBSBaseHeader from "../partials/HBSBaseHeader";
 
-export default function HBSHakkimizda() {
-  const photos = {
-    hero: "https://www.ehad.org.tr/wp-content/uploads/2015/07/EHAD-GENEL-MERKEZ-2018-YONETIM-KURULU-DIB-ALI-ERBAS-ZIYARETI-1600-810001-370x250.jpg",
-    shot1: "https://www.ehad.org.tr/wp-content/uploads/2015/07/SLIDER-DISARI-EHAD-GENEL-MERKEZ-2018-YONETIM-KURULU-DIB-ALI-ERBAS-ZIYARETI-1600-810001-370x250.jpg",
-    shot2: "https://www.ehad.org.tr/wp-content/uploads/2018/02/EHAD-GENEL-MERKEZ-2018-YONETIM-KURULU-DIB-ALI-ERBAS-ZIYARETI-001-370x250.jpg",
-    logo: "https://www.ehad.org.tr/wp-content/uploads/2025/08/istanbul-medeniyet-universitesi-protokolu-2025-150x150.jpeg",
-  };
+/* ─── Tema renkleri ─────────────────────────── */
+const P  = "#3c5fa8";   // hbs-600
+const P2 = "#1c2b4d";   // hbs-900
+const PL = "#dbeafe";   // blue-100
+const PL2= "#eff6ff";   // blue-50
+const PT = "#1e3a8a";   // blue-900
 
-  const css = `
-:root{
-  --acc1:#3c5fa8;  /* hbs-600 */
-  --acc2:#1c2b4d;  /* hbs-900 */
-  --accent-light:#6a86d6; /* hbs-400 */
-
-  --ink:#0f172a; --sl-700:#334155; --sl-300:#cbd5e1; --sl-200:#e5e7eb;
-  --sl-100:#f1f5f9; --bg1:#f8fafc;
-  --radius-xl:22px; --shadow-lg:0 16px 40px rgba(15,23,42,.12);
-  --shadow-md:0 10px 24px rgba(15,23,42,.10);
-  --container:1120px;
+function StatCard({ icon, label, value, color, bg }) {
+  return (
+    <div style={{ background: "#fff", border: "1.5px solid #dbeafe", borderRadius: 16, padding: "20px 22px", display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ width: 46, height: 46, borderRadius: 12, background: bg, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", flexShrink: 0 }}>
+        <i className={`bi ${icon}`} />
+      </div>
+      <div>
+        <div style={{ fontSize: "1.6rem", fontWeight: 900, color: "#0f172a", lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: ".8rem", color: "#475569", fontWeight: 600, marginTop: 4 }}>{label}</div>
+      </div>
+    </div>
+  );
 }
-*{box-sizing:border-box} html,body{margin:0;padding:0}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;color:var(--ink)}
-.outer{padding:16px} @media (min-width:768px){.outer{padding:24px}}
-.page{max-width:calc(var(--container)+48px);margin:0 auto;border:1px solid var(--sl-200);
-border-radius:var(--radius-xl);background:#fff;box-shadow:var(--shadow-lg);overflow:hidden}
 
-/* Başlık alanı */
-.title{padding:24px 28px;border-bottom:2px solid var(--accent-light);
-background:linear-gradient(90deg,var(--acc1),var(--acc2));color:#fff}
-.title .chip{display:inline-block;font-size:12px;font-weight:800;color:#fff;
-background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
-padding:6px 10px;border-radius:999px;margin-bottom:6px}
-.title h1{margin:0 0 6px;font-size:26px;font-weight:900}
-.title p{margin:0;color:#e5e9ff}
+function Card({ children, style }) {
+  return <div style={{ background: "#fff", border: "1.5px solid #dbeafe", borderRadius: 18, padding: "22px 24px", ...style }}>{children}</div>;
+}
 
-/* Bölüm stilleri */
-.section{padding:32px 24px;background:var(--bg1)}
-.grid-2{display:grid;gap:18px;margin-top:18px}
-@media(min-width:980px){.grid-2{grid-template-columns:1fr 1fr}}
-
-.card{background:#fff;border:1px solid var(--sl-200);border-radius:18px;
-box-shadow:var(--shadow-md);overflow:hidden;transition:transform .2s ease, box-shadow .2s ease;}
-.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(28,43,77,.15)}
-.hd{padding:14px 18px;border-bottom:1px solid var(--sl-200);
-background:linear-gradient(90deg,var(--accent-light),var(--acc1));color:#fff;font-weight:700}
-.bd{padding:18px}
-.lead{color:var(--sl-700)}
-.list{margin:10px 0 0;padding-left:18px}
-
-/* Galeri */
-.strip{background:linear-gradient(180deg,#f9fbff,#edf2ff);
-padding:20px;border-top:1px solid var(--sl-200);border-bottom:1px solid var(--sl-200)}
-.gallery{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
-@media(min-width:900px){.gallery{grid-template-columns:repeat(4,1fr)}}
-.img{width:100%;height:160px;object-fit:cover;border-radius:16px;
-border:2px solid var(--accent-light);
-box-shadow:0 10px 22px rgba(58,95,168,.25);transition:transform .3s ease;}
-.img:hover{transform:scale(1.05)}
-
-/* İstatistik bandı */
-.stats{padding:28px 20px;background:linear-gradient(90deg,var(--acc1),var(--acc2));color:#fff}
-.sgrid{display:grid;gap:12px}
-@media(min-width:900px){.sgrid{grid-template-columns:repeat(4,1fr)}}
-.stat{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
-border-radius:16px;padding:16px;text-align:center;backdrop-filter:blur(6px)}
-.kv{font-weight:900;font-size:22px;color:#fff}
-.stat div:last-child{color:#e2e8f0;font-weight:500;font-size:.95rem}
-`;
+export default function HBSHakkimizda() {
+  const degerler = [
+    { icon: "bi-person-vcard-fill",  baslik: "Merkezi Kayıt",      aciklama: "Kişi bilgileri, eğitim geçmişi, icazet durumu ve kurum ilişkileri tek çatı altında." },
+    { icon: "bi-graph-up",           baslik: "Analitik Raporlar",  aciklama: "Zaman serileri, dağılım haritaları ve yaş kohort analiziyle karar destek sistemi." },
+    { icon: "bi-building-check",     baslik: "Şube Yönetimi",      aciklama: "İl/ilçe/şube bazında performans karşılaştırmaları ve veri kalitesi uyarıları." },
+    { icon: "bi-shield-lock-fill",   baslik: "Veri Güvenliği",     aciklama: "KVKK uyumlu altyapı ile tüm hafız verilerinin güvenli ve denetlenebilir tutulması." },
+  ];
+  const ekip = [
+    { initials: "HY", ad: "Hüseyin Yıldırım",  rol: "HBS Genel Koordinatörü",       renk: P    },
+    { initials: "NK", ad: "Nurgül Kaya",        rol: "Kayıt & Veri Yöneticisi",       renk: P2   },
+    { initials: "SA", ad: "Selim Arslan",       rol: "Analiz & Raporlama Uzmanı",    renk: "#1d4ed8" },
+    { initials: "FT", ad: "Fatma Toprak",       rol: "Bölge Koordinatörleri Sorumlusu", renk: "#2563eb" },
+  ];
 
   return (
     <>
-      <style>{css}</style>
       <HBSBaseHeader />
-      <div className="outer">
-        <main className="page">
-          <div className="title">
-            <div className="chip">HBS</div>
-            <h1>HBS Hakkında</h1>
-            <p>
-              Tüm hafız kayıtlarının tutulduğu; bölge/kurum bazında istatistiklerin üretildiği
-              merkezi bilgi sistemi.
-            </p>
+      <div style={{ padding: "24px 0 48px" }}>
+        <div className="container-xxl">
+
+          {/* Hero */}
+          <div style={{
+            background: `linear-gradient(135deg, ${P2} 0%, ${P} 55%, #93c5fd 100%)`,
+            borderRadius: 20, padding: "40px 36px", marginBottom: 22,
+            color: "#fff", position: "relative", overflow: "hidden",
+          }}>
+            <div style={{ position: "absolute", right: -30, top: -30, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
+            <div style={{ position: "absolute", right: 60, bottom: -50, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,.05)" }} />
+            <div style={{ position: "relative" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.18)", borderRadius: 30, padding: "5px 14px", marginBottom: 16, fontSize: ".8rem", fontWeight: 700 }}>
+                <i className="bi bi-database-fill" /> Hafız Bilgi Sistemi
+              </div>
+              <h1 style={{ fontSize: "2rem", fontWeight: 900, margin: "0 0 12px", letterSpacing: "-.02em" }}>HBS Hakkında</h1>
+              <p style={{ fontSize: "1rem", margin: 0, opacity: .9, maxWidth: 540, lineHeight: 1.65 }}>
+                Tüm hafız kayıtlarının tutulduğu; bölge ve kurum bazında istatistiklerin üretildiği,
+                icazet arşivinin yönetildiği merkezi bilgi sistemi.
+              </p>
+            </div>
           </div>
 
-          <section className="section">
-            <div className="grid-2">
-              <div className="card">
-                <div className="hd"><strong>Kapsam</strong></div>
-                <div className="bd">
-                  <p className="lead">
-                    Kişi bilgileri, eğitim geçmişi, icazet durumu, kurum/şube ilişkileri ve denetim logları.
-                  </p>
-                  <ul className="list">
-                    <li>Standart kayıt formları & doğrulamalar</li>
-                    <li>İcazet/tezhip doküman arşivi</li>
-                    <li>İl/İlçe/Yaş kırılımları</li>
-                  </ul>
+          {/* İstatistikler */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 22 }}>
+            <StatCard icon="bi-people-fill"        label="Kayıtlı Hafız"     value="120.000+" color={P}   bg={PL}  />
+            <StatCard icon="bi-geo-alt-fill"       label="İl"                value="81"       color={P2}  bg="#e0e7ff" />
+            <StatCard icon="bi-check-circle-fill"  label="Veri Tutarlılığı"  value="%98"      color={PT}  bg="#dbeafe" />
+            <StatCard icon="bi-clock-fill"         label="Erişim"            value="24/7"     color="#1d4ed8" bg={PL2} />
+          </div>
+
+          {/* Misyon & Vizyon */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 22 }}>
+            <Card>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 11, background: PL, color: P, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>
+                  <i className="bi bi-bullseye" />
                 </div>
+                <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 800, color: "#0f172a" }}>Misyonumuz</h3>
               </div>
-
-              <div className="card">
-                <div className="hd"><strong>Analitik</strong></div>
-                <div className="bd">
-                  <p className="lead">
-                    Zaman serileri, dağılım haritaları ve yaş kohort analiziyle karar destek.
-                  </p>
-                  <ul className="list">
-                    <li>Yıllık/aylık kayıt trendleri</li>
-                    <li>Şube performans karşılaştırmaları</li>
-                    <li>Veri kalitesi uyarıları</li>
-                  </ul>
+              <p style={{ margin: 0, fontSize: ".88rem", color: "#475569", lineHeight: 1.7 }}>
+                Türkiye genelindeki tüm hafızlık verilerini doğru, güncel ve erişilebilir bir formatta
+                tutarak kurum ve yetkililerin stratejik kararlarını desteklemek; hafızlık faaliyetlerini
+                kayıt altına almak.
+              </p>
+            </Card>
+            <Card>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 11, background: "#e0e7ff", color: "#3730a3", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>
+                  <i className="bi bi-eye-fill" />
                 </div>
+                <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 800, color: "#0f172a" }}>Vizyonumuz</h3>
               </div>
-            </div>
-          </section>
+              <p style={{ margin: 0, fontSize: ".88rem", color: "#475569", lineHeight: 1.7 }}>
+                Hafızlık alanında Türkiye'nin en kapsamlı ve güvenilir dijital arşivi olmak; veriye
+                dayalı politika geliştirmeye katkı sağlayan, bölgesel analitik yetenekleri gelişmiş
+                bir bilgi platformu inşa etmek.
+              </p>
+            </Card>
+          </div>
 
-          <section className="strip">
-            <div className="gallery">
-              <img className="img" src={photos.hero} alt="HBS 1"/>
-              <img className="img" src={photos.shot1} alt="HBS 2"/>
-              <img className="img" src={photos.shot2} alt="HBS 3"/>
-              <img className="img" src={photos.logo} alt="HBS 4"/>
+          {/* Temel Değerler */}
+          <Card style={{ marginBottom: 22 }}>
+            <div style={{ fontWeight: 800, fontSize: ".95rem", color: P, marginBottom: 20, borderBottom: `1.5px solid ${PL}`, paddingBottom: 12 }}>
+              <i className="bi bi-stars me-2" />Temel Değerlerimiz
             </div>
-          </section>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14 }}>
+              {degerler.map((d, i) => (
+                <div key={i} style={{ display: "flex", gap: 14, padding: "14px", background: PL2, borderRadius: 12, border: `1px solid ${PL}` }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0, background: PL, color: P, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem" }}>
+                    <i className={`bi ${d.icon}`} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: ".9rem", color: "#0f172a", marginBottom: 4 }}>{d.baslik}</div>
+                    <div style={{ fontSize: ".82rem", color: "#475569", lineHeight: 1.6 }}>{d.aciklama}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
 
-          <section className="stats">
-            <div className="sgrid">
-              <div className="stat"><div className="kv">120.000+</div><div>Kayıt</div></div>
-              <div className="stat"><div className="kv">81</div><div>İl</div></div>
-              <div className="stat"><div className="kv">%98</div><div>Veri Tutarlılığı</div></div>
-              <div className="stat"><div className="kv">24/7</div><div>Erişim</div></div>
+          {/* Ekibimiz */}
+          <Card>
+            <div style={{ fontWeight: 800, fontSize: ".95rem", color: P, marginBottom: 20, borderBottom: `1.5px solid ${PL}`, paddingBottom: 12 }}>
+              <i className="bi bi-people me-2" />Ekibimiz
             </div>
-          </section>
-        </main>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14 }}>
+              {ekip.map((e, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 12, border: "1.5px solid #dbeafe", background: "#f8fafc" }}>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", flexShrink: 0, background: e.renk, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: ".9rem" }}>
+                    {e.initials}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: ".9rem", color: "#0f172a" }}>{e.ad}</div>
+                    <div style={{ fontSize: ".78rem", color: "#475569", marginTop: 2 }}>{e.rol}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+        </div>
       </div>
     </>
   );

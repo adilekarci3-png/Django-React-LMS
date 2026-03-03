@@ -81,6 +81,37 @@ import EgitmenDetay from "./views/HDM/EgitmenDetay";
 import HafizDetay from "./views/HDM/HafizDetay";
 import EgitmenHafizListesi from "./views/HDM/EgitmenHafizListesi";
 
+
+//Otm Pages
+import OTMIndex from "./views/base/OtmIndex";
+import KoclukPage from "./views/Otm/KoclukPage";
+import YoklamaPage from "./views/Otm/YoklamaPage";
+import DenemePage from "./views/Otm/DenemePage";
+import {
+  OtmAboutPage,
+  OtmContactPage,
+  OtmOrgChartPage,
+  KoclukTakipPage,
+  KoclukRaporlarPage,
+  DenemeListesiPage,
+  DenemeAnalizPage,
+  OgrenciDenemelerimPage,
+  OgrenciDenemeSonuclariPage,
+  YoklamaGecmisPage,
+  DevamRaporuPage,
+  KoordinatorYoklamaOzetPage,
+  KoordinatorDevamRaporlariPage,
+  SiniflarimPage,
+  OgretmenNotlarPage,
+  OgretmenRaporlarPage,
+  KoordinatorOgrenciListesiPage,
+  KoordinatorRaporlarPage,
+  KoordinatorAyarlarPage,
+  OgrenciDashboardPage,
+  OgrenciNotlarimPage,
+  OgrenciDevamPage,
+} from "./views/Otm/OtmPlaceholderPages";
+
 // ESKEP Pages
 import ESKEPDashboard from "./views/ESKEPinstructor/ESKEPDashboard";
 import ESKEPIndex from "./views/base/ESKEPIndex";
@@ -1381,6 +1412,213 @@ function App() {
               element={
                 <PrivateRoute>
                   <EducatorEditForm />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
+              path="/ogrenci-takip/"
+              element={<OTMIndex />}
+            />
+
+            {/* ── OTM Kurumsal ── */}
+            <Route path="/about-otm" element={<OtmAboutPage />} />
+            <Route path="/contact"   element={<OtmContactPage />} />
+            <Route path="/org-chart" element={<OtmOrgChartPage />} />
+
+            <Route
+              path="/otm/kocluk/planlar"
+              element={
+                <PrivateRoute>
+                  <KoclukPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogretmen/yoklama-al"
+              element={
+                <PrivateRoute>
+                  <YoklamaPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/deneme/yukle"
+              element={
+                <PrivateRoute>
+                  <DenemePage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ── OTM Koçluk ── */}
+            <Route
+              path="/otm/kocluk/takip"
+              element={
+                <PrivateRoute>
+                  <KoclukTakipPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/kocluk/raporlar"
+              element={
+                <PrivateRoute>
+                  <KoclukRaporlarPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ── OTM Deneme ── */}
+            <Route
+              path="/otm/deneme/listesi"
+              element={
+                <PrivateRoute>
+                  <DenemeListesiPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/deneme/analiz"
+              element={
+                <PrivateRoute>
+                  <DenemeAnalizPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogrenci/denemelerim"
+              element={
+                <PrivateRoute>
+                  <OgrenciDenemelerimPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogrenci/deneme-sonuclari"
+              element={
+                <PrivateRoute>
+                  <OgrenciDenemeSonuclariPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ── OTM Yoklama ── */}
+            <Route
+              path="/otm/ogretmen/yoklama-gecmis"
+              element={
+                <PrivateRoute>
+                  <YoklamaGecmisPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogretmen/devam-raporu"
+              element={
+                <PrivateRoute>
+                  <DevamRaporuPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/koordinator/yoklama-ozet"
+              element={
+                <PrivateRoute>
+                  <KoordinatorYoklamaOzetPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/koordinator/devam-raporlari"
+              element={
+                <PrivateRoute>
+                  <KoordinatorDevamRaporlariPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ── OTM Öğretmen ── */}
+            <Route
+              path="/otm/ogretmen/siniflarim"
+              element={
+                <PrivateRoute>
+                  <SiniflarimPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogretmen/yoklama"
+              element={
+                <PrivateRoute>
+                  <YoklamaPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogretmen/notlar"
+              element={
+                <PrivateRoute>
+                  <OgretmenNotlarPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogretmen/raporlar"
+              element={
+                <PrivateRoute>
+                  <OgretmenRaporlarPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ── OTM Koordinatör ── */}
+            <Route
+              path="/otm/koordinator/ogrenci-listesi"
+              element={
+                <PrivateRoute>
+                  <KoordinatorOgrenciListesiPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/koordinator/raporlar"
+              element={
+                <PrivateRoute>
+                  <KoordinatorRaporlarPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/koordinator/ayarlar"
+              element={
+                <PrivateRoute>
+                  <KoordinatorAyarlarPage />
+                </PrivateRoute>
+              }
+            />
+
+            {/* ── OTM Öğrenci ── */}
+            <Route
+              path="/otm/ogrenci/dashboard"
+              element={
+                <PrivateRoute>
+                  <OgrenciDashboardPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogrenci/notlarim"
+              element={
+                <PrivateRoute>
+                  <OgrenciNotlarimPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/otm/ogrenci/devam"
+              element={
+                <PrivateRoute>
+                  <OgrenciDevamPage />
                 </PrivateRoute>
               }
             />
