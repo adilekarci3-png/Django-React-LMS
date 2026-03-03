@@ -99,12 +99,12 @@ export default function OTMBaseHeader() {
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link otm-nav-link" to="/contact">
+                  <NavLink className="nav-link otm-nav-link" to="/otm/contact">
                     <i className="bi bi-telephone me-1"></i>İletişim
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link otm-nav-link" to="/org-chart">
+                  <NavLink className="nav-link otm-nav-link" to="/otm/org-chart">
                     <i className="bi bi-diagram-3 me-1"></i>Organizasyon
                   </NavLink>
                 </li>

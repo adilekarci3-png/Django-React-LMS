@@ -1509,9 +1509,9 @@ function App() {
             />
 
             {/* ── OTM Kurumsal ── */}
-            <Route path="/about-otm" element={<OtmAboutPage />} />
-            <Route path="/contact"   element={<OtmContactPage />} />
-            <Route path="/org-chart" element={<OtmOrgChartPage />} />
+            <Route path="/about-otm"    element={<OtmAboutPage />} />
+            <Route path="/otm/contact"  element={<OtmContactPage />} />
+            <Route path="/otm/org-chart" element={<OtmOrgChartPage />} />
 
             <Route
               path="/otm/kocluk/planlar"

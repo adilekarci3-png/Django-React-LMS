@@ -39,7 +39,7 @@ export default function OTMBaseFooter() {
               <div><Link className="otm-footer__link" to="/about-otm">Hakkında</Link></div>
               <div><Link className="otm-footer__link" to="/donate">Bağış</Link></div>
               <div><Link className="otm-footer__link" to="/academy">EHAD Akademi</Link></div>
-              <div><Link className="otm-footer__link" to="/contact">İletişim</Link></div>
+              <div><Link className="otm-footer__link" to="/otm/contact">İletişim</Link></div>
             </div>
           </div>
 
