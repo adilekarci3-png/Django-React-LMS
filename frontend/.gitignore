@@ -45,4 +45,8 @@ venv/
 **/venv/
 **/site-packages/
 backend/yedek/venv/
+<<<<<<< HEAD
 backend/*.sqlite3
+=======
+backend/*.sqlite3
+>>>>>>> 8fba58ce337d274760d40575f1f6e61ec3a56099
