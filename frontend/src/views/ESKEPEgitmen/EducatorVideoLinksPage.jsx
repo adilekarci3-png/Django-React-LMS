@@ -1,226 +1,221 @@
-// src/pages/EducatorVideoLinksPage.jsx
-import React, { useEffect, useMemo, useState } from "react";
-import VideoLinkFormModal from "../../modals/VideoLinkFormModal";
-import { listVideoLinks, deleteVideoLink, fetchRoleDetail } from "../../api/educatorVideoLinkApi";
-import { getYouTubeThumb, getYouTubeEmbedUrl } from "../../utils/youtube";
-import Header from "./Partials/Header";
-
-import Sidebar from "./Partials/Sidebar";
+// src/views/AkademiEgitmen/EducatorYouTubeVideosList.jsx
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import useAxios from "../../utils/useAxios";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
+import Header from "./Partials/Header";
+import Sidebar from "./Partials/Sidebar";
 
-export default function EducatorVideoLinksPage({ instructorId }) {
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function getThumb(url) {
+  const id = getYouTubeId(url);
+  return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
+}
+function getEmbed(url) {
+  const id = getYouTubeId(url);
+  return id ? `https://www.youtube.com/embed/${id}` : url;
+}
+function getWatch(url) {
+  const id = getYouTubeId(url);
+  return id ? `https://www.youtube.com/watch?v=${id}` : url;
+}
+
+export default function EducatorYouTubeVideosList() {
+  const api = useAxios();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
-  const [roleDetail, setRoleDetail] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [openModal, setOpenModal] = useState(false);
-  const [editing, setEditing] = useState(null);
   const [q, setQ] = useState("");
+  const [sort, setSort] = useState("newest");
 
-  const canEdit = useMemo(() => {
-    const b = roleDetail?.base_roles || [];
-    const s = roleDetail?.sub_roles || [];
-    const isKoord =
-      b.includes("Koordinator") ||
-      s.includes("ESKEPKoordinator") ||
-      s.includes("ESKEPGenelKoordinator");
-    const isTeacher =
-      s.includes("ESKEPEgitmen") ||
-      s.includes("HBSEgitmen") ||
-      s.includes("HDMEgitmen") ||
-      s.includes("AkademiEgitmen") ||
-      b.includes("Teacher");
-    return isKoord || isTeacher;
-  }, [roleDetail]);
 
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [roles, list] = await Promise.all([
-        fetchRoleDetail(),
-        listVideoLinks(
-          instructorId ? { instructor_id: instructorId, search: q } : { search: q }
-        ),
-      ]);
-      setRoleDetail(roles);
-      setItems(list);
+      const res = await api.get("educator/video/link/");
+      setItems(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      Swal.fire("Hata", "Videolar yüklenirken bir hata oluştu.", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchAll();
-    // eslint-disable-next-line
-  }, [instructorId]);
+  useEffect(() => { fetchAll(); }, []); // eslint-disable-line
 
-  const onSearch = async (e) => {
-    e.preventDefault();
-    await fetchAll();
-  };
+  // Client-side arama — arama backend'de desteklenmiyorsa burada filtrele
+  const filtered = useMemo(() => {
+    if (!q.trim()) return items;
+    const t = q.toLowerCase();
+    return items.filter(
+      (x) => x.title?.toLowerCase().includes(t) || x.description?.toLowerCase().includes(t)
+    );
+  }, [items, q]);
 
-  const onDelete = async (id) => {
-    if (!window.confirm("Bu video bağlantısını silmek istiyor musunuz?")) return;
+  // filtered zaten var
+
+  const sorted = useMemo(() => {
+  const arr = [...filtered];
+  arr.sort((a, b) => {
+    const da = new Date(a.created_at).getTime();
+    const db = new Date(b.created_at).getTime();
+    return sort === "newest" ? db - da : da - db;
+  });
+  return arr;
+}, [filtered, sort]);
+
+  const onDelete = async (id, title) => {
+    const result = await Swal.fire({
+      title: "Emin misiniz?",
+      text: `"${title}" video bağlantısı silinecek.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Evet, sil",
+      cancelButtonText: "İptal",
+    });
+    if (!result.isConfirmed) return;
     try {
-      await deleteVideoLink(id);
-      await fetchAll();
-      alert("Silindi");
-    } catch (err) {
-      alert("Silme işlemine izin verilmedi (403) veya hata oluştu.");
+      await api.delete(`educator/video/link/${id}/delete/`);
+      Swal.fire({ icon: "success", title: "Video bağlantısı silindi.", timer: 1500, showConfirmButton: false });
+      fetchAll();
+    } catch {
+      Swal.fire("Hata", "Silme işlemi başarısız oldu.", "error");
     }
   };
 
-return (
-  <>
-    <ESKEPBaseHeader />
-    <section className="pt-5 pb-5 bg-light">
-      <div className="container">
-        <Header />
-        <div className="row mt-0 mt-md-4">
-          {/* Sidebar */}
-          <div className="col-lg-3">
-            <Sidebar />
-          </div>
+  return (
+    <>
+      <ESKEPBaseHeader />
+      <section className="pt-5 pb-5 bg-light">
+        <div className="container-xxl">
+          <Header />
+          <div className="row mt-0 mt-md-4">
+            <div className="col-lg-3 col-md-4 col-12 mb-4"><Sidebar /></div>
+            <div className="col-lg-9 col-md-8 col-12">
+              <div className="bg-white p-5 rounded shadow">
+                <h3 className="mb-2">
+                  <i className="fa-brands fa-youtube text-danger"></i> YouTube Video Bağlantılarım
+                </h3>
+                <p className="text-muted mb-4">
+                  Eklediğiniz YouTube video bağlantılarını bu sayfadan yönetebilirsiniz.
+                </p>
 
-          {/* İçerik */}
-          <div className="col-lg-9">
-            <div className="bg-white p-5 rounded shadow">
-              <h3 className="mb-4 text-primary fw-bold">🎬 YouTube Video Bağlantıları</h3>
-
-              {loading ? (
-                <div>Yükleniyor...</div>
-              ) : (
-                <>
-                  {/* Arama + Ekle */}
-                  <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
-                    <form className="d-flex" onSubmit={onSearch}>
-                      <input
-                        className="form-control me-2"
-                        placeholder="Ara (başlık/açıklama)…"
-                        aria-label="Video bağlantılarında ara"
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                      />
-                      <button className="btn btn-outline-primary" type="submit">
-                        Ara
-                      </button>
-                    </form>
-                    {canEdit && (
-                      <button
-                        className="btn btn-success"
-                        onClick={() => {
-                          setEditing(null);
-                          setOpenModal(true);
-                        }}
-                      >
-                        + Yeni Ekle
+                <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
+                  <div className="input-group" style={{ maxWidth: 400 }}>
+                    <input className="form-control" placeholder="Başlık veya açıklamada ara…"
+                      value={q} onChange={(e) => setQ(e.target.value)} />
+                    {q && (
+                      <button className="btn btn-outline-secondary" type="button"
+                        onClick={() => setQ("")}>
+                        Temizle
                       </button>
                     )}
                   </div>
+                  <div className="d-flex align-items-center gap-2">
+                  <select className="form-select" style={{ width: 120 }} value={sort}
+                      onChange={(e) => setSort(e.target.value)}>
+                      <option value="newest">En Yeni</option>
+                      <option value="oldest">En Eski</option>
+                    </select>
+                    
+                  <button className="btn btn-success"
+                    onClick={() => navigate("/eskepegitmen/youtube-video-ekle/")}>
+                    + Yeni Bağlantı Ekle
+                  </button>
+                  </div>
+                </div>
 
-                  {/* Kayıt yok */}
-                  {items.length === 0 && (
-                    <div className="alert alert-light">Kayıt bulunamadı.</div>
-                  )}
-
-                  {/* 3 sütun grid */}
-                  <div className="row row-cols-1 row-cols-md-3 g-3">
-                    {items.map((item) => {
-                      const thumb = getYouTubeThumb(item.videoUrl);
-                      const embed = getYouTubeEmbedUrl(item.videoUrl);
-                      return (
-                        <div className="col" key={item.id}>
-                          <div className="card h-100 shadow-sm">
-                            {thumb ? (
-                              <a href={embed} target="_blank" rel="noreferrer">
-                                <img
-                                  src={thumb}
-                                  className="card-img-top"
-                                  alt={item.title}
-                                />
-                              </a>
-                            ) : (
-                              <div className="ratio ratio-16x9 bg-light d-flex align-items-center justify-content-center">
-                                <span className="text-muted">Önizleme yok</span>
-                              </div>
-                            )}
-
-                            <div className="card-body d-flex flex-column">
-                              <h6
-                                className="card-title"
-                                title={item.title}
-                                style={{
-                                  minHeight: 38,
-                                  lineHeight: "1.2em",
-                                  overflow: "hidden",
-                                }}
-                              >
-                                {item.title}
-                              </h6>
-                              <p className="card-text small text-muted" style={{ flexGrow: 1 }}>
-                                {(item.description || "").slice(0, 100)}
-                                {item.description && item.description.length > 100 ? "…" : ""}
-                              </p>
-
-                              <div className="d-flex justify-content-between align-items-center mt-2">
-                                <a
-                                  className="btn btn-outline-primary btn-sm"
-                                  href={embed}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                >
-                                  İzle
+                {loading ? (
+                  <div className="d-flex align-items-center gap-2 text-muted py-5 justify-content-center">
+                    <span className="spinner-border spinner-border-sm" /> Yükleniyor…
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div className="text-center py-5">
+                    <i className="fa-brands fa-youtube text-danger" style={{ fontSize: 40 }}></i>
+                    <p className="text-muted mt-3 mb-3">
+                      {q ? "Aramanıza uygun video bulunamadı." : "Henüz video bağlantısı eklenmemiş."}
+                    </p>
+                    
+                      <button className="btn btn-primary"
+                        onClick={() => navigate("/eskepegitmen/youtube-video-ekle/")}>
+                        İlk videoyu ekle
+                      </button>
+                    
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-muted small mb-3">{sorted.length} video listeleniyor</p>
+                    <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                      {sorted.map((item) => {
+                        const videoUrl = item.videoUrl || item.url || item.video_url;
+                        const thumb = getThumb(videoUrl);
+                        const embed = getEmbed(videoUrl);
+                        const watch = getWatch(videoUrl);
+                        return (
+                          <div className="col" key={item.id}>
+                            <div className="card h-100 border-0 shadow-sm">
+                              {thumb ? (
+                                <a href={embed} target="_blank" rel="noreferrer">
+                                  <img src={thumb} className="card-img-top" alt={item.title}
+                                    style={{ objectFit: "cover", height: 155 }} />
                                 </a>
-                                {canEdit && (
-                                  <div className="btn-group">
-                                    <button
-                                      className="btn btn-outline-secondary btn-sm"
-                                      onClick={() => {
-                                        setEditing(item);
-                                        setOpenModal(true);
-                                      }}
-                                    >
+                              ) : (
+                                <div className="d-flex align-items-center justify-content-center bg-light"
+                                  style={{ height: 155, borderRadius: "8px 8px 0 0" }}>
+                                  <i className="fa-brands fa-youtube text-secondary" style={{ fontSize: 36 }}></i>
+                                </div>
+                              )}
+                              <div className="card-body d-flex flex-column">
+                                <h6 className="card-title fw-semibold"
+                                  style={{ overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", minHeight: 40 }}
+                                  title={item.title}>
+                                  {item.title}
+                                </h6>
+                                {item.description && (
+                                  <p className="card-text small text-muted" style={{ flexGrow: 1, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                                    {item.description}
+                                  </p>
+                                )}
+                                <div className="d-flex justify-content-between align-items-center mt-2 gap-2">
+                                  <a href={watch} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
+  <i className="fa-solid fa-play me-1"></i> İzle
+</a>
+                                  <div className="d-flex gap-1">
+                                    <button className="btn btn-outline-warning btn-sm"
+                                      onClick={() => navigate(`/eskepegitmen/youtube-video-duzenle/${item.id}/`)}>
                                       Düzenle
                                     </button>
-                                    <button
-                                      className="btn btn-outline-danger btn-sm"
-                                      onClick={() => onDelete(item.id)}
-                                    >
+                                    <button className="btn btn-outline-danger btn-sm"
+                                      onClick={() => onDelete(item.id, item.title)}>
                                       Sil
                                     </button>
                                   </div>
-                                )}
+                                </div>
+                              </div>
+                              <div className="card-footer small text-muted bg-transparent">
+                                {new Date(item.created_at).toLocaleDateString("tr-TR")}
                               </div>
                             </div>
-
-                            <div className="card-footer small text-muted">
-                              {new Date(item.created_at).toLocaleString()}
-                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Modal */}
-                  <VideoLinkFormModal
-                    open={openModal}
-                    onClose={() => setOpenModal(false)}
-                    onSaved={fetchAll}
-                    editing={editing}
-                    defaultInstructorId={instructorId}
-                    roleDetail={roleDetail}
-                  />
-                </>
-              )}
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    <ESKEPBaseFooter />
-  </>
-);
-
-
+      </section>
+      <ESKEPBaseFooter />
+    </>
+  );
 }

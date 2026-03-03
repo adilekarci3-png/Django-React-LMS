@@ -59,20 +59,20 @@ function ESKEPEgitmenSchedule() {
     <>
       <ESKEPBaseHeader />
       <section className="pt-5 pb-5 bg-light">
-        <div className="container">
+        <div className="container-xxl">
           <Header />
           <div className="row mt-0 mt-md-4">
             <div className="col-lg-3">
               <Sidebar />
             </div>
             <div className="col-lg-9 col-md-8 col-12">
-              <div className="text-center mb-4">
-                <h3 className="fw-bold text-primary">
-                  📅 Eğitmen Eğitim Takvimi
-                </h3>
-                <p className="text-muted">
-                  Ders programınızı görüntüleyin ve detaylarına ulaşın.
-                </p>
+              <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                  <h3 className="fw-bold mb-1">📅 Eğitmen Eğitim Takvimi</h3>
+                  <p className="text-muted mb-0">
+                    Ders programınızı görüntüleyin ve detaylarına ulaşın.
+                  </p>
+                </div>
               </div>
 
               <div className="row">

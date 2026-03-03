@@ -1,125 +1,135 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import Swal from "sweetalert2";
+import useAxios from "../../utils/useAxios";
+import useUserData from "../plugin/useUserData";
+import { useNavigate } from "react-router-dom";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-import useAxios from "../../utils/useAxios";
-import useUserData from "../plugin/useUserData"; // Token'dan kullanıcı bilgisi al
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 
+const today = new Date().toISOString().split("T")[0];
+
+const validationSchema = Yup.object({
+  title: Yup.string().required("Ders başlığı zorunludur"),
+  date: Yup.string().required("Tarih seçiniz"),
+  background_color: Yup.string().required(),
+  border_color: Yup.string().required(),
+});
 
 function ESKEPEgitmenAddLesson() {
-  const today = new Date().toISOString().split("T")[0];
-  const [formData, setFormData] = useState({
-    title: "",
-    date: today,
-    background_color: "#007bff",
-    border_color: "#0056b3",
-  });
-
   const api = useAxios();
   const navigate = useNavigate();
-  const profile = useUserData(); // ✅ Token'dan user_id, username vb. alınır
+  const profile = useUserData();
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async (values, { setSubmitting }) => {
     if (!profile?.user_id) {
       Swal.fire("Hata", "Kullanıcı bilgisi alınamadı.", "error");
+      setSubmitting(false);
       return;
     }
-
     try {
-      const payload = {
-        ...formData,
-        user_id: profile.user_id, // ✅ user_id eklendi
-      };
-
-      await api.post("/events/create/", payload);
+      await api.post("/events/create/", { ...values, user_id: profile.user_id });
       Swal.fire("Başarılı", "Etkinlik eklendi!", "success");
       navigate("/eskepegitmen/takvim/");
     } catch (err) {
-      console.error("Hata:", err);
-      Swal.fire("Hata", "Etkinlik eklenemedi.", "error");
+      const data = err?.response?.data;
+      const msg =
+        data && typeof data === "object"
+          ? Object.entries(data)
+              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+              .join("\n")
+          : "Etkinlik eklenemedi";
+      Swal.fire("Hata", msg, "error");
+    } finally {
+      setSubmitting(false);
     }
   };
-  useEffect(() => {
-    debugger;
-    // if (!profile?.user_id) navigate("/login");
-  }, [profile]);
 
   return (
     <>
       <ESKEPBaseHeader />
       <section className="pt-5 pb-5 bg-light">
-        <div className="container">
+        <div className="container-xxl">
           <Header />
           <div className="row mt-0 mt-md-4">
-           <div className="col-lg-3 mb-4 mb-lg-0">
+            <div className="col-lg-3 col-md-4 col-12 mb-4">
               <Sidebar />
             </div>
-            <div className="col-lg-9 mx-auto bg-white p-5 rounded shadow">
-              <h3 className="text-primary fw-bold mb-4">📘 Ders Saati Ekle</h3>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label">Ders Başlığı</label>
-                  <input
-                    type="text"
-                    name="title"
-                    className="form-control"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+            <div className="col-lg-9 col-md-8 col-12">
+              <div className="bg-white p-5 rounded shadow">
+                <h3 className="mb-2">
+                  <i className="fa-regular fa-clock text-success"></i> Ders Oluştur
+                </h3>
+                <p className="text-muted mb-4">
+                  Gerçekleştireceğiniz ders saatinin bilgilerini giriniz. Bu bilgiler, ders takviminizde görüntülenecektir.
+                </p>
+                
 
-                <div className="mb-3">
-                  <label className="form-label">Tarih</label>
-                  <input
-                    type="date"
-                    name="date"
-                    className="form-control"
-                    value={formData.date}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                <Formik
+                  initialValues={{
+                    title: "",
+                    date: today,
+                    background_color: "#007bff",
+                    border_color: "#0056b3",
+                  }}
+                  validationSchema={validationSchema}
+                  onSubmit={handleSubmit}
+                >
+                  {({ isSubmitting }) => (
+                    <Form>
+                      <div className="mb-3">
+                        <label className="form-label">Ders Başlığı</label>
+                        <Field name="title" className="form-control" placeholder="Ders başlığını giriniz" />
+                        <div className="text-danger small">
+                          <ErrorMessage name="title" />
+                        </div>
+                      </div>
 
-                <div className="mb-3 row">
-                  <div className="col">
-                    <label className="form-label">Arka Plan Rengi</label>
-                    <input
-                      type="color"
-                      name="background_color"
-                      className="form-control form-control-color"
-                      value={formData.background_color}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="col">
-                    <label className="form-label">Kenarlık Rengi</label>
-                    <input
-                      type="color"
-                      name="border_color"
-                      className="form-control form-control-color"
-                      value={formData.border_color}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
+                      <div className="mb-3">
+                        <label className="form-label">Tarih</label>
+                        <Field
+                          type="date"
+                          name="date"
+                          min={today}
+                          className="form-control"
+                        />
+                        <div className="text-danger small">
+                          <ErrorMessage name="date" />
+                        </div>
+                      </div>
 
-                <button type="submit" className="btn btn-primary mt-3">
-                  Kaydet
-                </button>
-              </form>
+                      <div className="row mb-3">
+                        <div className="col">
+                          <label className="form-label">Arka Plan Rengi</label>
+                          <Field
+                            type="color"
+                            name="background_color"
+                            className="form-control form-control-color"
+                          />
+                        </div>
+                        <div className="col">
+                          <label className="form-label">Kenarlık Rengi</label>
+                          <Field
+                            type="color"
+                            name="border_color"
+                            className="form-control form-control-color"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="btn btn-success w-100"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Kaydediliyor..." : "Dersi Kaydet"}
+                      </button>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
             </div>
           </div>
         </div>

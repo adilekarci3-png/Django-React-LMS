@@ -9,6 +9,7 @@ import StajerMenu from "../partials/menus/StajerMenu";
 import OgrenciMenu from "../partials/menus/OgrenciMenu";
 
 import "./css/eskep-aqua.css";
+import EgitmenMenu from "./menus/EgitmenMenu";
 
 export default function ESKEPBaseHeader() {
   const [open, setOpen] = useState(false);
@@ -41,6 +42,8 @@ export default function ESKEPBaseHeader() {
   // Öğrenci mi?
   const isEskepOgrenci =
     baseRoles.includes("Ogrenci") && subRoles.includes("ESKEPOgrenci");
+
+  const isEskepEgitmen = baseRoles.includes("Teacher") && subRoles.includes("ESKEPEgitmen");
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -87,6 +90,8 @@ export default function ESKEPBaseHeader() {
 
             {/* Öğrenci menüsü */}
             {isEskepOgrenci && <OgrenciMenu />}
+
+            {isEskepEgitmen && <EgitmenMenu />}
           </div>
 
           {/* Sağ: arama + giriş */}

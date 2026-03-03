@@ -29,7 +29,7 @@ function EskepKoordinatorStudents() {
       <ESKEPBaseHeader />
 
       <section className="pt-5 pb-5">
-        <div className="container">
+        <div className="container-xxl">
           {/* üst kısım */}
           <Header />
 

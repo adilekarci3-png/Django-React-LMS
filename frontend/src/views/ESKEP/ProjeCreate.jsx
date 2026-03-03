@@ -1,4 +1,7 @@
-import { useState, useEffect } from "react";
+// ProjeCreate.jsx
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FiSave, FiPlus, FiTrash2, FiUpload, FiImage } from "react-icons/fi";
 import Sidebar from "./Partials/Sidebar";
 import Header from "./Partials/Header";
 import Swal from "sweetalert2";
@@ -9,145 +12,189 @@ import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
 import UserData from "../plugin/UserData";
 
+import "./css/odev-create.css";
+
 // ✅ Markdown Editor
 import MdEditor from "react-markdown-editor-lite";
 import "react-markdown-editor-lite/lib/index.css";
 import MarkdownIt from "markdown-it";
 const mdParser = new MarkdownIt();
 
+const MAX_IMAGE_MB = 5;
+
 function ProjeCreate() {
-  
-  const user = UserData(); 
+  const api = useAxios();
+  const navigate = useNavigate();
+
+  const userHook = useUserData();
+  const userFallback = UserData?.() || {};
+  const user = userHook?.user_id ? userHook : userFallback;
+
+  const LANG_MAP = useMemo(
+    () => ({ Turkce: "Türkçe", Ingilizce: "İngilizce", Arapca: "Arapça" }),
+    []
+  );
+  const LEVEL_MAP = useMemo(
+    () => ({ Baslangic: "Başlangıç", Orta: "Orta", "Ileri Seviye": "İleri Seviye" }),
+    []
+  );
+  const LANGUAGE_OPTIONS = useMemo(
+    () => Object.entries(LANG_MAP).map(([value, label]) => ({ value, label })),
+    [LANG_MAP]
+  );
+  const LEVEL_OPTIONS = useMemo(
+    () => Object.entries(LEVEL_MAP).map(([value, label]) => ({ value, label })),
+    [LEVEL_MAP]
+  );
+
+  const [submitting, setSubmitting] = useState(false);
+  const [category, setCategory] = useState([]);
+
   const [proje, setProje] = useState({
     category: "",
-    image: "",
+    image: null, // { file, preview }
     title: "",
     description: "",
     level: "",
     language: "",
-    inserteduser:parseInt(user?.user_id),
     proje_status: "",
   });
 
-  const [category, setCategory] = useState([]);
-  const [variants, setVariants] = useState([{ title: "", pdf: "" }]);
+  const [variants, setVariants] = useState([{ title: "", pdf: null }]);
   const [errors, setErrors] = useState({});
-  
-  useEffect(() => {
-    useAxios().get(`course/category/`).then((res) => {
-      setCategory(res.data);
-    });
-  }, []);
 
-  const handleProjeInputChange = (event) => {
-    setProje({
-      ...proje,
-      [event.target.name]: event.target.value,
-    });
+  useEffect(() => {
+    api.get(`course/category/`).then((res) => setCategory(res.data || []));
+  }, [api]);
+
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    setProje((s) => ({ ...s, [name]: value }));
   };
 
   const handleEditorChange = ({ text }) => {
-    setProje({
-      ...proje,
-      description: text,
+    setProje((s) => ({ ...s, description: text }));
+  };
+
+  const onImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type)) {
+      setErrors((er) => ({ ...er, image: "Yalnızca JPEG/PNG/WEBP kabul edilir." }));
+      return;
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      setErrors((er) => ({ ...er, image: `En fazla ${MAX_IMAGE_MB}MB yükleyin.` }));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProje((s) => ({ ...s, image: { file, preview: reader.result } }));
+      setErrors((er) => ({ ...er, image: "" }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVariantTitle = (i, val) => {
+    setVariants((arr) => {
+      const copy = [...arr];
+      copy[i].title = val;
+      return copy;
     });
   };
 
-  const handleProjeImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (!["image/jpeg", "image/png", "image/jpg"].includes(file.type)) {
-        setErrors({ ...errors, image: "Yalnızca resim dosyaları kabul edilir." });
+  const handleVariantPDF = (i, file) => {
+    setVariants((arr) => {
+      const copy = [...arr];
+      if (file && file.type !== "application/pdf") {
+        setErrors((er) => ({
+          ...er,
+          [`variant_pdf_${i}`]: "Yalnızca PDF dosyaları kabul edilir.",
+        }));
       } else {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setProje({
-            ...proje,
-            image: {
-              file: file,
-              preview: reader.result,
-            },
-          });
-          setErrors({ ...errors, image: "" });
-        };
-        reader.readAsDataURL(file);
+        copy[i].pdf = file || null;
+        setErrors((er) => ({ ...er, [`variant_pdf_${i}`]: "" }));
       }
-    }
+      return copy;
+    });
   };
 
-  const handleVariantChange = (index, value) => {
-    const updatedVariants = [...variants];
-    updatedVariants[index].title = value;
-    setVariants(updatedVariants);
-  };
+  const addVariant = () => setVariants((arr) => [...arr, { title: "", pdf: null }]);
 
-  const handlePDFChange = (index, file) => {
-    const updatedVariants = [...variants];
-    if (file && file.type !== "application/pdf") {
-      setErrors({
-        ...errors,
-        [`variant_pdf_${index}`]: "Yalnızca PDF dosyaları kabul edilir.",
-      });
-    } else {
-      updatedVariants[index].pdf = file;
-      setVariants(updatedVariants);
-      setErrors({ ...errors, [`variant_pdf_${index}`]: "" });
-    }
-  };
-
-  const addVariant = () => {
-    setVariants([...variants, { title: "", pdf: "" }]);
-  };
-
-  const removeVariant = (index) => {
-    const updatedVariants = [...variants];
-    updatedVariants.splice(index, 1);
-    setVariants(updatedVariants);
-  };
+  const removeVariant = (i) =>
+    setVariants((arr) => {
+      if (arr.length === 1) return arr;
+      return arr.filter((_, idx) => idx !== i);
+    });
 
   const validateForm = () => {
-    const newErrors = {};
+    const er = {};
+    if (!proje.title?.trim()) er.title = "Proje başlığı zorunludur.";
+    if (!proje.description?.trim()) er.description = "Proje açıklaması zorunludur.";
+    if (!proje.image?.file) er.image = "Kapak resmi yükleyiniz.";
+    if (!proje.category) er.category = "Kategori seçiniz.";
+    if (!proje.level) er.level = "Seviye seçiniz.";
+    if (!proje.language) er.language = "Dil seçiniz.";
 
-    if (!proje.title) newErrors.title = "Proje başlığı zorunludur.";
-    if (!proje.description) newErrors.description = "Proje açıklaması zorunludur.";
-    if (!proje.image?.file) newErrors.image = "Kapak resmi yükleyiniz.";
-    if (!proje.category) newErrors.category = "Kategori seçiniz.";
-
-    variants.forEach((variant, index) => {
-      if (!variant.title)
-        newErrors[`variant_title_${index}`] = "Bölüm adı zorunludur.";
-      if (!variant.pdf)
-        newErrors[`variant_pdf_${index}`] = "PDF dosyası ekleyiniz.";
+    variants.forEach((v, i) => {
+      if (!v.title?.trim()) er[`variant_title_${i}`] = "Bölüm adı zorunludur.";
+      if (!v.pdf) er[`variant_pdf_${i}`] = "PDF dosyası ekleyiniz.";
     });
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(er);
+    return Object.keys(er).length === 0;
+  };
+
+  const resetForm = () => {
+    setProje({
+      category: "",
+      image: null,
+      title: "",
+      description: "",
+      level: "",
+      language: "",
+      proje_status: "",
+    });
+    setVariants([{ title: "", pdf: null }]);
+    setErrors({});
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const formdata = new FormData();
-    formdata.append("title", proje.title);
-    formdata.append("inserteduser", parseInt(user?.user_id));
-    formdata.append("proje_status", proje.proje_status);
-    formdata.append("image", proje.image.file);
-    formdata.append("description", proje.description);
-    formdata.append("category", proje.category);
-    formdata.append("level", proje.level);
-    formdata.append("language", proje.language);
+    const fd = new FormData();
+    fd.append("title", proje.title);
+    if (user?.user_id) fd.append("inserteduser", parseInt(user.user_id));
+    fd.append("proje_status", proje.proje_status || "");
+    fd.append("image", proje.image.file);
+    fd.append("description", proje.description);
+    fd.append("category", proje.category);
+    fd.append("level", proje.level);
+    fd.append("language", proje.language);
 
-    variants.forEach((variant, index) => {
-      formdata.append(`variants[${index}][title]`, variant.title);
-      formdata.append(`variants[${index}][pdf]`, variant.pdf);
+    variants.forEach((v, i) => {
+      fd.append(`variants[${i}][title]`, v.title);
+      fd.append(`variants[${i}][pdf]`, v.pdf);
     });
 
-    await useAxios().post(`eskepstajer/proje-create/`, formdata);
-    Swal.fire({
-      icon: "success",
-      title: "Proje Başarıyla Oluşturuldu",
-    });
+    try {
+      setSubmitting(true);
+      await api.post(`eskepstajer/proje-create/`, fd);
+      Swal.fire({ icon: "success", title: "Proje başarıyla oluşturuldu" });
+      resetForm();
+      navigate("/eskepstajer/projes");
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "İşlem başarısız",
+        text: err?.response?.data?.detail || "Lütfen tekrar deneyin.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -160,123 +207,270 @@ function ProjeCreate() {
             <div className="col-lg-3 col-md-3 col-12 mb-4 mb-md-0">
               <Sidebar />
             </div>
-          <div className="col-lg-9 col-md-9 col-12">
-            <form onSubmit={handleSubmit}>
-              <h2 className="mb-4">📘 Proje Oluştur</h2>
 
-              <div className="mb-3">
-                <label className="form-label">Proje Başlığı</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="title"
-                  value={proje.title}
-                  onChange={handleProjeInputChange}
-                />
-                {errors.title && <span className="text-danger">{errors.title}</span>}
-              </div>
+            <div className="col-lg-9 col-md-9 col-12">
+              <form onSubmit={handleSubmit}>
+                <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                  <h2 className="mb-0">
+                    <i className="fas fa-project-diagram text-danger me-2" />
+                    Proje Oluştur
+                  </h2>
+                  <Link to="/eskepstajer/projes" className="btn btn-light">
+                    ← Listeye Dön
+                  </Link>
+                </div>
 
-              <div className="mb-3">
-                <label className="form-label">Proje Durumu</label>
-                <select
-                  className="form-select"
-                  name="proje_status"
-                  value={proje.proje_status}
-                  onChange={handleProjeInputChange}
-                >
-                  <option value="">Seçiniz</option>
-                  <option value="İncelemede">İncelemede</option>
-                  <option value="Pasif">Pasif</option>
-                  <option value="Reddedilmiş">Reddedilmiş</option>
-                  <option value="Taslak">Taslak</option>
-                  <option value="Teslim Edildi">Teslim Edildi</option>
-                </select>
-              </div>
+                {/* Genel Bilgiler */}
+                <div className="card mb-4">
+                  <div className="card-header">
+                    <h5 className="mb-0">Genel Bilgiler</h5>
+                    <small className="text-muted">Başlık, durum ve açıklamayı doldurun.</small>
+                  </div>
+                  <div className="card-body">
+                    <div className="row g-3">
+                      <div className="col-md-8">
+                        <label className="form-label">Proje Başlığı</label>
+                        <input
+                          type="text"
+                          className={`form-control ${errors.title ? "is-invalid" : ""}`}
+                          name="title"
+                          value={proje.title}
+                          onChange={handleInput}
+                          placeholder="Örn. Yapay Zeka ile Görüntü İşleme Projesi"
+                        />
+                        {errors.title && <div className="invalid-feedback">{errors.title}</div>}
+                      </div>
 
-              <div className="mb-3">
-                <label className="form-label">Proje Açıklaması</label>
-                <MdEditor
-                  value={proje.description}
-                  style={{ height: "200px" }}
-                  renderHTML={(text) => mdParser.render(text)}
-                  onChange={handleEditorChange}
-                />
-                {errors.description && (
-                  <span className="text-danger">{errors.description}</span>
-                )}
-              </div>
+                      <div className="col-md-4">
+                        <label className="form-label">Proje Durumu</label>
+                        <select
+                          className="form-select"
+                          name="proje_status"
+                          value={proje.proje_status}
+                          onChange={handleInput}
+                        >
+                          <option value="">Seçiniz</option>
+                          <option value="İncelemede">İncelemede</option>
+                          <option value="Taslak">Taslak</option>
+                          <option value="Pasif">Pasif</option>
+                          <option value="Reddedilmiş">Reddedilmiş</option>
+                          <option value="Teslim Edildi">Teslim Edildi</option>
+                        </select>
+                      </div>
 
-              <div className="mb-3">
-                <label className="form-label">Kapak Resmi</label>
-                <input type="file" className="form-control" onChange={handleProjeImageChange} />
-                {errors.image && <span className="text-danger">{errors.image}</span>}
-              </div>
+                      <div className="col-12">
+                        <label className="form-label">Proje Açıklaması</label>
+                        <MdEditor
+                          value={proje.description}
+                          style={{ height: 260 }}
+                          renderHTML={(text) => mdParser.render(text)}
+                          onChange={handleEditorChange}
+                        />
+                        {errors.description && (
+                          <div className="text-danger mt-1">{errors.description}</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="mb-3">
-                <label className="form-label">Kategori</label>
-                <select
-                  className="form-select"
-                  name="category"
-                  onChange={handleProjeInputChange}
-                >
-                  <option value="">-------------</option>
-                  {category.map((c, index) => (
-                    <option key={index} value={c.id}>
-                      {c.title}
-                    </option>
-                  ))}
-                </select>
-                {errors.category && <span className="text-danger">{errors.category}</span>}
-              </div>
+                {/* Kapsam & Kapak */}
+                <div className="card mb-4">
+                  <div className="card-header">
+                    <h5 className="mb-0">Kapsam & Kapak</h5>
+                    <small className="text-muted">
+                      Kategori, seviye, dil seçin ve bir kapak resmi yükleyin.
+                    </small>
+                  </div>
+                  <div className="card-body">
+                    <div className="row g-3">
+                      <div className="col-md-4">
+                        <label className="form-label">Kategori</label>
+                        <select
+                          className={`form-select ${errors.category ? "is-invalid" : ""}`}
+                          name="category"
+                          value={proje.category}
+                          onChange={handleInput}
+                        >
+                          <option value="">Seçiniz</option>
+                          {category.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.title}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.category && (
+                          <div className="invalid-feedback">{errors.category}</div>
+                        )}
+                      </div>
 
-              <div className="mb-3">
-                <h4>Bölümler</h4>
-                {variants.map((variant, index) => (
-                  <div key={index} className="border p-2 rounded-3 mb-3 bg-light">
-                    <input
-                      type="text"
-                      placeholder="Bölüm Adı"
-                      className="form-control mb-2"
-                      value={variant.title}
-                      onChange={(e) => handleVariantChange(index, e.target.value)}
-                    />
-                    {errors[`variant_title_${index}`] && (
-                      <span className="text-danger">
-                        {errors[`variant_title_${index}`]}
-                      </span>
-                    )}
+                      <div className="col-md-4">
+                        <label className="form-label">Seviye</label>
+                        <select
+                          className={`form-select ${errors.level ? "is-invalid" : ""}`}
+                          name="level"
+                          value={proje.level}
+                          onChange={handleInput}
+                        >
+                          <option value="">Seçiniz</option>
+                          {LEVEL_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.level && <div className="invalid-feedback">{errors.level}</div>}
+                      </div>
 
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="application/pdf"
-                      onChange={(e) => handlePDFChange(index, e.target.files[0])}
-                    />
-                    {errors[`variant_pdf_${index}`] && (
-                      <span className="text-danger">
-                        {errors[`variant_pdf_${index}`]}
-                      </span>
-                    )}
+                      <div className="col-md-4">
+                        <label className="form-label">Dil</label>
+                        <select
+                          className={`form-select ${errors.language ? "is-invalid" : ""}`}
+                          name="language"
+                          value={proje.language}
+                          onChange={handleInput}
+                        >
+                          <option value="">Seçiniz</option>
+                          {LANGUAGE_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.language && (
+                          <div className="invalid-feedback">{errors.language}</div>
+                        )}
+                      </div>
 
+                      <div className="col-12">
+                        <div className={`upload-card ${errors.image ? "has-error" : ""}`}>
+                          <div className="upload-left">
+                            <div className="upload-icon">
+                              {proje.image?.preview ? (
+                                <img
+                                  src={proje.image.preview}
+                                  alt="Kapak önizleme"
+                                  className="cover-preview"
+                                />
+                              ) : (
+                                <FiImage size={28} />
+                              )}
+                            </div>
+                            <div>
+                              <div className="fw-semibold">Kapak Resmi</div>
+                              <div className="text-muted small">
+                                JPEG/PNG/WEBP yükleyin. En fazla {MAX_IMAGE_MB}MB. Önerilen: 1200×630 px
+                              </div>
+                            </div>
+                          </div>
+
+                          <label className="btn btn-outline-primary mb-0">
+                            <FiUpload className="me-2" />
+                            Dosya Seç
+                            <input
+                              type="file"
+                              className="d-none"
+                              accept="image/png,image/jpeg,image/webp"
+                              onChange={onImageChange}
+                            />
+                          </label>
+                        </div>
+                        {errors.image && <div className="text-danger mt-1">{errors.image}</div>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bölümler */}
+                <div className="card mb-5">
+                  <div className="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                      <h5 className="mb-0">Bölümler</h5>
+                      <small className="text-muted">
+                        Her bölüm için ad ve PDF dosyası ekleyin (en az 1 bölüm).
+                      </small>
+                    </div>
                     <button
-                      className="btn btn-danger mt-2"
                       type="button"
-                      onClick={() => removeVariant(index)}
+                      className="btn btn-secondary"
+                      onClick={addVariant}
+                      title="Yeni bölüm ekle"
                     >
-                      Bölümü Kaldır
+                      <FiPlus className="me-1" />
+                      Yeni Bölüm
                     </button>
                   </div>
-                ))}
-                <button className="btn btn-secondary w-100" type="button" onClick={addVariant}>
-                  + Yeni Bölüm
-                </button>
-              </div>
 
-              <button className="btn btn-success w-100" type="submit">
-                Proje Oluştur
-              </button>
-            </form>
-          </div>
+                  <div className="card-body">
+                    <div className="row g-3">
+                      {variants.map((v, i) => (
+                        <div key={i} className="col-12">
+                          <div className="variant-card">
+                            <div className="variant-index">{i + 1}</div>
+                            <div className="variant-fields">
+                              <input
+                                type="text"
+                                className={`form-control ${errors[`variant_title_${i}`] ? "is-invalid" : ""}`}
+                                placeholder="Bölüm Adı"
+                                value={v.title}
+                                onChange={(e) => handleVariantTitle(i, e.target.value)}
+                              />
+                              {errors[`variant_title_${i}`] && (
+                                <div className="invalid-feedback">
+                                  {errors[`variant_title_${i}`]}
+                                </div>
+                              )}
+
+                              <div className="mt-2 d-flex gap-2 align-items-center">
+                                <input
+                                  type="file"
+                                  className={`form-control ${errors[`variant_pdf_${i}`] ? "is-invalid" : ""}`}
+                                  accept="application/pdf"
+                                  onChange={(e) => handleVariantPDF(i, e.target.files?.[0])}
+                                />
+                                {v.pdf && (
+                                  <span className="small text-muted">{v.pdf.name}</span>
+                                )}
+                              </div>
+                              {errors[`variant_pdf_${i}`] && (
+                                <div className="invalid-feedback d-block">
+                                  {errors[`variant_pdf_${i}`]}
+                                </div>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger variant-remove"
+                              onClick={() => removeVariant(i)}
+                              title="Bölümü kaldır"
+                              disabled={variants.length === 1}
+                            >
+                              <FiTrash2 />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Yapışkan alt çubuk */}
+                <div className="sticky-savebar">
+                  <div className="container-xxl d-flex justify-content-end py-2">
+                    <button
+                      className="btn btn-success btn-lg"
+                      type="submit"
+                      disabled={submitting}
+                      title="Projeyi oluştur"
+                    >
+                      <FiSave className="me-2" />
+                      {submitting ? "Kaydediliyor..." : "Proje Oluştur"}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </section>

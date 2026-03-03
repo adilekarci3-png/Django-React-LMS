@@ -51,7 +51,7 @@ import Orders from "./views/instructor/Orders";
 import Coupon from "./views/instructor/Coupon";
 import TeacherNotification from "./views/instructor/TeacherNotification";
 import QA from "./views/instructor/QA";
-import ChangePassword from "./views/instructor/ChangePassword";
+import ChangePassword from "./views/ESKEP/ChangePassword";
 import Profile from "./views/instructor/Profile";
 import CourseCreate from "./views/instructor/CourseCreate";
 import CourseEdit from "./views/instructor/CourseEdit";
@@ -111,27 +111,40 @@ import ESKEPinstructorOdevDetail from "./views/ESKEPinstructor/OdevDetail";
 import ESKEPinstructorProjeDetail from "./views/ESKEPinstructor/ProjeDetail";
 import ESKEPinstructorKitapTahliliDetail from "./views/ESKEPinstructor/KitapTahliliDetail";
 import ESKEPinstructorAssingCoordinator from "./views/ESKEPinstructor/AssignCoordinator";
-import EskepInstructorStudents from "./views/ESKEPinstructor/EskepInstructorStudents";
 import EskepInstructorProfile from "./views/ESKEPinstructor/EskepInstructorProfile";
-import EskepInstructorStudentStajerList from "./views/ESKEPinstructor/EskepInstructorStudentStajerList";
-import ESKEPChangePassword from "./views/ESKEPinstructor/ChangePassword";
-import StajerListesi from "./views/ESKEPinstructor/EskepKoordinatorStajers";
-import OgrenciListesi from "./views/ESKEPinstructor/EskepKoordinatorStudents";
 import StajerDetay from "./views/ESKEPinstructor/StajerDetay";
 import StajerDuzenle from "./views/ESKEPinstructor/StajerDuzenle";
 import EskepInstructorCourseDetail from "./views/ESKEPinstructor/EskepInstructorCourseDetail";
 import EskepInstructorAssingCourses from "./views/ESKEPinstructor/EskepInstructorAssingCourses";
+
+import EskepInstructorShowProfile from "./views/ESKEPinstructor/ShowProfile";
+import EskepInstructorChangePassword from "./views/ESKEPinstructor/ChangePassword";
+import EskepInstructorProfileEdit from "./views/ESKEPinstructor/ProfileEdit";
+import EskepInstructorReviews from "./views/ESKEPinstructor/Review";
+import EskepInstructorQA from "./views/ESKEPinstructor/QA";
+import EskepInstructorStudentStajerList from "./views/ESKEPinstructor/EskepInstructorStudentStajerList";
+import EskepInstructorStajerListesi from "./views/ESKEPinstructor/EskepKoordinatorStajers";
+import EskepInstructorOgrenciListesi from "./views/ESKEPinstructor/EskepKoordinatorStudents";
+import EskepInstructorStudents from "./views/ESKEPinstructor/EskepInstructorStudents";
+
+
 
 //Eskep Eğitmen Pages
 import ESKEPEgitmenDersSaatiEkle from "./views/ESKEPEgitmen/ESKEPEgitmenAddLesson";
 import ESKEPEgitmenVideoCreate from "./views/ESKEPEgitmen/ESKEPEgitmenVideoCreate";
 import ESKEPEgitmenCreate from "./views/ESKEPinstructor/EskepInstructorTeacherCreate";
 import ESKEPEgitmenVideoLinkCreate from "./views/ESKEPEgitmen/EducatorYouTubeVideoCreate";
-import ESKEPEgitmenProfil from "./views/ESKEPinstructor/EskepInstructorProfile";
-import ESKEPEgitmenVideoList from "./views/ESKEPinstructor/InstructorVideoList";
+import ESKEPEgitmenProfil from "./views/ESKEPEgitmen/ProfileEdit";
+import ESKEPEgitmenVideoList from "./views/ESKEPEgitmen/Educatoruploadedvideoslist"
+import EskepEgitmenCreatedvideos from "./views/ESKEPEgitmen/Educatorcreatedvideoslist";
 import ESKEPEgitmenYoutubeCanli from "./views/ESKEPinstructor/YouTubeLivePage";
 import ESKEPEgitmenSchedule from "./views/ESKEPEgitmen/ESKEPEgitmenSchedule";
 import EducatorVideoLinksPage from "./views/ESKEPEgitmen/EducatorVideoLinksPage";
+import ESKEPEgitmenokumanCreate from "./views/ESKEPEgitmen/EducatorDecumentsCreate";
+import ESKEPEgitmenDocumentsList from "./views/ESKEPEgitmen/EducatorDocumentsList";
+import EskepEgitmenShowProfile from "./views/ESKEPEgitmen/ShowProfile";
+import EskepEgitmenChangePassword from "./views/ESKEPEgitmen/ChangePassword";
+import EskepEgitmenDashboard from "./views/ESKEPEgitmen/EskepEgitmenDashboard";
 
 
 //Eskep Stajer Pages
@@ -758,6 +771,14 @@ function App() {
               }
             />
             <Route
+              path="/eskep/change-password"
+              element={
+                <PrivateRoute>
+                  <ChangePassword />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/eskep/dashboard"
               element={
                 <PrivateRoute>
@@ -855,6 +876,30 @@ function App() {
               }
             />
             {/* ESKEP Instructor */}
+            <Route
+              path="/eskepinstructor/profile-edit/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorProfileEdit />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/profile/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorShowProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepinstructor/change-password/"
+              element={
+                <PrivateRoute>
+                  <EskepInstructorChangePassword />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/eskepinstructor/dashboard/"
               element={
@@ -995,18 +1040,19 @@ function App() {
               path="/eskepinstructor/question-answer/"
               element={
                 <PrivateRoute>
-                  <QA />
+                  <EskepInstructorQA />
                 </PrivateRoute>
               }
             />
             <Route
-              path="/eskepinstructor/change-password/"
+              path="/eskepinstructor/reviews/"
               element={
                 <PrivateRoute>
-                  <ESKEPChangePassword />
+                  <EskepInstructorReviews />
                 </PrivateRoute>
               }
             />
+            
             <Route
               path="/eskepinstructor/profile/"
               element={
@@ -1027,7 +1073,7 @@ function App() {
               path="/eskepinstructor/stajer-list/"
               element={
                 <PrivateRoute>
-                  <StajerListesi />
+                  <EskepInstructorStajerListesi />
                 </PrivateRoute>
               }
             />
@@ -1035,7 +1081,7 @@ function App() {
               path="/eskepinstructor/ogrenci-list/"
               element={
                 <PrivateRoute>
-                  <OgrenciListesi />
+                  <EskepInstructorOgrenciListesi />
                 </PrivateRoute>
               }
             />
@@ -1246,10 +1292,59 @@ function App() {
             />
             {/* ESKEP Eğitmen */}
             <Route
+              path="/eskepegitmen/profile/"
+              element={
+                <PrivateRoute>
+                  <EskepEgitmenShowProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/change-password"
+              element={
+                <PrivateRoute>
+                  <EskepEgitmenChangePassword />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/created-videos"
+              element={
+                <PrivateRoute>
+                  <EskepEgitmenCreatedvideos />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/dashboard/"
+              element={
+                <PrivateRoute>
+                  <EskepEgitmenDashboard />
+                </PrivateRoute>
+              }
+            />
+
+            <Route
               path="/eskepegitmen/ders-saat-ekle/"
               element={
                 <PrivateRoute>
                   <ESKEPEgitmenDersSaatiEkle />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/dokuman-ekle/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenokumanCreate />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/eskepegitmen/documents/"
+              element={
+                <PrivateRoute>
+                  <ESKEPEgitmenDocumentsList />
                 </PrivateRoute>
               }
             />
@@ -1263,7 +1358,7 @@ function App() {
             />
 
             <Route
-              path="/eskepegitmen/profil/"
+              path="/eskepegitmen/profil-edit/"
               element={
                 <PrivateRoute>
                   <ESKEPEgitmenProfil />
@@ -1283,18 +1378,10 @@ function App() {
               element={<ESKEPEgitmenAddCanliDersPopup />}
             />
             <Route
-              path="/eskepegitmen/ders-olustur/"
-              element={
-                <PrivateRoute>
-                  <ESKEPEgitmenVideoCreate />
-                </PrivateRoute>
-              }
-            />
-            <Route
               path="/eskepegitmen/video-ekle/"
               element={
                 <PrivateRoute>
-                  <ESKEPEgitmenVideoLinkCreate />
+                  <ESKEPEgitmenVideoCreate />
                 </PrivateRoute>
               }
             />

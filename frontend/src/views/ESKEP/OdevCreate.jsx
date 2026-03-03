@@ -210,7 +210,10 @@ function OdevCreate() {
             <div className="col-lg-9 col-md-9 col-12">
               <form onSubmit={handleSubmit}>
                 <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                  <h2 className="mb-0">📘 Ödev Oluştur</h2>
+                  
+                  <h2 className="mb-0">
+                    <i className="fas fa-chalkboard-user text-success me-2" />
+                    Ödev Oluştur</h2>
                   <Link to="/eskepstajer/odevs/" className="btn btn-light">
                     ← Listeye Dön
                   </Link>

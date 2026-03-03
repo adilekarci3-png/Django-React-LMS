@@ -191,6 +191,7 @@ console.log(user);
       });
 
       Swal.fire("Başarılı", "Video başarıyla yüklendi!", "success");
+      Navigate("/akademi/egitmen/video-linkleri");
       setFormData({ title: "", description: "", videoUrl: "", videoFile: null });
       setTab("file");
       setUploadPct(0);

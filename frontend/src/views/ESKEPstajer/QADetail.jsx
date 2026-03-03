@@ -12,7 +12,7 @@ function QADetail() {
             <ESKEPBaseHeader />
 
             <section className="pt-5 pb-5">
-                <div className="container">
+                <div className="container-xxl">
                     {/* Header Here */}
                     <Header />
                     <div className="row mt-0 mt-md-4">
