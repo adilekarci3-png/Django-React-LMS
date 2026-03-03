@@ -1,107 +1,150 @@
-// src/pages/HDMHakkimizda.jsx
 import React from "react";
 import HDMBaseHeader from "../partials/HDMBaseHeader";
 
-export default function HDMHakkimizda() {
-  const photos = {
-    hero: "https://www.ehad.org.tr/wp-content/uploads/2015/07/SLIDER-DISARI-EHAD-GENEL-MERKEZ-2018-YONETIM-KURULU-DIB-ALI-ERBAS-ZIYARETI-1600-810001-370x250.jpg",
-    shot1: "https://www.ehad.org.tr/wp-content/uploads/2015/07/EHAD-GENEL-MERKEZ-2018-YONETIM-KURULU-DIB-ALI-ERBAS-ZIYARETI-1600-810001-370x250.jpg",
-    shot2: "https://www.ehad.org.tr/wp-content/uploads/2018/02/EHAD-GENEL-MERKEZ-2018-YONETIM-KURULU-DIB-ALI-ERBAS-ZIYARETI-001-370x250.jpg",
-    logo: "https://www.ehad.org.tr/wp-content/uploads/2025/08/istanbul-medeniyet-universitesi-protokolu-2025-150x150.jpeg",
-  };
+/* ─── Tema renkleri ─────────────────────────── */
+const P  = "#4f46e5";   // indigo-600
+const P2 = "#c026d3";   // fuchsia-600
+const PL = "#e0e7ff";   // indigo-100
+const PL2= "#fae8ff";   // fuchsia-100
+const PT = "#312e81";   // indigo-900
 
-  const css = `
-:root{
-  --acc1:#4f46e5; /* indigo-600 */
-  --acc2:#c026d3; /* fuchsia-600 */
-
-  --ink:#0f172a; --sl-700:#334155; --sl-300:#cbd5e1; --sl-200:#e5e7eb; --sl-100:#f1f5f9; --bg1:#f7f5ff;
-  --radius-xl:22px; --shadow-lg:0 16px 40px rgba(15,23,42,.12); --shadow-md:0 10px 24px rgba(15,23,42,.10);
-  --container:1120px;
+function StatCard({ icon, label, value, color, bg }) {
+  return (
+    <div style={{ background: "#fff", border: "1.5px solid #e0e7ff", borderRadius: 16, padding: "20px 22px", display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ width: 46, height: 46, borderRadius: 12, background: bg, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", flexShrink: 0 }}>
+        <i className={`bi ${icon}`} />
+      </div>
+      <div>
+        <div style={{ fontSize: "1.6rem", fontWeight: 900, color: "#0f172a", lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: ".8rem", color: "#475569", fontWeight: 600, marginTop: 4 }}>{label}</div>
+      </div>
+    </div>
+  );
 }
-*{box-sizing:border-box} html,body{margin:0;padding:0}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;color:var(--ink)}
-.outer{padding:16px} @media (min-width:768px){.outer{padding:24px}}
-.page{max-width:calc(var(--container)+48px);margin:0 auto;border:1px solid var(--sl-200);border-radius:var(--radius-xl);background:#fff;box-shadow:var(--shadow-lg);overflow:hidden}
-.section{padding:28px 20px} @media(min-width:768px){.section{padding:36px 28px}}
 
-.chip{display:inline-block;font-size:12px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.65);padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--acc1),var(--acc2))}
-.intro{margin:20px;border-radius:18px;border:1px solid var(--sl-200);box-shadow:var(--shadow-md)}
-/* Indigo/Fuchsia 200 – hafif ama daha belirgin */
-.intro-top{padding:18px;background:linear-gradient(90deg,#e0e7ff,#fae8ff)}
-.intro-top h1{margin:0 0 6px;font-size:24px;font-weight:900}
-.intro-top p{margin:0;color:var(--sl-700)}
+function Card({ children, style }) {
+  return <div style={{ background: "#fff", border: "1.5px solid #e0e7ff", borderRadius: 18, padding: "22px 24px", ...style }}>{children}</div>;
+}
 
-.grid-3{display:grid;gap:16px;margin-top:18px} @media(min-width:980px){.grid-3{grid-template-columns:repeat(3,1fr)}}
-.card{background:#fff;border:1px solid var(--sl-200);border-radius:18px;box-shadow:var(--shadow-md)}
-.hd{padding:14px 18px;border-bottom:1px solid var(--sl-200);background:linear-gradient(90deg,#e0e7ff,#fae8ff)}
-.bd{padding:18px}
-.lead{color:var(--sl-700)}
-.list{margin:10px 0 0;padding-left:18px}
-
-.strip{background:var(--bg1);padding:20px;border-top:1px dashed var(--sl-200);border-bottom:1px dashed var(--sl-200)}
-.gallery{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)} @media(min-width:900px){.gallery{grid-template-columns:repeat(4,1fr)}}
-.img{width:100%;height:160px;object-fit:cover;border-radius:16px;border:1px solid var(--sl-200);box-shadow:0 10px 22px rgba(79,70,229,.18)}
-
-.stats{padding:26px 20px;background:linear-gradient(90deg,var(--acc1),var(--acc2));color:#fff}
-.sgrid{display:grid;gap:12px} @media(min-width:900px){.sgrid{grid-template-columns:repeat(4,1fr)}}
-.stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);border-radius:16px;padding:16px;text-align:center}
-.kv{font-weight:900;font-size:22px}
-`;
+export default function HDMHakkimizda() {
+  const degerler = [
+    { icon: "bi-mic-fill",           baslik: "Kayıt & İnceleme",    aciklama: "Ses/video yükleme, bölüm/ayet işaretleme, zaman damgasıyla not ve çoklu format desteği." },
+    { icon: "bi-tag-fill",           baslik: "Hata Etiketleme",     aciklama: "Tajvid kategorileri (mahreç, sıfat, medd vb.) ile sınıflandırma, şiddet ve sıklık ölçümü." },
+    { icon: "bi-graph-up-arrow",     baslik: "Gelişim Takibi",      aciklama: "Gelişim grafikleri, ayet/bölüm ısı haritaları ve kişiselleştirilmiş ders plan önerileri." },
+    { icon: "bi-person-check-fill",  baslik: "Hoca Onayı",          aciklama: "Öğrenci kayıtları hoca denetiminden geçer; ıslah önerileri ve geri bildirimler anında iletilir." },
+  ];
+  const ekip = [
+    { initials: "İD", ad: "İbrahim Doğan",   rol: "HDM Genel Koordinatörü",        renk: P    },
+    { initials: "SE", ad: "Sümeyye Erdoğan", rol: "Tajvid & İçerik Uzmanı",         renk: P2   },
+    { initials: "OK", ad: "Osman Karaca",    rol: "Ses Teknolojileri Sorumlusu",    renk: PT   },
+    { initials: "AY", ad: "Ayşe Yıldız",    rol: "Öğrenci Takip & Analiz",         renk: "#7c3aed" },
+  ];
 
   return (
     <>
-      <style>{css}</style>
       <HDMBaseHeader />
-      <div className="outer">
-        <main className="page">
-          <div className="title">
-            <div className="chip">HDM</div>
-            <h1>HDM Hakkında</h1>
-            <p>Okuma kayıtları, hata etiketleme ve kişisel istatistiklerin tutulduğu dinleme/değerlendirme modülü.</p>
+      <div style={{ padding: "24px 0 48px" }}>
+        <div className="container-xxl">
+
+          {/* Hero */}
+          <div style={{
+            background: `linear-gradient(135deg, ${PT} 0%, ${P} 55%, #a5b4fc 100%)`,
+            borderRadius: 20, padding: "40px 36px", marginBottom: 22,
+            color: "#fff", position: "relative", overflow: "hidden",
+          }}>
+            <div style={{ position: "absolute", right: -30, top: -30, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,.07)" }} />
+            <div style={{ position: "absolute", right: 60, bottom: -50, width: 120, height: 120, borderRadius: "50%", background: "rgba(255,255,255,.05)" }} />
+            <div style={{ position: "relative" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.18)", borderRadius: 30, padding: "5px 14px", marginBottom: 16, fontSize: ".8rem", fontWeight: 700 }}>
+                <i className="bi bi-headphones" /> Hafızlık Dinleme Modülü
+              </div>
+              <h1 style={{ fontSize: "2rem", fontWeight: 900, margin: "0 0 12px", letterSpacing: "-.02em" }}>HDM Hakkında</h1>
+              <p style={{ fontSize: "1rem", margin: 0, opacity: .9, maxWidth: 540, lineHeight: 1.65 }}>
+                Okuma kayıtları, tajvid hata etiketleme ve kişisel gelişim istatistiklerinin tutulduğu
+                dijital dinleme ve değerlendirme modülü.
+              </p>
+            </div>
           </div>
 
-          <section className="section">
-            <div className="grid-3">
-              <div className="card">
-                <div className="hd"><strong>Kayıt & İnceleme</strong></div>
-                <div className="bd">
-                  <p className="lead">Ses/video yükleme, bölüm/ayet işaretleme, tekrar dinleme listeleri.</p>
-                  <ul className="list"><li>Zaman damgasıyla not</li><li>Çoklu format</li><li>Hoca onayı</li></ul>
-                </div>
-              </div>
-              <div className="card">
-                <div className="hd"><strong>Hata Etiketleme</strong></div>
-                <div className="bd">
-                  <p className="lead">Tajvid kategorileri (mahreç, sıfat, medd vb.) ile sınıflandırma.</p>
-                  <ul className="list"><li>Şiddet & sıklık</li><li>Isabet/tekrar oranı</li><li>Islah önerileri</li></ul>
-                </div>
-              </div>
-              <div className="card">
-                <div className="hd"><strong>Raporlama</strong></div>
-                <div className="bd"><p className="lead">Gelişim grafikleri, ayet/bölüm ısı haritaları ve ders plan önerileri.</p></div>
-              </div>
-            </div>
-          </section>
+          {/* İstatistikler */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 22 }}>
+            <StatCard icon="bi-headphones"         label="Dinleme Kaydı"      value="250.000+"  color={P}   bg={PL}  />
+            <StatCard icon="bi-tags-fill"          label="Hata Etiketi"       value="1.8M"      color={P2}  bg={PL2} />
+            <StatCard icon="bi-arrow-down-circle"  label="Hata Azalımı (3ay)" value="%35"       color={PT}  bg="#ede9fe" />
+            <StatCard icon="bi-shield-check"       label="Veri Uyumu"         value="KVKK"      color="#7c3aed" bg="#f3e8ff" />
+          </div>
 
-          <section className="strip">
-            <div className="gallery">
-              <img className="img" src={photos.hero} alt="HDM 1"/>
-              <img className="img" src={photos.shot1} alt="HDM 2"/>
-              <img className="img" src={photos.shot2} alt="HDM 3"/>
-              <img className="img" src={photos.logo} alt="HDM 4"/>
-            </div>
-          </section>
+          {/* Misyon & Vizyon */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 22 }}>
+            <Card>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 11, background: PL, color: P, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>
+                  <i className="bi bi-bullseye" />
+                </div>
+                <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 800, color: "#0f172a" }}>Misyonumuz</h3>
+              </div>
+              <p style={{ margin: 0, fontSize: ".88rem", color: "#475569", lineHeight: 1.7 }}>
+                Hafız öğrencilerin Kuran okuma kalitesini veriye dayalı hata analizi ve kişiselleştirilmiş
+                geri bildirimle sistematik biçimde geliştirmek; hoca-öğrenci iletişimini dijital ortamda
+                kesintisiz sürdürmek.
+              </p>
+            </Card>
+            <Card>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 11, background: PL2, color: P2, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>
+                  <i className="bi bi-eye-fill" />
+                </div>
+                <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 800, color: "#0f172a" }}>Vizyonumuz</h3>
+              </div>
+              <p style={{ margin: 0, fontSize: ".88rem", color: "#475569", lineHeight: 1.7 }}>
+                Tajvid ve hafızlık eğitiminde yapay zeka destekli ses analizi ile bireysel hata
+                profillerini çıkaran, öğrencinin güçlü ve zayıf yönlerini gerçek zamanlı raporlayan
+                öncü bir dijital platform olmak.
+              </p>
+            </Card>
+          </div>
 
-          <section className="stats">
-            <div className="sgrid">
-              <div className="stat"><div className="kv">250.000+</div><div>Dinleme</div></div>
-              <div className="stat"><div className="kv">1.8M</div><div>Hata Etiketi</div></div>
-              <div className="stat"><div className="kv">%35</div><div>Hata Azalımı (3 ay)</div></div>
-              <div className="stat"><div className="kv">KVKK</div><div>Uyum</div></div>
+          {/* Temel Değerler */}
+          <Card style={{ marginBottom: 22 }}>
+            <div style={{ fontWeight: 800, fontSize: ".95rem", color: P, marginBottom: 20, borderBottom: `1.5px solid ${PL}`, paddingBottom: 12 }}>
+              <i className="bi bi-stars me-2" />Temel Değerlerimiz
             </div>
-          </section>
-        </main>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14 }}>
+              {degerler.map((d, i) => (
+                <div key={i} style={{ display: "flex", gap: 14, padding: "14px", background: "#f5f3ff", borderRadius: 12, border: `1px solid ${PL}` }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, flexShrink: 0, background: PL, color: P, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem" }}>
+                    <i className={`bi ${d.icon}`} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: ".9rem", color: "#0f172a", marginBottom: 4 }}>{d.baslik}</div>
+                    <div style={{ fontSize: ".82rem", color: "#475569", lineHeight: 1.6 }}>{d.aciklama}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Ekibimiz */}
+          <Card>
+            <div style={{ fontWeight: 800, fontSize: ".95rem", color: P, marginBottom: 20, borderBottom: `1.5px solid ${PL}`, paddingBottom: 12 }}>
+              <i className="bi bi-people me-2" />Ekibimiz
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14 }}>
+              {ekip.map((e, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 12, border: "1.5px solid #e0e7ff", background: "#f8f7ff" }}>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", flexShrink: 0, background: e.renk, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: ".9rem" }}>
+                    {e.initials}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: ".9rem", color: "#0f172a" }}>{e.ad}</div>
+                    <div style={{ fontSize: ".78rem", color: "#475569", marginTop: 2 }}>{e.rol}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+        </div>
       </div>
     </>
   );

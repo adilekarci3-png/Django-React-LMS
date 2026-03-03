@@ -2,10 +2,9 @@ import React, { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ESKEPBaseHeader from "../partials/ESKEPBaseHeader";
 import ESKEPBaseFooter from "../partials/ESKEPBaseFooter";
-import eskepImage from "./images/1.png";
 import "./css/eskep-theme.css";
 
-/* --- küçük yardımcılar: reveal ve sayacı koruyoruz --- */
+/* ========== Yardımcı: Reveal (scroll animasyonu) ========== */
 function useReveal(threshold = 0.15) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -21,6 +20,7 @@ function useReveal(threshold = 0.15) {
   }, [threshold]);
   return [ref, visible];
 }
+
 function Reveal({ as: Tag = "div", delay = 0, className = "", children, threshold = 0.15 }) {
   const [ref, visible] = useReveal(threshold);
   return (
@@ -33,15 +33,19 @@ function Reveal({ as: Tag = "div", delay = 0, className = "", children, threshol
     </Tag>
   );
 }
+
+/* ========== Yardımcı: CountUp ========== */
 function CountUp({ end = 0, duration = 1200 }) {
   const ref = useRef(null);
   const [started, setStarted] = useState(false);
   const [val, setVal] = useState(0);
   useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const io = new IntersectionObserver(([ent]) => {
-      if (ent.isIntersecting) { setStarted(true); io.disconnect(); }
-    }, { threshold: 0.4 });
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([ent]) => { if (ent.isIntersecting) { setStarted(true); io.disconnect(); } },
+      { threshold: 0.4 }
+    );
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -59,60 +63,60 @@ function CountUp({ end = 0, duration = 1200 }) {
   return <span ref={ref}>{val.toLocaleString("tr-TR")}</span>;
 }
 
-/* --- İstatistik Şeridi --- */
+/* ========== İstatistik Şeridi ========== */
 function StatsStripESKEP() {
   const items = [
-    { icon: "bi-briefcase", label: "Aktif Proje", value: 24 },
-    { icon: "bi-mortarboard", label: "Kayıtlı Stajyer", value: 560 },
-    { icon: "bi-people", label: "Mentor / Eğitmen", value: 120 },
-    { icon: "bi-building", label: "Paydaş Kurum", value: 67 },
+    { icon: "bi-briefcase",   label: "Aktif Proje",      value: 24  },
+    { icon: "bi-mortarboard", label: "Kayıtlı Stajyer",  value: 560 },
+    { icon: "bi-people",      label: "Mentor / Eğitmen", value: 120 },
+    { icon: "bi-building",    label: "Paydaş Kurum",     value: 67  },
   ];
   return (
-    <section className="hdm-stats-section">
-      <div className="container">
-        <div className="row g-3 g-md-4">
-          {items.map((it, i) => (
-            <div key={it.label} className="col-6 col-md-3">
-              <Reveal delay={i * 90}>
-                <div className="hdm-stat-card hover-lift">
-                  <div className="hdm-stat-icon"><i className={`bi ${it.icon}`} /></div>
-                  <div>
-                    <div className="hdm-stat-value">
-                      <CountUp end={it.value} duration={1100 + i * 150} />
-                    </div>
-                    <div className="hdm-stat-label">{it.label}</div>
-                  </div>
+    <section className="eskep-stats">
+      <div className="eskep-stats__grid">
+        {items.map((it, i) => (
+          <Reveal key={it.label} delay={i * 90}>
+            <div className="eskep-stat">
+              <div className="eskep-stat__icon"><i className={`bi ${it.icon}`} /></div>
+              <div>
+                <div className="eskep-stat__value">
+                  <CountUp end={it.value} duration={1100 + i * 150} />
                 </div>
-              </Reveal>
+                <div className="eskep-stat__label">{it.label}</div>
+              </div>
             </div>
-          ))}
-        </div>
+          </Reveal>
+        ))}
       </div>
     </section>
   );
 }
 
-/* --- Özellik Kartları --- */
+/* ========== Özellik Kartları ========== */
 function FeatureGridESKEP() {
   const features = [
-    { icon: "bi-kanban",        title: "Proje & Görev Takibi",         text: "Sprint, görev ve ilerlemeyi tek ekrandan yönetin." },
-    { icon: "bi-person-video3", title: "Mentorluk Oturumları",         text: "Görüşmeler, notlar ve aksiyon maddeleri." },
-    { icon: "bi-award",         title: "Sertifika & Değerlendirme",    text: "Rubrik tabanlı puanlama ve sertifika." },
+    { icon: "bi-kanban",        title: "Proje & Görev Takibi",      desc: "Sprint, görev ve ilerlemeyi tek ekrandan yönetin."             },
+    { icon: "bi-person-video3", title: "Mentorluk Oturumları",      desc: "Görüşmeler, notlar ve aksiyon maddeleri tek yerde."            },
+    { icon: "bi-award",         title: "Sertifika & Değerlendirme", desc: "Rubrik tabanlı puanlama ve dijital sertifika."                 },
+    { icon: "bi-graph-up",      title: "İlerleme & Raporlar",       desc: "Staj süreci ve kazanımlarını tek ekranda takip et."            },
+    { icon: "bi-calendar3",     title: "Eğitim Takvimi",            desc: "Canlı etkinlik ve eğitim programlarını kaçırma."              },
+    { icon: "bi-patch-check",   title: "Başvuru Sistemi",           desc: "Staj ve kariyer başvurularını kolayca oluştur ve takip et."    },
   ];
   return (
-    <section className="hdm-features-section">
-      <div className="container">
-        <div className="row g-4">
+    <section className="eskep-features">
+      <div className="eskep-features__inner">
+        <div className="eskep-section-label">Özellikler</div>
+        <h2 className="eskep-section-title">Kapsamlı araçlar</h2>
+        <p className="eskep-section-sub">Kariyer gelişimini güçlendirecek her şey burada</p>
+        <div className="eskep-features__grid">
           {features.map((f, i) => (
-            <div key={f.title} className="col-md-4">
-              <Reveal delay={i * 120}>
-                <div className="hdm-feature-card hover-lift">
-                  <div className="hdm-feature-icon"><i className={`bi ${f.icon}`} /></div>
-                  <h5 className="mb-2">{f.title}</h5>
-                  <p className="m-0">{f.text}</p>
-                </div>
-              </Reveal>
-            </div>
+            <Reveal key={f.title} delay={i * 80}>
+              <div className="eskep-feature">
+                <div className="eskep-feature__icon"><i className={`bi ${f.icon}`} /></div>
+                <div className="eskep-feature__title">{f.title}</div>
+                <div className="eskep-feature__desc">{f.desc}</div>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -120,61 +124,101 @@ function FeatureGridESKEP() {
   );
 }
 
-/* --- CTA bandı --- */
+/* ========== CTA Bandı ========== */
 function CalloutBandESKEP() {
   return (
-    <Reveal as="section" className="hdm-callout" threshold={0.2}>
-      <div className="container d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
-        <div>
-          <h4 className="mb-1">Kariyer yolculuğunu bugün başlat</h4>
-          <p className="mb-0">Bir projeye katıl ya da yeni bir staj başvurusu oluştur.</p>
+    <Reveal as="section" className="eskep-callout" threshold={0.2}>
+      <div className="eskep-callout__wrap">
+        <div className="eskep-callout__text">
+          <h3>Kariyer yolculuğunu bugün başlat</h3>
+          <p>Binlerce stajyer ve mentorla birlikte gelişmeye şimdi başla.</p>
         </div>
-        <div className="d-flex gap-2">
-          <Link to="/eskep/apply" className="btn btn-cta">Başvuru Yap</Link>
-          <Link to="/eskep/egitim-takvimi/" className="btn btn-outline-light soft">Eğitim Takvimi</Link>
+        <div className="eskep-callout__actions">
+          <Link to="/eskep/apply" className="eskep-callout__btn eskep-callout__btn--white">
+            Başvuru Yap <i className="bi bi-arrow-right"></i>
+          </Link>
+          <Link to="/eskep/egitim-takvimi/" className="eskep-callout__btn eskep-callout__btn--ghost">
+            Eğitim Takvimi
+          </Link>
         </div>
       </div>
     </Reveal>
   );
 }
 
-/* --- SAYFA --- */
+const MODULES = [
+  { emoji: "💼", name: "Staj Modülü"            },
+  { emoji: "🚀", name: "Kariyer Gelişim Modülü"  },
+  { emoji: "🎓", name: "Eğitim Modülü"           },
+  { emoji: "🤝", name: "Mentorluk Modülü"         },
+  { emoji: "📋", name: "Proje Takip Modülü"       },
+];
+
 export default function ESKEPIndex() {
   return (
     <div className="page-eskep eskep-theme eskep-theme--aqua is-deep">
       <ESKEPBaseHeader />
 
-      {/* Koyu, yüksek kontrastlı hero / küçük görsel */}
-      <section className="eskep-hero eskep-hero--dark">
-        <div className="container">
-          <div className="eskep-hero__wrap">
-            {/* Metin */}
-            <div className="eskep-hero__content">
-              <h1>EHAD Staj ve Kariyer Eğitimi Programı</h1>
-              <p>Staj, proje ve kariyer gelişim süreçlerinizi profesyonel bir platformda yönetin.</p>
-
-              <div className="eskep-hero__badges">
-                <span className="eskep-badge">Staj</span>
-                <span className="eskep-badge">Proje</span>
-                <span className="eskep-badge">Mentorluk</span>
-              </div>
-
-              <div className="d-flex flex-wrap gap-2">
-                <Link to="/eskep/projects" className="btn btn-cta--orange">Projeleri Gör</Link>
-                <Link to="/eskep/apply" className="btn btn-outline--glass">Başvuru Yap</Link>
-              </div>
+      {/* HERO */}
+      <div className="eskep-hero-wrap">
+        <div className="eskep-hero">
+          {/* Sol metin */}
+          <div>
+            <div className="eskep-eyebrow">
+              <span className="eskep-eyebrow-dot"></span>
+              EHAD • ESKEP Platformu
             </div>
+            <h1 className="eskep-title">
+              Kariyer yolculuğun<br />
+              için <em>tek platform</em>
+            </h1>
+            <p className="eskep-lead">
+              Staj, proje ve kariyer gelişim süreçlerini profesyonel bir platformda yönet.
+              Basit, işlevsel ve etkili.
+            </p>
+            <div className="eskep-badges">
+              <span className="eskep-badge"><i className="bi bi-briefcase"></i> Staj</span>
+              <span className="eskep-badge"><i className="bi bi-person-video3"></i> Mentorluk</span>
+              <span className="eskep-badge"><i className="bi bi-patch-check"></i> Sertifika</span>
+            </div>
+            <div className="eskep-actions">
+              <Link to="/eskep/apply" className="eskep-btn--cta">
+                Başvuru Yap <i className="bi bi-arrow-right"></i>
+              </Link>
+              <Link to="/eskep/projects" className="eskep-btn--ghost">
+                <i className="bi bi-play-circle"></i> Projelere Göz At
+              </Link>
+            </div>
+          </div>
 
-            {/* Küçük dekoratif görsel */}
-            <div className="eskep-hero__media">
-              <img src={eskepImage} alt="ESKEP" />
+          {/* Sağ görsel kart */}
+          <div className="eskep-hero__media">
+            <div className="eskep-hero__card">
+              <div className="eskep-hero__icon">
+                <i className="bi bi-layers-fill"></i>
+              </div>
+              <div className="eskep-hero__card-label">ESKEP</div>
+              <div className="eskep-hero__card-sub">+560 kayıtlı stajyer ile büyüyoruz</div>
+            </div>
+            <div className="eskep-pill eskep-pill--top">
+              <span className="eskep-pill-dot eskep-pill-dot--blue"></span> Aktif Proje: 24
+            </div>
+            <div className="eskep-pill eskep-pill--bottom">
+              <span className="eskep-pill-dot eskep-pill-dot--amber"></span> +120 Mentor
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
+      {/* STATS — CountUp animasyonlu */}
       <StatsStripESKEP />
+
+      
+
+      {/* FEATURES — Reveal animasyonlu */}
       <FeatureGridESKEP />
+
+      {/* CALLOUT — Reveal animasyonlu */}
       <CalloutBandESKEP />
 
       <ESKEPBaseFooter />

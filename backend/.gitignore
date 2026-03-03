@@ -1,2 +1,48 @@
-env
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+*.db
 
+# === Virtual Environments ===
+.venv/
+venv/
+env/
+ENV/
+
+# === Django ===
+*.mo
+*.pot
+staticfiles/
+media/
+
+# === Node / React ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+
+# === Environment ===
+.env
+.env.*
+.venv/
+venv/
+**/.venv/
+**/venv/
+**/site-packages/
+backend/yedek/venv/
+backend/*.sqlite3

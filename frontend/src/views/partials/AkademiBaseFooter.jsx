@@ -1,4 +1,3 @@
-// src/partials/AkademiBaseFooter.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { FaGithub, FaFacebookF, FaTwitter } from "react-icons/fa";
@@ -7,151 +6,166 @@ function AkademiBaseFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="eskep-footer">
-      <div className="eskep-container top">
-        <div className="cols">
+    <footer className="akd-footer">
+      <div className="akd-footer__container">
+        <div className="akd-footer__cols">
           <div>
-            <h4>EHAD</h4>
-            <p className="text">
-              81 ilde şube ve temsilciliklerimizle sahih Kur’an eğitimi, kamp programları,
+            <div className="akd-footer__brand">
+              <span className="akd-footer__brand-mark">
+                <i className="bi bi-mortarboard-fill"></i>
+              </span>
+              EHAD Akademi
+            </div>
+            <p className="akd-footer__text">
+              81 ilde şube ve temsilciliklerimizle sahih Kur'an eğitimi, kamp programları,
               yarışmalar ve motivasyon seminerleri düzenliyoruz.
             </p>
-            <div className="eskep-social">
+            <div className="akd-footer__social">
               <a href="#" aria-label="Facebook"><FaFacebookF size={14} /></a>
               <a href="#" aria-label="Twitter/X"><FaTwitter size={14} /></a>
-              <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub"><FaGithub size={16} /></a>
+              <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub">
+                <FaGithub size={16} />
+              </a>
             </div>
           </div>
 
           <div>
-            <h6>Kuruluş</h6>
-            <div className="text">
-              <div><Link className="link" to="/about-eskep">Hakkında</Link></div>
-              <div><Link className="link" to="/donate">Bağış</Link></div>
-              <div><Link className="link" to="/academy">EHAD Akademi</Link></div>
-              <div><Link className="link" to="/contact">İletişim</Link></div>
+            <h6 className="akd-footer__col-title">Kuruluş</h6>
+            <div className="akd-footer__text">
+              <div><Link className="akd-footer__link" to="/about-eskep">Hakkında</Link></div>
+              <div><Link className="akd-footer__link" to="/donate">Bağış</Link></div>
+              <div><Link className="akd-footer__link" to="/academy">EHAD Akademi</Link></div>
+              <div><Link className="akd-footer__link" to="/contact">İletişim</Link></div>
             </div>
           </div>
 
           <div>
-            <h6>Destek</h6>
-            <div className="text">
-              <div><Link className="link" to="/help">Yardım ve Destek</Link></div>
-              <div><Link className="link" to="/become-trainer">Eğitmen Ol</Link></div>
-              <div><Link className="link" to="/faq">SSS</Link></div>
-              <div><Link className="link" to="/courses">Dersler</Link></div>
+            <h6 className="akd-footer__col-title">Destek</h6>
+            <div className="akd-footer__text">
+              <div><Link className="akd-footer__link" to="/help">Yardım ve Destek</Link></div>
+              <div><Link className="akd-footer__link" to="/become-trainer">Eğitmen Ol</Link></div>
+              <div><Link className="akd-footer__link" to="/faq">SSS</Link></div>
+              <div><Link className="akd-footer__link" to="/courses">Dersler</Link></div>
             </div>
           </div>
 
           <div>
-            <h6>İletişimde Kalın</h6>
-            <address>Anafartalar Cad. Gülhane İşhanı No: 62/33, Altındağ / Ankara</address>
-            <p className="text" style={{ margin: "8px 0 4px" }}>
-              E-posta: <a className="link" href="mailto:bilgi@ehad.org.tr">bilgi@ehad.org.tr</a>
+            <h6 className="akd-footer__col-title">İletişimde Kalın</h6>
+            <address className="akd-footer__text">
+              Anafartalar Cad. Gülhane İşhanı No: 62/33, Altındağ / Ankara
+            </address>
+            <p className="akd-footer__text" style={{ margin: "8px 0 4px" }}>
+              E-posta:{" "}
+              <a className="akd-footer__link" href="mailto:bilgi@ehad.org.tr">
+                bilgi@ehad.org.tr
+              </a>
             </p>
-            <p className="text" style={{ margin: 0 }}>
+            <p className="akd-footer__text" style={{ margin: 0 }}>
               Telefon: <strong>+90 312 324 00 34</strong>
             </p>
           </div>
         </div>
 
-        <div className="bottom">
-          <small className="text">© {year} EHAD. Tüm hakları saklıdır.</small>
-          <div className="legal">
-            <Link className="link" to="/kvkk">KVKK</Link>
-            <Link className="link" to="/terms">Kullanım Şartları</Link>
-            <Link className="link" to="/privacy">Gizlilik</Link>
+        <div className="akd-footer__bottom">
+          <small className="akd-footer__text">© {year} EHAD Akademi · Tüm hakları saklıdır</small>
+          <div className="akd-footer__legal">
+            <Link className="akd-footer__link" to="/kvkk">KVKK</Link>
+            <Link className="akd-footer__link" to="/terms">Kullanım Şartları</Link>
+            <Link className="akd-footer__link" to="/privacy">Gizlilik</Link>
           </div>
         </div>
       </div>
 
-      {/* Inline styles – aqua/teal, mor yok */}
       <style>{`
-        .eskep-footer {
-          color: #eaf6ff;
-          background: linear-gradient(135deg, #007f91 0%, #0096c7 50%, #00b4d8 100%);
-          position: relative;
+        .akd-footer {
+          background: #fff;
+          border-top: 1px solid #e4ede9;
+          color: #52756a;
           padding: 48px 0 24px;
-          box-shadow: 0 8px 28px rgba(0, 150, 199, .25) inset;
         }
-        .eskep-container {
-          max-width: 1200px;
+
+        .akd-footer__container {
+          max-width: 1240px;
           margin: 0 auto;
-          padding: 0 16px;
+          padding: 0 48px;
         }
-        .eskep-container.top { }
-        .cols {
+
+        .akd-footer__brand {
+          display: flex; align-items: center; gap: 8px;
+          font-weight: 900; font-size: 1.05rem;
+          color: #111c17; margin-bottom: 10px;
+        }
+        .akd-footer__brand-mark {
+          width: 28px; height: 28px; border-radius: 8px;
+          background: #16a05a;
+          display: inline-flex; align-items: center; justify-content: center;
+          color: #fff; font-size: 14px;
+        }
+
+        .akd-footer__cols {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 24px;
+          gap: 28px;
         }
-        .cols h4 {
-          margin: 0 0 8px;
-          font-size: 1.25rem;
-          font-weight: 800;
-          letter-spacing: .02em;
-          color: #ffffff;
-        }
-        .cols h6 {
-          margin: 0 0 10px;
-          font-size: .95rem;
-          letter-spacing: .04em;
+
+        .akd-footer__col-title {
+          font-size: .78rem;
           text-transform: uppercase;
-          color: #e3f7ff;
-          opacity: .95;
+          letter-spacing: .08em;
+          color: #16a05a;
+          font-weight: 800;
+          margin: 0 0 12px;
         }
-        .text {
-          color: rgba(255,255,255,.9);
-          line-height: 1.6;
+
+        .akd-footer__text {
+          color: #52756a;
+          line-height: 1.75;
+          font-size: 0.9rem;
         }
-        .link {
-          color: rgba(255,255,255,.92);
+
+        .akd-footer__link {
+          color: #52756a;
           text-decoration: none;
+          transition: color .15s;
         }
-        .link:hover { text-decoration: underline; color: #ffffff; }
-        .eskep-social {
-          display: flex;
-          gap: 8px;
-          margin-top: 10px;
-        }
-        .eskep-social a {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          background: #ffffff;
-          color: #0b4960;
-          box-shadow: 0 4px 16px rgba(0,0,0,.12);
-          transition: transform .15s ease, filter .15s ease;
-        }
-        .eskep-social a:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .akd-footer__link:hover { color: #0d7a42; text-decoration: underline; }
 
-        .bottom {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 16px;
-          border-top: 1px solid rgba(255,255,255,.18);
-          margin-top: 28px;
-          padding-top: 16px;
+        .akd-footer__social {
+          display: flex; gap: 8px; margin-top: 12px;
         }
-        .legal {
-          display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
+        .akd-footer__social a {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 34px; height: 34px; border-radius: 10px;
+          background: #e8f5ef; color: #16a05a;
+          border: 1px solid #d1eddf;
+          transition: transform .15s, background .15s;
+        }
+        .akd-footer__social a:hover {
+          transform: translateY(-2px);
+          background: #d1eddf;
         }
 
-        address { margin: 0; white-space: pre-line; color: rgba(255,255,255,.92); }
+        .akd-footer__bottom {
+          display: flex; justify-content: space-between; align-items: center;
+          gap: 16px; flex-wrap: wrap;
+          border-top: 1px solid #e4ede9;
+          margin-top: 32px; padding-top: 18px;
+          font-size: 0.82rem;
+        }
 
-        /* Responsive */
+        .akd-footer__legal {
+          display: flex; gap: 16px; flex-wrap: wrap;
+        }
+
+        address { font-style: normal; }
+
         @media (max-width: 991.98px) {
-          .cols { grid-template-columns: repeat(2, minmax(0,1fr)); }
+          .akd-footer__cols { grid-template-columns: repeat(2, minmax(0,1fr)); }
+          .akd-footer__container { padding: 0 24px; }
         }
         @media (max-width: 575.98px) {
-          .cols { grid-template-columns: 1fr; }
-          .bottom { flex-direction: column; align-items: flex-start; }
+          .akd-footer__cols { grid-template-columns: 1fr; }
+          .akd-footer__bottom { flex-direction: column; align-items: flex-start; }
         }
       `}</style>
     </footer>

@@ -1,240 +1,233 @@
-/* ================== ORTAK (değiştirme) ================== */
-.hdm-min-header .navbar{
-  --bs-navbar-color:#fff;
-  --bs-navbar-hover-color:#fff;
-  --bs-navbar-active-color:#fff;
-  --bs-navbar-brand-color:#fff;
-  --bs-navbar-brand-hover-color:#fff;
-}
-.hdm-link{ color:#fff !important; opacity:1; font-weight:600; text-shadow:0 1px 2px rgba(0,0,0,.25); }
-.hdm-link:hover{ filter:brightness(1.06); }
-.hdm-link i, .hdm-link .bi{ color:currentColor; }
-
-/* =========================================================
-   HDM THEME  (indigo / mavi)
-   ========================================================= */
-.hdm-theme{
-  --hdm-1: 79 70 229;   /* indigo-600  #4f46e5 */
-  --hdm-2: 67 56 202;   /* indigo-700  #4338ca */
-  --hdm-3: 49 46 129;   /* indigo-900  #312e81 */
-
-  --hdm-chip: linear-gradient(135deg, #818cf8, #4f46e5);
-  --hdm-cta-from: #60a5fa; /* sky-400 */
-  --hdm-cta-to:   #3b82f6; /* blue-500 */
-  --hdm-footer-a:#0f1137; --hdm-footer-b:#0d0f2e;
+/* ================================================================
+   HDM – Mor / Violet Tema  |  Akademi/OTM ile aynı beyaz yapı
+   ================================================================ */
+:root {
+  --v:        #7c3aed;
+  --v-dark:   #5b21b6;
+  --v-pale:   #f5f3ff;
+  --v-pale2:  #ede9fe;
+  --amber:    #f59e0b;
+  --ink:      #1a0a2e;
+  --ink-soft: #6b5b9a;
+  --border:   #ede9fe;
+  --radius:   18px;
+  --sh:       0 6px 28px rgba(124,58,237,.09);
+  --sh-h:     0 12px 40px rgba(124,58,237,.18);
 }
 
-/* Header */
-.hdm-theme.hdm-min-header .navbar{
-  background: linear-gradient(
-    100deg,
-    rgb(var(--hdm-1) / .96) 0%,
-    rgb(var(--hdm-2) / .96) 45%,
-    rgb(var(--hdm-3) / .96) 100%
-  ) !important;
-  border-bottom: 1px solid rgba(255,255,255,.12);
-  box-shadow: 0 6px 18px rgba(0,0,0,.10);
-}
+.reveal { opacity:0; transform:translateY(22px); transition:opacity .5s,transform .5s; }
+.reveal-visible { opacity:1; transform:translateY(0); }
+.hover-lift { transition:transform .2s,box-shadow .2s; }
+.hover-lift:hover { transform:translateY(-3px); box-shadow:var(--sh-h); }
 
-/* Stats / Features / Callout / Footer */
-.hdm-theme .hdm-stat-icon{ background: var(--hdm-chip); color:#fff; }
-.hdm-theme .hdm-feature-icon{ background: var(--hdm-chip); color:#fff; }
-.hdm-theme .hdm-features-section{
-  background: radial-gradient(900px 400px at 15% -10%, rgba(129,140,248,.18), transparent 60%);
+/* ── HERO ── */
+.hdm-hero-wrap { background:#fff; border-bottom:1px solid var(--border); }
+.hdm-hero {
+  padding:72px 48px 64px; max-width:1240px; margin:0 auto;
+  display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center;
 }
-.hdm-theme .hdm-callout{
-  background: linear-gradient(100deg, rgba(99,102,241,.95), rgba(79,70,229,.95), rgba(49,46,129,.95));
-  border-top: 1px solid rgba(255,255,255,.16);
-  border-bottom: 1px solid rgba(0,0,0,.08);
+.hdm-eyebrow {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--v-pale); color:var(--v-dark); font-weight:700;
+  font-size:.76rem; letter-spacing:.1em; text-transform:uppercase;
+  padding:5px 14px; border-radius:999px; margin-bottom:22px;
+  border:1px solid var(--v-pale2);
 }
-.hdm-theme .hdm-min-footer{
-  background: linear-gradient(180deg, var(--hdm-footer-a) 0%, var(--hdm-footer-b) 100%);
+.hdm-eyebrow-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--v);
+  animation:hdm-pulse 2s ease-in-out infinite;
 }
+@keyframes hdm-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.65)} }
 
-/* CTA butonu */
-.hdm-theme .btn-cta{
-  background: linear-gradient(90deg, var(--hdm-cta-from), var(--hdm-cta-to));
-  color:#0b1220 !important; border:none;
+.hdm-title {
+  font-family:'Playfair Display',serif; font-size:clamp(34px,3.8vw,54px);
+  font-weight:800; line-height:1.16; color:var(--ink); margin:0 0 18px; letter-spacing:-.02em;
 }
+.hdm-title em { font-style:italic; color:var(--v); }
+.hdm-lead { font-size:1.05rem; color:var(--ink-soft); line-height:1.72; margin-bottom:30px; max-width:460px; }
 
-/* =========================================================
-   ESKEP THEME  (yeşil / mint)
-   ========================================================= */
-.eskep-theme{
-  --eskep-1: 165 232 214; /* #A5E8D6 mint-açık */
-  --eskep-2: 132 210 190; /* #84D2BE mint */
-  --eskep-3:  98 178 160; /* #62B2A0 pine-mint */
+.hdm-hero-badges { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:34px; }
+.hdm-hero-badge {
+  background:var(--v-pale); border:1px solid var(--v-pale2); color:var(--v-dark);
+  font-size:.82rem; font-weight:700; padding:5px 14px; border-radius:999px;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.hdm-hero-actions { display:flex; gap:12px; flex-wrap:wrap; }
 
-  --eskep-chip: linear-gradient(135deg, #7adcc5, #40a08c);
-  --eskep-cta-from:#fb923c; /* turuncu CTA (ayrışsın) */
-  --eskep-cta-to:  #f97316;
-  --eskep-footer-a:#0f2c2a; --eskep-footer-b:#0b2422;
+.hdm-btn--cta {
+  padding:13px 28px; border-radius:14px; background:var(--v); color:#fff;
+  font-weight:800; font-size:.95rem; border:none; text-decoration:none;
+  display:inline-flex; align-items:center; gap:9px;
+  transition:background .15s,transform .12s,box-shadow .15s;
+  box-shadow:0 8px 24px rgba(124,58,237,.30);
 }
+.hdm-btn--cta:hover { background:var(--v-dark); transform:translateY(-2px); color:#fff; }
 
-/* Header (yeşil geçişli) */
-.eskep-theme.hdm-min-header .navbar{
-  background: linear-gradient(
-    100deg,
-    rgb(14 59 46 / .98) 0%,    /* #0E3B2E  koyu çam */
-    rgb(11 107 68 / .98) 45%,  /* #0B6B44  derin yeşil */
-    rgb(6 78 59 / .98) 100%    /* #064E3B  pine/teal-800 */
-  ) !important;
-  border-bottom: 1px solid rgba(0,0,0,.18);
-  box-shadow: 0 6px 18px rgba(0,0,0,.22);
-  /* metin/ikonlar net beyaz kalsın */
-  --bs-navbar-color:#fff; --bs-navbar-hover-color:#fff;
-  --bs-navbar-active-color:#fff; --bs-navbar-brand-color:#fff;
+.hdm-btn--ghost {
+  padding:12px 24px; border-radius:14px; background:transparent; color:var(--ink-soft);
+  font-weight:700; font-size:.95rem; border:1.5px solid var(--border); text-decoration:none;
+  display:inline-flex; align-items:center; gap:8px; transition:border-color .15s,color .15s;
 }
+.hdm-btn--ghost:hover { border-color:var(--v); color:var(--v-dark); }
 
-/* Stats / Features / Callout / Footer */
-.eskep-theme .hdm-stat-icon{ background: var(--eskep-chip); color:#fff; }
-.eskep-theme .hdm-feature-icon{ background: linear-gradient(135deg, #34d399, #10b981); color:#fff; }
-.eskep-theme .hdm-features-section{
-  background: radial-gradient(900px 400px at 15% -10%, rgba(122,220,197,.18), transparent 60%);
+.hdm-hero__media { position:relative; display:flex; justify-content:center; align-items:center; }
+.hdm-hero__card {
+  width:100%; max-width:480px; border-radius:24px;
+  background:var(--v-pale); border:1.5px solid var(--v-pale2);
+  box-shadow:0 20px 60px rgba(124,58,237,.12);
+  aspect-ratio:4/3.1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:18px; padding:40px;
+  position:relative; overflow:hidden;
 }
-/* çok duraklı geçişli bar */
-.eskep-theme .hdm-callout{
-  background:
-    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .10), transparent 60%),
-    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .10), transparent 60%),
-    linear-gradient(100deg,
-      rgb(52 182 192 / .95) 0%,
-      rgb(74 222 128 / .95) 33%,
-      rgb(110 231 183 / .95) 66%,
-      rgb(21 128 120 / .95) 100%
-    );
-  border-top: 1px solid rgba(255,255,255,.16);
-  border-bottom: 1px solid rgba(0,0,0,.08);
+.hdm-hero__card::before {
+  content:''; position:absolute; top:-40px; right:-40px;
+  width:160px; height:160px; border-radius:50%;
+  background:radial-gradient(circle,rgba(124,58,237,.13) 0%,transparent 70%);
+  pointer-events:none;
 }
-.eskep-theme .hdm-min-footer{
-  background: linear-gradient(180deg, var(--eskep-footer-a) 0%, var(--eskep-footer-b) 100%);
+.hdm-hero__icon {
+  width:76px; height:76px; border-radius:22px; background:var(--v);
+  display:flex; align-items:center; justify-content:center;
+  font-size:34px; color:#fff;
+  box-shadow:0 12px 32px rgba(124,58,237,.36); position:relative; z-index:1;
 }
+.hdm-hero__card-label {
+  font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:800;
+  color:var(--v-dark); text-align:center; position:relative; z-index:1;
+}
+.hdm-hero__card-sub {
+  font-size:.88rem; color:var(--ink-soft); font-weight:600;
+  text-align:center; position:relative; z-index:1;
+}
+.hdm-pill {
+  position:absolute; background:#fff; border:1.5px solid var(--border);
+  border-radius:999px; padding:8px 16px; font-size:.8rem; font-weight:700;
+  display:flex; align-items:center; gap:7px;
+  box-shadow:0 4px 16px rgba(0,0,0,.07); white-space:nowrap; z-index:2;
+}
+.hdm-pill--top    { top:-18px; right:-10px; color:var(--v-dark); }
+.hdm-pill--bottom { bottom:-18px; left:-10px; color:var(--amber); }
+.hdm-pill-dot { width:7px; height:7px; border-radius:50%; }
+.hdm-pill-dot--v     { background:var(--v); }
+.hdm-pill-dot--amber { background:var(--amber); }
 
-/* CTA butonu */
-.eskep-theme .btn-cta{
-  background: linear-gradient(90deg, var(--eskep-cta-from), var(--eskep-cta-to));
-  color:#111827 !important; border:none;
+/* ── STATS ── */
+.hdm-stats-section { padding:32px 48px; background:#faf7ff; border-bottom:1px solid var(--border); }
+.hdm-stats__grid { max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.hdm-stat-card {
+  background:#fff; border:1.5px solid var(--border); border-radius:16px;
+  padding:18px 20px; display:flex; align-items:center; gap:14px;
+  transition:transform .15s,box-shadow .15s;
 }
-
-/* ===========================
-   ESKEP — Sage (teal/slate) tema (mat görünüm)
-   =========================== */
-.eskep-theme.eskep-theme--sage{
-  /* temel renkler (doygunluğu düşük) */
-  --eskep-1: 13 148 136;  /* #0d9488 teal-600 */
-  --eskep-2: 15 118 110;  /* #0f766e teal-700 */
-  --eskep-3:  8  47  43;  /* #082f2b teal-900 */
-
-  /* metin & vurgu */
-  --eskep-ink:   #ecfdf5;
-  --eskep-muted: rgba(236,253,245,.85);
-
-  /* ikon/çip geçişi ve CTA */
-  --eskep-chip: linear-gradient(135deg,#5eead4,#14b8a6);
-  --eskep-cta-from:#eab308; /* amber-500  (sıcak ama mat) */
-  --eskep-cta-to:  #d97706; /* amber-600 */
-  --eskep-cta-fg:  #0b1f1d;
-
-  /* footer */
-  --eskep-footer-a:#071c1a;
-  --eskep-footer-b:#051513;
+.hdm-stat-card:hover { transform:translateY(-2px); box-shadow:var(--sh-h); }
+.hdm-stat-icon {
+  width:44px; height:44px; border-radius:13px; background:var(--v-pale);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--v); font-size:1.25rem; flex-shrink:0; border:1px solid var(--v-pale2);
 }
+.hdm-stat-value { font-size:1.15rem; font-weight:900; color:var(--ink); line-height:1.1; }
+.hdm-stat-label { font-size:.81rem; color:var(--ink-soft); font-weight:600; margin-top:2px; }
 
-/* HEADER – mat degrade, yüksek okunabilirlik */
-.eskep-theme.eskep-theme--sage.hdm-min-header .navbar{
-  background: linear-gradient(
-    100deg,
-    rgb(var(--eskep-1) / .96) 0%,
-    rgb(var(--eskep-2) / .96) 48%,
-    rgb(var(--eskep-3) / .96) 100%
-  ) !important;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-  box-shadow: 0 8px 24px rgba(8,47,43,.18);
-  --bs-navbar-color:#fff; --bs-navbar-hover-color:#fff;
-  --bs-navbar-active-color:#fff; --bs-navbar-brand-color:#fff;
+/* ── SECTION HEADER ── */
+.hdm-section-label {
+  display:inline-flex; align-items:center; gap:7px; font-size:.76rem;
+  font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--v); margin-bottom:8px;
 }
+.hdm-section-label::before { content:''; display:inline-block; width:18px; height:2px; background:var(--v); border-radius:2px; }
+.hdm-section-title { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:800; color:var(--ink); margin-bottom:5px; letter-spacing:-.01em; }
+.hdm-section-sub { font-size:.92rem; color:var(--ink-soft); }
 
-/* HERO – header’la uyumlu mat arka plan ve compact desteği */
-.page-eskep.eskep-theme--sage .asym-hero{
-  background:
-    radial-gradient(1100px 360px at -10% 10%, rgba(255,255,255,.06), transparent 60%),
-    radial-gradient(1000px 320px at 110% 120%, rgba(0,0,0,.10), transparent 60%),
-    linear-gradient(105deg,
-      rgb(var(--eskep-1) / .94) 0%,
-      rgb(var(--eskep-2) / .94) 52%,
-      rgb(var(--eskep-3) / .94) 100%
-    );
-  color: var(--eskep-ink);
+/* ── MODULES ── */
+.hdm-modules { padding:48px 48px 40px; background:#faf7ff; }
+.hdm-modules__inner { max-width:1240px; margin:0 auto; }
+.hdm-modules__grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-top:24px; }
+.hdm-module-card {
+  background:#fff; border:1.5px solid var(--border); border-radius:18px;
+  padding:28px 16px 24px; display:flex; flex-direction:column; align-items:center;
+  gap:14px; text-align:center; text-decoration:none; color:inherit;
+  transition:transform .15s,box-shadow .15s;
 }
-.page-eskep.eskep-theme--sage .asym-hero__title{ color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.16); }
-.page-eskep.eskep-theme--sage .asym-hero__subtitle{ color:var(--eskep-muted); }
+.hdm-module-card:hover { transform:translateY(-4px); box-shadow:var(--sh-h); }
+.hdm-module-card__emoji {
+  width:60px; height:60px; border-radius:18px; background:var(--v-pale);
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; border:1.5px solid var(--v-pale2); transition:background .15s;
+}
+.hdm-module-card:hover .hdm-module-card__emoji { background:var(--v-pale2); }
+.hdm-module-card__name { font-weight:800; font-size:.86rem; color:var(--ink); line-height:1.45; }
 
-/* compact mod (yükseklik kısa) */
-.page-eskep.eskep-theme--sage .asym-hero--compact,
-.page-eskep.eskep-theme--sage .asym-hero[compact]{  /* prop set ediyorsanız */
-  min-height: 46vh;
-  padding-block: 1.2rem 1.1rem;
+/* ── FEATURES ── */
+.hdm-features-section {
+  padding:40px 48px; background:#fff;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
 }
-@media (max-width: 991.98px){
-  .page-eskep.eskep-theme--sage .asym-hero--compact,
-  .page-eskep.eskep-theme--sage .asym-hero[compact]{
-    min-height: auto; padding-block: 1rem;
-  }
+.hdm-features__inner { max-width:1240px; margin:0 auto; }
+.hdm-features__grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:24px; }
+.hdm-feature-card {
+  background:var(--v-pale); border:1.5px solid var(--v-pale2); border-radius:var(--radius);
+  padding:24px; display:flex; flex-direction:column; gap:12px;
+  transition:transform .15s,box-shadow .15s; height:100%;
 }
+.hdm-feature-card:hover { transform:translateY(-3px); box-shadow:var(--sh-h); }
+.hdm-feature-icon {
+  width:46px; height:46px; border-radius:14px; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--v); font-size:1.3rem; border:1.5px solid var(--v-pale2);
+}
+.hdm-feature-title { font-weight:800; font-size:.95rem; color:var(--ink); }
+.hdm-feature-desc { font-size:.87rem; color:var(--ink-soft); line-height:1.65; margin:0; }
 
-/* Chip/rozetler – yarı saydam çerçeveli */
-.page-eskep.eskep-theme--sage .asym-hero__chip{
-  color:#e7f8f4;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.22);
-  backdrop-filter: blur(3px);
+/* ── CALLOUT ── */
+.hdm-callout { padding:48px 48px 64px; background:#faf7ff; }
+.hdm-callout__wrap {
+  max-width:1240px; margin:0 auto; background:var(--v); border-radius:22px;
+  padding:36px 48px; display:flex; align-items:center; justify-content:space-between;
+  gap:24px; flex-wrap:wrap; position:relative; overflow:hidden;
 }
+.hdm-callout__wrap::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:220px; height:220px; border-radius:50%;
+  background:rgba(255,255,255,.08); pointer-events:none;
+}
+.callout-orb { position:absolute; border-radius:50%; pointer-events:none; opacity:.15; }
+.callout-orb--a { width:280px; height:280px; background:radial-gradient(circle,#c4b5fd,transparent 70%); top:-80px; left:-60px; }
+.callout-orb--b { width:220px; height:220px; background:radial-gradient(circle,#a78bfa,transparent 70%); bottom:-70px; right:-40px; }
+.hdm-callout__text h4 { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:800; color:#fff; margin-bottom:6px; }
+.hdm-callout__text p { font-size:.92rem; color:rgba(255,255,255,.80); margin:0; }
+.hdm-callout__actions { display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:1; }
+.hdm-callout__btn { padding:12px 26px; border-radius:13px; font-weight:800; font-size:.9rem; text-decoration:none; display:inline-flex; align-items:center; gap:7px; transition:transform .12s; }
+.hdm-callout__btn:hover { transform:translateY(-1px); }
+.hdm-callout__btn--white { background:#fff; color:var(--v-dark); border:none; box-shadow:0 4px 16px rgba(0,0,0,.10); }
+.hdm-callout__btn--ghost { background:rgba(255,255,255,.12); color:#fff; border:1.5px solid rgba(255,255,255,.35); }
+.hdm-callout__btn--ghost:hover { background:rgba(255,255,255,.22); }
 
-/* Kartlar/ikonlar – siliklik yok, mat cam */
-.eskep-theme.eskep-theme--sage .hdm-stat-card,
-.eskep-theme.eskep-theme--sage .hdm-feature-card{
-  background: rgba(4,28,26,.58);
-  border: 1px solid rgba(255,255,255,.14);
-  color:#f0fdfa;
-}
-.eskep-theme.eskep-theme--sage .hdm-stat-icon,
-.eskep-theme.eskep-theme--sage .hdm-feature-icon{
-  background: var(--eskep-chip);
-  color:#0b1f1d;
-}
+/* ── FOOTER ── */
+.hdm-min-footer { background:linear-gradient(135deg,#2e1065 0%,#5b21b6 50%,#7c3aed 100%); color:#f5f3ff; padding:48px 0 0; }
+.text-footer { color:rgba(245,243,255,.85) !important; }
+.footer-link { color:rgba(245,243,255,.85); text-decoration:none; transition:color .15s; }
+.footer-link:hover { color:#fff; text-decoration:underline; }
+.hdm-min-footer h5 { color:#fff !important; }
+.hdm-min-footer h6 { color:#c4b5fd !important; font-size:.78rem !important; text-transform:uppercase; letter-spacing:.08em; font-weight:800 !important; margin-bottom:12px; }
+.hdm-min-footer__bottom { border-top:1px solid rgba(255,255,255,.18); padding:18px 0; }
 
-/* Bölüm zeminleri – mat geçiş */
-.eskep-theme.eskep-theme--sage .hdm-stats-section{
-  background: linear-gradient(180deg, rgba(236,253,245,.05), rgba(13,148,136,.08));
-  border-top: 1px solid rgba(255,255,255,.06);
-  border-bottom: 1px solid rgba(0,0,0,.06);
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .hdm-stats__grid    { grid-template-columns:repeat(2,1fr); }
+  .hdm-modules__grid  { grid-template-columns:repeat(3,1fr); }
+  .hdm-features__grid { grid-template-columns:repeat(2,1fr); }
 }
-.eskep-theme.eskep-theme--sage .hdm-features-section{
-  background: radial-gradient(900px 400px at 15% -10%, rgba(20,184,166,.18), transparent 60%);
+@media(max-width:860px){
+  .hdm-hero { grid-template-columns:1fr; gap:36px; padding:40px 24px; text-align:center; }
+  .hdm-lead { max-width:100%; }
+  .hdm-hero-badges,.hdm-hero-actions { justify-content:center; }
+  .hdm-hero__media { order:-1; }
+  .hdm-hero__card { max-width:340px; margin:0 auto; }
+  .hdm-stats-section,.hdm-modules,.hdm-features-section,.hdm-callout { padding-left:20px; padding-right:20px; }
+  .hdm-callout__wrap { padding:28px 24px; }
+  .hdm-modules__grid { grid-template-columns:repeat(2,1fr); }
 }
-
-/* Callout bar – mat sage bandı */
-.eskep-theme.eskep-theme--sage .hdm-callout{
-  background:
-    radial-gradient(90% 140% at 0% 0%,   rgb(255 255 255 / .08), transparent 60%),
-    radial-gradient(120% 160% at 100% 100%, rgb(0 0 0 / .10), transparent 60%),
-    linear-gradient(100deg,
-      rgb(var(--eskep-1) / .96) 0%,
-      rgb(var(--eskep-2) / .96) 50%,
-      rgb(var(--eskep-3) / .96) 100%
-    );
-  border-top: 1px solid rgba(255,255,255,.14);
-  border-bottom: 1px solid rgba(0,0,0,.06);
-  color:#ecfdf5;
-}
-
-/* CTA butonu – sıcak amber, mat */
-.eskep-theme.eskep-theme--sage .btn-cta{
-  background: linear-gradient(90deg, var(--eskep-cta-from), var(--eskep-cta-to));
-  color: var(--eskep-cta-fg) !important; border:none;
-}
-
-/* Footer – daha koyu, mat */
-.eskep-theme.eskep-theme--sage .hdm-min-footer{
-  background: linear-gradient(180deg, var(--eskep-footer-a) 0%, var(--eskep-footer-b) 100%);
+@media(max-width:560px){
+  .hdm-stats__grid    { grid-template-columns:1fr; }
+  .hdm-features__grid { grid-template-columns:1fr; }
 }
