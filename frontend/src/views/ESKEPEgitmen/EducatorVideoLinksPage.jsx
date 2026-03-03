@@ -21,10 +21,10 @@ function getEmbed(url) {
   const id = getYouTubeId(url);
   return id ? `https://www.youtube.com/embed/${id}` : url;
 }
-function getWatch(url) {
-  const id = getYouTubeId(url);
-  return id ? `https://www.youtube.com/watch?v=${id}` : url;
-}
+// function getWatch(url) {
+//   const id = getYouTubeId(url);
+//   return id ? `https://www.youtube.com/watch?v=${id}` : url;
+// }
 
 export default function EducatorYouTubeVideosList() {
   const api = useAxios();
@@ -158,7 +158,7 @@ export default function EducatorYouTubeVideosList() {
                         const videoUrl = item.videoUrl || item.url || item.video_url;
                         const thumb = getThumb(videoUrl);
                         const embed = getEmbed(videoUrl);
-                        const watch = getWatch(videoUrl);
+                        // const watch = getWatch(videoUrl);
                         return (
                           <div className="col" key={item.id}>
                             <div className="card h-100 border-0 shadow-sm">
@@ -185,7 +185,7 @@ export default function EducatorYouTubeVideosList() {
                                   </p>
                                 )}
                                 <div className="d-flex justify-content-between align-items-center mt-2 gap-2">
-                                  <a href={watch} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
+                                  <a href={embed} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
   <i className="fa-solid fa-play me-1"></i> İzle
 </a>
                                   <div className="d-flex gap-1">
