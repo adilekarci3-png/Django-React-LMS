@@ -58,7 +58,7 @@ export default function AboutEHAD() {
     if (g.length >= 4) return g.slice(0, 4);
     const needed = 4 - g.length;
     const fb = [
-      { src: FALLBACKS.hero, caption: "EHAD" },
+      { src: FALLBACKS.hero, caption: "Sinaps" },
       { src: FALLBACKS.meeting, caption: "Toplantı" },
       { src: FALLBACKS.group, caption: "Heyet" },
       { src: FALLBACKS.protocol, caption: "Protokol" },
@@ -115,12 +115,12 @@ export default function AboutEHAD() {
             <div className="hero-overlay" aria-hidden="true" />
             <div className="hero-inner">
               <div className="container">
-                <div className="badge"><span className="dot" /> Kurumsal • EHAD</div>
-                <h1>{data?.title || "Kur’an ilmiyle topluma değer katan bir ekosistem"}</h1>
-                <p>{data?.subtitle || "EHAD, hafızlık ve Kur’an eğitimi alanında sahih bilgi, nitelikli eğitim ve toplumsal hizmet üretir."}</p>
+                <div className="badge"><span className="dot" /> Kurumsal • Sinaps</div>
+                <h1>{data?.title || "Kur'an ilmiyle topluma değer katan bir ekosistem"}</h1>
+                <p>{data?.subtitle || "Sinaps, hafızlık ve Kur'an eğitimi alanında sahih bilgi, nitelikli eğitim ve toplumsal hizmet üretir."}</p>
                 <div className="actions">
                   <a href="/bagis" className="btn btn-primary">Bağış Yap</a>
-                  <a href="/akademi/courses" className="btn btn-outline">EHAD Akademi</a>
+                  <a href="/akademi/courses" className="btn btn-outline">Sinaps Akademi</a>
                 </div>
               </div>
             </div>
@@ -255,8 +255,8 @@ export default function AboutEHAD() {
           <footer className="footer">
             <div className="footer-inner">
               <div>
-                <div className="brand">EHAD – Evrensel Hafızlar Derneği</div>
-                <div style={{fontSize:14, color:"#6b7280"}}>© {new Date().getFullYear()} EHAD. Tüm hakları saklıdır.</div>
+                <div className="brand">Sinaps – Evrensel Hafızlar Derneği</div>
+                <div style={{fontSize:14, color:"#6b7280"}}>© {new Date().getFullYear()} Sinaps. Tüm hakları saklıdır.</div>
               </div>
             </div>
           </footer>

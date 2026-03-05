@@ -48,7 +48,7 @@ export default function HafizBilgiIndex() {
           <div>
             <div className="hbs-eyebrow">
               <span className="hbs-eyebrow-dot"></span>
-              EHAD • HBS
+              Sinaps • HBS
             </div>
             <h1 className="hbs-hero-title">
               Hafızlar <em>Bilgi Sistemi</em>

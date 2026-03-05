@@ -50,7 +50,7 @@ const sampleData = [
   {
     id: 1,
     full_name: "Ali Özdemir",
-    title: "EHAD Başkanı",
+    title: "Sinaps Başkanı",
     department: 1,
     department_name: "Yönetim",
     photo: hafiz1,
@@ -58,7 +58,7 @@ const sampleData = [
       {
         id: 2,
         full_name: "Mustafa Yılmaz",
-        title: "EHAD Genel Sekreter",
+        title: "Sinaps Genel Sekreter",
         department: 2,
         department_name: "Sekreter",
         photo: hafiz2,

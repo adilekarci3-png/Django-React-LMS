@@ -168,7 +168,7 @@ export default function OTMIndex() {
           <div>
             <div className="otm-eyebrow">
               <span className="otm-eyebrow-dot"></span>
-              EHAD • OTM Platformu
+              Sinaps • OTM Platformu
             </div>
             <h1 className="otm-title">
               Öğrenci takibinde<br />

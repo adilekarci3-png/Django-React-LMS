@@ -57,7 +57,7 @@ import CourseCreate from "./views/instructor/CourseCreate";
 import CourseEdit from "./views/instructor/CourseEdit";
 import CourseDetail from "./views/instructor/CourseDetail";
 
-//EHAD Akademi Pages
+//Sinaps Akademi Pages
 import AkademiIndex from "./views/base/AkademiIndex";
 import AkademiCourses from "./views/Akademi/Courses";
 import {
@@ -607,7 +607,7 @@ function App() {
               }
             />
 
-            {/* EHAD Akademi */}
+            {/* Sinaps Akademi */}
             <Route path="/akademi/videos" element={<AllVideosPage />} />
             <Route path="/akademi/me/saved-videos" element={<MySavedVideosPage />} />
             <Route path="/org-chart" element={<OrgChart />} />
@@ -618,7 +618,7 @@ function App() {
             <Route path="/about-hbs" element={<HBSHakkimizda />} />
             <Route path="/about-akademi" element={<Akademihakkimizda />} />
 
-            {/* EHAD Akademi Koordinator */}
+            {/* Sinaps Akademi Koordinator */}
             <Route path="/koordinator/youtube-videolar" element={<AllYoutubeVideosPage />} />
             <Route path="/koordinator/egitmen-videolari" element={<AllInstructorVideosPage />} />
             <Route path="/koordinator/egitmen-dokumanlari" element={<AllInstructorDocumentsCrudPage />} />
@@ -633,7 +633,7 @@ function App() {
             {/* Toplu satın alma & kayıt listeleri */}
             <Route path="/koordinator/satin-almalar" element={<AllVideoPurchasesPage />} />
             <Route path="/koordinator/video-kayitlari" element={<AllVideoEnrollmentsPage />} />
-            {/* EHAD Akademi Egitmen */}
+            {/* Sinaps Akademi Egitmen */}
             <Route path="/educator/add-canli-ders" element={<EducatorAddCanliDers />} />
             <Route path="/educator/dashboard" element={<EducatorMediaDashboard />} />
             <Route path="/educator/add-lesson" element={<EducatorAddLesson />} />
@@ -693,7 +693,7 @@ function App() {
                 </PrivateRoute>
               }
             />
-            {/* EHAD Akademi Egitmen */}
+            {/* Sinaps Akademi Egitmen */}
             <Route
               path="/koordinator/ogrencilist/"
               element={

@@ -46,7 +46,7 @@ function HBSBaseFooter() {
             <div className="mb-4">
               <h4 className="text-white">İletişim</h4>
               <p className="text-footer">Cinnah Caddesi No:12 Çankaya / Ankara</p>
-              <p className="text-footer">Eposta: <a href="#" className="footer-link">hbs@ehad.org.tr</a></p>
+              <p className="text-footer">Eposta: <a href="#" className="footer-link">hbs@sinaps.org.tr</a></p>
               <p className="text-footer">Telefon: <span className="fw-semibold">+90 312 000 00 00</span></p>
             </div>
           </div>

@@ -173,7 +173,7 @@ export default function HDMIndex() {
           <div>
             <div className="hdm-eyebrow">
               <span className="hdm-eyebrow-dot"></span>
-              EHAD • HDM Platformu
+              Sinaps • HDM Platformu
             </div>
             <h1 className="hdm-title">
               Hafızlık dinlemede<br />için <em>tek platform</em>

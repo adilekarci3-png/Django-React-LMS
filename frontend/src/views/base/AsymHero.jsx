@@ -180,7 +180,7 @@ export function EskepGiris_V2({ Header, Footer, image }) {
     <>
       {Header ? <Header /> : null}
       <AsymHero
-        title="EHAD Staj ve Kariyer Eğitimi Programı"
+        title="Sinaps Staj ve Kariyer Eğitimi Programı"
         subtitle="Staj, proje ve kariyer gelişim süreçlerinizi profesyonel bir platformda yönetin."
         image={image}
         alt="ESKEP"
@@ -200,10 +200,10 @@ export function AkademiIndex_V2({ Header, Footer, image }) {
     <>
       {Header ? <Header /> : null}
       <AsymHero
-        title="EHAD AKADEMİ"
+        title="Sinaps AKADEMİ"
         subtitle="Kadim ilim yolculuğunu dijital dünyanın imkânlarıyla buluşturan eğitim platformu."
         image={image}
-        alt="EHAD Akademi"
+        alt="Sinaps Akademi"
         theme="indigo"
         badges={["Dersler", "Modüller", "Canlı Yayın"]}
         primary={{ to: "/academy/courses", label: "Kurslara Göz At" }}

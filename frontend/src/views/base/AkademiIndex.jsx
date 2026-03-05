@@ -40,7 +40,7 @@ export default function AkademiIndex() {
           <div>
             <div className="akd-eyebrow">
               <span className="akd-eyebrow-dot"></span>
-              EHAD • AKD Platformu
+              Sinaps • AKD Platformu
             </div>
             <h1 className="akd-title">
               Öğrenme yolculuğun<br />

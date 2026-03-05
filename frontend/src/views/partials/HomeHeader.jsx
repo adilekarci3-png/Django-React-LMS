@@ -13,7 +13,7 @@ function HomeHeader() {
         <div className="ehad-container">
           <Link to="/" className="ehad-brand">
             <span className="ehad-brand-dot" aria-hidden="true" />
-            EHAD Akademi
+            Sinaps
           </Link>
 
           <button

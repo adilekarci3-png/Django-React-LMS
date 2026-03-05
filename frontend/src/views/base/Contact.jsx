@@ -21,6 +21,11 @@ export default function Contact() {
   .contact-page .cp-outer{padding:0}
   .contact-page .cp-page{max-width:100%;margin:0;border-radius:0;overflow:hidden;background:#fff}
 
+  /* --- Hero Banner --- */
+  .contact-page .cp-hero{background:linear-gradient(135deg,var(--pri-900),var(--sec-700));padding:48px 20px 40px;text-align:center}
+  .contact-page .cp-hero-title{margin:0 0 8px;font-size:clamp(22px,5vw,36px);font-weight:900;color:#fff;letter-spacing:-.5px}
+  .contact-page .cp-hero-sub{margin:0;font-size:clamp(13px,3vw,16px);color:rgba(255,255,255,.75)}
+
   .contact-page .cp-content{padding:48px 40px;background:linear-gradient(180deg,var(--subtle),#fff)}
   .contact-page .cp-container{max-width:var(--container);margin:0 auto}
   .contact-page .cp-grid{display:grid;gap:36px}
@@ -49,8 +54,8 @@ export default function Contact() {
   .contact-page .cp-field select:focus + .cp-label{top:-9px;font-size:11px;color:var(--pri-700)}
   .contact-page .cp-error{font-size:12px;color:#b91c1c;margin-top:6px}
 
-  .contact-page .cp-actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:18px}
-  .contact-page .cp-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:13px 18px;font-weight:800;cursor:pointer;transition:all .15s}
+  .contact-page .cp-actions{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .contact-page .cp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:13px 18px;font-weight:800;cursor:pointer;transition:all .15s}
   .contact-page .cp-btn-primary{background:linear-gradient(90deg,var(--pri-600),var(--sec-700));color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(6,182,212,.3)}
   .contact-page .cp-btn-primary:hover{filter:brightness(.97)}
   .contact-page .cp-btn-ghost{background:#fff;border-color:var(--line);color:var(--text)}
@@ -58,17 +63,56 @@ export default function Contact() {
   .contact-page .cp-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:cp-spin .9s linear infinite}
   @keyframes cp-spin{to{transform:rotate(360deg)}}
 
-  .contact-page .cp-alert{padding:12px 14px;border-radius:12px;border:1px solid;margin-bottom:14px}
+  .contact-page .cp-alert{padding:12px 14px;border-radius:12px;border:1px solid;margin-bottom:14px;font-size:14px}
   .contact-page .cp-alert-success{background:#ecfeff;border-color:#7dd3fc;color:#075985}
   .contact-page .cp-alert-error{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
 
   .contact-page .cp-info-list{display:grid;gap:14px}
   .contact-page .cp-info-item{display:flex;gap:14px;align-items:flex-start}
-  .contact-page .cp-info-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#bae6fd,#ddd6fe);color:#1e1b4b;font-weight:900;border:1px solid #ddd6fe;box-shadow:0 4px 10px rgba(0,0,0,.06)}
-  .contact-page .cp-info-link{color:var(--pri-700);text-decoration:none;font-weight:500}
+  .contact-page .cp-info-icon{width:42px;height:42px;min-width:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#bae6fd,#ddd6fe);color:#1e1b4b;font-weight:900;border:1px solid #ddd6fe;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+  .contact-page .cp-info-link{color:var(--pri-700);text-decoration:none;font-weight:500;word-break:break-all}
   .contact-page .cp-map{border-radius:22px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow-md)}
   .contact-page .cp-ratio{position:relative;width:100%;padding-top:56.25%}
   .contact-page .cp-ratio iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .contact-page .cp-right-col{gap:36px}
+
+  /* ===== TABLET (max 1099px) ===== */
+  @media(max-width:1099px){
+    .contact-page .cp-content{padding:36px 24px}
+    .contact-page .cp-grid{gap:24px}
+    .contact-page .cp-right-col{gap:24px}
+  }
+
+  /* ===== MOBILE (max 679px) ===== */
+  @media(max-width:679px){
+    .contact-page .cp-hero{padding:32px 16px 28px}
+    .contact-page .cp-content{padding:20px 12px}
+    .contact-page .cp-grid{gap:16px}
+    .contact-page .cp-card{border-radius:16px}
+    .contact-page .cp-card-header{padding:14px 16px;gap:10px}
+    .contact-page .cp-card-title{font-size:16px}
+    .contact-page .cp-card-body{padding:16px 14px}
+    .contact-page .cp-row{gap:12px}
+    .contact-page .cp-field input,
+    .contact-page .cp-field select,
+    .contact-page .cp-field textarea{font-size:16px;padding:20px 12px 9px}
+    .contact-page .cp-field textarea{min-height:130px;padding-top:24px}
+    .contact-page .cp-actions{flex-direction:column;gap:10px;margin-top:14px}
+    .contact-page .cp-btn{width:100%;padding:14px 16px;font-size:15px}
+    .contact-page .cp-btn-ghost{display:none}
+    .contact-page .cp-info-icon{width:36px;height:36px;min-width:36px;font-size:15px}
+    .contact-page .cp-info-list{gap:12px}
+    .contact-page .cp-info-item{gap:12px}
+    .contact-page .cp-ratio{padding-top:65%}
+    .contact-page .cp-right-col{gap:16px}
+  }
+
+  /* ===== VERY SMALL (max 359px) ===== */
+  @media(max-width:359px){
+    .contact-page .cp-content{padding:16px 10px}
+    .contact-page .cp-card-body{padding:12px 10px}
+    .contact-page .cp-card-title{font-size:15px}
+  }
   `;
 
   const initial = useMemo(
@@ -159,6 +203,10 @@ export default function Contact() {
       <div className="contact-page">
         <div className="cp-outer">
           <main className="cp-page">
+            <div className="cp-hero">
+              <h1 className="cp-hero-title">Bizimle İletişime Geçin</h1>
+              <p className="cp-hero-sub">Sorularınız için bize ulaşın, en kısa sürede dönüş yapalım.</p>
+            </div>
             <section className="cp-content">
               <div className="cp-container cp-grid">
 
@@ -232,7 +280,7 @@ export default function Contact() {
                 </div>
 
                 {/* Sağ: Bilgi + Harita */}
-                <div className="cp-grid" style={{ gap: 36 }}>
+                <div className="cp-grid cp-right-col">
                   <div className="cp-card">
                     <div className="cp-card-header">
                       <div style={{ width: 12, height: 12, borderRadius: 999, background: "var(--sec-700)" }} />
@@ -246,7 +294,7 @@ export default function Contact() {
                         </div>
                         <div className="cp-info-item">
                           <div className="cp-info-icon">✉️</div>
-                          <div><a className="cp-info-link" href="mailto:bilgi@ehad.org.tr">bilgi@ehad.org.tr</a></div>
+                          <div><a className="cp-info-link" href="mailto:bilgi@ehad.org.tr">bilgi@sinaps.org.tr</a></div>
                         </div>
                         <div className="cp-info-item">
                           <div className="cp-info-icon">📞</div>
@@ -258,7 +306,7 @@ export default function Contact() {
                         </div>
                         <div className="cp-info-item">
                           <div className="cp-info-icon">🌐</div>
-                          <div><a className="cp-info-link" href="https://www.ehad.org.tr/">ehad.org.tr</a></div>
+                          <div><a className="cp-info-link" href="https://www.ehad.org.tr/">sinaps.org.tr</a></div>
                         </div>
                       </div>
                     </div>

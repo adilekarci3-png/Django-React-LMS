@@ -243,7 +243,7 @@ const FALLBACK_ROOT = {
       children: [
         {
           id: 51,
-          name: "1. EHAD Akademi",
+          name: "1. Sinaps Akademi",
           employees: [
             { id: 9023, full_name: "İlayda Er", title: "Akademi Koord." },
           ],
@@ -331,7 +331,7 @@ const FALLBACK_ROOT = {
     // GENÇLİK
     {
       id: 70,
-      name: "Gençlik Komisyonu (Genç EHAD)",
+      name: "Gençlik Komisyonu (Genç Sinaps)",
       employees: [
         { id: 9032, full_name: "Sena Yüce", title: "Gençlik Srm." },
       ],

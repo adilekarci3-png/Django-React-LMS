@@ -38,7 +38,7 @@ export default function ESKEPBaseFooter() {
             <div className="eskep-footer__text">
               <div><Link className="eskep-footer__link" to="/about-eskep">Hakkında</Link></div>
               <div><Link className="eskep-footer__link" to="/donate">Bağış</Link></div>
-              <div><Link className="eskep-footer__link" to="/academy">EHAD Akademi</Link></div>
+              <div><Link className="eskep-footer__link" to="/academy">Sinaps Akademi</Link></div>
               <div><Link className="eskep-footer__link" to="/contact">İletişim</Link></div>
             </div>
           </div>
@@ -63,7 +63,7 @@ export default function ESKEPBaseFooter() {
             <p className="eskep-footer__text" style={{ margin: "8px 0 4px" }}>
               E-posta:{" "}
               <a className="eskep-footer__link" href="mailto:bilgi@ehad.org.tr">
-                bilgi@ehad.org.tr
+                bilgi@sinaps.org.tr
               </a>
             </p>
             <p className="eskep-footer__text" style={{ margin: 0 }}>
@@ -74,7 +74,7 @@ export default function ESKEPBaseFooter() {
 
         {/* Alt şerit */}
         <div className="eskep-footer__bottom">
-          <small className="eskep-footer__text">© {year} EHAD Akademi · Tüm hakları saklıdır</small>
+          <small className="eskep-footer__text">© {year} Sinaps · Tüm hakları saklıdır</small>
           <div className="eskep-footer__legal">
             <Link className="eskep-footer__link" to="/kvkk">KVKK</Link>
             <Link className="eskep-footer__link" to="/terms">Kullanım Şartları</Link>

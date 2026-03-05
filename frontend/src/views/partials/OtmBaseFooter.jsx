@@ -38,7 +38,7 @@ export default function OTMBaseFooter() {
             <div className="otm-footer__text">
               <div><Link className="otm-footer__link" to="/about-otm">Hakkında</Link></div>
               <div><Link className="otm-footer__link" to="/donate">Bağış</Link></div>
-              <div><Link className="otm-footer__link" to="/academy">EHAD Akademi</Link></div>
+              <div><Link className="otm-footer__link" to="/academy">Sinaps Akademi</Link></div>
               <div><Link className="otm-footer__link" to="/otm/contact">İletişim</Link></div>
             </div>
           </div>
@@ -63,7 +63,7 @@ export default function OTMBaseFooter() {
             <p className="otm-footer__text" style={{ margin: "8px 0 4px" }}>
               E-posta:{" "}
               <a className="otm-footer__link" href="mailto:bilgi@ehad.org.tr">
-                bilgi@ehad.org.tr
+                bilgi@sinaps.org.tr
               </a>
             </p>
             <p className="otm-footer__text" style={{ margin: 0 }}>
@@ -74,7 +74,7 @@ export default function OTMBaseFooter() {
 
         {/* Alt şerit */}
         <div className="otm-footer__bottom">
-          <small className="otm-footer__text">© {year} EHAD · Tüm hakları saklıdır</small>
+          <small className="otm-footer__text">© {year} Sinaps · Tüm hakları saklıdır</small>
           <div className="otm-footer__legal">
             <Link className="otm-footer__link" to="/kvkk">KVKK</Link>
             <Link className="otm-footer__link" to="/terms">Kullanım Şartları</Link>
