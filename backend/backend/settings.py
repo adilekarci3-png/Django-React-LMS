@@ -103,13 +103,6 @@ INSTALLED_APPS = [
     "userauths",
     "vendor",
 
-    "kariyer_modul",
-    "akademi_modul",
-    "yonetim_modul",
-    "dershane_modul",
-    "kuran_modul",
-
-
     # Third Party
     "rest_framework",
     "rest_framework_simplejwt",
@@ -117,7 +110,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "anymail",
     "drf_yasg",
-
     
 ]
 
