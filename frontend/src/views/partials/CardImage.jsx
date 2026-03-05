@@ -4,6 +4,7 @@ import resim1 from "./image/resim1.png";
 import resim2 from "./image/resim2.png";
 import resim3 from "./image/resim3.png";
 import resim4 from "./image/resim4.png";
+import resim5 from "./image/resim5.png";
 
 const features = [
   {
@@ -56,7 +57,7 @@ const features = [
   },
   {
     id: 5,
-    image: "https://images.unsplash.com/photo-1611746872915-64382b5c76da?w=700&q=85",
+    image: resim5,
     icon: "📖",
     title: "Kuran Eğitimi",
     desc: "Dinleme ve tilavet süreçlerini dijital ortamda takip edin.",
@@ -356,7 +357,7 @@ export default function FeatureIntro() {
             Tüm ihtiyaçlarınız <span>tek platformda</span>
           </h2>
           <p className="fi-subtitle">
-            Eğitimden yönetime, kariyer takibinden kuran eğitimine — Sinaps'ın
+            Eğitimden yönetime, kariyer takibinden kuran eğitimine — Eğitim Portalı'nın
             entegre modülleriyle kurumunuzu dijital çağa taşıyın.
           </p>
         </div>

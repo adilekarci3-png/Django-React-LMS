@@ -48,7 +48,7 @@ export default function HafizBilgiIndex() {
           <div>
             <div className="hbs-eyebrow">
               <span className="hbs-eyebrow-dot"></span>
-              Sinaps • HBS
+              Eğitim Portalı • HBS
             </div>
             <h1 className="hbs-hero-title">
               Hafızlar <em>Bilgi Sistemi</em>
@@ -66,8 +66,8 @@ export default function HafizBilgiIndex() {
 
             {/* CTA'lar */}
             <div className="hbs-hero-actions">
-              <Link to="/hbs/login" className="hbs-btn-amber">Panele Giriş <i className="bi bi-arrow-right"></i></Link>
-              <Link to="/hbs/register" className="hbs-btn-glass"><i className="bi bi-person-plus"></i> Kayıt Ol</Link>
+              <Link to="/register" className="hbs-btn-amber">Panele Giriş <i className="bi bi-arrow-right"></i></Link>
+              <Link to="/register" className="hbs-btn-glass"><i className="bi bi-person-plus"></i> Kayıt Ol</Link>
             </div>
           </div>
 

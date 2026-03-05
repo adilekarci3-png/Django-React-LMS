@@ -14,7 +14,7 @@ function AkademiBaseFooter() {
               <span className="akd-footer__brand-mark">
                 <i className="bi bi-mortarboard-fill"></i>
               </span>
-              Sinaps
+              Eğitim Portalı
             </div>
             <p className="akd-footer__text">
               81 ilde şube ve temsilciliklerimizle sahih Kur'an eğitimi, kamp programları,
@@ -34,7 +34,7 @@ function AkademiBaseFooter() {
             <div className="akd-footer__text">
               <div><Link className="akd-footer__link" to="/about-eskep">Hakkında</Link></div>
               <div><Link className="akd-footer__link" to="/donate">Bağış</Link></div>
-              <div><Link className="akd-footer__link" to="/academy">Sinaps Akademi</Link></div>
+              <div><Link className="akd-footer__link" to="/academy">Eğitim Portalı Akademi</Link></div>
               <div><Link className="akd-footer__link" to="/contact">İletişim</Link></div>
             </div>
           </div>
@@ -57,7 +57,7 @@ function AkademiBaseFooter() {
             <p className="akd-footer__text" style={{ margin: "8px 0 4px" }}>
               E-posta:{" "}
               <a className="akd-footer__link" href="mailto:bilgi@ehad.org.tr">
-                bilgi@sinaps.org.tr
+                bilgi@egitimportali.com
               </a>
             </p>
             <p className="akd-footer__text" style={{ margin: 0 }}>
@@ -67,7 +67,7 @@ function AkademiBaseFooter() {
         </div>
 
         <div className="akd-footer__bottom">
-          <small className="akd-footer__text">© {year} Sinaps · Tüm hakları saklıdır</small>
+          <small className="akd-footer__text">© {year} Eğitim Portalı · Tüm hakları saklıdır</small>
           <div className="akd-footer__legal">
             <Link className="akd-footer__link" to="/kvkk">KVKK</Link>
             <Link className="akd-footer__link" to="/terms">Kullanım Şartları</Link>

@@ -92,7 +92,7 @@ export default function ContactMessages() {
     setSelected(msg);
     // backend’de subject FK, frontend’de string olabilir, ikisini de düşün
     const subjText = typeof msg.subject === "string" ? msg.subject : msg.subject?.name || "";
-    setReplySubject(`Sinaps İletişim Yanıtı: ${subjText}`);
+    setReplySubject(`Eğitim Portalı İletişim Yanıtı: ${subjText}`);
     setReplyBody(`Merhaba ${msg.name},\n\n`);
     setReplyOpen(true);
   }

@@ -38,7 +38,7 @@ export default function OTMBaseFooter() {
             <div className="otm-footer__text">
               <div><Link className="otm-footer__link" to="/about-otm">Hakkında</Link></div>
               <div><Link className="otm-footer__link" to="/donate">Bağış</Link></div>
-              <div><Link className="otm-footer__link" to="/academy">Sinaps Akademi</Link></div>
+              <div><Link className="otm-footer__link" to="/academy">Eğitim Portalı Akademi</Link></div>
               <div><Link className="otm-footer__link" to="/otm/contact">İletişim</Link></div>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function OTMBaseFooter() {
 
         {/* Alt şerit */}
         <div className="otm-footer__bottom">
-          <small className="otm-footer__text">© {year} Sinaps · Tüm hakları saklıdır</small>
+          <small className="otm-footer__text">© {year} Eğitim Portalı · Tüm hakları saklıdır</small>
           <div className="otm-footer__legal">
             <Link className="otm-footer__link" to="/kvkk">KVKK</Link>
             <Link className="otm-footer__link" to="/terms">Kullanım Şartları</Link>

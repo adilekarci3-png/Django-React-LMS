@@ -61,7 +61,7 @@ export default function Akademihakkimizda() {
               </div>
               <h1 style={{ fontSize: "2rem", fontWeight: 900, margin: "0 0 12px", letterSpacing: "-.02em" }}>Akademi Hakkında</h1>
               <p style={{ fontSize: "1rem", margin: 0, opacity: .9, maxWidth: 540, lineHeight: 1.65 }}>
-                Sinaps'ın eğitim video ve dökümanlarını seviye/konu bazlı olarak sunan, kişiselleştirilmiş
+                Eğitim Portalı'nın eğitim video ve dökümanlarını seviye/konu bazlı olarak sunan, kişiselleştirilmiş
                 öğrenme yollarıyla desteklenen dijital eğitim kütüphanesi.
               </p>
             </div>

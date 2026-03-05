@@ -166,7 +166,7 @@ export default function ESKEPIndex() {
           <div>
             <div className="eskep-eyebrow">
               <span className="eskep-eyebrow-dot"></span>
-              Sinaps • ESKEP Platformu
+              Eğitim Portalı • ESKEP Platformu
             </div>
             <h1 className="eskep-title">
               Kariyer yolculuğun<br />

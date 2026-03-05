@@ -1,4 +1,4 @@
-// Reusable asymmetric hero for EHAD apps (fixed)
+// Reusable asymmetric hero for Eğitim Portalı apps (fixed)
 // --------------------------------------------------
 // Save as: src/components/AsymHero.jsx
 // Usage: Replace your page <section> with the related *_V2 component below.
@@ -166,8 +166,8 @@ export function HafizBilgiIndex_V2({ Header, Footer, image }) {
         alt="Hafız Bilgi"
         theme="emerald"
         badges={["Öğrenci", "Eğitmen", "Raporlar"]}
-        primary={{ to: "/hbs/login", label: "Panele Giriş" }}
-        secondary={{ to: "/hbs/register", label: "Kayıt Ol" }}
+        primary={{ to: "/register", label: "Panele Giriş" }}
+        secondary={{ to: "/register", label: "Kayıt Ol" }}
       />
       {Footer ? <Footer /> : null}
     </>
@@ -180,7 +180,7 @@ export function EskepGiris_V2({ Header, Footer, image }) {
     <>
       {Header ? <Header /> : null}
       <AsymHero
-        title="Sinaps Staj ve Kariyer Eğitimi Programı"
+        title="Eğitim Portalı Staj ve Kariyer Eğitimi Programı"
         subtitle="Staj, proje ve kariyer gelişim süreçlerinizi profesyonel bir platformda yönetin."
         image={image}
         alt="ESKEP"
@@ -200,10 +200,10 @@ export function AkademiIndex_V2({ Header, Footer, image }) {
     <>
       {Header ? <Header /> : null}
       <AsymHero
-        title="Sinaps AKADEMİ"
+        title="Eğitim Portalı AKADEMİ"
         subtitle="Kadim ilim yolculuğunu dijital dünyanın imkânlarıyla buluşturan eğitim platformu."
         image={image}
-        alt="Sinaps Akademi"
+        alt="Eğitim Portalı Akademi"
         theme="indigo"
         badges={["Dersler", "Modüller", "Canlı Yayın"]}
         primary={{ to: "/academy/courses", label: "Kurslara Göz At" }}

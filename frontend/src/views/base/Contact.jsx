@@ -294,7 +294,7 @@ export default function Contact() {
                         </div>
                         <div className="cp-info-item">
                           <div className="cp-info-icon">✉️</div>
-                          <div><a className="cp-info-link" href="mailto:bilgi@ehad.org.tr">bilgi@sinaps.org.tr</a></div>
+                          <div><a className="cp-info-link" href="mailto:bilgi@ehad.org.tr">bilgi@egitimportali.com</a></div>
                         </div>
                         <div className="cp-info-item">
                           <div className="cp-info-icon">📞</div>
@@ -306,7 +306,7 @@ export default function Contact() {
                         </div>
                         <div className="cp-info-item">
                           <div className="cp-info-icon">🌐</div>
-                          <div><a className="cp-info-link" href="https://www.ehad.org.tr/">sinaps.org.tr</a></div>
+                          <div><a className="cp-info-link" href="https://www.ehad.org.tr/">egitimportali.com</a></div>
                         </div>
                       </div>
                     </div>

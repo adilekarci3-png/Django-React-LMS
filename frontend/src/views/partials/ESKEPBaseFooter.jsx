@@ -38,7 +38,7 @@ export default function ESKEPBaseFooter() {
             <div className="eskep-footer__text">
               <div><Link className="eskep-footer__link" to="/about-eskep">Hakkında</Link></div>
               <div><Link className="eskep-footer__link" to="/donate">Bağış</Link></div>
-              <div><Link className="eskep-footer__link" to="/academy">Sinaps Akademi</Link></div>
+              <div><Link className="eskep-footer__link" to="/academy">Eğitim Portalı Akademi</Link></div>
               <div><Link className="eskep-footer__link" to="/contact">İletişim</Link></div>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function ESKEPBaseFooter() {
 
         {/* Alt şerit */}
         <div className="eskep-footer__bottom">
-          <small className="eskep-footer__text">© {year} Sinaps · Tüm hakları saklıdır</small>
+          <small className="eskep-footer__text">© {year} Eğitim Portalı · Tüm hakları saklıdır</small>
           <div className="eskep-footer__legal">
             <Link className="eskep-footer__link" to="/kvkk">KVKK</Link>
             <Link className="eskep-footer__link" to="/terms">Kullanım Şartları</Link>

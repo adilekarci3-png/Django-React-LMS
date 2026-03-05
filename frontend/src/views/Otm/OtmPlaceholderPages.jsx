@@ -798,8 +798,8 @@ export function KoordinatorAyarlarPage() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           {[
             ["Platform Adı", "OTM – Öğrenci Takip Modülü"],
-            ["Kurum Kodu", "Sinaps-OTM-2025"],
-            ["Yönetici E-posta", "admin@sinaps.org.tr"],
+            ["Kurum Kodu", "EgitimPortali-OTM-2025"],
+            ["Yönetici E-posta", "admin@egitimportali.com"],
             ["Saat Dilimi", "Europe/Istanbul"],
           ].map(([lbl, val], i) => (
             <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>

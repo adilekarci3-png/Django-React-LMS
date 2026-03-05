@@ -134,12 +134,10 @@ function CalloutBandOTM() {
           <p>Binlerce öğrencinin gelişimini tek platformdan yönet.</p>
         </div>
         <div className="otm-callout__actions">
-          <Link to="/otm/register" className="otm-callout__btn otm-callout__btn--white">
+          <Link to="/register" className="otm-callout__btn otm-callout__btn--white">
             Hemen Başla <i className="bi bi-arrow-right"></i>
           </Link>
-          <Link to="/otm/demo" className="otm-callout__btn otm-callout__btn--ghost">
-            Demo İzle
-          </Link>
+          
         </div>
       </div>
     </Reveal>
@@ -168,7 +166,7 @@ export default function OTMIndex() {
           <div>
             <div className="otm-eyebrow">
               <span className="otm-eyebrow-dot"></span>
-              Sinaps • OTM Platformu
+              Eğitim Portalı • OTM Platformu
             </div>
             <h1 className="otm-title">
               Öğrenci takibinde<br />
@@ -184,12 +182,10 @@ export default function OTMIndex() {
               <span className="otm-badge"><i className="bi bi-patch-check"></i> Değerlendirme</span>
             </div>
             <div className="otm-actions">
-              <Link to="/otm/register" className="otm-btn--cta">
+              <Link to="/register" className="otm-btn--cta">
                 Hemen Başla <i className="bi bi-arrow-right"></i>
               </Link>
-              <Link to="/otm/demo" className="otm-btn--ghost">
-                <i className="bi bi-play-circle"></i> Demo İzle
-              </Link>
+              
             </div>
           </div>
 
