@@ -1,9 +1,6 @@
 
 from django.db.models import Q
-
 from api.views.base import BaseListAPIView, BaseDestroyAPIView, BaseCreateAPIView, BaseUpdateAPIView
-from api import models as api_models
-from api import serializers as api_serializer
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
 

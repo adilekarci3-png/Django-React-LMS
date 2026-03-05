@@ -53,12 +53,12 @@ from .reports import (
     EnrolledDersSonuRaporu, NoteDersSonuRaporu, ReviewDersSonuRaporu
 )
 
-# ---- Kitap Tahlili içerikleri + Soru-Cevap ----
-from .book_reviews import (
-    KitapTahlili, VariantKitapTahlili, VariantKitapTahliliItem,
-    Question_AnswerKitapTahlili, Question_Answer_MessageKitapTahlili,
-    CompletedKitapTahlili, EnrolledKitapTahlili, NoteKitapTahlili, ReviewKitapTahlili
-)
+# # ---- Kitap Tahlili içerikleri + Soru-Cevap ----
+# from .book_reviews import (
+#     KitapTahlili, VariantKitapTahlili, VariantKitapTahliliItem,
+#     Question_AnswerKitapTahlili, Question_Answer_MessageKitapTahlili,
+#     CompletedKitapTahlili, EnrolledKitapTahlili, NoteKitapTahlili, ReviewKitapTahlili
+# )
 
 # ---- Proje içerikleri + Soru-Cevap ----
 from .projects import (
@@ -123,10 +123,10 @@ __all__ = [
     "Question_AnswerDersSonuRaporu", "Question_Answer_MessageDersSonuRaporu",
     "EnrolledDersSonuRaporu", "NoteDersSonuRaporu", "ReviewDersSonuRaporu",
 
-    # book reviews
-    "KitapTahlili", "VariantKitapTahlili", "VariantKitapTahliliItem",
-    "Question_AnswerKitapTahlili", "Question_Answer_MessageKitapTahlili",
-    "CompletedKitapTahlili", "EnrolledKitapTahlili", "NoteKitapTahlili", "ReviewKitapTahlili",
+    # # book reviews
+    # "KitapTahlili", "VariantKitapTahlili", "VariantKitapTahliliItem",
+    # "Question_AnswerKitapTahlili", "Question_Answer_MessageKitapTahlili",
+    # "CompletedKitapTahlili", "EnrolledKitapTahlili", "NoteKitapTahlili", "ReviewKitapTahlili",
 
     # projects
     "EskepProje", "VariantEskepProje", "VariantEskepProjeItem",
